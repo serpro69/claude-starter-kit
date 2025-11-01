@@ -6,6 +6,37 @@
 name: Template Cleanup
 on:
   workflow_dispatch:
+    inputs:
+      SERENA_LANGUAGE:
+        description: 'Primary programming language(s) for Serena semantic analysis (e.g., "python", "typescript", "java"). See Serena docs for supported languages.'
+        required: false
+        default: ''
+        type: string
+      SERENA_INITIAL_PROMPT:
+        description: 'Initial prompt/context for Serena semantic analysis.'
+        required: false
+        default: ''
+        type: string
+      TM_CUSTOM_SYSTEM_PROMPT:
+        description: 'Custom system prompt to override Claude Code default behavior in Task Master.'
+        required: false
+        default: ''
+        type: string
+      TM_APPEND_SYSTEM_PROMPT:
+        description: 'Additional content to append to Claude Code system prompt in Task Master.'
+        required: false
+        default: ''
+        type: string
+      TM_PERMISSION_MODE:
+        description: 'Task Master permission mode for file system operations.'
+        required: false
+        default: 'default'
+        type: choice
+        options:
+          - default
+          - acceptEdits
+          - plan
+          - bypassPermissions
 
 jobs:
   # Run cleaning process only if workflow is triggered by the non-"claude-starter-kit" repository.
@@ -26,31 +57,45 @@ jobs:
           export LC_CTYPE=C
           export LANG=C
 
-          # Prepare variables
+          # Prepare repository-specific variables
           NAME="${GITHUB_REPOSITORY##*/}"
           ACTOR=$(echo $GITHUB_ACTOR | tr '[:upper:]' '[:lower:]')
+          REPOSITORY="${GITHUB_REPOSITORY}"
           SAFE_NAME=$(echo $NAME | sed 's/[^a-zA-Z0-9]//g' | tr '[:upper:]' '[:lower:]')
           SAFE_ACTOR=$(echo $ACTOR | sed 's/[^a-zA-Z0-9]//g' | tr '[:upper:]' '[:lower:]')
           GROUP="com.github.$SAFE_ACTOR.$SAFE_NAME"
 
-          # Replace placeholders in the template-cleanup files
-          sed -i "s/%ACTOR%/$ACTOR/g" .github/template-cleanup/*
-          sed -i "s/%NAME%/$NAME/g" .github/template-cleanup/*
-          sed -i "s/%REPOSITORY%/${GITHUB_REPOSITORY/\//\\/}/g" .github/template-cleanup/*
-          sed -i "s/%GROUP%/$GROUP/g" .github/template-cleanup/*
+          # Get MCP configuration variables from workflow inputs
+          SERENA_LANGUAGE="${{ github.event.inputs.SERENA_LANGUAGE }}"
+          SERENA_INITIAL_PROMPT="${{ github.event.inputs.SERENA_INITIAL_PROMPT }}"
+          TM_CUSTOM_SYSTEM_PROMPT="${{ github.event.inputs.TM_CUSTOM_SYSTEM_PROMPT }}"
+          TM_APPEND_SYSTEM_PROMPT="${{ github.event.inputs.TM_APPEND_SYSTEM_PROMPT }}"
+          TM_PERMISSION_MODE="${{ github.event.inputs.TM_PERMISSION_MODE }}"
 
-          # Move content
-          cp -R .github/template-cleanup/* .
+          # Replace placeholders in the template files
+          find .github/templates -type f -exec sed -i "s/%NAME%/$NAME/g" {} +
+          find .github/templates -type f -exec sed -i "s/%ACTOR%/$ACTOR/g" {} +
+          find .github/templates -type f -exec sed -i "s/%REPOSITORY%/${GITHUB_REPOSITORY/\//\\\\/}/g" {} +
+          find .github/templates -type f -exec sed -i "s/%GROUP%/$GROUP/g" {} +
+          find .github/templates -type f -exec sed -i "s/%SAFE_NAME%/$SAFE_NAME/g" {} +
+          find .github/templates -type f -exec sed -i "s/%SAFE_ACTOR%/$SAFE_ACTOR/g" {} +
+          find .github/templates -type f -exec sed -i "s/%SERENA_LANGUAGE%/$SERENA_LANGUAGE/g" {} +
+          find .github/templates -type f -exec sed -i "s/%SERENA_INITIAL_PROMPT%/$SERENA_INITIAL_PROMPT/g" {} +
+          find .github/templates -type f -exec sed -i "s/%TM_CUSTOM_SYSTEM_PROMPT%/$TM_CUSTOM_SYSTEM_PROMPT/g" {} +
+          find .github/templates -type f -exec sed -i "s/%TM_APPEND_SYSTEM_PROMPT%/$TM_APPEND_SYSTEM_PROMPT/g" {} +
+          find .github/templates -type f -exec sed -i "s/%TM_PERMISSION_MODE%/$TM_PERMISSION_MODE/g" {} +
 
-          # Cleanup
-          rm -rf \
-            .github/readme \
-            .github/template-cleanup \
-            .github/workflows/template-cleanup.yml \
-            LICENSE
+          # Deploy templates to destination locations
+          cp -R .github/templates/serena .serena
+          cp -R .github/templates/taskmaster .taskmaster
+          cp -R .github/templates/claude .claude
 
-          # Remove leftover empty directories
-          find . -type d -empty -delete
+          # Complete cleanup - remove everything except preserved files/directories
+          # Preserve: .git/, .gitignore, .serena/, .taskmaster/, .claude/
+          find . -mindepth 1 -maxdepth 1 ! -name '.git' ! -name '.gitignore' ! -name '.serena' ! -name '.taskmaster' ! -name '.claude' -exec rm -rf {} +
+
+          # Generate minimal README
+          echo "# $NAME" > README.md
 
       # Commit modified files
       - name: Commit files
@@ -62,7 +107,6 @@ jobs:
 
       # Push changes
       - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          branch: main
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH=$(git branch --show-current)
+          git push origin $BRANCH
