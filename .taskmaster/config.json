@@ -25,7 +25,7 @@
     "defaultNumTasks": 10,
     "defaultSubtasks": 5,
     "defaultPriority": "medium",
-    "projectName": "claude-starter-template",
+    "projectName": "claude-starter-kit",
     "ollamaBaseURL": "",
     "bedrockBaseURL": "",
     "responseLanguage": "English",
