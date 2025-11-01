@@ -8,7 +8,36 @@ This is a starter template repository designed to provide a complete development
 
 ## Features
 
-**TODO**
+- **🤖 Four Pre-Configured MCP Servers**
+  - **Context7**: Up-to-date library documentation and code examples
+  - **Serena**: Semantic code analysis with LSP integration for intelligent navigation
+  - **Task Master**: AI-powered task management and workflow orchestration
+  - **Zen**: Multi-model AI integration for debugging, code review, and planning
+
+- **⚙️ Automated Template Cleanup**
+  - GitHub Actions workflow for one-click repository initialization
+  - Configurable inputs for language detection and Task Master settings
+  - Automatic cleanup of template-specific files for a clean starting point
+
+- **📋 50+ Task Master Slash Commands**
+  - Pre-configured hierarchical command structure under `/project:tm/`
+  - Commands for task management, complexity analysis, PRD parsing, and workflows
+  - Complete command reference in `.claude/TM_COMMANDS_GUIDE.md`
+
+- **🔍 Intelligent Code Navigation**
+  - Serena's symbol-based code analysis for efficient exploration
+  - Token-efficient reading with overview and targeted symbol queries
+  - Reference tracking and semantic understanding across your codebase
+
+- **📝 Configuration Templates**
+  - Ready-to-use templates for `.serena/`, `.taskmaster/`, and `.claude/` directories
+  - Placeholder-based customization with repository-specific values
+  - Permission configuration for tool access control
+
+- **📚 Comprehensive Documentation**
+  - Project-level `CLAUDE.md` with integration guidance
+  - Task Master integration guide with 400+ lines of best practices
+  - Complete workflow specification and command references
 
 ## Requirements
 
@@ -88,37 +117,42 @@ Here's an example `mcpServers` object that you can use as a reference:
 
 3. Run the `template-cleanup` workflow from your new repo, and provide some inputs for your specific use-case.
 
-**Serena MCP Configuration Params:**
+**Serena MCP Configuration Inputs:**
 
-- `LANGUAGE` - the main language(s) of your project (see [Serena Programming Language Support & Semantic Analysis Capabilities](https://github.com/oraios/serena?tab=readme-ov-file#programming-language-support--semantic-analysis-capabilities) for more details on supported languages)
+- `SERENA_LANGUAGE` - the main language(s) of your project (see [Serena Programming Language Support & Semantic Analysis Capabilities](https://github.com/oraios/serena?tab=readme-ov-file#programming-language-support--semantic-analysis-capabilities) for more details on supported languages)
 
-**Task-Master MCP Configuration Params:**
+- `SERENA_INITIAL_PROMPT` - initial prompt for the project; it will always be given to the LLM upon activating the project
 
-- `TM_CUSTOM_SYSTEM_PROMPT` - Custom system prompt to override Claude Code's default behavior.
+> [!TIP]
+> Take a look at serena [project.yaml](./.github/templates/serena/project.yml) configuration file for more details.
 
-- `TM_APPEND_SYSTEM_PROMPT` - Append additional content to the system prompt.
+**Task-Master MCP Configuration Inputs:**
 
-- `TM_PERMISSION_MODE` - Permission mode for file system operations.
+- `TM_CUSTOM_SYSTEM_PROMPT` - custom system prompt to override Claude Code's default behavior
 
-> [!INFO]
+- `TM_APPEND_SYSTEM_PROMPT` - append additional content to the system prompt
+
+- `TM_PERMISSION_MODE` - permission mode for file system operations
+
+> [!TIP]
 > See [Task Master Advanced Claude Code Settings Usage](https://github.com/eyaltoledano/claude-task-master/blob/main/docs/examples/claude-code-usage.md#advanced-settings-usage) for more details on the above parameters.
 
 4. Clone your new repo and run `claude /mcp`.
 
-You should see the mcp servers configured and active:
+    You should see the mcp servers configured and active:
 
-```
-> /mcp
-╭────────────────────────────────────────────────────────────────────╮
-│ Manage MCP servers                                                 │
-│                                                                    │
-│ ❯ 1. context7                  ✔ connected · Enter to view details │
-│   2. serena                    ✔ connected · Enter to view details │
-│   3. task-master-ai            ✔ connected · Enter to view details │
-│   4. zen                       ✔ connected · Enter to view details │
-╰────────────────────────────────────────────────────────────────────╯
-```
+    ```
+    > /mcp
+    ╭────────────────────────────────────────────────────────────────────╮
+    │ Manage MCP servers                                                 │
+    │                                                                    │
+    │ ❯ 1. context7                  ✔ connected · Enter to view details │
+    │   2. serena                    ✔ connected · Enter to view details │
+    │   3. task-master-ai            ✔ connected · Enter to view details │
+    │   4. zen                       ✔ connected · Enter to view details │
+    ╰────────────────────────────────────────────────────────────────────╯
+    ```
 
-5. Create a `README.md` with a description of your project, then run `claude /init` to initialize claude-code.
+5. Update the `README.md` with a full description of your project, then run `claude /init` to finalize initialization of claude-code.
 
 6. Profit
