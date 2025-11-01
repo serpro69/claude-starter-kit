@@ -85,10 +85,12 @@ jobs:
           find .github/templates -type f -exec sed -i "s/%TM_APPEND_SYSTEM_PROMPT%/$TM_APPEND_SYSTEM_PROMPT/g" {} +
           find .github/templates -type f -exec sed -i "s/%TM_PERMISSION_MODE%/$TM_PERMISSION_MODE/g" {} +
 
+          rm -rf .claude .serena .taskmaster
+
           # Deploy templates to destination locations
-          cp -R .github/templates/serena .serena
-          cp -R .github/templates/taskmaster .taskmaster
-          cp -R .github/templates/claude .claude
+          cp -r .github/templates/claude ./.claude
+          cp -r .github/templates/serena ./.serena
+          cp -r .github/templates/taskmaster ./.taskmaster
 
           # Complete cleanup - remove everything except preserved files/directories
           # Preserve: .git/, .gitignore, .serena/, .taskmaster/, .claude/
@@ -107,6 +109,6 @@ jobs:
 
       # Push changes
       - name: Push changes
-        run: |
+        run: |-
           BRANCH=$(git branch --show-current)
           git push origin $BRANCH
