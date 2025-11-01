@@ -73,17 +73,17 @@ jobs:
           TM_PERMISSION_MODE="${{ github.event.inputs.TM_PERMISSION_MODE }}"
 
           # Replace placeholders in the template files
-          find .github/templates -type f -exec sed -i "s/%NAME%/$NAME/g" {} +
-          find .github/templates -type f -exec sed -i "s/%ACTOR%/$ACTOR/g" {} +
-          find .github/templates -type f -exec sed -i "s/%REPOSITORY%/${GITHUB_REPOSITORY/\//\\\\/}/g" {} +
-          find .github/templates -type f -exec sed -i "s/%GROUP%/$GROUP/g" {} +
-          find .github/templates -type f -exec sed -i "s/%SAFE_NAME%/$SAFE_NAME/g" {} +
-          find .github/templates -type f -exec sed -i "s/%SAFE_ACTOR%/$SAFE_ACTOR/g" {} +
-          find .github/templates -type f -exec sed -i "s/%SERENA_LANGUAGE%/$SERENA_LANGUAGE/g" {} +
-          find .github/templates -type f -exec sed -i "s/%SERENA_INITIAL_PROMPT%/$SERENA_INITIAL_PROMPT/g" {} +
-          find .github/templates -type f -exec sed -i "s/%TM_CUSTOM_SYSTEM_PROMPT%/$TM_CUSTOM_SYSTEM_PROMPT/g" {} +
-          find .github/templates -type f -exec sed -i "s/%TM_APPEND_SYSTEM_PROMPT%/$TM_APPEND_SYSTEM_PROMPT/g" {} +
-          find .github/templates -type f -exec sed -i "s/%TM_PERMISSION_MODE%/$TM_PERMISSION_MODE/g" {} +
+          sed -i "s/%ACTOR%/$ACTOR/g" .github/templates/**/*
+          sed -i "s/%NAME%/$NAME/g" .github/templates/**/*
+          sed -i "s/%REPOSITORY%/${GITHUB_REPOSITORY/\//\\/}/g" .github/templates/**/*
+          sed -i "s/%GROUP%/$GROUP/g" .github/templates/**/*
+          sed -i "s/%SAFE_NAME%/$SAFE_NAME/g" .github/templates/**/*
+          sed -i "s/%SAFE_ACTOR%/$SAFE_ACTOR/g" .github/templates/**/*
+          sed -i "s/%SERENA_LANGUAGE%/$SERENA_LANGUAGE/g" .github/templates/**/*
+          sed -i "s/%SERENA_INITIAL_PROMPT%/$SERENA_INITIAL_PROMPT/g" .github/templates/**/*
+          sed -i "s/%TM_CUSTOM_SYSTEM_PROMPT%/$TM_CUSTOM_SYSTEM_PROMPT/g" .github/templates/**/*
+          sed -i "s/%TM_APPEND_SYSTEM_PROMPT%/$TM_APPEND_SYSTEM_PROMPT/g" .github/templates/**/*
+          sed -i "s/%TM_PERMISSION_MODE%/$TM_PERMISSION_MODE/g" .github/templates/**/*
 
           # Deploy templates to destination locations
           cp -R .github/templates/serena .serena
