@@ -2,6 +2,10 @@
 
 Starter template repo for all your Claude Code needs
 
+## About
+
+This is a starter template repository designed to provide a complete development environment for Claude-Code with pre-configured MCP servers and tools for AI-powered development workflows. The repository is intentionally minimal, containing only configuration templates for three primary systems: Claude Code, Serena, and Task Master.
+
 ## Features
 
 **TODO**
@@ -115,6 +119,6 @@ You should see the mcp servers configured and active:
 ╰────────────────────────────────────────────────────────────────────╯
 ```
 
-5. Run `claude /init` to initialize `CLAUDE.md` for your project.
+5. Create a `README.md` with a description of your project, then run `claude /init` to initialize claude-code.
 
 6. Profit

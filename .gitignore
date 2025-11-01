@@ -1,0 +1,30 @@
+# ignore all hidden
+.*
+# except
+!.gitattributes
+!.gitignore
+!.gitmodules
+!.github
+!.github/**
+
+# Logs
+logs
+*.log*
+
+# Environment variables
+.env
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# OS specific
+.DS_Store
+
+# AI tools
+!.serena
+!.claude
+!.taskmaster
