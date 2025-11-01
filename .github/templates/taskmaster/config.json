@@ -1,0 +1,42 @@
+{
+  "models": {
+    "main": {
+      "provider": "claude-code",
+      "modelId": "sonnet",
+      "maxTokens": 120000,
+      "temperature": 0.2
+    },
+    "research": {
+      "provider": "claude-code",
+      "modelId": "opus",
+      "maxTokens": 64000,
+      "temperature": 0.1
+    },
+    "fallback": {
+      "provider": "claude-code",
+      "modelId": "sonnet",
+      "maxTokens": 120000,
+      "temperature": 0.2
+    }
+  },
+  "global": {
+    "logLevel": "info",
+    "debug": false,
+    "defaultNumTasks": 10,
+    "defaultSubtasks": 5,
+    "defaultPriority": "medium",
+    "projectName": "claude-starter-template",
+    "ollamaBaseURL": "",
+    "bedrockBaseURL": "",
+    "responseLanguage": "English",
+    "enableCodebaseAnalysis": true,
+    "defaultTag": "master",
+    "azureOpenaiBaseURL": "",
+    "userId": "42"
+  },
+  "claudeCode": {
+    "customSystemPrompt": "TM_CUSTOM_SYSTEM_PROMPT",
+    "appendSystemPrompt": "TM_APPEND_SYSTEM_PROMPT",
+    "permissionMode": "TM_PERMISSION_MODE"
+  }
+}
