@@ -6,6 +6,8 @@
 !.gitmodules
 !.github
 !.github/**
+!.yamlfmt.yaml
+!.yamllint.yml
 
 # Logs
 logs
