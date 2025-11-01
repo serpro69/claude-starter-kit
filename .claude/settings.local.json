@@ -28,9 +28,41 @@
     "deny": [
       "Bash(task-master:*)",
       "Read(./**/consensus*.md)",
-      "Read(./**/review*.md)"
+      "Read(./**/review*.md)",
+      "Read(./**/.env)",
+      "Read(./**/service-account-key.json)",
+      "Read(*.csv)",
+      "Read(*.log)",
+      "Read(*.pyc)",
+      "Read(./**/*.lock*)",
+      "Read(.git/)",
+      "Read(.idea/)",
+      "Read(.vscode/)",
+      "Read(.next/)",
+      "Read(./**/.ansible/)",
+      "Read(./**/.terraform/)",
+      "Read(./**/build/)",
+      "Read(./**/data/)",
+      "Read(./**/dist/)",
+      "Read(./**/out/)",
+      "Read(./**/node_modules/)",
+      "Read(./**/venv/)",
+      "Read(./**/__pycache__/)"
     ],
     "ask": []
   },
-  "enabledMcpjsonServers": []
+  "enabledMcpjsonServers": [],
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/scripts/validate-bash.sh"
+          }
+        ]
+      }
+    ]
+  }
 }
