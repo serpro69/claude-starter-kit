@@ -119,7 +119,7 @@ Here's an example `mcpServers` object that you can use as a reference:
 
 **Serena MCP Configuration Inputs:**
 
-- `SERENA_LANGUAGE` - the main language(s) of your project (see [Serena Programming Language Support & Semantic Analysis Capabilities](https://github.com/oraios/serena?tab=readme-ov-file#programming-language-support--semantic-analysis-capabilities) for more details on supported languages)
+- `LANGUAGE` - the main language(s) of your project (see [Serena Programming Language Support & Semantic Analysis Capabilities](https://github.com/oraios/serena?tab=readme-ov-file#programming-language-support--semantic-analysis-capabilities) for more details on supported languages)
 
 - `SERENA_INITIAL_PROMPT` - initial prompt for the project; it will always be given to the LLM upon activating the project
 
@@ -153,6 +153,6 @@ Here's an example `mcpServers` object that you can use as a reference:
     ╰────────────────────────────────────────────────────────────────────╯
     ```
 
-5. Update the `README.md` with a full description of your project, then run `claude /init` to finalize initialization of claude-code.
+5. Update the `README.md` with a full description of your project, then run `chmod +x bootstrap.sh && ./bootstrap.sh` to finalize initialization of the repo.
 
 6. Profit

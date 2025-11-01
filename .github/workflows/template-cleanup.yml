@@ -7,30 +7,33 @@ name: Template Cleanup
 on:
   workflow_dispatch:
     inputs:
-      SERENA_LANGUAGE:
-        description: 'Primary programming language(s) for Serena semantic analysis (e.g., "python", "typescript", "java"). See Serena docs for supported languages.'
+      LANGUAGE:
+        description: |
+          Primary programming language(s) of this project.
+          Used for Serena semantic analysis (e.g., "python", "typescript", "java").
+          See Serena docs for supported languages.
         required: false
         default: ''
         type: string
       SERENA_INITIAL_PROMPT:
-        description: 'Initial prompt/context for Serena semantic analysis.'
+        description: Initial prompt/context for Serena semantic analysis.
         required: false
         default: ''
         type: string
       TM_CUSTOM_SYSTEM_PROMPT:
-        description: 'Custom system prompt to override Claude Code default behavior in Task Master.'
+        description: Custom system prompt to override Claude Code default behavior in Task Master.
         required: false
         default: ''
         type: string
       TM_APPEND_SYSTEM_PROMPT:
-        description: 'Additional content to append to Claude Code system prompt in Task Master.'
+        description: Additional content to append to Claude Code system prompt in Task Master.
         required: false
         default: ''
         type: string
       TM_PERMISSION_MODE:
-        description: 'Task Master permission mode for file system operations.'
+        description: Task Master permission mode for file system operations.
         required: false
-        default: 'default'
+        default: default
         type: choice
         options:
           - default
@@ -66,7 +69,7 @@ jobs:
           GROUP="com.github.$SAFE_ACTOR.$SAFE_NAME"
 
           # Get MCP configuration variables from workflow inputs
-          SERENA_LANGUAGE="${{ github.event.inputs.SERENA_LANGUAGE }}"
+          LANGUAGE="${{ github.event.inputs.LANGUAGE }}"
           SERENA_INITIAL_PROMPT="${{ github.event.inputs.SERENA_INITIAL_PROMPT }}"
           TM_CUSTOM_SYSTEM_PROMPT="${{ github.event.inputs.TM_CUSTOM_SYSTEM_PROMPT }}"
           TM_APPEND_SYSTEM_PROMPT="${{ github.event.inputs.TM_APPEND_SYSTEM_PROMPT }}"
@@ -79,7 +82,7 @@ jobs:
           find .github/templates -type f -exec sed -i "s/%GROUP%/$GROUP/g" {} +
           find .github/templates -type f -exec sed -i "s/%SAFE_NAME%/$SAFE_NAME/g" {} +
           find .github/templates -type f -exec sed -i "s/%SAFE_ACTOR%/$SAFE_ACTOR/g" {} +
-          find .github/templates -type f -exec sed -i "s/%SERENA_LANGUAGE%/$SERENA_LANGUAGE/g" {} +
+          find .github/templates -type f -exec sed -i "s/%LANGUAGE%/$LANGUAGE/g" {} +
           find .github/templates -type f -exec sed -i "s/%SERENA_INITIAL_PROMPT%/$SERENA_INITIAL_PROMPT/g" {} +
           find .github/templates -type f -exec sed -i "s/%TM_CUSTOM_SYSTEM_PROMPT%/$TM_CUSTOM_SYSTEM_PROMPT/g" {} +
           find .github/templates -type f -exec sed -i "s/%TM_APPEND_SYSTEM_PROMPT%/$TM_APPEND_SYSTEM_PROMPT/g" {} +
@@ -91,10 +94,18 @@ jobs:
           cp -r .github/templates/claude ./.claude
           cp -r .github/templates/serena ./.serena
           cp -r .github/templates/taskmaster ./.taskmaster
+          cp .github/templates/bootstrap.sh .
 
           # Complete cleanup - remove everything except preserved files/directories
           # Preserve: .git/, .gitignore, .serena/, .taskmaster/, .claude/
-          find . -mindepth 1 -maxdepth 1 ! -name '.git' ! -name '.gitignore' ! -name '.serena' ! -name '.taskmaster' ! -name '.claude' -exec rm -rf {} +
+          find . -mindepth 1 -maxdepth 1 \
+            ! -name '.git' \
+            ! -name '.gitignore' \
+            ! -name '.claude' \
+            ! -name '.serena' \
+            ! -name '.taskmaster' \
+            ! -name 'bootstrap.sh' \
+            -exec rm -rf {} +
 
           # Generate minimal README
           echo "# $NAME" > README.md
