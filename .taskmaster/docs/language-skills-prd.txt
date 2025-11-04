@@ -1,0 +1,366 @@
+Product Requirements Document: Language-Specific Development Skills
+
+OVERVIEW
+========
+
+Add comprehensive language-specific development skills to the claude-starter-kit template that provide developers with immediate access to code style conventions, testing strategies, tooling guidance, and best practices for Go, Python, Java, Kotlin, and TypeScript.
+
+PROBLEM STATEMENT
+=================
+
+The current template includes process-based skills that are intentionally language-agnostic. While this maintains flexibility, it creates friction:
+- Developers must repeatedly look up language-specific conventions and testing frameworks
+- The %LANGUAGE% placeholder in testing-process provides minimal actionable guidance
+- No centralized reference for language idioms within Claude Code workflow
+- New contributors lack quick access to project language patterns and best practices
+
+GOALS
+=====
+
+1. Provide language-specific guidance for the 5 most common languages: Go, Python, Java, Kotlin, TypeScript
+2. Integrate seamlessly with existing process skills without disrupting current workflows
+3. Keep template lean by only including the relevant language skill per project
+4. Enable extensibility for users to add framework-specific guidance as needed
+5. Maintain practicality - focus on actionable insights, not encyclopedic documentation
+
+NON-GOALS
+=========
+
+- Not creating language tutorials (assumes developer proficiency)
+- Not documenting specific frameworks (core language focus with extensibility)
+- Not providing API references (Claude can use Context7 for this)
+- Not generating code templates or boilerplate
+
+REQUIREMENTS
+============
+
+Functional Requirements
+-----------------------
+
+1. Language Skill Structure
+   - Create dedicated skill for each supported language following naming convention: lang-<language>
+   - Each skill must include:
+     * SKILL.md - Entry point with overview, quick reference, navigation links
+     * style.md - Code conventions, naming, formatting, project structure, idioms
+     * testing.md - Testing frameworks, patterns, coverage, mocking strategies
+     * tooling.md - Package managers, build tools, linters, formatters, debugging
+     * patterns.md - Design patterns, anti-patterns, error handling, concurrency
+     * frameworks/README.md - Instructions for adding optional framework guides
+     * frameworks/.gitkeep - Ensures directory is tracked in git
+
+2. Template Cleanup Integration
+   - Workflow must accept LANGUAGE input parameter
+   - Remove all lang-* directories except the one matching LANGUAGE input
+   - Replace %LANGUAGE% placeholders with actual language name in process skills
+   - Inject markdown links to language skill in testing-process and development-process
+   - Validate LANGUAGE input against supported languages (go, python, java, kotlin, typescript)
+   - Handle case-insensitive input (Go, GO, go all work)
+
+3. Process Skill Integration
+   - testing-process/SKILL.md must reference lang-<language>/testing.md
+   - development-process/SKILL.md must reference lang-<language>/tooling.md
+   - References should be markdown links, not import statements
+   - Brief inline guidance plus link to full skill for deep dives
+   - Natural reading flow when placeholders are replaced
+
+4. Content Requirements
+   - SKILL.md: 50-100 lines (lightweight overview + quick reference)
+   - Topic files: 150-300 lines each (practical + comprehensive)
+   - Focus on what's unique or commonly misunderstood about the language
+   - Avoid framework comparisons (can be looked up elsewhere)
+   - Avoid code examples for API usage (use Context7 instead)
+   - Emphasize practical, actionable guidance over exhaustive coverage
+
+5. Framework Extensibility
+   - Each language skill includes empty frameworks/ directory
+   - frameworks/README.md explains how to add framework-specific guides
+   - Template ships without any framework content (keeps it lean)
+   - Users add framework guides post-template as project-specific needs arise
+
+Non-Functional Requirements
+---------------------------
+
+1. Maintainability
+   - Consistent structure across all 5 language skills
+   - Clear separation between core language and framework content
+   - Easy to update content without touching workflow logic
+   - Easy to add new languages following established pattern
+
+2. Usability
+   - Skills invoke naturally in Claude Code
+   - Navigation links work correctly
+   - Markdown formatting renders properly
+   - Clear guidance on when to use each skill
+
+3. Performance
+   - Template cleanup workflow completes in under 2 minutes
+   - No significant increase in repository size
+   - Language skills don't bloat Claude Code context unnecessarily
+
+4. Compatibility
+   - Works with existing Claude Code skill invocation system
+   - Compatible with current MCP server setup (Serena, Task Master, Context7, Zen)
+   - Doesn't break existing process skill functionality
+   - Backward compatible for projects created before this feature
+
+SUPPORTED LANGUAGES
+==================
+
+Priority order:
+1. Go - Strong typing, concurrency, stdlib focus
+2. Python - Dynamic typing, ecosystem richness, multiple paradigms
+3. TypeScript - JavaScript superset, type system, frontend/backend
+4. Java - Enterprise patterns, JVM ecosystem
+5. Kotlin - Modern JVM, coroutines, multi-platform
+
+Language-Specific Content Areas
+-------------------------------
+
+Go:
+- Style: Exported vs unexported, package naming, receiver names, interface conventions
+- Testing: Table-driven tests, subtests, race detector, testify vs stdlib
+- Tooling: go mod, go work, gofmt, goimports, golangci-lint
+- Patterns: Error wrapping, context usage, interface design, goroutine management
+
+Python:
+- Style: PEP 8, type hints, docstring formats, naming conventions
+- Testing: pytest vs unittest, fixtures, parametrize, mocking, coverage.py
+- Tooling: pip vs poetry vs uv, virtual environments, black, ruff, mypy
+- Patterns: Context managers, decorators, generators, async/await, dataclasses
+
+Java:
+- Style: Class naming, package structure, JavaDoc, modern features (records, sealed)
+- Testing: JUnit 5, AssertJ, Mockito, test containers, integration testing
+- Tooling: Maven vs Gradle, Checkstyle, SpotBugs, dependency management
+- Patterns: Builder, DI, streams, Optional, exception handling
+
+Kotlin:
+- Style: Naming conventions, extension functions, data classes, null safety
+- Testing: Kotest vs JUnit, MockK, coroutine testing, property-based testing
+- Tooling: Gradle Kotlin DSL, ktlint, detekt, compiler options
+- Patterns: Sealed classes, delegation, coroutines, flow, scope functions, DSLs
+
+TypeScript:
+- Style: Type vs interface, any vs unknown, optional chaining, modules
+- Testing: Jest vs Vitest, React Testing Library, mocking, snapshot testing
+- Tooling: npm vs pnpm vs yarn, tsconfig, ESLint + Prettier, compiler options
+- Patterns: Generic constraints, utility types, discriminated unions, type guards
+
+USER EXPERIENCE
+===============
+
+During Project Creation
+----------------------
+1. User clicks "Use this template" on GitHub
+2. Runs template-cleanup workflow with LANGUAGE input (e.g., "go")
+3. Receives project with:
+   - Only lang-go skill directory present
+   - testing-process automatically references lang-go/testing.md
+   - development-process automatically references lang-go/tooling.md
+   - All %LANGUAGE% placeholders replaced with "Go"
+
+During Development
+-----------------
+1. Invoke process skills normally (testing-process, development-process)
+2. Follow inline brief guidance in process skills
+3. Navigate to language skill for comprehensive guidance via markdown links
+4. Directly invoke language skill: "Use the lang-go skill to help with..."
+5. Extend with framework guides as needed in frameworks/ directory
+
+Framework Extension Workflow
+---------------------------
+1. Developer identifies need for framework-specific guidance (e.g., Gin for Go)
+2. Reads frameworks/README.md for instructions
+3. Creates frameworks/gin.md following provided template
+4. Documents framework patterns, testing approaches, project-specific conventions
+5. Framework guide available for team reference within Claude Code
+
+TECHNICAL SPECIFICATIONS
+========================
+
+Directory Structure
+------------------
+.claude/skills/
+├── lang-go/
+│   ├── SKILL.md
+│   ├── style.md
+│   ├── testing.md
+│   ├── tooling.md
+│   ├── patterns.md
+│   └── frameworks/
+│       ├── README.md
+│       └── .gitkeep
+├── lang-python/ [same structure]
+├── lang-java/ [same structure]
+├── lang-kotlin/ [same structure]
+└── lang-typescript/ [same structure]
+
+SKILL.md Format
+--------------
+---
+name: lang-<language>
+description: Use when working with <Language> codebases to get guidance on <Language>-specific style conventions, testing strategies, tooling, and best practices
+---
+
+# <Language> Development Skill
+
+[Philosophy/overview]
+
+## Quick Reference
+
+[Essential commands and patterns]
+
+## Topics
+
+- [Code Style & Conventions](./style.md)
+- [Testing Strategies](./testing.md)
+- [Tooling & Ecosystem](./tooling.md)
+- [Patterns & Best Practices](./patterns.md)
+- [Framework Extensions](./frameworks/README.md)
+
+## When to Use This Skill
+
+[Specific scenarios]
+
+Workflow Changes
+---------------
+.github/workflows/template-cleanup.yml additions:
+
+1. Input validation step - verify LANGUAGE matches supported languages
+2. Language skill pruning step - remove unused lang-* directories
+3. Process skill update step - replace %LANGUAGE% and inject references
+4. Case handling - normalize input to lowercase for file operations
+
+Integration with Process Skills
+-------------------------------
+testing-process/SKILL.md after replacement:
+
+"Use Go best practices and well-established Go testing tools.
+
+For comprehensive Go testing guidance including table-driven tests,
+test coverage, and benchmark testing, see the `lang-go` skill at
+[skills/lang-go/testing.md](./../lang-go/testing.md)."
+
+development-process/SKILL.md addition:
+
+"For Go-specific tooling, package management, and ecosystem best practices,
+see the `lang-go` skill at [skills/lang-go/tooling.md](./../lang-go/tooling.md)."
+
+DOCUMENTATION UPDATES
+====================
+
+Files to Update
+--------------
+1. CLAUDE.md - Add "Language-Specific Skills" section
+2. README.md - Update Features list and Quick Start guidance
+3. Create docs/wip/language-specific-skills/migration.md - Guide for existing users
+
+CLAUDE.md Content
+----------------
+- Overview of language skills feature
+- List of available language skills
+- Skill structure explanation
+- Usage patterns (automatic reference, direct invocation, framework extensions)
+- Best practices
+
+README.md Changes
+----------------
+- Add to Features: "Language-Specific Development Skills" bullet
+- Update Quick Start step 3 to clarify LANGUAGE input determines skill inclusion
+- List supported languages: go, python, java, kotlin, typescript
+
+SUCCESS METRICS
+==============
+
+1. Template adoption - Number of projects using language-specific skills
+2. Skill invocation frequency - Analytics on how often language skills are referenced
+3. Framework directory usage - Indication users extend with custom guides
+4. Feedback quality - User reports on practical value
+5. Maintenance overhead - Time to keep content current
+
+IMPLEMENTATION PHASES
+====================
+
+Phase 1: Structure Creation
+- Create 5 language skill directories with file templates
+- Establish consistent SKILL.md and topic file structures
+- Create frameworks/README.md templates
+
+Phase 2: Content Development
+- Research and write Go content
+- Research and write Python content
+- Research and write Java content
+- Research and write Kotlin content
+- Research and write TypeScript content
+
+Phase 3: Workflow Integration
+- Add language skill pruning logic to template-cleanup.yml
+- Add process skill update logic with reference injection
+- Add input validation
+- Test all 5 language workflows
+
+Phase 4: Documentation
+- Update CLAUDE.md with language skills section
+- Update README.md with feature description
+- Create migration guide for existing users
+- Update process skills with placeholder patterns
+
+Phase 5: Testing & Validation
+- Integration testing for all 5 languages
+- Content quality review
+- User acceptance testing
+- Iteration based on feedback
+
+RISKS & MITIGATIONS
+==================
+
+Risk: Content becomes outdated as languages evolve
+Mitigation: Schedule quarterly content reviews, monitor language version updates
+
+Risk: Inconsistent structure across language skills
+Mitigation: Use templates, establish clear guidelines, code review process
+
+Risk: Framework guidance bleeds into core language content
+Mitigation: Clear boundaries documented, separate frameworks/ directory
+
+Risk: Template-cleanup workflow failures
+Mitigation: Robust input validation, comprehensive testing, clear error messages
+
+Risk: Increased maintenance burden
+Mitigation: Community contributions, automated checks for broken links, modular structure
+
+FUTURE CONSIDERATIONS
+====================
+
+1. Multi-language project support - Accept comma-separated LANGUAGE values
+2. Language version specificity - Include version-specific guidance (Go 1.23+, Python 3.12+)
+3. Additional languages - Expand to Rust, C++, C#, Ruby, PHP based on demand
+4. Automated content updates - Scripts to refresh tooling references
+5. Community framework guides - Accept contributions for common frameworks
+6. Cross-language patterns - Shared guidance for patterns common across languages
+
+OPEN QUESTIONS
+=============
+
+1. Should we support multi-language projects from day one or wait for user demand?
+   Recommendation: Wait for demand, start with single language per project
+
+2. How frequently should we review content for accuracy?
+   Recommendation: Quarterly reviews, major updates trigger immediate review
+
+3. Should framework guides have a standard structure enforced by tooling?
+   Recommendation: Provide template, enforce through documentation and code review
+
+4. How do we handle language-specific linting configurations?
+   Recommendation: Document in tooling.md, provide examples, don't include actual configs
+
+5. Should we create a skill for shell scripting (Bash)?
+   Recommendation: Defer until user demand is clear, focus on main programming languages first
+
+REFERENCES
+==========
+
+Design document: /docs/wip/language-specific-skills/design.md
+Implementation plan: /docs/wip/language-specific-skills/implementation.md
+Existing skills: .claude/skills/{analysis-process,testing-process,development-process,documentation-process,task-master-process}
+Template cleanup workflow: .github/workflows/template-cleanup.yml

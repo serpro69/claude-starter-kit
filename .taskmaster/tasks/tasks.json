@@ -1,0 +1,343 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Create Language Skill Directory Structure and Base Templates",
+        "description": "Set up the foundational directory structure for all 5 language skills (Go, Python, Java, Kotlin, TypeScript) with consistent file templates and framework extension support",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "high",
+        "details": "Create the base directory structure under .claude/skills/ for each language skill following the naming convention lang-<language>. Each skill directory must contain: SKILL.md (entry point with navigation), style.md, testing.md, tooling.md, patterns.md, and frameworks/ subdirectory with README.md and .gitkeep. Use a consistent markdown template structure across all files. The SKILL.md template should include frontmatter with name and description fields, followed by sections for overview, quick reference, topic links, and usage scenarios. Topic files should have placeholder sections ready for content population. The frameworks/README.md should provide clear instructions for adding framework-specific guides with a template structure example.\n\nReference Documentation:\n- Design: /docs/wip/language-specific-skills/design.md\n- Implementation Plan: /docs/wip/language-specific-skills/implementation.md (Phase 1, Tasks 1.1-1.4)",
+        "testStrategy": "Verify all 5 language skill directories exist with correct structure using filesystem assertions. Validate that each SKILL.md contains proper frontmatter and required sections. Ensure all markdown files have valid syntax and working relative links between files. Test that frameworks/ directories contain both README.md and .gitkeep files. Use a schema validator to ensure consistent structure across all language skills.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create base directory structure for all 5 language skills",
+            "description": "Create the foundational directory structure under .claude/skills/ for Go, Python, Java, Kotlin, and TypeScript language skills following the lang-<language> naming convention",
+            "dependencies": [],
+            "details": "Create 5 directories: .claude/skills/lang-go/, .claude/skills/lang-python/, .claude/skills/lang-java/, .claude/skills/lang-kotlin/, and .claude/skills/lang-typescript/. Each directory must contain the exact same file structure: SKILL.md, style.md, testing.md, tooling.md, patterns.md, and a frameworks/ subdirectory. Create frameworks/README.md and frameworks/.gitkeep files in each language skill directory to ensure proper git tracking and provide framework extension instructions.",
+            "status": "pending",
+            "testStrategy": "Verify all 5 language skill directories exist at .claude/skills/lang-{go,python,java,kotlin,typescript}/. Check that each directory contains exactly 5 markdown files and 1 frameworks subdirectory. Validate frameworks/ contains both README.md and .gitkeep files."
+          },
+          {
+            "id": 2,
+            "title": "Implement SKILL.md entry point templates for each language",
+            "description": "Create standardized SKILL.md files with proper frontmatter and navigation structure for all 5 language skills",
+            "dependencies": [
+              1
+            ],
+            "details": "For each language skill directory, create SKILL.md with YAML frontmatter containing name field (lang-<language>) and description field following the pattern 'Use when working with <Language> codebases to get guidance on <Language>-specific style conventions, testing strategies, tooling, and best practices'. Include sections: language philosophy/overview (10-15 lines), Quick Reference with essential commands, Topics section with markdown links to all topic files (style.md, testing.md, tooling.md, patterns.md, frameworks/README.md), and When to Use This Skill section with specific invocation scenarios. Ensure consistent formatting and relative link paths.",
+            "status": "pending",
+            "testStrategy": "Parse each SKILL.md to verify YAML frontmatter contains required name and description fields. Check that all 5 required sections are present. Validate all internal markdown links resolve correctly to topic files. Ensure file meets 50-100 line requirement."
+          },
+          {
+            "id": 3,
+            "title": "Create topic file templates with placeholder content",
+            "description": "Generate consistent template structure for style.md, testing.md, tooling.md, and patterns.md files across all languages",
+            "dependencies": [
+              1
+            ],
+            "details": "For each of the 4 topic files (style.md, testing.md, tooling.md, patterns.md) in all 5 language directories, create a consistent markdown template with: H1 header '<Language> <Topic Name>', Overview section with placeholder text explaining the topic's purpose, multiple H2 sections for subtopics (minimum 4-5 per file), placeholder content with TODO markers for later population, consistent section naming across languages (e.g., all style.md files have 'Naming Conventions', 'Code Formatting', 'Project Structure' sections). Each file should be 30-50 lines with clear structure ready for content addition. Include code block placeholders with appropriate language syntax highlighting.",
+            "status": "pending",
+            "testStrategy": "Verify each topic file exists in all 5 language directories (20 files total). Check that each file has proper H1 header and at least 4 H2 sections. Validate TODO markers are present for content population. Ensure consistent section structure across same topic files."
+          },
+          {
+            "id": 4,
+            "title": "Create framework extension templates and documentation",
+            "description": "Set up frameworks/ subdirectories with README.md templates explaining how to add framework-specific guides",
+            "dependencies": [
+              1
+            ],
+            "details": "In each language's frameworks/ directory, create README.md with: H1 'Framework-Specific Guides for <Language>', explanation of the framework extension system, template structure for adding new framework guides (frontmatter format, required sections, file naming conventions like 'framework-<name>.md'), example framework guide structure showing sections like 'Setup', 'Core Concepts', 'Testing Approach', 'Common Patterns', instructions for when to add framework guides vs keeping content in core files, list of potential frameworks for each language (e.g., React/Next.js for TypeScript, Django/FastAPI for Python). Include .gitkeep file to ensure directory tracking. Each README.md should be 50-75 lines with clear, actionable instructions.",
+            "status": "pending",
+            "testStrategy": "Verify frameworks/README.md exists in all 5 language directories. Check for presence of .gitkeep files. Validate that README contains template structure example and clear instructions. Ensure framework naming conventions are documented. Test that markdown syntax is valid."
+          },
+          {
+            "id": 5,
+            "title": "Validate complete directory structure and file consistency",
+            "description": "Perform comprehensive validation of the entire language skills directory structure ensuring all files are created with correct naming and organization",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "details": "Run validation checks to ensure: all 5 language directories exist under .claude/skills/ with correct lang-<language> naming, each directory contains exactly 5 markdown files (SKILL.md, style.md, testing.md, tooling.md, patterns.md), frameworks/ subdirectory exists with README.md and .gitkeep, all markdown files have valid syntax without broken internal links, SKILL.md files contain proper frontmatter and all required sections, topic files follow consistent template structure, file permissions are correct for git tracking. Create a validation script or checklist documenting the complete structure. Fix any inconsistencies found during validation.",
+            "status": "pending",
+            "testStrategy": "Execute filesystem checks for all 35 expected files (7 files × 5 languages). Parse all markdown files for syntax validity. Verify internal link consistency. Check git status to ensure all files are tracked. Run markdown linter on all files."
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Implement Language-Specific Content for All Skills",
+        "description": "Research and write comprehensive, practical content for each language skill covering style conventions, testing strategies, tooling ecosystem, and design patterns",
+        "status": "pending",
+        "dependencies": [
+          1
+        ],
+        "priority": "high",
+        "details": "For each language, create detailed content adhering to size requirements (50-100 lines for SKILL.md, 150-300 lines for topic files). Go content should cover: exported naming, table-driven tests, go mod/work, error wrapping, goroutines. Python should include: PEP 8, type hints, pytest vs unittest, pip/poetry/uv comparisons, decorators, async patterns. Java needs: modern features (records/sealed), JUnit 5, Maven/Gradle, builder pattern, Optional usage. Kotlin requires: null safety, Kotest/MockK, coroutines, sealed classes, DSLs. TypeScript must have: type vs interface, Jest/Vitest, tsconfig best practices, utility types, discriminated unions. Focus on actionable insights unique to each language, avoiding generic programming concepts. Include current tool versions and modern practices (2024 standards).\n\nReference Documentation:\n- Design: /docs/wip/language-specific-skills/design.md (see \"Content Guidelines\" and \"Language Coverage\" sections)\n- Implementation Plan: /docs/wip/language-specific-skills/implementation.md (Phase 2, Tasks 2.1-2.5)",
+        "testStrategy": "Content review checklist: verify each topic file meets line count requirements (150-300 lines), check for technical accuracy against official documentation, validate that examples use current syntax and libraries, ensure no framework-specific content in core files, test that all internal markdown links resolve correctly. Use automated readability scoring to ensure content is clear and actionable.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Go Language Skill Content with Modern Practices",
+            "description": "Research and write comprehensive Go language content covering exported naming conventions, table-driven testing patterns, module management with go mod/work, error wrapping best practices, and goroutine patterns for concurrency",
+            "dependencies": [],
+            "details": "Create Go skill content in .claude/skills/lang-go/ with SKILL.md (50-100 lines) covering overview and navigation. Write style.md focusing on exported vs unexported naming, receiver naming conventions, and idiomatic Go formatting. Develop testing.md with table-driven test examples, subtests, test fixtures, and benchmarking patterns. Create tooling.md covering go mod vs go work for monorepos, vendoring strategies, and essential tools like golangci-lint. Write patterns.md featuring error wrapping with fmt.Errorf(%w), context propagation, goroutine lifecycle management, and channel patterns. Ensure all content uses Go 1.21+ features and follows 2024 best practices. Reference design document sections on \"Content Guidelines\" for proper structure and \"Language Coverage\" for Go-specific requirements.",
+            "status": "pending",
+            "testStrategy": "Validate all Go code examples compile and run correctly. Check adherence to official Go style guide. Verify line count requirements (50-100 for SKILL.md, 150-300 for topic files). Test all markdown links and code formatting."
+          },
+          {
+            "id": 2,
+            "title": "Implement Python Skill with Type Hints and Modern Tooling",
+            "description": "Develop Python language skill content covering PEP 8 compliance, type hints usage, pytest vs unittest comparison, package management tools evaluation (pip/poetry/uv), decorator patterns, and async/await patterns",
+            "dependencies": [],
+            "details": "Write Python skill content in .claude/skills/lang-python/ with SKILL.md overview. Create style.md covering PEP 8 essentials, type hints syntax with typing module, docstring formats (Google/NumPy/Sphinx), and naming conventions. Develop testing.md comparing pytest vs unittest with practical examples, fixture patterns, mocking strategies, and property-based testing with hypothesis. Write tooling.md comparing pip, poetry, and uv with use case recommendations, virtual environment management, and linting tools (ruff, mypy, black). Create patterns.md featuring decorator implementations, context managers, async/await patterns, and metaclass usage. Focus on Python 3.11+ features and modern practices. Follow implementation plan Task 2.2 specifications for research sources and content depth requirements.",
+            "status": "pending",
+            "testStrategy": "Verify all Python examples run on Python 3.11+. Validate type hints with mypy. Check PEP 8 compliance with ruff. Ensure pytest examples execute successfully. Validate markdown structure and line counts."
+          },
+          {
+            "id": 3,
+            "title": "Build Java Skill with Modern Features and JUnit 5",
+            "description": "Create Java language skill covering modern Java features (records, sealed classes, pattern matching), JUnit 5 testing, Maven vs Gradle comparison, builder pattern implementation, and Optional usage patterns",
+            "dependencies": [],
+            "details": "Develop Java skill in .claude/skills/lang-java/ with comprehensive SKILL.md. Write style.md covering naming conventions, package organization, JavaDoc best practices, and modern Java 17+ syntax including records and sealed classes. Create testing.md focusing on JUnit 5 features, parameterized tests, assertJ assertions, and Mockito patterns. Develop tooling.md comparing Maven vs Gradle with practical examples, dependency management strategies, and essential plugins. Write patterns.md featuring builder pattern with fluent interfaces, Optional chaining and mapping, Stream API best practices, and CompletableFuture for async operations. Emphasize Java 17+ LTS features. Adhere to content depth guidelines from implementation plan Task 2.3 (50-100 lines SKILL.md, 150-300 lines per topic file).",
+            "status": "pending",
+            "testStrategy": "Compile all Java examples with Java 17+. Run JUnit 5 test examples. Validate Maven and Gradle build configurations. Check JavaDoc formatting. Verify line count requirements and markdown structure."
+          },
+          {
+            "id": 4,
+            "title": "Develop Kotlin Skill with Null Safety and Coroutines",
+            "description": "Write Kotlin language skill content emphasizing null safety features, Kotest and MockK testing frameworks, coroutine patterns, sealed classes for state management, and DSL creation techniques",
+            "dependencies": [],
+            "details": "Create Kotlin skill in .claude/skills/lang-kotlin/ with navigation SKILL.md. Write style.md covering Kotlin idioms, null safety operators, data classes best practices, and extension functions. Develop testing.md featuring Kotest spec styles (FunSpec, StringSpec, BehaviorSpec), MockK for mocking, and coroutine testing with runTest. Create tooling.md covering Gradle Kotlin DSL, dependency management with version catalogs, and KtLint configuration. Write patterns.md showcasing sealed classes for state machines, coroutine patterns (flow, channels, structured concurrency), DSL creation with receiver functions, and delegation patterns. Focus on Kotlin 1.9+ features. Follow design document framework-agnostic core principles and practical guidance approach from Task 2.4 specifications.",
+            "status": "pending",
+            "testStrategy": "Verify Kotlin examples compile with Kotlin 1.9+. Run Kotest examples successfully. Validate coroutine patterns with kotlinx-coroutines-test. Check KtLint compliance. Ensure proper markdown formatting and line counts."
+          },
+          {
+            "id": 5,
+            "title": "Create TypeScript Skill with Advanced Types and Testing",
+            "description": "Implement TypeScript language skill covering type vs interface decisions, Jest and Vitest comparison, tsconfig best practices, utility types usage, and discriminated union patterns for type safety",
+            "dependencies": [],
+            "details": "Build TypeScript skill in .claude/skills/lang-typescript/ with comprehensive SKILL.md. Write style.md explaining when to use type vs interface, strict mode benefits, const assertions, and satisfies operator. Develop testing.md comparing Jest vs Vitest with configuration examples, type-safe mocking patterns, and testing async code. Create tooling.md covering tsconfig.json best practices for different project types, module resolution strategies, and build tools (tsc, esbuild, swc). Write patterns.md featuring utility types (Partial, Required, Pick, Omit), discriminated unions for exhaustive checking, branded types for validation, and conditional types. Target TypeScript 5.0+ features. Implement according to Task 2.5 research sources and content structure requirements, emphasizing practical over comprehensive approach as outlined in design principles.",
+            "status": "pending",
+            "testStrategy": "Type-check all examples with TypeScript 5.0+ strict mode. Run Jest and Vitest example tests. Validate tsconfig.json configurations. Check ESLint with typescript-eslint. Verify markdown structure and line requirements."
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Enhance Template Cleanup Workflow with Language Selection",
+        "description": "Modify the GitHub Actions template-cleanup workflow to accept LANGUAGE parameter, prune unused language skills, and update process skill references",
+        "status": "pending",
+        "dependencies": [
+          1
+        ],
+        "priority": "high",
+        "details": "Update .github/workflows/template-cleanup.yml to add a new LANGUAGE input parameter with validation against supported languages (go, python, java, kotlin, typescript - case insensitive). Implement three new workflow steps: 1) Language validation step using bash to normalize input to lowercase and verify against allowed values, failing with clear error if invalid. 2) Language skill pruning step that removes all .claude/skills/lang-* directories except the one matching the selected language using find and rm commands. 3) Process skill update step that replaces all %LANGUAGE% placeholders in testing-process and development-process skills with the actual language name, and injects markdown reference links to the appropriate language skill files (e.g., [skills/lang-go/testing.md](./../lang-go/testing.md)). Use sed or similar for in-place replacements. Ensure the workflow maintains idempotency and handles edge cases like missing directories gracefully.\n\nReference Documentation:\n- Design: /docs/wip/language-specific-skills/design.md (see \"Template Cleanup Workflow\" section)\n- Implementation Plan: /docs/wip/language-specific-skills/implementation.md (Phase 3, Tasks 3.1-3.5)",
+        "testStrategy": "Create test matrix for all 5 languages plus invalid inputs. For each valid language, verify: only selected language skill remains, all %LANGUAGE% placeholders are replaced, markdown links are correctly formatted and resolve, workflow completes successfully. For invalid inputs, verify workflow fails with helpful error message. Test case sensitivity handling (GO, go, Go should all work). Validate that re-running workflow doesn't break already-processed files.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Add LANGUAGE input parameter to workflow",
+            "description": "Add a new workflow_dispatch input parameter LANGUAGE to the template-cleanup.yml workflow with proper validation and description",
+            "dependencies": [],
+            "details": "Modify the workflow_dispatch inputs section in .github/workflows/template-cleanup.yml to add a required LANGUAGE parameter. The parameter should include a description explaining it accepts one of: go, python, java, kotlin, typescript (case-insensitive). Set type to 'choice' with options for each language to provide dropdown selection in GitHub UI. Also add this as an input parameter to the workflow_call event if present for reusability.",
+            "status": "pending",
+            "testStrategy": "Test workflow dispatch with each valid language option through GitHub UI. Verify parameter is properly passed to subsequent steps. Test that workflow fails if parameter is missing when required."
+          },
+          {
+            "id": 2,
+            "title": "Implement language validation step",
+            "description": "Create a bash validation step that normalizes the LANGUAGE input to lowercase and validates it against the allowed languages list",
+            "dependencies": [
+              1
+            ],
+            "details": "Add a new job step after checkout that normalizes the LANGUAGE input using bash parameter expansion (${LANGUAGE,,}) to convert to lowercase. Validate the normalized value against the allowed list (go, python, java, kotlin, typescript) using a case statement or if-else chain. If invalid, use exit 1 with a clear error message listing valid options. Store the normalized language in a step output or environment variable for use in subsequent steps.",
+            "status": "pending",
+            "testStrategy": "Test with valid inputs in different cases (GO, Python, TYPESCRIPT). Test with invalid inputs (ruby, c++, blank). Verify error messages are clear and list valid options. Ensure normalized value is available to subsequent steps."
+          },
+          {
+            "id": 3,
+            "title": "Create language skill pruning step",
+            "description": "Implement a step that removes all .claude/skills/lang-* directories except the one matching the selected language",
+            "dependencies": [
+              2
+            ],
+            "details": "Add a step using bash commands to prune unused language skills. First check if .claude/skills directory exists to handle edge cases gracefully. Use find command to locate all lang-* directories: find .claude/skills -maxdepth 1 -type d -name 'lang-*' ! -name \"lang-${normalized_language}\" -exec rm -rf {} +. Add error handling with || true to prevent workflow failure if directories don't exist. Log which directories are being removed for transparency.",
+            "status": "pending",
+            "testStrategy": "Test with full set of language directories present. Verify only selected language remains after pruning. Test with missing .claude/skills directory. Test with partially missing language directories. Verify idempotent behavior on repeated runs."
+          },
+          {
+            "id": 4,
+            "title": "Implement process skill placeholder replacement",
+            "description": "Create a step that replaces %LANGUAGE% placeholders in testing-process and development-process skills with the selected language",
+            "dependencies": [
+              2
+            ],
+            "details": "Add a step to update process skill files with the selected language. Use sed or similar tool to replace %LANGUAGE% with the capitalized language name and %LANGUAGE_LOWER% with the lowercase version. Target files: .claude/skills/testing-process/SKILL.md and .claude/skills/development-process/SKILL.md. Replace placeholders in text and construct proper markdown links like [skills/lang-${language}/testing.md](./../lang-${language}/testing.md). Use sed -i for in-place replacement with proper escaping. Add checks to verify files exist before modification.",
+            "status": "pending",
+            "testStrategy": "Verify all %LANGUAGE% and %LANGUAGE_LOWER% placeholders are replaced. Test markdown link generation and ensure links resolve correctly. Verify replacements work for all 5 languages. Check file integrity after modifications."
+          },
+          {
+            "id": 5,
+            "title": "Add workflow status reporting and error handling",
+            "description": "Implement comprehensive error handling and status reporting throughout the workflow to ensure clear feedback and graceful failure modes",
+            "dependencies": [
+              3,
+              4
+            ],
+            "details": "Add echo statements to report progress at each major step (validating language, pruning skills, updating references). Implement proper error handling with meaningful exit codes and messages. Add a final summary step that reports what was done (selected language, directories removed, files updated). Use GitHub Actions ::notice, ::warning, and ::error commands for better visibility in workflow logs. Ensure all steps handle edge cases like missing directories or files gracefully without failing the entire workflow unless critical.",
+            "status": "pending",
+            "testStrategy": "Test workflow with various failure scenarios (missing directories, malformed files). Verify error messages are clear and actionable. Test that non-critical failures don't stop the workflow. Verify summary output is accurate and helpful."
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Integrate Language Skills with Existing Process Skills",
+        "description": "Update testing-process and development-process skills to include %LANGUAGE% placeholders and prepare for automatic reference injection by the cleanup workflow",
+        "status": "pending",
+        "dependencies": [
+          1
+        ],
+        "priority": "medium",
+        "details": "Modify testing-process/SKILL.md to include a new section with the pattern: 'Use %LANGUAGE% best practices and well-established %LANGUAGE% testing tools. For comprehensive %LANGUAGE% testing guidance including [language-specific features], see the `lang-%LANGUAGE_LOWER%` skill at [skills/lang-%LANGUAGE_LOWER%/testing.md](./../lang-%LANGUAGE_LOWER%/testing.md).' Add similar reference in development-process/SKILL.md for tooling guidance. Ensure placeholders use consistent naming: %LANGUAGE% for display name, %LANGUAGE_LOWER% for file paths. Position these references naturally within existing content flow. Update both skills to maintain backward compatibility - the placeholders should read sensibly even before replacement. Consider adding a comment marker around injected content for easier future updates.\n\nReference Documentation:\n- Design: /docs/wip/language-specific-skills/design.md (see \"Integration with Process Skills\" section)\n- Implementation Plan: /docs/wip/language-specific-skills/implementation.md (Phase 4, Tasks 4.1-4.2)",
+        "testStrategy": "Verify placeholder patterns are consistent and correctly formatted in both process skills. Test the replacement logic with sample language values to ensure natural reading flow. Validate markdown link syntax before and after replacement. Check that skills remain functional without language skills present (backward compatibility). Test that navigation from process skills to language skills works correctly after workflow processing.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Analyze existing process skill files and identify integration points",
+            "description": "Examine testing-process/SKILL.md and development-process/SKILL.md to understand current structure and identify optimal locations for language-specific placeholder sections",
+            "dependencies": [],
+            "details": "Read both .claude/skills/testing-process/SKILL.md and .claude/skills/development-process/SKILL.md files. Map the current content structure and identify natural insertion points where language-specific references would flow seamlessly. Document the existing markdown structure, section headings, and content flow. Note any existing cross-references or patterns that should be maintained. Create a plan for where to insert the new sections without disrupting the existing logical flow. Current analysis shows testing-process/SKILL.md already has %LANGUAGE% placeholders on lines 20-21, and development-process/SKILL.md has a dependency management section that would be suitable for tooling references.",
+            "status": "pending",
+            "testStrategy": "Verify that both process skill files are correctly analyzed and insertion points are documented with line numbers and section context"
+          },
+          {
+            "id": 2,
+            "title": "Update testing-process skill with language placeholder section",
+            "description": "Modify testing-process/SKILL.md to include the specified language placeholder pattern with proper markdown formatting and comment markers",
+            "dependencies": [
+              1
+            ],
+            "details": "Insert a new section in .claude/skills/testing-process/SKILL.md containing the exact pattern: 'Use %LANGUAGE% best practices and well-established %LANGUAGE% testing tools. For comprehensive %LANGUAGE% testing guidance including [language-specific features], see the `lang-%LANGUAGE_LOWER%` skill at [skills/lang-%LANGUAGE_LOWER%/testing.md](./../lang-%LANGUAGE_LOWER%/testing.md).' Wrap this section with HTML comment markers like <!-- LANGUAGE_INJECTION_START --> and <!-- LANGUAGE_INJECTION_END --> for easier future updates. Ensure the section integrates naturally with surrounding content and maintains markdown formatting consistency. Note that existing %LANGUAGE% placeholders are already present on lines 20-21, so coordinate with these existing patterns.",
+            "status": "pending",
+            "testStrategy": "Test placeholder replacement with sample values (e.g., Python/python, Go/go) to ensure natural reading flow and verify markdown link syntax renders correctly"
+          },
+          {
+            "id": 3,
+            "title": "Update development-process skill with tooling placeholder section",
+            "description": "Modify development-process/SKILL.md to include language-specific tooling guidance placeholders with consistent formatting",
+            "dependencies": [
+              1
+            ],
+            "details": "Insert a new section in .claude/skills/development-process/SKILL.md for tooling guidance using the pattern: 'For %LANGUAGE%-specific development tooling and ecosystem guidance, refer to the `lang-%LANGUAGE_LOWER%` skill at [skills/lang-%LANGUAGE_LOWER%/tooling.md](./../lang-%LANGUAGE_LOWER%/tooling.md).' Add similar comment markers (<!-- LANGUAGE_INJECTION_START --> and <!-- LANGUAGE_INJECTION_END -->) around the injected content. Based on implementation documentation Task 4.2, this should be added after the 'Working with Dependencies' section which currently focuses on external dependencies and Context7 usage.",
+            "status": "pending",
+            "testStrategy": "Validate markdown syntax before and after placeholder replacement, test with multiple language values to ensure consistent formatting"
+          },
+          {
+            "id": 4,
+            "title": "Implement backward compatibility and readability checks",
+            "description": "Ensure both updated process skills remain functional and readable even before placeholder replacement occurs",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Review both modified skill files to ensure the placeholder sections read sensibly as standalone content. The text should be grammatically correct and provide value even if the %LANGUAGE% placeholders are never replaced. Add conditional phrasing if needed, such as 'When working with a specific programming language, use [language] best practices...' Verify that the skills maintain their core value proposition without requiring the language skills to be present. Follow the pattern established in the design documentation showing graceful degradation when language skills are not available.",
+            "status": "pending",
+            "testStrategy": "Read through both skills with placeholders unreplaced to verify coherent flow, test skills without any language skills present to ensure no broken references"
+          },
+          {
+            "id": 5,
+            "title": "Create integration documentation and validation scripts",
+            "description": "Document the integration pattern and create validation logic for the cleanup workflow to use when replacing placeholders",
+            "dependencies": [
+              4
+            ],
+            "details": "Create a markdown file documenting the placeholder patterns (%LANGUAGE% for display, %LANGUAGE_LOWER% for paths), the comment marker convention, and the expected replacement behavior. Include examples showing before/after states for different languages as shown in implementation.md Task 4.1. Prepare validation rules that the cleanup workflow can use: check for consistent placeholder naming, verify markdown link syntax, ensure comment markers are properly paired, validate that all placeholders in a section are replaced atomically. Document any edge cases or special handling requirements. Reference the design documentation for the complete integration approach and expected user experience.",
+            "status": "pending",
+            "testStrategy": "Test documentation completeness by having the cleanup workflow implementation follow only the documentation, verify all edge cases are covered"
+          }
+        ]
+      },
+      {
+        "id": "5",
+        "title": "Update Documentation and Migration Guides",
+        "description": "Create comprehensive documentation updates for CLAUDE.md and README.md, plus migration guide for existing users adopting the new language skills feature",
+        "status": "pending",
+        "dependencies": [
+          3,
+          4
+        ],
+        "priority": "medium",
+        "details": "Update CLAUDE.md with a new 'Language-Specific Skills' section explaining the feature, listing available languages, describing skill structure, and providing usage patterns (automatic references, direct invocation, framework extensions). Add best practices for when to use language skills vs process skills. Update README.md Features section to highlight 'Language-Specific Development Skills' with supported languages list. Clarify in Quick Start that the LANGUAGE parameter in template-cleanup determines which skill is included. Create docs/wip/language-specific-skills/migration.md with step-by-step guide for existing projects to adopt language skills: how to run cleanup workflow on existing repo, manual steps if needed, how to verify successful integration. Include troubleshooting section for common issues (missing language skill, broken links, workflow failures). Add examples of framework extension patterns users can follow.\n\nReference Documentation:\n- Design: /docs/wip/language-specific-skills/design.md (see \"User Experience\" section)\n- Implementation Plan: /docs/wip/language-specific-skills/implementation.md (Phase 4, Tasks 4.3-4.5)",
+        "testStrategy": "Documentation validation: check all markdown files render correctly, verify all internal links resolve, validate code examples syntax, ensure instructions are complete and reproducible. Have test users follow migration guide on sample existing project to identify gaps. Review documentation against actual implementation to ensure accuracy. Test that all mentioned file paths and commands work as documented.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Analyze existing documentation structure and patterns",
+            "description": "Explore the current CLAUDE.md and README.md files to understand existing documentation patterns, sections, and conventions before making updates",
+            "dependencies": [],
+            "details": "Use the Read tool to examine /home/sergio/Projects/personal/claude-starter-kit/CLAUDE.md and README.md files. Identify current documentation structure, sections, and formatting patterns. Look for existing references to skills, language configurations, and workflow documentation. Search for any existing migration guides or documentation patterns to follow. Document the current state to ensure new additions integrate seamlessly.",
+            "status": "pending",
+            "testStrategy": "Verify that analysis captures all major sections of both files, identifies formatting conventions, and documents integration points for new language skills content"
+          },
+          {
+            "id": 2,
+            "title": "Update CLAUDE.md with Language-Specific Skills section",
+            "description": "Add comprehensive Language-Specific Skills section to CLAUDE.md explaining the feature, listing supported languages, and providing usage patterns",
+            "dependencies": [
+              1
+            ],
+            "details": "Create a new 'Language-Specific Skills' section in CLAUDE.md after the existing skills documentation. Include explanation of how language skills work, list of available languages (Go, Python, Java, Kotlin, TypeScript), description of skill file structure (SKILL.md, style.md, testing.md, tooling.md, patterns.md, frameworks/), usage patterns for automatic references and direct invocation, and best practices for when to use language skills vs process skills. Ensure proper markdown formatting and internal links to skill directories. Reference the design document at /docs/wip/language-specific-skills/design.md for User Experience patterns and the implementation plan Phase 4, Task 4.3 for specific content requirements.",
+            "status": "pending",
+            "testStrategy": "Validate markdown syntax, verify all internal links resolve correctly, ensure new section integrates with existing documentation flow, test readability and completeness of instructions"
+          },
+          {
+            "id": 3,
+            "title": "Update README.md Features and Quick Start sections",
+            "description": "Enhance README.md to highlight Language-Specific Development Skills feature and clarify LANGUAGE parameter usage in template-cleanup workflow",
+            "dependencies": [
+              1
+            ],
+            "details": "Update the Features section in README.md to prominently highlight 'Language-Specific Development Skills' with a list of supported languages. Add clear explanation of how the feature works and its benefits. In the Quick Start section, clarify that the LANGUAGE parameter in template-cleanup workflow determines which language skill is included. Add example command showing how to set LANGUAGE parameter. Ensure changes maintain consistency with existing README format and style. Follow implementation plan Phase 4, Task 4.4 specifications for exact content additions.",
+            "status": "pending",
+            "testStrategy": "Check markdown rendering, verify feature description is clear and compelling, ensure Quick Start instructions are actionable, validate all examples work correctly"
+          },
+          {
+            "id": 4,
+            "title": "Create migration guide for existing users",
+            "description": "Develop comprehensive migration guide at docs/wip/language-specific-skills/migration.md for users adopting the new language skills feature",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Create directory structure docs/wip/language-specific-skills/ if needed. Write migration.md with step-by-step guide including: prerequisites check, instructions for running cleanup workflow on existing repository, manual migration steps if workflow cannot be used, verification steps to confirm successful integration, and rollback procedures if needed. Include code examples showing before/after states. Add troubleshooting section covering common issues like missing language skill, broken links, and workflow failures. Follow the migration guide template outlined in implementation plan Phase 4, Task 4.5.",
+            "status": "pending",
+            "testStrategy": "Test migration guide by following steps on a sample existing project, verify all commands work, ensure troubleshooting covers realistic scenarios, validate that guide is complete and reproducible"
+          },
+          {
+            "id": 5,
+            "title": "Add framework extension examples and patterns",
+            "description": "Document framework extension patterns and provide concrete examples for users to follow when extending language skills",
+            "dependencies": [
+              4
+            ],
+            "details": "Add a section to migration.md or create a separate frameworks-guide.md documenting how users can extend language skills with framework-specific content. Include examples for common frameworks in each language (e.g., Spring for Java, Django for Python, React for TypeScript). Show directory structure for framework extensions, naming conventions, and how to reference framework content from main skill files. Provide template for creating new framework documentation. Include best practices for maintaining framework extensions. Reference the design document's Framework Extensibility section for architectural guidance.",
+            "status": "pending",
+            "testStrategy": "Verify examples are technically accurate, test that framework extension patterns are clear and followable, ensure examples cover diverse use cases across different languages"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "created": "2025-11-04T17:13:17.171Z",
+      "updated": "2025-11-04T17:13:17.171Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
