@@ -137,9 +137,9 @@ Here's an example `mcpServers` object that you can use as a reference:
 > [!TIP]
 > See [Task Master Advanced Claude Code Settings Usage](https://github.com/eyaltoledano/claude-task-master/blob/main/docs/examples/claude-code-usage.md#advanced-settings-usage) for more details on the above parameters.
 
-4. Clone your new repo and run `claude /mcp`.
+4. Clone your new repo and cd into it
 
-    You should see the mcp servers configured and active:
+    Run `claude /mcp`, you should see the mcp servers configured and active:
 
     ```
     > /mcp
@@ -153,6 +153,36 @@ Here's an example `mcpServers` object that you can use as a reference:
     ╰────────────────────────────────────────────────────────────────────╯
     ```
 
+    Run `claude "list your skills"`, you should see the skills from this repo present:
+
+    ```
+    > list your skills
+
+    ● I have access to the following skills:
+
+      Available Skills
+
+      analysis-process
+      Turn the idea for a feature into a fully-formed PRD/design/specification and implementation-plan. Use in pre-implementation (idea-to-design) stages to make sure you
+      understand the requirements and have a correct implementation plan before writing actual code.
+
+      documentation-process
+      After implementing a new feature or fixing a bug, make sure to document the changes. Use after finishing the implementation phase for a feature or a bug-fix.
+
+      task-master-process
+      Workflow for task-master-ai when working with task-master tasks and PRDs. Use when creating or parsing PRDs from requirements, adding/updating/expanding tasks and other task-master-ai operations.
+
+      testing-process
+      Guidelines describing how to test the code. Use whenever writing new or updating existing code, for example after implementing a new feature or fixing a bug.
+
+      ---
+      These skills provide specialized workflows for different stages of development. You can invoke any of them by asking me to use a specific skill (e.g., "use the analysis-process skill" or "help me document this feature").
+    ```
+
 5. Update the `README.md` with a full description of your project, then run `chmod +x bootstrap.sh && ./bootstrap.sh` to finalize initialization of the repo.
 
 6. Profit
+
+## Examples
+
+Some examples of the actual claude-code workflows that were executed using templates, configs, skills, and other tools from this repository can be found in [examples](./examples) directory.

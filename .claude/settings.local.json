@@ -27,6 +27,7 @@
     ],
     "deny": [
       "Bash(task-master:*)",
+      "Read(./examples)",
       "Read(./**/consensus*.md)",
       "Read(./**/review*.md)",
       "Read(./**/.env)",
