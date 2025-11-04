@@ -12,6 +12,7 @@ Task Progress:
 - [ ] Step 6: Create task-master PRD
 - [ ] Step 7: Parse the PRD with research
 - [ ] Step 8: Expand the new task into subtasks
+- [ ] Step 9: Update the tasks/subtasks to include links to relevant design and implementation plan docs
 ```
 
 **Step 1: Understand the current state of the project**
@@ -60,3 +61,8 @@ Parse the task-master PRD with research.
 
 Expand the task-master task into subtasks with links to existing design and implementation documents.
 
+**Step 9: Update the tasks/subtasks to include links to relevant design and implementation plan docs**
+
+After expanding the tasks into subtasks, we need to ensure that tasks also have links to relevant design and implementation plan docs created in Step 5.
+
+Update each parent task's details section with links to relevant docs.
