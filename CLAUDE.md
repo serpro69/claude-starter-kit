@@ -195,9 +195,3 @@ The repository includes a GitHub workflow that customizes the template:
 - **Serena Language Support**: https://github.com/oraios/serena#programming-language-support
 - **Zen Getting Started**: https://github.com/BeehiveInnovations/zen-mcp-server/blob/main/docs/getting-started.md
 - **Context7**: https://context7.com/
-
-## Task Master AI Instructions
-
-**IMPORTANT!!! Import Task Master's development workflow commands and guidelines, treat as if import is in the main CLAUDE.md file.**
-
-@./.taskmaster/CLAUDE.md
