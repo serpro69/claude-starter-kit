@@ -53,6 +53,9 @@
     "ask": []
   },
   "enabledMcpjsonServers": [],
+  "env": {
+    "MAX_MCP_OUTPUT_TOKENS": 64000
+  },
   "hooks": {
     "PreToolUse": [
       {
