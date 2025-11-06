@@ -14,6 +14,11 @@ claude -p --permission-mode "acceptEdits" /init
 
 cat <<EOF >>CLAUDE.md
 
+## Task Master AI Instructions
+
+**IMPORTANT!!! Import Task Master's development workflow commands and guidelines, treat as if import is in the main CLAUDE.md file.**
+
+@./.taskmaster/CLAUDE.md
 EOF
 
 printf "\n"
