@@ -102,7 +102,12 @@ Here's an example `mcpServers` object that you can use as a reference:
     ],
     "env": {
       "PATH": "/usr/local/bin:/usr/bin:/bin:~/.local/bin",
+      # see https://github.com/BeehiveInnovations/zen-mcp-server/blob/main/docs/configuration.md#model-configuration
+      "DEFAULT_MODEL": "auto",
+      # see https://github.com/BeehiveInnovations/zen-mcp-server/blob/main/docs/advanced-usage.md#thinking-modes
+      "DEFAULT_THINKING_MODE_THINKDEEP": "high",
       "GEMINI_API_KEY": "YOUR_GEMINI_API_KEY",
+      # see https://github.com/BeehiveInnovations/zen-mcp-server/blob/main/docs/configuration.md#model-usage-restrictions
       "GOOGLE_ALLOWED_MODELS": "gemini-2.5-pro,gemini-2.5-flash"
     }
   }
