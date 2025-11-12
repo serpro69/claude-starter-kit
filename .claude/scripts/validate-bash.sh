@@ -13,13 +13,12 @@ fi
 
 # Define forbidden patterns
 FORBIDDEN_PATTERNS=(
-  "node_modules"
-  "frontend/node_modules"
-  # "pipelines/data"
   "\.env"
+  "\.ansible/"
+  "\.terraform/"
   "build/"
   "dist/"
-  # "data/"
+  "node_modules"
   "__pycache__"
   "\.git/"
   "venv/"
