@@ -2,6 +2,7 @@
   "permissions": {
     "allow": [
       "Bash(cat:*)",
+      "Bash(chmod:*)",
       "Bash(grep:*)",
       "Bash(ls:*)",
       "Bash(mkdir:*)",
