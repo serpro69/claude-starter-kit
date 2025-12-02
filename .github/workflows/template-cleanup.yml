@@ -7,6 +7,23 @@ name: Template Cleanup
 on:
   workflow_dispatch:
     inputs:
+      CC_MODEL:
+        description: |
+          Default model to use with claude-code.
+          See https://code.claude.com/docs/en/model-config#model-aliases for model aliases.
+        required: true
+        default: default
+        type: choice
+        options:
+          - default
+          - sonnet
+          - sonnet[1m]
+          - opus
+          - opusplan
+          - haiku
+          # NOTE: does not currently support 1m context.
+          # Model name from: https://platform.claude.com/docs/en/about-claude/models/overview#model-names
+          - claude-opus-4.5
       LANGUAGE:
         description: |
           Primary programming language(s) of this project.
@@ -68,6 +85,8 @@ jobs:
           SAFE_ACTOR=$(echo $ACTOR | sed 's/[^a-zA-Z0-9]//g' | tr '[:upper:]' '[:lower:]')
           GROUP="com.github.$SAFE_ACTOR.$SAFE_NAME"
 
+          # Claude Code settings
+          CC_MODEL="${{ github.event.inputs.CC_MODEL }}"
           # Get MCP configuration variables from workflow inputs
           LANGUAGE="${{ github.event.inputs.LANGUAGE }}"
           SERENA_INITIAL_PROMPT="${{ github.event.inputs.SERENA_INITIAL_PROMPT }}"
@@ -82,6 +101,7 @@ jobs:
           find .github/templates -type f -exec sed -i "s/%GROUP%/$GROUP/g" {} +
           find .github/templates -type f -exec sed -i "s/%SAFE_NAME%/$SAFE_NAME/g" {} +
           find .github/templates -type f -exec sed -i "s/%SAFE_ACTOR%/$SAFE_ACTOR/g" {} +
+          find .github/templates -type f -exec sed -i "s/%CC_MODEL%/$CC_MODEL/g" {} +
           find .github/templates -type f -exec sed -i "s/%LANGUAGE%/$LANGUAGE/g" {} +
           find .github/templates -type f -exec sed -i "s/%SERENA_INITIAL_PROMPT%/$SERENA_INITIAL_PROMPT/g" {} +
           find .github/templates -type f -exec sed -i "s/%TM_CUSTOM_SYSTEM_PROMPT%/$TM_CUSTOM_SYSTEM_PROMPT/g" {} +
