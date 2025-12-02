@@ -56,7 +56,11 @@ You will need the following on your workstation:
 ### Claude `claude.json` mcp settings
 
 You need to have `mcpServers` present and configured in your `~/.claude.json`. 
-The reason we put them in the user's claude.json configuration, instead of repo local settings, is for reusability across projects, and to prevent committing API keys, which some MPC servers might require.
+
+> [!NOTE]
+> The reason we put them in the user's `claude.json` configuration, instead of repo local settings, is to prevent committing API keys, which some MCP servers might require.
+>
+> These configs are also generic enough that they can be re-used across every project, and hence is better placed in user's settings.
 
 Here's an example `mcpServers` object that you can use as a reference:
 
@@ -108,7 +112,7 @@ Here's an example `mcpServers` object that you can use as a reference:
       "DEFAULT_THINKING_MODE_THINKDEEP": "high",
       "GEMINI_API_KEY": "YOUR_GEMINI_API_KEY",
       # see https://github.com/BeehiveInnovations/zen-mcp-server/blob/main/docs/configuration.md#model-usage-restrictions
-      "GOOGLE_ALLOWED_MODELS": "gemini-2.5-pro,gemini-2.5-flash"
+      "GOOGLE_ALLOWED_MODELS": "gemini-3-pro-preview,gemini-2.5-pro,gemini-2.5-flash"
     }
   }
 }
