@@ -19,7 +19,7 @@ This is a starter template repository designed to provide a complete development
   - **Context7**: Up-to-date library documentation and code examples
   - **Serena**: Semantic code analysis with LSP integration for intelligent navigation
   - **Task Master**: AI-powered task management and workflow orchestration
-  - **Zen**: Multi-model AI integration for debugging, code review, and planning
+  - **Pal**: Multi-model AI integration for debugging, code review, and planning
 
 - **⚙️ Automated Template Cleanup**
   - GitHub Actions workflow for one-click repository initialization
@@ -58,7 +58,7 @@ You will need the following on your workstation:
 ### API Keys
 
 - [Context7](https://context7.com/) API key
-- Gemini API key for [zen-mcp-server](https://github.com/BeehiveInnovations/zen-mcp-server). You don't need to use gemini and can configure zen with any other provider/models. See [zen getting started docs](https://github.com/BeehiveInnovations/zen-mcp-server/blob/main/docs/getting-started.md) for more details.
+- Gemini API key for [pal-mcp-server](https://github.com/BeehiveInnovations/pal-mcp-server). You don't need to use gemini and can configure pal with any other provider/models. See [pal getting started docs](https://github.com/BeehiveInnovations/pal-mcp-server/blob/main/docs/getting-started.md) for more details.
 
 ### Claude `claude.json` mcp settings
 
@@ -113,12 +113,12 @@ Here's an example `mcpServers` object that you can use as a reference:
     ],
     "env": {
       "PATH": "/usr/local/bin:/usr/bin:/bin:~/.local/bin",
-      # see https://github.com/BeehiveInnovations/zen-mcp-server/blob/main/docs/configuration.md#model-configuration
+      # see https://github.com/BeehiveInnovations/pal-mcp-server/blob/main/docs/configuration.md#model-configuration
       "DEFAULT_MODEL": "auto",
-      # see https://github.com/BeehiveInnovations/zen-mcp-server/blob/main/docs/advanced-usage.md#thinking-modes
+      # see https://github.com/BeehiveInnovations/pal-mcp-server/blob/main/docs/advanced-usage.md#thinking-modes
       "DEFAULT_THINKING_MODE_THINKDEEP": "high",
       "GEMINI_API_KEY": "YOUR_GEMINI_API_KEY",
-      # see https://github.com/BeehiveInnovations/zen-mcp-server/blob/main/docs/configuration.md#model-usage-restrictions
+      # see https://github.com/BeehiveInnovations/pal-mcp-server/blob/main/docs/configuration.md#model-usage-restrictions
       "GOOGLE_ALLOWED_MODELS": "gemini-3-pro-preview,gemini-2.5-pro,gemini-2.5-flash"
     }
   }
@@ -165,7 +165,7 @@ Here's an example `mcpServers` object that you can use as a reference:
     │ ❯ 1. context7                  ✔ connected · Enter to view details │
     │   2. serena                    ✔ connected · Enter to view details │
     │   3. task-master-ai            ✔ connected · Enter to view details │
-    │   4. zen                       ✔ connected · Enter to view details │
+    │   4. pal                       ✔ connected · Enter to view details │
     ╰────────────────────────────────────────────────────────────────────╯
     ```
 

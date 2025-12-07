@@ -99,7 +99,7 @@ Non-Functional Requirements
 
 4. Compatibility
    - Works with existing Claude Code skill invocation system
-   - Compatible with current MCP server setup (Serena, Task Master, Context7, Zen)
+   - Compatible with current MCP server setup (Serena, Task Master, Context7, Pal)
    - Doesn't break existing process skill functionality
    - Backward compatible for projects created before this feature
 

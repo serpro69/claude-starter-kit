@@ -41,7 +41,7 @@ The following API keys must be configured in `~/.claude.json` under the `mcpServ
 
 ### Essential Keys
 - **Context7 API Key** (`CONTEXT7_API_KEY`): Up-to-date library documentation
-- **Gemini API Key** (`GEMINI_API_KEY`): Zen MCP server (or alternative provider - see Zen docs)
+- **Gemini API Key** (`GEMINI_API_KEY`): Pal MCP server (or alternative provider - see pal docs)
 
 ### Task Master Keys (at least one required)
 - `ANTHROPIC_API_KEY` (recommended for Claude models)
@@ -57,7 +57,7 @@ All MCP servers must be configured in `~/.claude.json` (user-level) to prevent c
 **context7**: Library documentation lookup and code examples
 **serena**: Semantic code analysis via LSP with symbol-based navigation
 **task-master-ai**: AI-powered task management and workflow orchestration
-**zen**: Multi-model AI integration for chat, debugging, code review, planning
+**pal**: Multi-model AI integration for chat, debugging, code review, planning
 
 ### Verification
 
@@ -83,7 +83,7 @@ The `.claude/settings.local.json` file controls tool access:
 - All Context7 tools for documentation lookup
 - Serena read-only tools: `get_symbols_overview`, `find_file`, `find_symbol`, `list_dir`, `search_for_pattern`
 - Task Master workflow tools: task operations, complexity analysis, PRD parsing
-- Zen code review: `mcp__zen__codereview`
+- Pal code review: `mcp__pal__codereview`
 - `WebSearch` for documentation lookup
 
 ### Denied Tools
@@ -193,7 +193,7 @@ The repository includes a GitHub workflow that customizes the template:
 - **Task Master Docs**: .taskmaster/CLAUDE.md (400+ lines of integration guidance)
 - **Command Guide**: .claude/TM_COMMANDS_GUIDE.md (complete slash command reference)
 - **Serena Language Support**: https://github.com/oraios/serena#programming-language-support
-- **Zen Getting Started**: https://github.com/BeehiveInnovations/zen-mcp-server/blob/main/docs/getting-started.md
+- **Pal Getting Started**: https://github.com/BeehiveInnovations/pal-mcp-server/blob/main/docs/getting-started.md
 - **Context7**: https://context7.com/
 
 ## Task Master AI Instructions
