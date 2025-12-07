@@ -1,5 +1,7 @@
 # claude-starter-kit
 
+[![Mentioned in Awesome Claude Code](https://awesome.re/mentioned-badge-flat.svg)](https://github.com/hesreallyhim/awesome-claude-code)
+
 Starter template repo for all your Claude Code needs
 
 ## About
