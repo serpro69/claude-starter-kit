@@ -6,7 +6,12 @@ Starter template repo for all your Claude Code needs
 
 ## About
 
-This is a starter template repository designed to provide a complete development environment for Claude-Code with pre-configured MCP servers and tools for AI-powered development workflows. The repository is intentionally minimal, containing only configuration templates for three primary systems: Claude Code, Serena, and Task Master.
+This is a starter template repository designed to provide a complete development environment for Claude-Code with pre-configured MCP servers and tools for AI-powered, collaborative, development workflows. The defaults are intentionally minimal, containing only configuration templates for three primary systems: Claude Code, Serena, and Task Master. Users can opt-in to additional claude-code features like [skills](https://code.claude.com/docs/en/skills), [plugins](https://code.claude.com/docs/en/plugins), [hooks](https://code.claude.com/docs/en/hooks-guide), [sub-agents](https://code.claude.com/docs/en/sub-agents), and so on.
+
+> [!NOTE]
+> This configuration also focuses on collaborative development workflows where multiple developers are working on the same code-base, which is one of the reasons why most of claude- and mcp-related settings are local-scoped (i.e. most claude settings will be in `.claude/settings.local.json` so they can be shared with the entire dev team, and not in user-scoped `~/claude/settings.json`, which are harder to share with others.)
+>
+> For this same reason, most of the claude/mcp configuration files are not git-ignored, but instead committed to the repo.
 
 ## Features
 
