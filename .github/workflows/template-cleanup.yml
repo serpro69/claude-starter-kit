@@ -23,7 +23,7 @@ on:
           - haiku
           # NOTE: does not currently support 1m context.
           # Model name from: https://platform.claude.com/docs/en/about-claude/models/overview#model-names
-          - claude-opus-4.5
+          - claude-opus-4-5
       LANGUAGE:
         description: |
           Primary programming language(s) of this project.
