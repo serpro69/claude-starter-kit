@@ -100,11 +100,11 @@ Here's an example `mcpServers` object that you can use as a reference:
     ],
     "headers": {}
   },
-  "zen": {
+  "pal": {
     "command": "sh",
     "args": [
       "-c",
-      "uvx --from git+https://github.com/BeehiveInnovations/zen-mcp-server.git zen-mcp-server"
+      "$HOME/.local/bin/uvx --from git+https://github.com/BeehiveInnovations/pal-mcp-server.git pal-mcp-server"
     ],
     "env": {
       "PATH": "/usr/local/bin:/usr/bin:/bin:~/.local/bin",
