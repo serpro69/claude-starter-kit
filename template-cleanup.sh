@@ -73,7 +73,10 @@ Options:
   --model <model>           Claude Code model alias (default: default)
                             Options: default, sonnet, sonnet[1m], opus, opusplan, haiku, claude-opus-4-5
   --language <lang>         Primary programming language for Serena semantic analysis
-                            (e.g., "python", "typescript", "java")
+                            Primary: python, typescript, java, go, rust, csharp, cpp, ruby
+                            Additional: bash, elixir, kotlin, scala, haskell, lua, php, swift, zig...
+                            Note: For C use 'cpp', for JavaScript use 'typescript'
+                            Docs: https://oraios.github.io/serena/01-about/020_programming-languages.html
   --serena-prompt <prompt>  Initial prompt/context for Serena semantic analysis
   --tm-system-prompt <p>    Custom system prompt to override Claude Code default behavior
   --tm-append-prompt <p>    Additional content to append to Claude Code system prompt
@@ -180,9 +183,26 @@ run_interactive() {
 
     echo ""
 
-    # Language
-    echo -e "${YELLOW}Tip:${NC} Common languages: python, typescript, javascript, java, go, rust, csharp"
-    prompt_input "Primary programming language for Serena (leave empty to skip)" "" LANGUAGE
+    # Language selection
+    # Sources:
+    #   https://oraios.github.io/serena/01-about/020_programming-languages.html
+    #   https://github.com/oraios/serena/blob/main/.serena/project.yml
+    echo -e "${YELLOW}Serena Language Support:${NC}"
+    echo -e "  Primary languages: python, typescript, java, go, rust, csharp, cpp, ruby"
+    echo -e "  40+ additional: bash, elixir, kotlin, scala, haskell, lua, php, swift, zig..."
+    echo -e "  ${CYAN}Notes:${NC}"
+    echo -e "    - For C, use 'cpp'. For JavaScript, use 'typescript'"
+    echo -e "    - csharp requires a .sln file in the project"
+    echo -e "    - Multi-language support is on the Serena roadmap"
+    echo -e "  ${CYAN}Docs:${NC} https://oraios.github.io/serena/01-about/020_programming-languages.html"
+    echo ""
+    prompt_select "Select primary language for Serena" "" LANGUAGE \
+        "python" "typescript" "java" "go" "rust" "csharp" "cpp" "ruby"
+
+    # Allow custom language if user selected nothing or wants something else
+    if [[ -z "$LANGUAGE" ]]; then
+        prompt_input "Enter language identifier (or leave empty to skip)" "" LANGUAGE
+    fi
 
     echo ""
 
