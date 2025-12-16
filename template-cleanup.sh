@@ -4,7 +4,10 @@
 # Converts the claude-starter-kit template into a project-specific setup.
 # Based on .github/workflows/template-cleanup.yml
 #
-# Usage: ./template-cleanup.sh [options]
+# Usage:
+#   ./template-cleanup.sh                    # Interactive mode (recommended)
+#   ./template-cleanup.sh [options]          # Non-interactive with CLI options
+#   ./template-cleanup.sh -y [options]       # Skip confirmation prompt
 #
 # Options:
 #   --model <model>           Claude Code model (default: default)
@@ -14,7 +17,7 @@
 #   --tm-append-prompt <p>    Additional content to append to Task Master prompt
 #   --tm-permission <mode>    Task Master permission mode (default: default)
 #   --no-commit               Skip git commit and push
-#   --dry-run                 Show what would be done without making changes
+#   -y, --yes                 Skip confirmation prompt (for scripted use)
 #   -h, --help                Show this help message
 
 set -euo pipefail
@@ -27,12 +30,17 @@ TM_CUSTOM_SYSTEM_PROMPT=""
 TM_APPEND_SYSTEM_PROMPT=""
 TM_PERMISSION_MODE="default"
 NO_COMMIT=false
-DRY_RUN=false
+SKIP_CONFIRM=false
+INTERACTIVE_MODE=false
+HAS_CLI_ARGS=false
 
 # Color output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
 NC='\033[0m' # No Color
 
 log_info() {
@@ -47,12 +55,19 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+log_step() {
+    echo -e "${CYAN}>>>${NC} $1"
+}
+
 show_help() {
     cat << 'EOF'
 Template Cleanup Script
 Converts the claude-starter-kit template into a project-specific setup.
 
-Usage: ./template-cleanup.sh [options]
+Usage:
+  ./template-cleanup.sh                    # Interactive mode (recommended)
+  ./template-cleanup.sh [options]          # Non-interactive with CLI options
+  ./template-cleanup.sh -y [options]       # Skip confirmation prompt
 
 Options:
   --model <model>           Claude Code model alias (default: default)
@@ -65,23 +80,262 @@ Options:
   --tm-permission <mode>    Task Master permission mode (default: default)
                             Options: default, acceptEdits, plan, bypassPermissions
   --no-commit               Skip git commit and push
-  --dry-run                 Show what would be done without making changes
+  -y, --yes                 Skip confirmation prompt (for scripted use)
   -h, --help                Show this help message
 
 Examples:
+  # Interactive setup (recommended for first-time users)
+  ./template-cleanup.sh
+
   # Basic setup with TypeScript
-  ./template-cleanup.sh --language typescript
+  ./template-cleanup.sh --language typescript -y
 
   # Full setup with custom prompts
-  ./template-cleanup.sh --model sonnet --language python --tm-permission acceptEdits
-
-  # Preview changes without applying
-  ./template-cleanup.sh --language rust --dry-run
+  ./template-cleanup.sh --model sonnet --language python --tm-permission acceptEdits -y
 EOF
+}
+
+# Prompt for input with default value
+prompt_input() {
+    local prompt="$1"
+    local default="$2"
+    local var_name="$3"
+    local result
+
+    if [[ -n "$default" ]]; then
+        echo -ne "${BLUE}?${NC} ${prompt} ${CYAN}[$default]${NC}: "
+    else
+        echo -ne "${BLUE}?${NC} ${prompt}: "
+    fi
+    read -r result
+
+    if [[ -z "$result" ]]; then
+        result="$default"
+    fi
+
+    eval "$var_name=\"$result\""
+}
+
+# Prompt for selection from options
+prompt_select() {
+    local prompt="$1"
+    local default="$2"
+    local var_name="$3"
+    shift 3
+    local options=("$@")
+    local result
+
+    echo -e "${BLUE}?${NC} ${prompt}"
+    local i=1
+    for opt in "${options[@]}"; do
+        if [[ "$opt" == "$default" ]]; then
+            echo -e "  ${CYAN}$i)${NC} $opt ${GREEN}(default)${NC}"
+        else
+            echo -e "  ${CYAN}$i)${NC} $opt"
+        fi
+        ((i++))
+    done
+    echo -ne "  Enter choice [1-${#options[@]}] or value: "
+    read -r result
+
+    if [[ -z "$result" ]]; then
+        result="$default"
+    elif [[ "$result" =~ ^[0-9]+$ ]] && (( result >= 1 && result <= ${#options[@]} )); then
+        result="${options[$((result-1))]}"
+    fi
+
+    eval "$var_name=\"$result\""
+}
+
+# Prompt for yes/no
+prompt_confirm() {
+    local prompt="$1"
+    local default="${2:-y}"
+    local result
+
+    if [[ "$default" == "y" ]]; then
+        echo -ne "${BLUE}?${NC} ${prompt} ${CYAN}[Y/n]${NC}: "
+    else
+        echo -ne "${BLUE}?${NC} ${prompt} ${CYAN}[y/N]${NC}: "
+    fi
+    read -r result
+
+    if [[ -z "$result" ]]; then
+        result="$default"
+    fi
+
+    [[ "${result,,}" == "y" || "${result,,}" == "yes" ]]
+}
+
+# Interactive configuration
+run_interactive() {
+    echo ""
+    echo -e "${BOLD}Claude Starter Kit - Template Cleanup${NC}"
+    echo -e "This will configure your project from the template."
+    echo ""
+
+    # Model selection
+    prompt_select "Select Claude Code model" "default" CC_MODEL \
+        "default" "sonnet" "sonnet[1m]" "opus" "opusplan" "haiku" "claude-opus-4-5"
+
+    echo ""
+
+    # Language
+    echo -e "${YELLOW}Tip:${NC} Common languages: python, typescript, javascript, java, go, rust, csharp"
+    prompt_input "Primary programming language for Serena (leave empty to skip)" "" LANGUAGE
+
+    echo ""
+
+    # Advanced options
+    if prompt_confirm "Configure advanced options?" "n"; then
+        echo ""
+        prompt_input "Serena initial prompt/context" "" SERENA_INITIAL_PROMPT
+        prompt_input "Task Master custom system prompt" "" TM_CUSTOM_SYSTEM_PROMPT
+        prompt_input "Task Master append system prompt" "" TM_APPEND_SYSTEM_PROMPT
+        prompt_select "Task Master permission mode" "default" TM_PERMISSION_MODE \
+            "default" "acceptEdits" "plan" "bypassPermissions"
+    fi
+
+    echo ""
+
+    # Commit option
+    if ! prompt_confirm "Commit and push changes after cleanup?" "y"; then
+        NO_COMMIT=true
+    fi
+
+    echo ""
+}
+
+# Show configuration summary
+show_config_summary() {
+    local name="$1"
+    local actor="$2"
+    local repository="$3"
+    local safe_name="$4"
+    local safe_actor="$5"
+    local group="$6"
+
+    echo ""
+    echo -e "${BOLD}═══════════════════════════════════════════════════════════════${NC}"
+    echo -e "${BOLD}                    Configuration Summary                       ${NC}"
+    echo -e "${BOLD}═══════════════════════════════════════════════════════════════${NC}"
+    echo ""
+    echo -e "${CYAN}Repository Info:${NC}"
+    echo "  Name:        $name"
+    echo "  Actor:       $actor"
+    echo "  Repository:  $repository"
+    echo "  Safe Name:   $safe_name"
+    echo "  Safe Actor:  $safe_actor"
+    echo "  Group:       $group"
+    echo ""
+    echo -e "${CYAN}Configuration:${NC}"
+    echo "  Claude Model:       $CC_MODEL"
+    echo "  Language:           ${LANGUAGE:-<not set>}"
+    echo "  TM Permission Mode: $TM_PERMISSION_MODE"
+    if [[ -n "$SERENA_INITIAL_PROMPT" ]]; then
+        echo "  Serena Prompt:      $SERENA_INITIAL_PROMPT"
+    fi
+    if [[ -n "$TM_CUSTOM_SYSTEM_PROMPT" ]]; then
+        echo "  TM System Prompt:   $TM_CUSTOM_SYSTEM_PROMPT"
+    fi
+    if [[ -n "$TM_APPEND_SYSTEM_PROMPT" ]]; then
+        echo "  TM Append Prompt:   $TM_APPEND_SYSTEM_PROMPT"
+    fi
+    echo ""
+    echo -e "${CYAN}Options:${NC}"
+    echo "  Commit changes:     $(if $NO_COMMIT; then echo "No"; else echo "Yes"; fi)"
+    echo ""
+    echo -e "${BOLD}═══════════════════════════════════════════════════════════════${NC}"
+    echo ""
+    echo -e "${YELLOW}Actions that will be performed:${NC}"
+    echo "  1. Replace placeholders in .github/templates/"
+    echo "  2. Remove existing .claude/, .serena/, .taskmaster/ directories"
+    echo "  3. Deploy configured templates to project root"
+    echo "  4. Remove all template-specific files (README, docs, workflows, etc.)"
+    echo "  5. Generate minimal README.md"
+    if ! $NO_COMMIT; then
+        echo "  6. Commit and push changes"
+    fi
+    echo ""
+}
+
+# Execute the cleanup
+execute_cleanup() {
+    local name="$1"
+    local actor="$2"
+    local repository="$3"
+    local safe_name="$4"
+    local safe_actor="$5"
+    local group="$6"
+
+    log_step "Replacing placeholders in template files..."
+    # Escape special characters for sed replacement
+    local repository_escaped
+    repository_escaped=$(echo "$repository" | sed 's/\//\\\//g')
+
+    find .github/templates -type f -exec sed -i "s/%ACTOR%/$actor/g" {} +
+    find .github/templates -type f -exec sed -i "s/%NAME%/$name/g" {} +
+    find .github/templates -type f -exec sed -i "s/%REPOSITORY%/$repository_escaped/g" {} +
+    find .github/templates -type f -exec sed -i "s/%GROUP%/$group/g" {} +
+    find .github/templates -type f -exec sed -i "s/%SAFE_NAME%/$safe_name/g" {} +
+    find .github/templates -type f -exec sed -i "s/%SAFE_ACTOR%/$safe_actor/g" {} +
+    find .github/templates -type f -exec sed -i "s/%CC_MODEL%/$CC_MODEL/g" {} +
+    find .github/templates -type f -exec sed -i "s/%LANGUAGE%/$LANGUAGE/g" {} +
+    find .github/templates -type f -exec sed -i "s/%SERENA_INITIAL_PROMPT%/$SERENA_INITIAL_PROMPT/g" {} +
+    find .github/templates -type f -exec sed -i "s/%TM_CUSTOM_SYSTEM_PROMPT%/$TM_CUSTOM_SYSTEM_PROMPT/g" {} +
+    find .github/templates -type f -exec sed -i "s/%TM_APPEND_SYSTEM_PROMPT%/$TM_APPEND_SYSTEM_PROMPT/g" {} +
+    find .github/templates -type f -exec sed -i "s/%TM_PERMISSION_MODE%/$TM_PERMISSION_MODE/g" {} +
+
+    log_step "Removing existing configuration directories..."
+    rm -rf .claude .serena .taskmaster
+
+    log_step "Deploying templates to destination locations..."
+    cp -r .github/templates/claude ./.claude
+    cp -r .github/templates/serena ./.serena
+    cp -r .github/templates/taskmaster ./.taskmaster
+    if [[ -f .github/templates/bootstrap.sh ]]; then
+        cp .github/templates/bootstrap.sh .
+    fi
+
+    log_step "Cleaning up template-specific files..."
+    find . -mindepth 1 -maxdepth 1 \
+        ! -name '.git' \
+        ! -name '.gitignore' \
+        ! -name '.claude' \
+        ! -name '.serena' \
+        ! -name '.taskmaster' \
+        ! -name 'bootstrap.sh' \
+        -exec rm -rf {} +
+
+    log_step "Generating minimal README..."
+    echo "# $name" > README.md
+
+    if $NO_COMMIT; then
+        log_info "Skipping git commit (--no-commit specified)"
+    else
+        log_step "Committing changes..."
+        git add .
+        git commit -m "Template cleanup"
+
+        log_step "Pushing changes..."
+        local branch
+        branch=$(git branch --show-current)
+        git push origin "$branch"
+    fi
+
+    echo ""
+    log_info "Template cleanup complete!"
+    echo ""
+    echo -e "${GREEN}Next steps:${NC}"
+    echo "  1. Run 'claude' to start Claude Code"
+    echo "  2. Run '/mcp' to verify MCP servers are connected"
+    echo "  3. Run '/init' to initialize project-specific CLAUDE.md"
+    echo ""
 }
 
 # Parse command-line arguments
 while [[ $# -gt 0 ]]; do
+    HAS_CLI_ARGS=true
     case $1 in
         --model)
             CC_MODEL="$2"
@@ -111,8 +365,8 @@ while [[ $# -gt 0 ]]; do
             NO_COMMIT=true
             shift
             ;;
-        --dry-run)
-            DRY_RUN=true
+        -y|--yes)
+            SKIP_CONFIRM=true
             shift
             ;;
         -h|--help)
@@ -126,6 +380,11 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# If no CLI arguments provided, run in interactive mode
+if ! $HAS_CLI_ARGS; then
+    INTERACTIVE_MODE=true
+fi
 
 # Validate we're in a git repository
 if ! git rev-parse --is-inside-work-tree &>/dev/null; then
@@ -174,102 +433,22 @@ SAFE_NAME=$(echo "$NAME" | sed 's/[^a-zA-Z0-9]//g' | tr '[:upper:]' '[:lower:]')
 SAFE_ACTOR=$(echo "$ACTOR" | sed 's/[^a-zA-Z0-9]//g' | tr '[:upper:]' '[:lower:]')
 GROUP="com.github.$SAFE_ACTOR.$SAFE_NAME"
 
-log_info "Configuration:"
-echo "  Repository Name: $NAME"
-echo "  Actor: $ACTOR"
-echo "  Repository: $REPOSITORY"
-echo "  Safe Name: $SAFE_NAME"
-echo "  Safe Actor: $SAFE_ACTOR"
-echo "  Group: $GROUP"
-echo "  Claude Model: $CC_MODEL"
-echo "  Language: ${LANGUAGE:-<not set>}"
-echo "  TM Permission Mode: $TM_PERMISSION_MODE"
-echo ""
-
-if $DRY_RUN; then
-    log_warn "DRY RUN - No changes will be made"
-    echo ""
+# Run interactive mode if no CLI args
+if $INTERACTIVE_MODE; then
+    run_interactive
 fi
 
-# Function to execute or simulate commands
-run_cmd() {
-    if $DRY_RUN; then
-        echo "  [DRY-RUN] $*"
-    else
-        "$@"
+# Show configuration summary
+show_config_summary "$NAME" "$ACTOR" "$REPOSITORY" "$SAFE_NAME" "$SAFE_ACTOR" "$GROUP"
+
+# Confirm before proceeding
+if ! $SKIP_CONFIRM; then
+    if ! prompt_confirm "Proceed with template cleanup?" "y"; then
+        log_warn "Aborted by user"
+        exit 0
     fi
-}
-
-log_info "Replacing placeholders in template files..."
-if ! $DRY_RUN; then
-    # Escape special characters for sed replacement
-    REPOSITORY_ESCAPED=$(echo "$REPOSITORY" | sed 's/\//\\\//g')
-
-    find .github/templates -type f -exec sed -i "s/%ACTOR%/$ACTOR/g" {} +
-    find .github/templates -type f -exec sed -i "s/%NAME%/$NAME/g" {} +
-    find .github/templates -type f -exec sed -i "s/%REPOSITORY%/$REPOSITORY_ESCAPED/g" {} +
-    find .github/templates -type f -exec sed -i "s/%GROUP%/$GROUP/g" {} +
-    find .github/templates -type f -exec sed -i "s/%SAFE_NAME%/$SAFE_NAME/g" {} +
-    find .github/templates -type f -exec sed -i "s/%SAFE_ACTOR%/$SAFE_ACTOR/g" {} +
-    find .github/templates -type f -exec sed -i "s/%CC_MODEL%/$CC_MODEL/g" {} +
-    find .github/templates -type f -exec sed -i "s/%LANGUAGE%/$LANGUAGE/g" {} +
-    find .github/templates -type f -exec sed -i "s/%SERENA_INITIAL_PROMPT%/$SERENA_INITIAL_PROMPT/g" {} +
-    find .github/templates -type f -exec sed -i "s/%TM_CUSTOM_SYSTEM_PROMPT%/$TM_CUSTOM_SYSTEM_PROMPT/g" {} +
-    find .github/templates -type f -exec sed -i "s/%TM_APPEND_SYSTEM_PROMPT%/$TM_APPEND_SYSTEM_PROMPT/g" {} +
-    find .github/templates -type f -exec sed -i "s/%TM_PERMISSION_MODE%/$TM_PERMISSION_MODE/g" {} +
-else
-    echo "  [DRY-RUN] Would replace placeholders: %ACTOR%, %NAME%, %REPOSITORY%, etc."
-fi
-
-log_info "Removing existing configuration directories..."
-run_cmd rm -rf .claude .serena .taskmaster
-
-log_info "Deploying templates to destination locations..."
-run_cmd cp -r .github/templates/claude ./.claude
-run_cmd cp -r .github/templates/serena ./.serena
-run_cmd cp -r .github/templates/taskmaster ./.taskmaster
-if [[ -f .github/templates/bootstrap.sh ]]; then
-    run_cmd cp .github/templates/bootstrap.sh .
-fi
-
-log_info "Cleaning up template-specific files..."
-if ! $DRY_RUN; then
-    # Complete cleanup - remove everything except preserved files/directories
-    find . -mindepth 1 -maxdepth 1 \
-        ! -name '.git' \
-        ! -name '.gitignore' \
-        ! -name '.claude' \
-        ! -name '.serena' \
-        ! -name '.taskmaster' \
-        ! -name 'bootstrap.sh' \
-        -exec rm -rf {} +
-else
-    echo "  [DRY-RUN] Would remove all files except: .git, .gitignore, .claude, .serena, .taskmaster, bootstrap.sh"
-fi
-
-log_info "Generating minimal README..."
-if ! $DRY_RUN; then
-    echo "# $NAME" > README.md
-else
-    echo "  [DRY-RUN] Would create README.md with: # $NAME"
-fi
-
-if $NO_COMMIT; then
-    log_info "Skipping git commit (--no-commit specified)"
-elif $DRY_RUN; then
-    log_info "[DRY-RUN] Would commit and push changes"
-else
-    log_info "Committing changes..."
-    git add .
-    git commit -m "Template cleanup"
-
-    log_info "Pushing changes..."
-    BRANCH=$(git branch --show-current)
-    git push origin "$BRANCH"
-fi
-
-log_info "Template cleanup complete!"
-if $DRY_RUN; then
     echo ""
-    log_warn "This was a dry run. Run without --dry-run to apply changes."
 fi
+
+# Execute the cleanup
+execute_cleanup "$NAME" "$ACTOR" "$REPOSITORY" "$SAFE_NAME" "$SAFE_ACTOR" "$GROUP"
