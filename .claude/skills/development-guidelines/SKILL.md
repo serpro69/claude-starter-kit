@@ -5,6 +5,17 @@ description: Use this task to ensure you follow development best practices durin
 
 # Development Guidelines
 
+## Working with code
+
+**ALWAYS**:
+
+- Ensure minimal and atomic code changes: any code change should only be related to current task at hand
+
+**DO NOT**:
+
+- Never rename things just for the sake of renaming
+- Never optimize the code unless you're working specifically on code optimization
+
 ## Working with Dependencies
 
 1. Always try to use latest versions for dependencies.
