@@ -1,9 +1,9 @@
 ---
-name: development-process
-description: 
+name: development-guidelines
+description: Use this task to ensure you follow development best practices during development and implementation.
 ---
 
-# Development Process
+# Development Guidelines
 
 ## Working with Dependencies
 
