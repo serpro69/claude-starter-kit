@@ -34,6 +34,7 @@
     ],
     "deny": [
       "Bash(task-master:*)",
+      "Read(./examples)",
       "Read(./**/consensus*.md)",
       "Read(./**/review*.md)",
       "Read(./**/.env)",
@@ -76,5 +77,5 @@
       }
     ]
   },
-  "model": "%CC_MODEL%"
+  "model": "claude-opus-4-5"
 }
