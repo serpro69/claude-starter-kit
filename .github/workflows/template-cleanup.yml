@@ -30,22 +30,22 @@ on:
           Used for Serena semantic analysis (e.g., "python", "typescript", "java").
           See Serena docs for supported languages.
         required: false
-        default: ''
+        default: ""
         type: string
       SERENA_INITIAL_PROMPT:
         description: Initial prompt/context for Serena semantic analysis.
         required: false
-        default: ''
+        default: ""
         type: string
       TM_CUSTOM_SYSTEM_PROMPT:
         description: Custom system prompt to override Claude Code default behavior in Task Master.
         required: false
-        default: ''
+        default: ""
         type: string
       TM_APPEND_SYSTEM_PROMPT:
         description: Additional content to append to Claude Code system prompt in Task Master.
         required: false
-        default: ''
+        default: ""
         type: string
       TM_PERMISSION_MODE:
         description: Task Master permission mode for file system operations.
@@ -79,34 +79,50 @@ jobs:
 
           # Prepare repository-specific variables
           NAME="${GITHUB_REPOSITORY##*/}"
-          ACTOR=$(echo $GITHUB_ACTOR | tr '[:upper:]' '[:lower:]')
-          REPOSITORY="${GITHUB_REPOSITORY}"
-          SAFE_NAME=$(echo $NAME | sed 's/[^a-zA-Z0-9]//g' | tr '[:upper:]' '[:lower:]')
-          SAFE_ACTOR=$(echo $ACTOR | sed 's/[^a-zA-Z0-9]//g' | tr '[:upper:]' '[:lower:]')
-          GROUP="com.github.$SAFE_ACTOR.$SAFE_NAME"
 
-          # Claude Code settings
-          CC_MODEL="${{ github.event.inputs.CC_MODEL }}"
-          # Get MCP configuration variables from workflow inputs
+          # Get workflow input variables
           LANGUAGE="${{ github.event.inputs.LANGUAGE }}"
+          CC_MODEL="${{ github.event.inputs.CC_MODEL }}"
           SERENA_INITIAL_PROMPT="${{ github.event.inputs.SERENA_INITIAL_PROMPT }}"
           TM_CUSTOM_SYSTEM_PROMPT="${{ github.event.inputs.TM_CUSTOM_SYSTEM_PROMPT }}"
           TM_APPEND_SYSTEM_PROMPT="${{ github.event.inputs.TM_APPEND_SYSTEM_PROMPT }}"
           TM_PERMISSION_MODE="${{ github.event.inputs.TM_PERMISSION_MODE }}"
 
-          # Replace placeholders in the template files
-          find .github/templates -type f -exec sed -i "s/%ACTOR%/$ACTOR/g" {} +
-          find .github/templates -type f -exec sed -i "s/%NAME%/$NAME/g" {} +
-          find .github/templates -type f -exec sed -i "s/%REPOSITORY%/${GITHUB_REPOSITORY/\//\\/}/g" {} +
-          find .github/templates -type f -exec sed -i "s/%GROUP%/$GROUP/g" {} +
-          find .github/templates -type f -exec sed -i "s/%SAFE_NAME%/$SAFE_NAME/g" {} +
-          find .github/templates -type f -exec sed -i "s/%SAFE_ACTOR%/$SAFE_ACTOR/g" {} +
-          find .github/templates -type f -exec sed -i "s/%CC_MODEL%/$CC_MODEL/g" {} +
-          find .github/templates -type f -exec sed -i "s/%LANGUAGE%/$LANGUAGE/g" {} +
-          find .github/templates -type f -exec sed -i "s/%SERENA_INITIAL_PROMPT%/$SERENA_INITIAL_PROMPT/g" {} +
-          find .github/templates -type f -exec sed -i "s/%TM_CUSTOM_SYSTEM_PROMPT%/$TM_CUSTOM_SYSTEM_PROMPT/g" {} +
-          find .github/templates -type f -exec sed -i "s/%TM_APPEND_SYSTEM_PROMPT%/$TM_APPEND_SYSTEM_PROMPT/g" {} +
-          find .github/templates -type f -exec sed -i "s/%TM_PERMISSION_MODE%/$TM_PERMISSION_MODE/g" {} +
+          # Substitute default values with user-provided values
+          # Note: Templates now use actual working values instead of placeholders
+
+          # Claude Code Settings
+          cc_settings_file=".github/templates/claude/settings.json"
+          # Claude Code model - always substitute (user selects from dropdown)
+          sed -i "s/\"model\": \".*\"/\"model\": \"$CC_MODEL\"/g" "$cc_settings_file"
+
+          # Serena MCP Settings
+          serena_settings_file=".github/templates/serena/project.yml"
+          # Project name - always substitute with repo name
+          sed -i "s/project_name: \".*\"/project_name: \"$NAME\"/g" "$serena_settings_file"
+          # Language - only substitute if provided
+          if [ -n "$LANGUAGE" ]; then
+            sed -i "s/language: \".*\"/language: \"$LANGUAGE\"/g" "$serena_settings_file"
+          fi
+          # Serena initial prompt - only substitute if provided
+          if [ -n "$SERENA_INITIAL_PROMPT" ]; then
+            sed -i "s/initial_prompt: \"\"/initial_prompt: \"$SERENA_INITIAL_PROMPT\"/g" "$serena_settings_file"
+          fi
+
+          # TaskMaster MCP Settings
+          tm_settings_file=".github/templates/taskmaster/config.json"
+          # Project name - always substitute with repo name
+          sed -i "s/\"projectName\": \".*\"/\"projectName\": \"$NAME\"/g" "$tm_settings_file"
+          # Task Master prompts - only substitute if provided
+          if [ -n "$TM_CUSTOM_SYSTEM_PROMPT" ]; then
+            sed -i "s/\"customSystemPrompt\": \"\"/\"customSystemPrompt\": \"$TM_CUSTOM_SYSTEM_PROMPT\"/g" "$tm_settings_file"
+          fi
+          if [ -n "$TM_APPEND_SYSTEM_PROMPT" ]; then
+            sed -i "s/\"appendSystemPrompt\": \"\"/\"appendSystemPrompt\": \"$TM_APPEND_SYSTEM_PROMPT\"/g" "$tm_settings_file"
+          fi
+          if [ -n "$TM_PERMISSION_MODE" ]; then
+            sed -i "s/\"permissionMode\": \"\"/\"permissionMode\": \"$TM_PERMISSION_MODE\"/g" "$tm_settings_file"
+          fi
 
           rm -rf .claude .serena .taskmaster
 
