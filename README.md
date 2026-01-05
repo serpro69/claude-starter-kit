@@ -62,7 +62,7 @@ You will need the following on your workstation:
 
 ### Claude `claude.json` mcp settings
 
-You need to have `mcpServers` present and configured in your `~/.claude.json`. 
+You need to have `mcpServers` present and configured in your `~/.claude.json`.
 
 > [!NOTE]
 > The reason we put them in the user's `claude.json` configuration, instead of repo local settings, is to prevent committing API keys, which some MCP servers might require.
@@ -127,7 +127,7 @@ Here's an example `mcpServers` object that you can use as a reference:
 
 ## Quick Start
 
-1. [Create a new project based on this template repository](https://github.com/new?template_name=claude-starter-kit&template_owner=serpro69) using the Use this template button. 
+1. [Create a new project based on this template repository](https://github.com/new?template_name=claude-starter-kit&template_owner=serpro69) using the Use this template button.
 
 2. A scaffold repo will appear in your GitHub account.
 
@@ -155,49 +155,86 @@ Here's an example `mcpServers` object that you can use as a reference:
 
 4. Clone your new repo and cd into it
 
-    Run `claude /mcp`, you should see the mcp servers configured and active:
+   Run `claude /mcp`, you should see the mcp servers configured and active:
 
-    ```
-    > /mcp
-    ╭────────────────────────────────────────────────────────────────────╮
-    │ Manage MCP servers                                                 │
-    │                                                                    │
-    │ ❯ 1. context7                  ✔ connected · Enter to view details │
-    │   2. serena                    ✔ connected · Enter to view details │
-    │   3. task-master-ai            ✔ connected · Enter to view details │
-    │   4. pal                       ✔ connected · Enter to view details │
-    ╰────────────────────────────────────────────────────────────────────╯
-    ```
+   ```
+   > /mcp
+   ╭────────────────────────────────────────────────────────────────────╮
+   │ Manage MCP servers                                                 │
+   │                                                                    │
+   │ ❯ 1. context7                  ✔ connected · Enter to view details │
+   │   2. serena                    ✔ connected · Enter to view details │
+   │   3. task-master-ai            ✔ connected · Enter to view details │
+   │   4. pal                       ✔ connected · Enter to view details │
+   ╰────────────────────────────────────────────────────────────────────╯
+   ```
 
-    Run `claude "list your skills"`, you should see the skills from this repo present:
+   Run `claude "list your skills"`, you should see the skills from this repo present:
 
-    ```
-    > list your skills
+   ```
+   > list your skills
 
-    ● I have access to the following skills:
+   ● I have access to the following skills:
 
-      Available Skills
+     Available Skills
 
-      analysis-process
-      Turn the idea for a feature into a fully-formed PRD/design/specification and implementation-plan. Use in pre-implementation (idea-to-design) stages to make sure you
-      understand the requirements and have a correct implementation plan before writing actual code.
+     analysis-process
+     Turn the idea for a feature into a fully-formed PRD/design/specification and implementation-plan. Use in pre-implementation (idea-to-design) stages to make sure you
+     understand the requirements and have a correct implementation plan before writing actual code.
 
-      documentation-process
-      After implementing a new feature or fixing a bug, make sure to document the changes. Use after finishing the implementation phase for a feature or a bug-fix.
+     documentation-process
+     After implementing a new feature or fixing a bug, make sure to document the changes. Use after finishing the implementation phase for a feature or a bug-fix.
 
-      task-master-process
-      Workflow for task-master-ai when working with task-master tasks and PRDs. Use when creating or parsing PRDs from requirements, adding/updating/expanding tasks and other task-master-ai operations.
+     task-master-process
+     Workflow for task-master-ai when working with task-master tasks and PRDs. Use when creating or parsing PRDs from requirements, adding/updating/expanding tasks and other task-master-ai operations.
 
-      testing-process
-      Guidelines describing how to test the code. Use whenever writing new or updating existing code, for example after implementing a new feature or fixing a bug.
+     testing-process
+     Guidelines describing how to test the code. Use whenever writing new or updating existing code, for example after implementing a new feature or fixing a bug.
 
-      ---
-      These skills provide specialized workflows for different stages of development. You can invoke any of them by asking me to use a specific skill (e.g., "use the analysis-process skill" or "help me document this feature").
-    ```
+     ---
+     These skills provide specialized workflows for different stages of development. You can invoke any of them by asking me to use a specific skill (e.g., "use the analysis-process skill" or "help me document this feature").
+   ```
 
 5. Update the `README.md` with a full description of your project, then run `chmod +x bootstrap.sh && ./bootstrap.sh` to finalize initialization of the repo.
 
 6. Profit
+
+### Post-Init Settings
+
+The following tweaks are not mandatory, but will more often than not improve your experience with CC
+
+#### Claude Code Configuration
+
+> [!TIP]
+> The following config parameters can be easily configured via `claude /config` command.
+>
+> The config file can also be modified manually and is usually found at `~/.claude.json`
+
+This is my current config, you may want to tweak it to your needs. **I can't recommend enough disabling auto-compact** feature and controlling the context window manually. I've seen many a time claude starting to compact conversations in the middle of a task, which produces very poor results for the remaining work it does after compacting.
+
+```
+
+> /config
+────────────────────────────────────────────────────────────
+ Configure Claude Code preferences
+
+   Auto-compact                              false
+   Show tips                                 true
+   Thinking mode                             true
+   Prompt suggestions                        true
+   Rewind code (checkpoints)                 true
+   Verbose output                            false
+   Terminal progress bar                     true
+   Default permission mode                   Default
+   Respect .gitignore in file picker         true
+   Theme                                     Dark mode
+   Notifications                             Auto
+   Output style                              default
+   Editor mode                               vim
+   Model                                     claude-opus-4-5
+   Auto-connect to IDE (external terminal)   false
+   Claude in Chrome enabled by default       false
+```
 
 ## Examples
 
