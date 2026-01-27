@@ -96,6 +96,74 @@ check_dependencies() {
 }
 
 # =============================================================================
+# Manifest Functions
+# =============================================================================
+
+# Extract a value from the manifest using a jq expression
+# Usage: get_manifest_value '.variables.PROJECT_NAME'
+get_manifest_value() {
+  local jq_expr="$1"
+  jq -r "$jq_expr" "$MANIFEST_PATH"
+}
+
+# Read and validate the manifest file exists and contains valid JSON
+read_manifest() {
+  # Check if manifest file exists
+  if [[ ! -f "$MANIFEST_PATH" ]]; then
+    log_error "Manifest file not found: $MANIFEST_PATH"
+    log_error "This repository may not have been initialized with template-cleanup.sh"
+    exit 1
+  fi
+
+  # Validate JSON syntax
+  if ! jq -e '.' "$MANIFEST_PATH" &>/dev/null; then
+    log_error "Invalid JSON in manifest file: $MANIFEST_PATH"
+    exit 1
+  fi
+
+  # Verify required top-level fields exist
+  local required_fields=("schema_version" "upstream_repo" "template_version" "variables")
+  for field in "${required_fields[@]}"; do
+    if [[ "$(get_manifest_value ".$field // empty")" == "" ]]; then
+      log_error "Missing required field in manifest: $field"
+      exit 1
+    fi
+  done
+
+  log_info "Manifest loaded: $MANIFEST_PATH"
+}
+
+# Validate manifest schema and required variables
+validate_manifest() {
+  # Check schema version
+  local schema_version
+  schema_version=$(get_manifest_value '.schema_version')
+  if [[ "$schema_version" != "1" ]]; then
+    log_error "Unsupported manifest schema version: $schema_version (expected: 1)"
+    exit 1
+  fi
+
+  # Validate upstream_repo format (owner/repo)
+  local upstream_repo
+  upstream_repo=$(get_manifest_value '.upstream_repo')
+  if [[ ! "$upstream_repo" =~ ^[^/]+/[^/]+$ ]]; then
+    log_error "Invalid upstream_repo format: $upstream_repo (expected: owner/repo)"
+    exit 1
+  fi
+
+  # Verify all required variables exist (can be empty but must be present)
+  local required_vars=("PROJECT_NAME" "LANGUAGE" "CC_MODEL" "SERENA_INITIAL_PROMPT" "TM_CUSTOM_SYSTEM_PROMPT" "TM_APPEND_SYSTEM_PROMPT" "TM_PERMISSION_MODE")
+  for var in "${required_vars[@]}"; do
+    if [[ "$(get_manifest_value ".variables.$var // \"__MISSING__\"")" == "__MISSING__" ]]; then
+      log_error "Missing required variable in manifest: $var"
+      exit 1
+    fi
+  done
+
+  log_success "Manifest validation passed"
+}
+
+# =============================================================================
 # Help / Usage
 # =============================================================================
 
@@ -217,8 +285,24 @@ main() {
     echo ""
   fi
 
-  # TODO: Implement core sync logic (Task 3.2+)
-  log_info "Script skeleton ready - core logic to be implemented"
+  # Read and validate manifest
+  read_manifest
+  validate_manifest
+
+  # Display manifest info
+  if ! $CI_MODE; then
+    local upstream_repo template_version project_name
+    upstream_repo=$(get_manifest_value '.upstream_repo')
+    template_version=$(get_manifest_value '.template_version')
+    project_name=$(get_manifest_value '.variables.PROJECT_NAME')
+    echo "  Upstream repo:  $upstream_repo"
+    echo "  Current ver:    $template_version"
+    echo "  Project name:   $project_name"
+    echo ""
+  fi
+
+  # TODO: Implement core sync logic (Task 3.3+)
+  log_info "Manifest functions ready - core sync logic to be implemented"
 }
 
 # Run main with all arguments
