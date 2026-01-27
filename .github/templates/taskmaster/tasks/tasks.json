@@ -29,10 +29,11 @@
             "dependencies": [
               1
             ],
-            "details": "Review `template-cleanup.sh` (lines 26-32 for defaults, lines 287-330 for substitutions) and document:\n\n1. **Create mapping table in design docs** (add section to `docs/wip/template-sync/design.md`):\n   | Manifest Variable | Shell Variable | Default Value | Target File(s) | Substitution Pattern |\n   |------------------|----------------|---------------|----------------|---------------------|\n   | PROJECT_NAME | NAME/REPO_NAME | (repo name) | settings.json, config.json, project.yml | Various |\n   | LANGUAGE | LANGUAGE | \"\" | project.yml | language: \"...\" |\n   | CC_MODEL | CC_MODEL | \"default\" | settings.json | \"model\": \"...\" |\n   | ... | ... | ... | ... | ... |\n\n2. **Document default value behavior:**\n   - CC_MODEL=\"default\" means line removal (not substitution)\n   - Empty strings for optional fields\n   - TM_PERMISSION_MODE=\"default\" as explicit value\n\n3. **Add inline comments to schema file** explaining each variable's purpose and constraints.\n\n4. **Cross-reference verification script idea** for future implementation to validate manifest variables against cleanup script.",
-            "status": "pending",
+            "details": "Review `template-cleanup.sh` (lines 26-32 for defaults, lines 287-330 for substitutions) and document:\n\n1. **Create mapping table in design docs** (add section to `docs/wip/template-sync/design.md`):\n   | Manifest Variable | Shell Variable | Default Value | Target File(s) | Substitution Pattern |\n   |------------------|----------------|---------------|----------------|---------------------|\n   | PROJECT_NAME | NAME/REPO_NAME | (repo name) | settings.json, config.json, project.yml | Various |\n   | LANGUAGE | LANGUAGE | \"\" | project.yml | language: \"...\" |\n   | CC_MODEL | CC_MODEL | \"default\" | settings.json | \"model\": \"...\" |\n   | ... | ... | ... | ... | ... |\n\n2. **Document default value behavior:**\n   - CC_MODEL=\"default\" means line removal (not substitution)\n   - Empty strings for optional fields\n   - TM_PERMISSION_MODE=\"default\" as explicit value\n\n3. **Add inline comments to schema file** explaining each variable's purpose and constraints.\n\n4. **Cross-reference verification script idea** for future implementation to validate manifest variables against cleanup script.\n<info added on 2026-01-27T13:09:13.694Z>\nI'll analyze the codebase to understand the current implementation and then provide the subtask update text.Based on my analysis of the codebase, I can see that the implementation has been completed successfully. The user request describes comprehensive updates to both the design documentation and schema file. Here is the new text that should be appended to the subtask's details:\n\n---\n\n**Implementation completed successfully:**\n\nAdded comprehensive variable mapping documentation in two locations:\n\n1. **design.md** (lines 90-123): Created \"Variable Name Mapping\" section with complete mapping table covering all 7 manifest variables (PROJECT_NAME, LANGUAGE, CC_MODEL, SERENA_INITIAL_PROMPT, TM_CUSTOM_SYSTEM_PROMPT, TM_APPEND_SYSTEM_PROMPT, TM_PERMISSION_MODE). Documented shell variable names, default values, target config files, substitution patterns, and special behaviors. Included source file references to template-cleanup.sh (lines 27-32 for declarations, 295-329 for substitution logic, 458/469 for PROJECT_NAME derivation).\n\n2. **template-state-schema.json** (lines 40-83): Enhanced JSON Schema with inline documentation for each variable property. Added target file references (e.g., \".serena/project.yml (language field)\"), documented CC_MODEL \"default\" line removal behavior, included bash command references for timestamp/version generation, and cross-referenced design.md for full mapping details.\n\n**Key findings:**\n\n- All 7 variables traced from template-cleanup.sh through to target config files\n- PROJECT_NAME derived from REPO_NAME (repository basename)\n- CC_MODEL=\"default\" is special-cased for line removal rather than substitution\n- Empty string defaults handled conditionally (substitution only when non-empty)\n- TM_PERMISSION_MODE=\"default\" is a literal value, not special-cased\n- Schema validation passes after documentation enhancements\n\nVariable coverage verified complete: design.md table aligns exactly with schema properties and template-cleanup.sh implementation.\n</info added on 2026-01-27T13:09:13.694Z>",
+            "status": "done",
             "testStrategy": "1. Grep template-cleanup.sh for all variable names and verify each appears in the mapping\n2. Run template-cleanup.sh with various configurations and verify resulting files match expected substitutions\n3. Peer review: manually trace each variable from manifest definition through cleanup script to target file\n4. Create a checklist of all 7 variables and verify complete coverage",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-01-27T13:09:13.770Z"
           },
           {
             "id": 3,
@@ -48,7 +49,7 @@
             "parentId": "undefined"
           }
         ],
-        "updatedAt": "2026-01-27T13:01:07.854Z"
+        "updatedAt": "2026-01-27T13:09:13.770Z"
       },
       {
         "id": "2",
@@ -468,7 +469,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-01-27T13:01:07.854Z",
+      "lastModified": "2026-01-27T13:09:13.770Z",
       "taskCount": 8,
       "completedCount": 0,
       "tags": [

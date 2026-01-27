@@ -2,83 +2,83 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/serpro69/claude-starter-kit/template-state-schema.json",
   "title": "Template State Manifest",
-  "description": "Schema for .github/template-state.json - tracks template version and substitution variables for sync operations",
+  "description": "Schema for .github/template-state.json - tracks template version and substitution variables for sync operations. See docs/wip/template-sync/design.md for variable mapping details.",
   "type": "object",
   "required": ["schema_version", "upstream_repo", "template_version", "synced_at", "variables"],
   "additionalProperties": false,
   "properties": {
     "schema_version": {
       "type": "string",
-      "description": "Manifest format version for future migrations. Currently only '1' is supported.",
+      "description": "Manifest format version for future migrations. Currently only '1' is supported. Increment when breaking changes require migration logic.",
       "pattern": "^[0-9]+$",
       "examples": ["1"]
     },
     "upstream_repo": {
       "type": "string",
-      "description": "Source template repository in owner/repo format",
+      "description": "Source template repository in owner/repo format. Used to fetch upstream templates during sync.",
       "pattern": "^[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+$",
       "examples": ["serpro69/claude-starter-kit"]
     },
     "template_version": {
       "type": "string",
-      "description": "Git tag (e.g., 'v1.0.0') or commit SHA (7+ characters) from initial setup or last sync",
+      "description": "Git tag (e.g., 'v1.0.0') or commit SHA (7+ characters) from initial setup or last sync. Determined via 'git describe --tags' or 'git rev-parse --short HEAD'.",
       "minLength": 1,
       "examples": ["v1.0.0", "abc1234def"]
     },
     "synced_at": {
       "type": "string",
-      "description": "ISO 8601 timestamp of creation or last sync",
+      "description": "ISO 8601 timestamp of manifest creation or last sync. Generated via 'date -u +%Y-%m-%dT%H:%M:%SZ'.",
       "format": "date-time",
       "examples": ["2025-01-27T10:00:00Z"]
     },
     "variables": {
       "type": "object",
-      "description": "All substitution values applied during template cleanup",
+      "description": "All substitution values applied during template cleanup. Variable names match those in template-cleanup.sh (lines 27-32).",
       "required": ["PROJECT_NAME"],
       "additionalProperties": false,
       "properties": {
         "PROJECT_NAME": {
           "type": "string",
-          "description": "Repository name, derived from repo basename during cleanup",
+          "description": "Repository name, derived from $(basename \"$REPO_ROOT\") during cleanup. Substituted into .serena/project.yml (project_name) and .taskmaster/config.json (projectName).",
           "minLength": 1,
-          "examples": ["my-project"]
+          "examples": ["my-project", "claude-starter-kit"]
         },
         "LANGUAGE": {
           "type": "string",
-          "description": "Serena language identifier for semantic code analysis",
+          "description": "Serena language identifier for semantic code analysis. Substituted into .serena/project.yml (language field). Empty string means language detection is skipped. See Serena docs for supported values.",
           "default": "",
-          "examples": ["typescript", "python", "go", "rust", ""]
+          "examples": ["typescript", "python", "go", "rust", "java", ""]
         },
         "CC_MODEL": {
           "type": "string",
-          "description": "Claude Code model alias. 'default' means line removal (no substitution)",
+          "description": "Claude Code model alias. Substituted into .claude/settings.json (model field). SPECIAL: 'default' triggers line REMOVAL instead of substitution (template-cleanup.sh lines 297-301).",
           "default": "default",
-          "examples": ["sonnet", "opus", "default"]
+          "examples": ["sonnet", "opus", "haiku", "default"]
         },
         "SERENA_INITIAL_PROMPT": {
           "type": "string",
-          "description": "Initial prompt for Serena MCP server",
+          "description": "Initial prompt/context for Serena MCP server. Substituted into .serena/project.yml (initial_prompt field). Only applied if non-empty.",
           "default": "",
-          "examples": [""]
+          "examples": ["", "You are working on a TypeScript project"]
         },
         "TM_CUSTOM_SYSTEM_PROMPT": {
           "type": "string",
-          "description": "Task Master custom system prompt",
+          "description": "Task Master custom system prompt. Substituted into .taskmaster/config.json (customSystemPrompt field). Only applied if non-empty.",
           "default": "",
-          "examples": [""]
+          "examples": ["", "Follow test-driven development practices"]
         },
         "TM_APPEND_SYSTEM_PROMPT": {
           "type": "string",
-          "description": "Task Master append system prompt",
+          "description": "Task Master append system prompt. Substituted into .taskmaster/config.json (appendSystemPrompt field). Only applied if non-empty.",
           "default": "",
-          "examples": [""]
+          "examples": ["", "Always write tests before implementation"]
         },
         "TM_PERMISSION_MODE": {
           "type": "string",
-          "description": "Task Master permission mode",
+          "description": "Task Master permission mode. Substituted into .taskmaster/config.json (permissionMode field). Unlike CC_MODEL, 'default' is a literal value (not special-cased).",
           "default": "default",
           "enum": ["default", "full", "minimal"],
-          "examples": ["default"]
+          "examples": ["default", "full", "minimal"]
         }
       }
     }
