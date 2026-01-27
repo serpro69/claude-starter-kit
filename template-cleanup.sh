@@ -286,11 +286,56 @@ show_config_summary() {
   echo "  2. Remove existing .claude/, .serena/, .taskmaster/ directories"
   echo "  3. Deploy configured templates to project root"
   echo "  4. Remove all template-specific files (README, docs, workflows, etc.)"
-  echo "  5. Generate minimal README.md"
+  echo "  5. Generate template state manifest (.github/template-state.json)"
+  echo "  6. Generate minimal README.md"
   if ! $NO_COMMIT; then
-    echo "  6. Commit and push changes"
+    echo "  7. Commit and push changes"
   fi
   echo ""
+}
+
+# Generate state manifest for template sync
+generate_manifest() {
+  local project_name="$1"
+  local upstream_repo="${UPSTREAM_REPO:-serpro69/claude-starter-kit}"
+  local template_version
+
+  # Determine template version from git
+  template_version=$(git describe --tags --abbrev=0 2>/dev/null || git rev-parse --short HEAD)
+
+  # Ensure .github directory exists
+  mkdir -p .github
+
+  # Generate manifest using jq for safe JSON escaping
+  jq -n \
+    --arg schema_version "1" \
+    --arg upstream_repo "$upstream_repo" \
+    --arg template_version "$template_version" \
+    --arg synced_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    --arg PROJECT_NAME "$project_name" \
+    --arg LANGUAGE "$LANGUAGE" \
+    --arg CC_MODEL "$CC_MODEL" \
+    --arg SERENA_INITIAL_PROMPT "$SERENA_INITIAL_PROMPT" \
+    --arg TM_CUSTOM_SYSTEM_PROMPT "$TM_CUSTOM_SYSTEM_PROMPT" \
+    --arg TM_APPEND_SYSTEM_PROMPT "$TM_APPEND_SYSTEM_PROMPT" \
+    --arg TM_PERMISSION_MODE "$TM_PERMISSION_MODE" \
+    '{
+      schema_version: $schema_version,
+      upstream_repo: $upstream_repo,
+      template_version: $template_version,
+      synced_at: $synced_at,
+      variables: {
+        PROJECT_NAME: $PROJECT_NAME,
+        LANGUAGE: $LANGUAGE,
+        CC_MODEL: $CC_MODEL,
+        SERENA_INITIAL_PROMPT: $SERENA_INITIAL_PROMPT,
+        TM_CUSTOM_SYSTEM_PROMPT: $TM_CUSTOM_SYSTEM_PROMPT,
+        TM_APPEND_SYSTEM_PROMPT: $TM_APPEND_SYSTEM_PROMPT,
+        TM_PERMISSION_MODE: $TM_PERMISSION_MODE
+      }
+    }' > .github/template-state.json
+
+  log_info "Generated state manifest: .github/template-state.json"
 }
 
 # Execute the cleanup
@@ -358,6 +403,9 @@ execute_cleanup() {
     ! -name '.taskmaster' \
     ! -name 'bootstrap.sh' \
     -exec rm -rf {} +
+
+  log_step "Generating template state manifest..."
+  generate_manifest "$name"
 
   log_step "Generating minimal README..."
   echo "# $name" >README.md
