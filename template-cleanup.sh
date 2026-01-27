@@ -72,6 +72,15 @@ log_step() {
   echo -e "${CYAN}>>>${NC} $1"
 }
 
+# Check for required dependencies
+if ! command -v jq &>/dev/null; then
+  log_error "jq is required but not installed."
+  echo "Please install jq:"
+  echo "  macOS:  brew install jq"
+  echo "  Linux:  apt-get install jq"
+  exit 1
+fi
+
 show_help() {
   cat <<'EOF'
 Template Cleanup Script

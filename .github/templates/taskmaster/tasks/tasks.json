@@ -62,17 +62,18 @@
         "dependencies": [
           "1"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
             "title": "Add jq dependency check at script startup",
             "description": "Add a dependency check for jq near the beginning of template-cleanup.sh, after the set options and variable declarations but before any processing logic, to fail fast with a helpful error message if jq is not installed.",
             "dependencies": [],
-            "details": "Insert a jq availability check after line 38 (after CI_MODE declaration) and before the load_env_vars function. The check should use `command -v jq &>/dev/null` to test for jq presence. If jq is not found, use the existing `log_error` function to display a message indicating jq is required and provide installation instructions for both macOS (brew install jq) and Linux (apt-get install jq), then exit with code 1. This ensures the script fails immediately with a clear error rather than failing later during manifest generation.\n<info added on 2026-01-27T12:33:45.064Z>\nI'll analyze the codebase to understand the implementation guidance document structure and then provide the appropriate reference text.Now I need to look at the specific Task 2 section to provide the precise reference. Based on the read, I can see Task 2 is described in lines 73-103. Let me extract the key implementation guidance for the jq dependency check subtask:\n\nThe implementation document describes Task 2 starting at line 73, with specific guidance about:\n1. Capturing variables before substitution\n2. Determining template version using git commands\n3. Writing manifest after substitution completes (with jq usage noted)\n4. Updating files-to-keep list\n\nThe document also mentions at line 280-282 in Task 6 section: \"Add jq dependency check - The sync script requires `jq` for JSON parsing - Add check in script or document as requirement\"\n\nHowever, the most relevant section for the jq dependency check is in the \"JSON Generation in Bash\" technical note (lines 366-389) which shows jq being used for safe JSON generation of the manifest.\n\nFor implementation details about the jq check at script startup, see lines 88-90 which mention using jq for manifest generation, and the Technical Notes section (lines 366-389) which demonstrates jq usage patterns. The check should occur before any jq-dependent operations to fail fast with clear error messaging (as mentioned in edge cases line 100-102).\n</info added on 2026-01-27T12:33:45.064Z>",
-            "status": "pending",
+            "details": "Insert a jq availability check after line 38 (after CI_MODE declaration) and before the load_env_vars function. The check should use `command -v jq &>/dev/null` to test for jq presence. If jq is not found, use the existing `log_error` function to display a message indicating jq is required and provide installation instructions for both macOS (brew install jq) and Linux (apt-get install jq), then exit with code 1. This ensures the script fails immediately with a clear error rather than failing later during manifest generation.\n<info added on 2026-01-27T12:33:45.064Z>\nI'll analyze the codebase to understand the implementation guidance document structure and then provide the appropriate reference text.Now I need to look at the specific Task 2 section to provide the precise reference. Based on the read, I can see Task 2 is described in lines 73-103. Let me extract the key implementation guidance for the jq dependency check subtask:\n\nThe implementation document describes Task 2 starting at line 73, with specific guidance about:\n1. Capturing variables before substitution\n2. Determining template version using git commands\n3. Writing manifest after substitution completes (with jq usage noted)\n4. Updating files-to-keep list\n\nThe document also mentions at line 280-282 in Task 6 section: \"Add jq dependency check - The sync script requires `jq` for JSON parsing - Add check in script or document as requirement\"\n\nHowever, the most relevant section for the jq dependency check is in the \"JSON Generation in Bash\" technical note (lines 366-389) which shows jq being used for safe JSON generation of the manifest.\n\nFor implementation details about the jq check at script startup, see lines 88-90 which mention using jq for manifest generation, and the Technical Notes section (lines 366-389) which demonstrates jq usage patterns. The check should occur before any jq-dependent operations to fail fast with clear error messaging (as mentioned in edge cases line 100-102).\n</info added on 2026-01-27T12:33:45.064Z>\n<info added on 2026-01-27T16:58:22.116Z>\nI'll analyze the codebase to understand the template-cleanup.sh structure and verify the implementation details.Based on my analysis of the codebase, I can now provide the appropriate update text for the subtask:\n\nImplementation confirmed at lines 75-82 of template-cleanup.sh. The jq dependency check was correctly placed after the logging function definitions (specifically after log_step at line 72) rather than at line 38 as originally specified. This placement is optimal because it ensures the log_error function is available for use in the error message. The check successfully implements the fail-fast behavior by executing before any template processing logic (which begins at line 300 with execute_cleanup). The implementation matches the technical requirements: uses `command -v jq &>/dev/null` for detection, provides platform-specific installation instructions (brew for macOS, apt-get for Linux), and exits with status code 1 on failure.\n</info added on 2026-01-27T16:58:22.116Z>",
+            "status": "done",
             "testStrategy": "Run the script on a system without jq installed and verify it exits with a clear error message. Run on a system with jq and verify the script proceeds normally past the check. Test that the error message is displayed using the log_error function format.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-01-27T16:58:25.949Z"
           },
           {
             "id": 2,
@@ -110,7 +111,8 @@
             "testStrategy": "Run template-cleanup.sh and verify .github directory exists after cleanup. Verify .github/template-state.json is present and contains valid JSON. Verify other template files (like .github/workflows/template-cleanup.yml and .github/templates/) are still removed during cleanup as expected.",
             "parentId": "undefined"
           }
-        ]
+        ],
+        "updatedAt": "2026-01-27T16:58:25.949Z"
       },
       {
         "id": "3",
@@ -470,7 +472,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-01-27T13:18:08.308Z",
+      "lastModified": "2026-01-27T16:58:25.949Z",
       "taskCount": 8,
       "completedCount": 1,
       "tags": [
