@@ -293,8 +293,13 @@ execute_cleanup() {
 
   # Claude Code Settings
   local cc_settings_file=".github/templates/claude/settings.json"
-  # Claude Code model - always substitute (user selects from dropdown)
-  sed -i "s/\"model\": \".*\"/\"model\": \"$CC_MODEL\"/g" "$cc_settings_file"
+  # Claude Code model - remove line for "default" (uses Claude Code's default), otherwise substitute
+  if [[ "$CC_MODEL" == "default" ]]; then
+    # Remove the model line entirely so Claude Code uses its built-in default
+    sed -i '/"model":/d' "$cc_settings_file"
+  else
+    sed -i "s/\"model\": \".*\"/\"model\": \"$CC_MODEL\"/g" "$cc_settings_file"
+  fi
 
   # Serena MCP Settings
   local serena_settings_file=".github/templates/serena/project.yml"
