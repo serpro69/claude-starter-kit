@@ -149,9 +149,10 @@
               1
             ],
             "details": "Implement the following functions:\n\n1. **check_dependencies()**:\n```bash\ncheck_dependencies() {\n  for cmd in jq git curl; do\n    command -v \"$cmd\" &>/dev/null || { log_error \"$cmd is required\"; exit 1; }\n  done\n}\n```\n\n2. **read_manifest()**:\n- Check if MANIFEST_PATH file exists, exit with error if not\n- Validate JSON syntax using `jq -e '.' \"$MANIFEST_PATH\"`\n- Verify required fields exist: schema_version, upstream_repo, template_version, variables\n- Store key values in global variables for later use\n\n3. **get_manifest_value(jq_expression)**:\n- Helper to extract values from manifest using jq\n- Example: `get_manifest_value '.variables.PROJECT_NAME'`\n- Returns the raw value without quotes\n\n4. **validate_manifest()**:\n- Check schema_version is \"1\" (only supported version)\n- Verify upstream_repo is in owner/repo format\n- Ensure all required variables are present (can be empty but must exist):\n  - PROJECT_NAME, LANGUAGE, CC_MODEL\n  - SERENA_INITIAL_PROMPT, TM_CUSTOM_SYSTEM_PROMPT\n  - TM_APPEND_SYSTEM_PROMPT, TM_PERMISSION_MODE",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "1. Test check_dependencies passes when all tools installed\n2. Test read_manifest fails with exit 1 when file missing\n3. Test read_manifest fails with exit 1 for invalid JSON\n4. Test get_manifest_value extracts correct values\n5. Test validate_manifest detects missing required fields\n6. Test schema_version mismatch produces clear error",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-01-27T17:18:50.662Z"
           },
           {
             "id": 3,
@@ -192,7 +193,7 @@
             "parentId": "undefined"
           }
         ],
-        "updatedAt": "2026-01-27T17:16:17.746Z"
+        "updatedAt": "2026-01-27T17:18:50.662Z"
       },
       {
         "id": "4",
@@ -477,7 +478,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-01-27T17:16:17.746Z",
+      "lastModified": "2026-01-27T17:18:50.663Z",
       "taskCount": 8,
       "completedCount": 2,
       "tags": [
