@@ -176,9 +176,10 @@
               3
             ],
             "details": "Implement apply_substitutions() to mirror template-cleanup.sh logic:\n\n1. **apply_substitutions(template_dir, output_dir)**:\n- Copy templates to output directory first\n- Read all variables from manifest using get_manifest_value():\n  - project_name, language, cc_model\n  - serena_prompt, tm_custom, tm_append, tm_permission\n\n2. **Apply Claude Code settings** (claude/settings.json):\n```bash\nif [[ \"$cc_model\" == \"default\" ]]; then\n  sed -i '/\"model\":/d' \"$output_dir/claude/settings.json\"\nelse\n  sed -i \"s/\\\"model\\\": \\\".*\\\"/\\\"model\\\": \\\"$cc_model\\\"/g\" \"$output_dir/claude/settings.json\"\nfi\n```\n\n3. **Apply Serena settings** (serena/project.yml):\n- Always substitute project_name\n- Substitute language if provided\n- Substitute initial_prompt if provided\n\n4. **Apply TaskMaster settings** (taskmaster/config.json):\n- Always substitute projectName\n- Substitute customSystemPrompt if provided\n- Substitute appendSystemPrompt if provided\n- Substitute permissionMode if provided\n\n5. Handle special characters in substitution values (escape for sed)\n\nNote: Logic must exactly match template-cleanup.sh lines 294-330 to ensure consistency.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "1. Compare output against template-cleanup.sh for same inputs\n2. Test with empty optional values (should not substitute)\n3. Test with special characters in prompts (quotes, newlines)\n4. Test CC_MODEL='default' removes model line entirely\n5. Test all substitution variables are correctly applied\n6. Verify file permissions are preserved during copy",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-01-27T17:42:15.992Z"
           },
           {
             "id": 5,
@@ -194,7 +195,7 @@
             "parentId": "undefined"
           }
         ],
-        "updatedAt": "2026-01-27T17:26:07.400Z"
+        "updatedAt": "2026-01-27T17:42:15.992Z"
       },
       {
         "id": "4",
@@ -479,7 +480,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-01-27T17:26:07.400Z",
+      "lastModified": "2026-01-27T17:42:15.992Z",
       "taskCount": 8,
       "completedCount": 2,
       "tags": [
