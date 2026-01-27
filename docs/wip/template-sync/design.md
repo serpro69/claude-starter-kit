@@ -87,6 +87,40 @@ Persisted during initial template cleanup. Contains:
 - `synced_at`: ISO timestamp of last sync
 - `variables`: All substitution values applied during cleanup
 
+##### Variable Name Mapping
+
+The manifest variables must align exactly with those used in `template-cleanup.sh`. This table documents the complete mapping:
+
+| Manifest Variable | Shell Variable | Default Value | Target File(s) | Substitution Pattern |
+|-------------------|----------------|---------------|----------------|----------------------|
+| `PROJECT_NAME` | `NAME` (from `REPO_NAME`) | `$(basename "$REPO_ROOT")` | `.serena/project.yml`, `.taskmaster/config.json` | `project_name: "..."`, `"projectName": "..."` |
+| `LANGUAGE` | `LANGUAGE` | `""` (empty) | `.serena/project.yml` | `language: "..."` |
+| `CC_MODEL` | `CC_MODEL` | `"default"` | `.claude/settings.json` | `"model": "..."` (or line removal) |
+| `SERENA_INITIAL_PROMPT` | `SERENA_INITIAL_PROMPT` | `""` (empty) | `.serena/project.yml` | `initial_prompt: "..."` |
+| `TM_CUSTOM_SYSTEM_PROMPT` | `TM_CUSTOM_SYSTEM_PROMPT` | `""` (empty) | `.taskmaster/config.json` | `"customSystemPrompt": "..."` |
+| `TM_APPEND_SYSTEM_PROMPT` | `TM_APPEND_SYSTEM_PROMPT` | `""` (empty) | `.taskmaster/config.json` | `"appendSystemPrompt": "..."` |
+| `TM_PERMISSION_MODE` | `TM_PERMISSION_MODE` | `"default"` | `.taskmaster/config.json` | `"permissionMode": "..."` |
+
+**Default Value Behaviors:**
+
+- `CC_MODEL="default"`: Special case - the model line is **removed** from settings.json rather than substituted (lines 297-301 in template-cleanup.sh)
+- Empty strings (`""`): For optional fields, substitution only occurs if the value is non-empty (conditional sed)
+- `TM_PERMISSION_MODE="default"`: Explicit value, always substituted (not special-cased like CC_MODEL)
+
+**Source File References (template-cleanup.sh):**
+
+- Variable declarations: lines 27-32
+- Environment variable loading: lines 42-47
+- Substitution logic: lines 295-329
+- Project name derivation: lines 458, 469
+
+**Schema Validation:**
+
+The JSON Schema at `docs/wip/template-sync/template-state-schema.json` enforces:
+- `PROJECT_NAME` is required (always derived from repo name)
+- `TM_PERMISSION_MODE` restricted to enum: `["default", "full", "minimal"]`
+- All other variables are optional strings with empty string defaults
+
 #### 2. Sync Workflow (`.github/workflows/template-sync.yml`)
 
 GitHub Actions workflow with manual dispatch trigger.
