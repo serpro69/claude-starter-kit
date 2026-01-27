@@ -9,7 +9,7 @@
         "testStrategy": "1. Create a sample manifest JSON and validate it parses correctly with `jq`\n2. Verify all variable names match those in template-cleanup.sh (grep for variable names)\n3. Test JSON generation with special characters in string values (quotes, backslashes, newlines)\n4. Validate schema_version field can support future migrations",
         "priority": "high",
         "dependencies": [],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -43,13 +43,14 @@
               1,
               2
             ],
-            "details": "1. **Create example manifest** at `.github/templates/template-state.example.json`:\n   ```json\n   {\n     \"schema_version\": \"1\",\n     \"upstream_repo\": \"serpro69/claude-starter-kit\",\n     \"template_version\": \"v1.0.0\",\n     \"synced_at\": \"2025-01-27T10:00:00Z\",\n     \"variables\": {\n       \"PROJECT_NAME\": \"my-project\",\n       \"LANGUAGE\": \"typescript\",\n       \"CC_MODEL\": \"sonnet\",\n       \"SERENA_INITIAL_PROMPT\": \"\",\n       \"TM_CUSTOM_SYSTEM_PROMPT\": \"\",\n       \"TM_APPEND_SYSTEM_PROMPT\": \"\",\n       \"TM_PERMISSION_MODE\": \"default\"\n     }\n   }\n   ```\n\n2. **Create jq validation patterns** (for use in sync script):\n   - `.schema_version` extraction and comparison\n   - `.variables.PROJECT_NAME` with fallback handling\n   - Iteration over `.variables | keys[]` for substitution loops\n\n3. **Test special character handling:**\n   - Project names with hyphens/underscores\n   - Prompts with quotes, backslashes, newlines (escaped properly)\n   - Empty string vs null handling\n\n4. **Document jq commands** that will be used in template-cleanup.sh's generate_manifest() function.",
-            "status": "pending",
+            "details": "1. **Create example manifest** at `.github/templates/template-state.example.json`:\n   ```json\n   {\n     \"schema_version\": \"1\",\n     \"upstream_repo\": \"serpro69/claude-starter-kit\",\n     \"template_version\": \"v1.0.0\",\n     \"synced_at\": \"2025-01-27T10:00:00Z\",\n     \"variables\": {\n       \"PROJECT_NAME\": \"my-project\",\n       \"LANGUAGE\": \"typescript\",\n       \"CC_MODEL\": \"sonnet\",\n       \"SERENA_INITIAL_PROMPT\": \"\",\n       \"TM_CUSTOM_SYSTEM_PROMPT\": \"\",\n       \"TM_APPEND_SYSTEM_PROMPT\": \"\",\n       \"TM_PERMISSION_MODE\": \"default\"\n     }\n   }\n   ```\n\n2. **Create jq validation patterns** (for use in sync script):\n   - `.schema_version` extraction and comparison\n   - `.variables.PROJECT_NAME` with fallback handling\n   - Iteration over `.variables | keys[]` for substitution loops\n\n3. **Test special character handling:**\n   - Project names with hyphens/underscores\n   - Prompts with quotes, backslashes, newlines (escaped properly)\n   - Empty string vs null handling\n\n4. **Document jq commands** that will be used in template-cleanup.sh's generate_manifest() function.\n<info added on 2026-01-27T13:18:08.214Z>\n**Implementation completed successfully.**\n\nThe test suite at `.github/scripts/test-manifest-jq.sh` validates all critical jq patterns for manifest operations:\n\n**Test Coverage (15 tests, 6 sections):**\n- **Section 1:** JSON validity (`jq . manifest.json` exit code 0)\n- **Section 2:** Field extraction for schema_version, upstream_repo, template_version, synced_at, PROJECT_NAME, and variable key enumeration\n- **Section 3:** Manifest generation pattern matching template-cleanup.sh's `generate_manifest()` function (uses `jq -n` with `--arg` flags)\n- **Section 4:** Special character handling (double quotes, backslashes, newlines, hyphens/underscores, empty vs null strings)\n- **Section 5:** Round-trip integrity test (generate → parse → verify all 7 variables preserved exactly)\n- **Section 6:** JSON Schema validation using `uv tool run check-jsonschema`\n\n**Key jq patterns documented for sync/cleanup scripts:**\n- Extract value: `jq -r '.variables.PROJECT_NAME' manifest.json`\n- Extract all variable keys: `jq -r '.variables | keys[]' manifest.json`\n- Generate manifest safely: `jq -n --arg schema \"1\" --arg upstream \"repo\" --arg version \"v1\" --arg synced \"2025-01-27T10:00:00Z\" --arg PROJECT_NAME \"value\" --arg LANGUAGE \"value\" --arg CC_MODEL \"value\" --arg SERENA_INITIAL_PROMPT \"value\" --arg TM_CUSTOM_SYSTEM_PROMPT \"value\" --arg TM_APPEND_SYSTEM_PROMPT \"value\" --arg TM_PERMISSION_MODE \"value\" '{schema_version: $schema, upstream_repo: $upstream, template_version: $version, synced_at: $synced, variables: {PROJECT_NAME: $PROJECT_NAME, LANGUAGE: $LANGUAGE, CC_MODEL: $CC_MODEL, SERENA_INITIAL_PROMPT: $SERENA_INITIAL_PROMPT, TM_CUSTOM_SYSTEM_PROMPT: $TM_CUSTOM_SYSTEM_PROMPT, TM_APPEND_SYSTEM_PROMPT: $TM_APPEND_SYSTEM_PROMPT, TM_PERMISSION_MODE: $TM_PERMISSION_MODE}}'`\n\n**Test Results:**\nAll 15 tests pass including critical special character handling (quotes in TM_CUSTOM_SYSTEM_PROMPT like `\"Use \\\"claude-code\\\" prefix\"` preserved through generation and parsing).\n</info added on 2026-01-27T13:18:08.214Z>",
+            "status": "done",
             "testStrategy": "1. Run `jq . .github/templates/template-state.example.json` to verify valid JSON\n2. Test each jq extraction pattern independently: `jq '.schema_version'`, `jq '.variables.PROJECT_NAME'`, etc.\n3. Create manifests with special characters (quotes in prompts: `\\\"test\\\"`), verify jq parses correctly\n4. Test round-trip: generate manifest with jq -n, then parse it back to verify structure preserved\n5. Verify all variable names match exactly those in template-cleanup.sh (case-sensitive comparison)",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-01-27T13:18:08.308Z"
           }
         ],
-        "updatedAt": "2026-01-27T13:09:13.770Z"
+        "updatedAt": "2026-01-27T13:18:08.308Z"
       },
       {
         "id": "2",
@@ -469,9 +470,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-01-27T13:09:13.770Z",
+      "lastModified": "2026-01-27T13:18:08.308Z",
       "taskCount": 8,
-      "completedCount": 0,
+      "completedCount": 1,
       "tags": [
         "master"
       ]
