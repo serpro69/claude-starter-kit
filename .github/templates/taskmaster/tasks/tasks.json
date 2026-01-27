@@ -128,7 +128,7 @@
           "1",
           "2"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -190,12 +190,13 @@
               4
             ],
             "details": "Implement comparison, reporting, and main orchestration:\n\n1. **compare_files(staging_dir)**:\n- Compare staging directories against current .claude/, .serena/, .taskmaster/\n- Use diff or file comparison to categorize:\n  - Added files (exist in staging, not in current)\n  - Modified files (exist in both, content differs)\n  - Deleted files (exist in current, not in staging)\n  - Unchanged files (exist in both, content matches)\n- Return counts: added, modified, deleted, unchanged\n- Store file lists in global arrays for diff report\n\n2. **generate_diff_report()**:\n- Create human-readable markdown summary\n- List all changed files grouped by change type\n- Include inline diffs for modified files (first N lines)\n- Output to stdout or file depending on mode\n- In CI mode, set GitHub Actions outputs:\n  - has_changes=true/false\n  - added_count, modified_count, deleted_count\n  - diff_summary (for PR body)\n\n3. **main() orchestration**:\n```bash\nmain() {\n  check_dependencies\n  read_manifest\n  validate_manifest\n  \n  local upstream=$(get_manifest_value '.upstream_repo')\n  local current_version=$(get_manifest_value '.template_version')\n  local resolved_version=$(resolve_version \"$TARGET_VERSION\" \"$upstream\")\n  \n  log_info \"Syncing from $current_version to $resolved_version\"\n  \n  # Create staging directory\n  STAGING_DIR=${STAGING_DIR:-$(mktemp -d)}\n  \n  # Fetch and apply substitutions\n  fetch_upstream_templates \"$resolved_version\" \"$upstream\" \"$STAGING_DIR/upstream\"\n  apply_substitutions \"$STAGING_DIR/upstream/.github/templates\" \"$STAGING_DIR/hydrated\"\n  \n  # Compare and report\n  compare_files \"$STAGING_DIR/hydrated\"\n  generate_diff_report\n  \n  # Cleanup temp if not --output-dir specified\n}\n```\n\n4. Entry point: call main with error trapping",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "1. Test compare_files detects added files correctly\n2. Test compare_files detects modified files correctly\n3. Test compare_files detects deleted files correctly\n4. Test diff report includes all change types\n5. Test CI mode outputs GitHub Actions format\n6. Test dry-run mode completes without applying changes\n7. Test full workflow end-to-end with mock upstream",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-01-27T17:54:25.000Z"
           }
         ],
-        "updatedAt": "2026-01-27T17:42:15.992Z"
+        "updatedAt": "2026-01-27T17:54:25.000Z"
       },
       {
         "id": "4",
@@ -480,9 +481,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-01-27T17:42:15.992Z",
+      "lastModified": "2026-01-27T17:54:25.000Z",
       "taskCount": 8,
-      "completedCount": 2,
+      "completedCount": 3,
       "tags": [
         "master"
       ]
