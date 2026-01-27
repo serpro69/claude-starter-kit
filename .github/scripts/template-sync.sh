@@ -30,6 +30,7 @@ STAGING_DIR=""
 DRY_RUN=false
 CI_MODE=false
 TARGET_VERSION="latest"
+FETCHED_TEMPLATES_PATH=""
 
 # =============================================================================
 # Color Output
@@ -161,6 +162,121 @@ validate_manifest() {
   done
 
   log_success "Manifest validation passed"
+}
+
+# =============================================================================
+# Version Resolution and Template Fetching
+# =============================================================================
+
+# Resolve target version to a concrete git ref
+# Usage: resolve_version "latest" "owner/repo"
+# Returns: tag name, branch name, or SHA (via stdout)
+# Note: All logging goes to stderr to keep stdout clean for return value
+resolve_version() {
+  local target="$1"
+  local upstream="$2"
+  local resolved=""
+
+  case "$target" in
+    latest)
+      # Get the most recent tag sorted by version
+      resolved=$(git ls-remote --tags --sort=-v:refname "https://github.com/$upstream.git" 2>/dev/null \
+        | grep -v '\^{}' \
+        | head -1 \
+        | sed 's/.*refs\/tags\///')
+
+      # If no tags exist, fall back to default branch (HEAD)
+      if [[ -z "$resolved" ]]; then
+        log_warn "No tags found in upstream repository, using default branch" >&2
+        resolved="HEAD"
+      fi
+      ;;
+    main|master|HEAD)
+      resolved="$target"
+      ;;
+    *)
+      # Assume specific tag or SHA
+      resolved="$target"
+      ;;
+  esac
+
+  # Validate we got something
+  if [[ -z "$resolved" ]]; then
+    log_error "Failed to resolve version: $target"
+    exit 1
+  fi
+
+  echo "$resolved"
+}
+
+# Fetch upstream templates using git sparse-checkout
+# Usage: fetch_upstream_templates "v1.0.0" "owner/repo" "/tmp/workdir"
+# Sets FETCHED_TEMPLATES_PATH to the path of fetched templates
+fetch_upstream_templates() {
+  local version="$1"
+  local upstream="$2"
+  local work_dir="$3"
+  local repo_url="https://github.com/$upstream.git"
+
+  log_step "Fetching templates from $upstream @ $version"
+
+  # Create work directory
+  mkdir -p "$work_dir"
+
+  # Clone with blob filter for efficiency (don't use --sparse flag for compatibility)
+  if ! git clone --depth 1 --filter=blob:none \
+    "$repo_url" "$work_dir/upstream" --quiet 2>/dev/null; then
+    log_error "Failed to clone upstream repository: $repo_url"
+    log_error "Please check your network connection and try again"
+    exit 1
+  fi
+
+  cd "$work_dir/upstream"
+
+  # For non-default branches/tags, we need to fetch explicitly since we used --depth 1
+  # HEAD means use whatever was cloned (default branch)
+  local current_branch
+  current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+
+  if [[ "$version" != "HEAD" && "$version" != "$current_branch" ]]; then
+    # Fetch the specific version
+    if ! git fetch --depth 1 origin "$version" --quiet 2>/dev/null; then
+      # Try as a tag
+      if ! git fetch --depth 1 origin "refs/tags/$version:refs/tags/$version" --quiet 2>/dev/null; then
+        log_error "Failed to fetch version: $version"
+        log_error "The version may not exist in the upstream repository"
+        cd - >/dev/null
+        exit 1
+      fi
+    fi
+
+    # Checkout the fetched version
+    if ! git checkout "$version" --quiet 2>/dev/null; then
+      if ! git checkout "tags/$version" --quiet 2>/dev/null; then
+        if ! git checkout FETCH_HEAD --quiet 2>/dev/null; then
+          log_error "Failed to checkout version: $version"
+          cd - >/dev/null
+          exit 1
+        fi
+      fi
+    fi
+  fi
+
+  # Configure sparse-checkout to only fetch template files
+  git sparse-checkout init --cone --quiet 2>/dev/null || true
+  git sparse-checkout set .github/templates --quiet 2>/dev/null || true
+
+  cd - >/dev/null
+
+  # Verify templates directory exists
+  FETCHED_TEMPLATES_PATH="$work_dir/upstream/.github/templates"
+  if [[ ! -d "$FETCHED_TEMPLATES_PATH" ]]; then
+    log_error "Templates directory not found in upstream at version: $version"
+    log_error "Expected path: .github/templates"
+    exit 1
+  fi
+
+  log_success "Fetched templates from $upstream @ $version"
 }
 
 # =============================================================================
@@ -301,8 +417,28 @@ main() {
     echo ""
   fi
 
-  # TODO: Implement core sync logic (Task 3.3+)
-  log_info "Manifest functions ready - core sync logic to be implemented"
+  # Get upstream repo from manifest
+  local upstream_repo
+  upstream_repo=$(get_manifest_value '.upstream_repo')
+
+  # Resolve target version
+  log_step "Resolving version: $TARGET_VERSION"
+  local resolved_version
+  resolved_version=$(resolve_version "$TARGET_VERSION" "$upstream_repo")
+  log_info "Resolved version: $resolved_version"
+
+  # Fetch upstream templates (sets FETCHED_TEMPLATES_PATH)
+  fetch_upstream_templates "$resolved_version" "$upstream_repo" "$STAGING_DIR"
+
+  # Display fetched templates info
+  if ! $CI_MODE; then
+    echo ""
+    echo "  Templates path: $FETCHED_TEMPLATES_PATH"
+    echo ""
+  fi
+
+  # TODO: Implement substitution and comparison (Task 3.4+)
+  log_info "Version resolution and fetching complete - substitution logic to be implemented"
 }
 
 # Run main with all arguments

@@ -162,9 +162,10 @@
               2
             ],
             "details": "Implement version resolution and template fetching:\n\n1. **resolve_version(target, upstream_repo)**:\n```bash\nresolve_version() {\n  local target=\"$1\" upstream=\"$2\"\n  case \"$target\" in\n    latest)\n      git ls-remote --tags --sort=-v:refname \"https://github.com/$upstream.git\" \\\n        | head -1 | sed 's/.*refs\\/tags\\///' ;;\n    main|master) echo \"$target\" ;;\n    *) echo \"$target\" ;;  # Assume specific tag or SHA\n  esac\n}\n```\n- Handle case where no tags exist (return main/HEAD)\n- Validate returned version is non-empty\n\n2. **fetch_upstream_templates(version, upstream_repo, temp_dir)**:\n- Create temp directory if not specified\n- Use git sparse-checkout for efficient cloning:\n```bash\ngit clone --depth 1 --filter=blob:none --sparse \\\n  \"https://github.com/$upstream.git\" \"$temp_dir\" --quiet\ncd \"$temp_dir\"\ngit sparse-checkout set .github/templates\ngit checkout \"$version\" --quiet 2>/dev/null || \\\n  git checkout \"tags/$version\" --quiet\n```\n- Handle checkout failures gracefully with clear error\n- Return path to fetched .github/templates directory\n- Add network error handling with retry hint",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "1. Test resolve_version with 'latest' returns most recent tag\n2. Test resolve_version with 'main' returns 'main'\n3. Test resolve_version with specific tag 'v1.0.0' returns unchanged\n4. Test fetch_upstream_templates creates correct directory structure\n5. Test fetch_upstream_templates only fetches .github/templates/\n6. Test network failure produces helpful error message",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-01-27T17:26:07.400Z"
           },
           {
             "id": 4,
@@ -193,7 +194,7 @@
             "parentId": "undefined"
           }
         ],
-        "updatedAt": "2026-01-27T17:18:50.662Z"
+        "updatedAt": "2026-01-27T17:26:07.400Z"
       },
       {
         "id": "4",
@@ -478,7 +479,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-01-27T17:18:50.663Z",
+      "lastModified": "2026-01-27T17:26:07.400Z",
       "taskCount": 8,
       "completedCount": 2,
       "tags": [
