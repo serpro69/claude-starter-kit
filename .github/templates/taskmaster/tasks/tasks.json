@@ -128,7 +128,7 @@
           "1",
           "2"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -136,9 +136,10 @@
             "description": "Set up the initial template-sync.sh file with shebang, strict mode (set -euo pipefail), global configuration variables, and argument parsing for --version, --dry-run, --ci, --output-dir, and --help flags.",
             "dependencies": [],
             "details": "Create `.github/scripts/template-sync.sh` with:\n\n1. Script header and strict mode:\n```bash\n#!/usr/bin/env bash\nset -euo pipefail\n```\n\n2. Global configuration variables:\n- MANIFEST_PATH=\".github/template-state.json\"\n- STAGING_DIR=\"\" (set from --output-dir or temp)\n- DRY_RUN=false\n- CI_MODE=false\n- TARGET_VERSION=\"latest\"\n\n3. Helper functions for logging:\n- log_info() with green [INFO] prefix\n- log_error() with red [ERROR] to stderr\n- log_warn() with yellow [WARN] prefix\n- log_success() with green checkmark\n\n4. CLI argument parsing loop handling:\n- --version VERSION: Target version (default: latest)\n- --dry-run: Preview only mode\n- --ci: CI mode for GitHub Actions outputs\n- --output-dir DIR: Staging directory path\n- --help: Display usage information\n\n5. Usage/help function showing all options\n\n6. Exit codes:\n- 0: Success\n- 1: Error (missing manifest, network failure)\n- 2: Invalid arguments\n<info added on 2026-01-27T12:34:12.230Z>\nI'll analyze the codebase to understand the current implementation and then provide the update for subtask 3.1.Based on my analysis of the implementation documentation at `/docs/wip/template-sync/implementation.md`, here is the new text that should be appended to subtask 3.1:\n\n---\n\n**Implementation Reference**: See `/docs/wip/template-sync/implementation.md` lines 106-179 for complete Task 3 specifications.\n\n**Key Script Patterns to Follow from template-cleanup.sh**:\n- Use color constants: RED, GREEN, YELLOW, BLUE, CYAN, BOLD, NC (lines 51-57)\n- Logging functions should match template-cleanup.sh style (lines 59-73)\n- Use `set -euo pipefail` for strict error handling (line 24)\n- Follow same CLI parsing pattern with `--` prefixes for long options\n\n**Dependency Check Requirements**:\nScript must verify presence of: `jq`, `git`, `curl` (referenced in implementation.md line 117 via check_dependencies function)\n\n**Manifest Path Configuration**:\nUse `.github/template-state.json` as MANIFEST_PATH constant (implementation.md lines 135-139)\n\n**Exit Code Standards** (implementation.md lines 175-178):\n- 0: Success (with or without changes)\n- 1: Operational errors (missing manifest, network failure, invalid JSON)\n- 2: Invalid CLI arguments\n</info added on 2026-01-27T12:34:12.230Z>",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "1. Verify script is executable (chmod +x)\n2. Test --help displays usage correctly\n3. Test invalid argument returns exit code 2\n4. Test default values are set when no args provided\n5. Test --dry-run sets DRY_RUN=true\n6. Test --ci sets CI_MODE=true",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-01-27T17:16:17.746Z"
           },
           {
             "id": 2,
@@ -190,7 +191,8 @@
             "testStrategy": "1. Test compare_files detects added files correctly\n2. Test compare_files detects modified files correctly\n3. Test compare_files detects deleted files correctly\n4. Test diff report includes all change types\n5. Test CI mode outputs GitHub Actions format\n6. Test dry-run mode completes without applying changes\n7. Test full workflow end-to-end with mock upstream",
             "parentId": "undefined"
           }
-        ]
+        ],
+        "updatedAt": "2026-01-27T17:16:17.746Z"
       },
       {
         "id": "4",
@@ -475,7 +477,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-01-27T17:08:56.789Z",
+      "lastModified": "2026-01-27T17:16:17.746Z",
       "taskCount": 8,
       "completedCount": 2,
       "tags": [
