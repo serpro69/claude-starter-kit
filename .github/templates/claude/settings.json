@@ -33,6 +33,7 @@
       "WebSearch"
     ],
     "deny": [
+      "Bash(rm:*)",
       "Bash(task-master:*)",
       "Read(./examples)",
       "Read(./**/consensus*.md)",
