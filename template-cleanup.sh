@@ -17,6 +17,7 @@
 #   --tm-append-prompt <p>    Additional content to append to Task Master prompt
 #   --tm-permission <mode>    Task Master permission mode (default: default)
 #   --no-commit               Skip git commit and push
+#   --ci                      CI mode: read from env vars, skip interactive prompts
 #   -y, --yes                 Skip confirmation prompt (for scripted use)
 #   -h, --help                Show this help message
 
@@ -33,6 +34,18 @@ NO_COMMIT=false
 SKIP_CONFIRM=false
 INTERACTIVE_MODE=false
 HAS_CLI_ARGS=false
+CI_MODE=false
+
+# Load configuration from environment variables
+# Called before CLI parsing so CLI args can override
+load_env_vars() {
+  CC_MODEL="${CC_MODEL:-default}"
+  LANGUAGE="${LANGUAGE:-}"
+  SERENA_INITIAL_PROMPT="${SERENA_INITIAL_PROMPT:-}"
+  TM_CUSTOM_SYSTEM_PROMPT="${TM_CUSTOM_SYSTEM_PROMPT:-}"
+  TM_APPEND_SYSTEM_PROMPT="${TM_APPEND_SYSTEM_PROMPT:-}"
+  TM_PERMISSION_MODE="${TM_PERMISSION_MODE:-default}"
+}
 
 # Color output
 RED='\033[0;31m'
@@ -83,6 +96,8 @@ Options:
   --tm-permission <mode>    Task Master permission mode (default: default)
                             Options: default, acceptEdits, plan, bypassPermissions
   --no-commit               Skip git commit and push
+  --ci                      CI mode: read config from environment variables,
+                            skip interactive prompts and repo name check
   -y, --yes                 Skip confirmation prompt (for scripted use)
   -h, --help                Show this help message
 
@@ -356,6 +371,9 @@ execute_cleanup() {
   echo ""
 }
 
+# Load environment variables as defaults (CLI args override)
+load_env_vars
+
 # Parse command-line arguments
 while [[ $# -gt 0 ]]; do
   HAS_CLI_ARGS=true
@@ -392,6 +410,11 @@ while [[ $# -gt 0 ]]; do
     SKIP_CONFIRM=true
     shift
     ;;
+  --ci)
+    CI_MODE=true
+    SKIP_CONFIRM=true
+    shift
+    ;;
   -h | --help)
     show_help
     exit 0
@@ -404,8 +427,8 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# If no CLI arguments provided, run in interactive mode
-if ! $HAS_CLI_ARGS; then
+# If no CLI arguments provided and not in CI mode, run in interactive mode
+if ! $HAS_CLI_ARGS && ! $CI_MODE; then
   INTERACTIVE_MODE=true
 fi
 
@@ -426,9 +449,9 @@ if [[ ! -d ".github/templates" ]]; then
   exit 1
 fi
 
-# Prevent running on the original template repository
+# Prevent running on the original template repository (skip in CI mode)
 REPO_NAME=$(basename "$REPO_ROOT")
-if [[ "$REPO_NAME" == "claude-starter-kit" ]]; then
+if [[ "$REPO_NAME" == "claude-starter-kit" ]] && ! $CI_MODE; then
   log_error "This script should not be run on the original claude-starter-kit repository"
   exit 1
 fi
