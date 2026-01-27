@@ -31,6 +31,7 @@ DRY_RUN=false
 CI_MODE=false
 TARGET_VERSION="latest"
 FETCHED_TEMPLATES_PATH=""
+SUBSTITUTED_TEMPLATES_PATH=""
 
 # =============================================================================
 # Color Output
@@ -280,6 +281,115 @@ fetch_upstream_templates() {
 }
 
 # =============================================================================
+# Substitution Functions
+# =============================================================================
+
+# Escape special characters for sed replacement
+# Usage: escaped=$(escape_sed_replacement "string with /special/ chars")
+escape_sed_replacement() {
+  local str="$1"
+  # Escape: & \ / and newlines for sed replacement string
+  printf '%s' "$str" | sed -e 's/[&\\/]/\\&/g' -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g'
+}
+
+# Apply variable substitutions to fetched templates
+# Usage: apply_substitutions "/path/to/templates" "/path/to/output"
+# Mirrors the substitution logic from template-cleanup.sh
+apply_substitutions() {
+  local template_dir="$1"
+  local output_dir="$2"
+
+  log_step "Applying substitutions from manifest"
+
+  # Copy templates to output directory (preserving permissions)
+  mkdir -p "$output_dir"
+  cp -rp "$template_dir"/* "$output_dir/"
+
+  # Read all variables from manifest
+  local project_name language cc_model
+  local serena_prompt tm_custom tm_append tm_permission
+
+  project_name=$(get_manifest_value '.variables.PROJECT_NAME')
+  language=$(get_manifest_value '.variables.LANGUAGE')
+  cc_model=$(get_manifest_value '.variables.CC_MODEL')
+  serena_prompt=$(get_manifest_value '.variables.SERENA_INITIAL_PROMPT')
+  tm_custom=$(get_manifest_value '.variables.TM_CUSTOM_SYSTEM_PROMPT')
+  tm_append=$(get_manifest_value '.variables.TM_APPEND_SYSTEM_PROMPT')
+  tm_permission=$(get_manifest_value '.variables.TM_PERMISSION_MODE')
+
+  # --- Claude Code Settings (claude/settings.json) ---
+  local cc_settings_file="$output_dir/claude/settings.json"
+  if [[ -f "$cc_settings_file" ]]; then
+    if [[ "$cc_model" == "default" ]]; then
+      # Remove the model line entirely so Claude Code uses its built-in default
+      sed -i '/"model":/d' "$cc_settings_file"
+    else
+      local escaped_model
+      escaped_model=$(escape_sed_replacement "$cc_model")
+      sed -i "s/\"model\": \".*\"/\"model\": \"$escaped_model\"/g" "$cc_settings_file"
+    fi
+    log_info "Applied Claude Code settings"
+  fi
+
+  # --- Serena Settings (serena/project.yml) ---
+  local serena_settings_file="$output_dir/serena/project.yml"
+  if [[ -f "$serena_settings_file" ]]; then
+    # Project name - always substitute
+    local escaped_project_name
+    escaped_project_name=$(escape_sed_replacement "$project_name")
+    sed -i "s/project_name: \".*\"/project_name: \"$escaped_project_name\"/g" "$serena_settings_file"
+
+    # Language - only substitute if provided
+    if [[ -n "$language" ]]; then
+      local escaped_language
+      escaped_language=$(escape_sed_replacement "$language")
+      sed -i "s/language: \".*\"/language: \"$escaped_language\"/g" "$serena_settings_file"
+    fi
+
+    # Initial prompt - only substitute if provided
+    if [[ -n "$serena_prompt" ]]; then
+      local escaped_serena_prompt
+      escaped_serena_prompt=$(escape_sed_replacement "$serena_prompt")
+      sed -i "s/initial_prompt: \"\"/initial_prompt: \"$escaped_serena_prompt\"/g" "$serena_settings_file"
+    fi
+    log_info "Applied Serena settings"
+  fi
+
+  # --- TaskMaster Settings (taskmaster/config.json) ---
+  local tm_settings_file="$output_dir/taskmaster/config.json"
+  if [[ -f "$tm_settings_file" ]]; then
+    # Project name - always substitute
+    local escaped_project_name_tm
+    escaped_project_name_tm=$(escape_sed_replacement "$project_name")
+    sed -i "s/\"projectName\": \".*\"/\"projectName\": \"$escaped_project_name_tm\"/g" "$tm_settings_file"
+
+    # Custom system prompt - only substitute if provided
+    if [[ -n "$tm_custom" ]]; then
+      local escaped_tm_custom
+      escaped_tm_custom=$(escape_sed_replacement "$tm_custom")
+      sed -i "s/\"customSystemPrompt\": \"\"/\"customSystemPrompt\": \"$escaped_tm_custom\"/g" "$tm_settings_file"
+    fi
+
+    # Append system prompt - only substitute if provided
+    if [[ -n "$tm_append" ]]; then
+      local escaped_tm_append
+      escaped_tm_append=$(escape_sed_replacement "$tm_append")
+      sed -i "s/\"appendSystemPrompt\": \"\"/\"appendSystemPrompt\": \"$escaped_tm_append\"/g" "$tm_settings_file"
+    fi
+
+    # Permission mode - only substitute if provided
+    if [[ -n "$tm_permission" ]]; then
+      local escaped_tm_permission
+      escaped_tm_permission=$(escape_sed_replacement "$tm_permission")
+      sed -i "s/\"permissionMode\": \"\"/\"permissionMode\": \"$escaped_tm_permission\"/g" "$tm_settings_file"
+    fi
+    log_info "Applied TaskMaster settings"
+  fi
+
+  log_success "Substitutions applied to $output_dir"
+}
+
+# =============================================================================
 # Help / Usage
 # =============================================================================
 
@@ -437,8 +547,19 @@ main() {
     echo ""
   fi
 
-  # TODO: Implement substitution and comparison (Task 3.4+)
-  log_info "Version resolution and fetching complete - substitution logic to be implemented"
+  # Apply substitutions to fetched templates
+  SUBSTITUTED_TEMPLATES_PATH="$STAGING_DIR/substituted"
+  apply_substitutions "$FETCHED_TEMPLATES_PATH" "$SUBSTITUTED_TEMPLATES_PATH"
+
+  # Display substituted templates info
+  if ! $CI_MODE; then
+    echo ""
+    echo "  Substituted to: $SUBSTITUTED_TEMPLATES_PATH"
+    echo ""
+  fi
+
+  # TODO: Implement comparison and diff report (Task 3.5+)
+  log_info "Substitution complete - comparison logic to be implemented"
 }
 
 # Run main with all arguments
