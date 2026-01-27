@@ -33,6 +33,15 @@ TARGET_VERSION="latest"
 FETCHED_TEMPLATES_PATH=""
 SUBSTITUTED_TEMPLATES_PATH=""
 
+# File change tracking arrays
+ADDED_FILES=()
+MODIFIED_FILES=()
+DELETED_FILES=()
+UNCHANGED_FILES=()
+
+# Resolved version (for reporting)
+RESOLVED_VERSION=""
+
 # =============================================================================
 # Color Output
 # =============================================================================
@@ -390,6 +399,262 @@ apply_substitutions() {
 }
 
 # =============================================================================
+# File Comparison Functions
+# =============================================================================
+
+# Compare staging directory against current project directories
+# Usage: compare_files "/path/to/staging"
+# Populates: ADDED_FILES, MODIFIED_FILES, DELETED_FILES, UNCHANGED_FILES
+compare_files() {
+  local staging_dir="$1"
+
+  log_step "Comparing files with current project"
+
+  # Reset arrays
+  ADDED_FILES=()
+  MODIFIED_FILES=()
+  DELETED_FILES=()
+  UNCHANGED_FILES=()
+
+  # Directories to compare (staging subdir -> project dir)
+  local -A dir_map=(
+    ["claude"]=".claude"
+    ["serena"]=".serena"
+    ["taskmaster"]=".taskmaster"
+  )
+
+  for staging_subdir in "${!dir_map[@]}"; do
+    local project_dir="${dir_map[$staging_subdir]}"
+    local staging_path="$staging_dir/$staging_subdir"
+
+    # Skip if staging subdir doesn't exist
+    [[ ! -d "$staging_path" ]] && continue
+
+    # Find all files in staging
+    while IFS= read -r -d '' staging_file; do
+      local relative_path="${staging_file#$staging_path/}"
+      local project_file="$project_dir/$relative_path"
+      local display_path="$project_dir/$relative_path"
+
+      if [[ ! -f "$project_file" ]]; then
+        # File exists in staging but not in project -> Added
+        ADDED_FILES+=("$display_path")
+      elif ! diff -q "$staging_file" "$project_file" &>/dev/null; then
+        # Files differ -> Modified
+        MODIFIED_FILES+=("$display_path")
+      else
+        # Files are identical -> Unchanged
+        UNCHANGED_FILES+=("$display_path")
+      fi
+    done < <(find "$staging_path" -type f -print0 2>/dev/null)
+
+    # Find deleted files (exist in project but not in staging)
+    if [[ -d "$project_dir" ]]; then
+      while IFS= read -r -d '' project_file; do
+        local relative_path="${project_file#$project_dir/}"
+        local staging_file="$staging_path/$relative_path"
+        local display_path="$project_dir/$relative_path"
+
+        if [[ ! -f "$staging_file" ]]; then
+          # File exists in project but not in staging -> Deleted
+          DELETED_FILES+=("$display_path")
+        fi
+      done < <(find "$project_dir" -type f -print0 2>/dev/null)
+    fi
+  done
+
+  # Also check for bootstrap.sh at root
+  if [[ -f "$staging_dir/bootstrap.sh" ]]; then
+    if [[ ! -f "bootstrap.sh" ]]; then
+      ADDED_FILES+=("bootstrap.sh")
+    elif ! diff -q "$staging_dir/bootstrap.sh" "bootstrap.sh" &>/dev/null; then
+      MODIFIED_FILES+=("bootstrap.sh")
+    else
+      UNCHANGED_FILES+=("bootstrap.sh")
+    fi
+  elif [[ -f "bootstrap.sh" ]]; then
+    DELETED_FILES+=("bootstrap.sh")
+  fi
+
+  log_success "Comparison complete: ${#ADDED_FILES[@]} added, ${#MODIFIED_FILES[@]} modified, ${#DELETED_FILES[@]} deleted, ${#UNCHANGED_FILES[@]} unchanged"
+}
+
+# Generate a human-readable diff report
+# Usage: generate_diff_report "/path/to/staging"
+# In CI mode, also outputs GitHub Actions format
+generate_diff_report() {
+  local staging_dir="$1"
+  local total_changes=$((${#ADDED_FILES[@]} + ${#MODIFIED_FILES[@]} + ${#DELETED_FILES[@]}))
+  local has_changes=false
+  [[ $total_changes -gt 0 ]] && has_changes=true
+
+  # CI mode: output GitHub Actions format
+  if $CI_MODE; then
+    if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
+      # Write to GITHUB_OUTPUT file
+      {
+        echo "has_changes=$has_changes"
+        echo "added_count=${#ADDED_FILES[@]}"
+        echo "modified_count=${#MODIFIED_FILES[@]}"
+        echo "deleted_count=${#DELETED_FILES[@]}"
+        echo "unchanged_count=${#UNCHANGED_FILES[@]}"
+        echo "total_changes=$total_changes"
+        echo "resolved_version=$RESOLVED_VERSION"
+        echo "diff_summary<<EOF"
+        generate_markdown_summary "$staging_dir"
+        echo "EOF"
+      } >> "$GITHUB_OUTPUT"
+    else
+      # Output to stdout for local testing
+      echo "::group::GitHub Actions Outputs"
+      echo "has_changes=$has_changes"
+      echo "added_count=${#ADDED_FILES[@]}"
+      echo "modified_count=${#MODIFIED_FILES[@]}"
+      echo "deleted_count=${#DELETED_FILES[@]}"
+      echo "unchanged_count=${#UNCHANGED_FILES[@]}"
+      echo "total_changes=$total_changes"
+      echo "resolved_version=$RESOLVED_VERSION"
+      echo "::endgroup::"
+    fi
+  fi
+
+  # Human-readable output
+  echo ""
+  echo -e "${BOLD}═══════════════════════════════════════════════════════════════${NC}"
+  echo -e "${BOLD}                    Template Sync Report                        ${NC}"
+  echo -e "${BOLD}═══════════════════════════════════════════════════════════════${NC}"
+  echo ""
+
+  local current_version
+  current_version=$(get_manifest_value '.template_version')
+  echo -e "  ${CYAN}From:${NC} $current_version"
+  echo -e "  ${CYAN}To:${NC}   $RESOLVED_VERSION"
+  echo ""
+
+  if ! $has_changes; then
+    echo -e "  ${GREEN}No changes detected - templates are up to date${NC}"
+    echo ""
+    return
+  fi
+
+  echo -e "  ${CYAN}Summary:${NC}"
+  echo -e "    Added:     ${GREEN}${#ADDED_FILES[@]}${NC}"
+  echo -e "    Modified:  ${YELLOW}${#MODIFIED_FILES[@]}${NC}"
+  echo -e "    Deleted:   ${RED}${#DELETED_FILES[@]}${NC}"
+  echo -e "    Unchanged: ${#UNCHANGED_FILES[@]}"
+  echo ""
+
+  # List added files
+  if [[ ${#ADDED_FILES[@]} -gt 0 ]]; then
+    echo -e "  ${GREEN}Added files:${NC}"
+    for file in "${ADDED_FILES[@]}"; do
+      echo -e "    ${GREEN}+${NC} $file"
+    done
+    echo ""
+  fi
+
+  # List modified files with inline diffs
+  if [[ ${#MODIFIED_FILES[@]} -gt 0 ]]; then
+    echo -e "  ${YELLOW}Modified files:${NC}"
+    for file in "${MODIFIED_FILES[@]}"; do
+      echo -e "    ${YELLOW}~${NC} $file"
+    done
+    echo ""
+
+    # Show diffs for modified files (limited to first 20 lines each)
+    if ! $CI_MODE; then
+      echo -e "  ${CYAN}Diffs:${NC}"
+      for file in "${MODIFIED_FILES[@]}"; do
+        local staging_file
+        # Map project path back to staging path
+        if [[ "$file" == ".claude/"* ]]; then
+          staging_file="$staging_dir/claude/${file#.claude/}"
+        elif [[ "$file" == ".serena/"* ]]; then
+          staging_file="$staging_dir/serena/${file#.serena/}"
+        elif [[ "$file" == ".taskmaster/"* ]]; then
+          staging_file="$staging_dir/taskmaster/${file#.taskmaster/}"
+        else
+          staging_file="$staging_dir/$file"
+        fi
+
+        if [[ -f "$staging_file" && -f "$file" ]]; then
+          echo ""
+          echo -e "    ${BOLD}--- $file${NC}"
+          diff -u "$file" "$staging_file" 2>/dev/null | head -30 | sed 's/^/    /' || true
+        fi
+      done
+      echo ""
+    fi
+  fi
+
+  # List deleted files
+  if [[ ${#DELETED_FILES[@]} -gt 0 ]]; then
+    echo -e "  ${RED}Deleted files:${NC}"
+    for file in "${DELETED_FILES[@]}"; do
+      echo -e "    ${RED}-${NC} $file"
+    done
+    echo ""
+  fi
+
+  echo -e "${BOLD}═══════════════════════════════════════════════════════════════${NC}"
+  echo ""
+
+  if $DRY_RUN; then
+    echo -e "  ${YELLOW}Dry run mode - no changes applied${NC}"
+    echo -e "  Run without --dry-run to apply these changes"
+    echo ""
+  fi
+}
+
+# Generate markdown summary for PR body
+generate_markdown_summary() {
+  local staging_dir="$1"
+  local current_version
+  current_version=$(get_manifest_value '.template_version')
+
+  echo "## Template Sync Summary"
+  echo ""
+  echo "**From:** \`$current_version\`"
+  echo "**To:** \`$RESOLVED_VERSION\`"
+  echo ""
+  echo "### Changes"
+  echo ""
+  echo "| Type | Count |"
+  echo "|------|-------|"
+  echo "| Added | ${#ADDED_FILES[@]} |"
+  echo "| Modified | ${#MODIFIED_FILES[@]} |"
+  echo "| Deleted | ${#DELETED_FILES[@]} |"
+  echo ""
+
+  if [[ ${#ADDED_FILES[@]} -gt 0 ]]; then
+    echo "### Added Files"
+    echo ""
+    for file in "${ADDED_FILES[@]}"; do
+      echo "- \`$file\`"
+    done
+    echo ""
+  fi
+
+  if [[ ${#MODIFIED_FILES[@]} -gt 0 ]]; then
+    echo "### Modified Files"
+    echo ""
+    for file in "${MODIFIED_FILES[@]}"; do
+      echo "- \`$file\`"
+    done
+    echo ""
+  fi
+
+  if [[ ${#DELETED_FILES[@]} -gt 0 ]]; then
+    echo "### Deleted Files"
+    echo ""
+    for file in "${DELETED_FILES[@]}"; do
+      echo "- \`$file\`"
+    done
+    echo ""
+  fi
+}
+
+# =============================================================================
 # Help / Usage
 # =============================================================================
 
@@ -533,12 +798,11 @@ main() {
 
   # Resolve target version
   log_step "Resolving version: $TARGET_VERSION"
-  local resolved_version
-  resolved_version=$(resolve_version "$TARGET_VERSION" "$upstream_repo")
-  log_info "Resolved version: $resolved_version"
+  RESOLVED_VERSION=$(resolve_version "$TARGET_VERSION" "$upstream_repo")
+  log_info "Resolved version: $RESOLVED_VERSION"
 
   # Fetch upstream templates (sets FETCHED_TEMPLATES_PATH)
-  fetch_upstream_templates "$resolved_version" "$upstream_repo" "$STAGING_DIR"
+  fetch_upstream_templates "$RESOLVED_VERSION" "$upstream_repo" "$STAGING_DIR"
 
   # Display fetched templates info
   if ! $CI_MODE; then
@@ -558,8 +822,20 @@ main() {
     echo ""
   fi
 
-  # TODO: Implement comparison and diff report (Task 3.5+)
-  log_info "Substitution complete - comparison logic to be implemented"
+  # Compare files and generate report
+  compare_files "$SUBSTITUTED_TEMPLATES_PATH"
+  generate_diff_report "$SUBSTITUTED_TEMPLATES_PATH"
+
+  # Summary
+  local total_changes=$((${#ADDED_FILES[@]} + ${#MODIFIED_FILES[@]} + ${#DELETED_FILES[@]}))
+  if [[ $total_changes -eq 0 ]]; then
+    log_success "Templates are up to date - no changes needed"
+  elif $DRY_RUN; then
+    log_info "Dry run complete - $total_changes file(s) would be changed"
+  else
+    log_info "Sync complete - $total_changes file(s) identified for update"
+    log_info "Review the changes above and apply manually or via PR"
+  fi
 }
 
 # Run main with all arguments
