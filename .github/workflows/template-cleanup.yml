@@ -71,80 +71,18 @@ jobs:
       - name: Fetch Sources
         uses: actions/checkout@v4
 
-      # Cleanup project
+      # Cleanup project using the template-cleanup.sh script
       - name: Cleanup
+        env:
+          CC_MODEL: ${{ github.event.inputs.CC_MODEL }}
+          LANGUAGE: ${{ github.event.inputs.LANGUAGE }}
+          SERENA_INITIAL_PROMPT: ${{ github.event.inputs.SERENA_INITIAL_PROMPT }}
+          TM_CUSTOM_SYSTEM_PROMPT: ${{ github.event.inputs.TM_CUSTOM_SYSTEM_PROMPT }}
+          TM_APPEND_SYSTEM_PROMPT: ${{ github.event.inputs.TM_APPEND_SYSTEM_PROMPT }}
+          TM_PERMISSION_MODE: ${{ github.event.inputs.TM_PERMISSION_MODE }}
         run: |
-          export LC_CTYPE=C
-          export LANG=C
-
-          # Prepare repository-specific variables
-          NAME="${GITHUB_REPOSITORY##*/}"
-
-          # Get workflow input variables
-          LANGUAGE="${{ github.event.inputs.LANGUAGE }}"
-          CC_MODEL="${{ github.event.inputs.CC_MODEL }}"
-          SERENA_INITIAL_PROMPT="${{ github.event.inputs.SERENA_INITIAL_PROMPT }}"
-          TM_CUSTOM_SYSTEM_PROMPT="${{ github.event.inputs.TM_CUSTOM_SYSTEM_PROMPT }}"
-          TM_APPEND_SYSTEM_PROMPT="${{ github.event.inputs.TM_APPEND_SYSTEM_PROMPT }}"
-          TM_PERMISSION_MODE="${{ github.event.inputs.TM_PERMISSION_MODE }}"
-
-          # Substitute default values with user-provided values
-          # Note: Templates now use actual working values instead of placeholders
-
-          # Claude Code Settings
-          cc_settings_file=".github/templates/claude/settings.json"
-          # Claude Code model - always substitute (user selects from dropdown)
-          sed -i "s/\"model\": \".*\"/\"model\": \"$CC_MODEL\"/g" "$cc_settings_file"
-
-          # Serena MCP Settings
-          serena_settings_file=".github/templates/serena/project.yml"
-          # Project name - always substitute with repo name
-          sed -i "s/project_name: \".*\"/project_name: \"$NAME\"/g" "$serena_settings_file"
-          # Language - only substitute if provided
-          if [ -n "$LANGUAGE" ]; then
-            sed -i "s/language: \".*\"/language: \"$LANGUAGE\"/g" "$serena_settings_file"
-          fi
-          # Serena initial prompt - only substitute if provided
-          if [ -n "$SERENA_INITIAL_PROMPT" ]; then
-            sed -i "s/initial_prompt: \"\"/initial_prompt: \"$SERENA_INITIAL_PROMPT\"/g" "$serena_settings_file"
-          fi
-
-          # TaskMaster MCP Settings
-          tm_settings_file=".github/templates/taskmaster/config.json"
-          # Project name - always substitute with repo name
-          sed -i "s/\"projectName\": \".*\"/\"projectName\": \"$NAME\"/g" "$tm_settings_file"
-          # Task Master prompts - only substitute if provided
-          if [ -n "$TM_CUSTOM_SYSTEM_PROMPT" ]; then
-            sed -i "s/\"customSystemPrompt\": \"\"/\"customSystemPrompt\": \"$TM_CUSTOM_SYSTEM_PROMPT\"/g" "$tm_settings_file"
-          fi
-          if [ -n "$TM_APPEND_SYSTEM_PROMPT" ]; then
-            sed -i "s/\"appendSystemPrompt\": \"\"/\"appendSystemPrompt\": \"$TM_APPEND_SYSTEM_PROMPT\"/g" "$tm_settings_file"
-          fi
-          if [ -n "$TM_PERMISSION_MODE" ]; then
-            sed -i "s/\"permissionMode\": \"\"/\"permissionMode\": \"$TM_PERMISSION_MODE\"/g" "$tm_settings_file"
-          fi
-
-          rm -rf .claude .serena .taskmaster
-
-          # Deploy templates to destination locations
-          cp -r .github/templates/claude ./.claude
-          cp -r .github/templates/serena ./.serena
-          cp -r .github/templates/taskmaster ./.taskmaster
-          cp .github/templates/bootstrap.sh .
-
-          # Complete cleanup - remove everything except preserved files/directories
-          # Preserve: .git/, .gitignore, .serena/, .taskmaster/, .claude/
-          find . -mindepth 1 -maxdepth 1 \
-            ! -name '.git' \
-            ! -name '.gitignore' \
-            ! -name '.claude' \
-            ! -name '.serena' \
-            ! -name '.taskmaster' \
-            ! -name 'bootstrap.sh' \
-            -exec rm -rf {} +
-
-          # Generate minimal README
-          echo "# $NAME" > README.md
+          chmod +x template-cleanup.sh
+          ./template-cleanup.sh --ci --no-commit
 
       # Commit modified files
       - name: Commit files
