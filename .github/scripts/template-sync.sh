@@ -33,6 +33,9 @@ TARGET_VERSION="latest"
 FETCHED_TEMPLATES_PATH=""
 SUBSTITUTED_TEMPLATES_PATH=""
 
+# Temp directory for cleanup tracking (set when using auto-generated staging dir)
+TEMP_DIR=""
+
 # File change tracking arrays
 ADDED_FILES=()
 MODIFIED_FILES=()
@@ -76,6 +79,26 @@ log_success() {
 
 log_step() {
   echo -e "${CYAN}>>>${NC} $1"
+}
+
+# =============================================================================
+# Cleanup Functions
+# =============================================================================
+
+# Cleanup handler that preserves exit code
+# Called on EXIT, INT, TERM signals
+cleanup_on_exit() {
+  local exit_code=$?
+
+  # Only clean up if TEMP_DIR is set and exists
+  if [[ -n "${TEMP_DIR:-}" && -d "$TEMP_DIR" ]]; then
+    rm -rf "$TEMP_DIR"
+    if ! $CI_MODE; then
+      log_info "Cleaned up temporary directory"
+    fi
+  fi
+
+  exit $exit_code
 }
 
 # =============================================================================
@@ -138,13 +161,22 @@ read_manifest() {
   # Check if manifest file exists
   if [[ ! -f "$MANIFEST_PATH" ]]; then
     log_error "Manifest file not found: $MANIFEST_PATH"
-    log_error "This repository may not have been initialized with .github/scripts/template-cleanup.sh"
+    log_error ""
+    log_error "This repository doesn't have a template state manifest."
+    log_error "Possible reasons:"
+    log_error "  - The repository was created before the sync feature was available"
+    log_error "  - The cleanup script was run with an older version"
+    log_error "  - The manifest file was accidentally deleted"
+    log_error ""
+    log_error "To create a manifest manually, see the template documentation."
     exit 1
   fi
 
   # Validate JSON syntax
   if ! jq -e '.' "$MANIFEST_PATH" &>/dev/null; then
     log_error "Invalid JSON in manifest file: $MANIFEST_PATH"
+    log_error "The manifest file is not valid JSON. It may be corrupted."
+    log_error "Please check the file for syntax errors or restore it from version control."
     exit 1
   fi
 
@@ -153,6 +185,7 @@ read_manifest() {
   for field in "${required_fields[@]}"; do
     if [[ "$(get_manifest_value ".$field // empty")" == "" ]]; then
       log_error "Missing required field in manifest: $field"
+      log_error "The manifest file may be incomplete or corrupted."
       exit 1
     fi
   done
@@ -164,9 +197,18 @@ read_manifest() {
 validate_manifest() {
   # Check schema version
   local schema_version
-  schema_version=$(get_manifest_value '.schema_version')
+  schema_version=$(get_manifest_value '.schema_version // empty')
+
+  if [[ -z "$schema_version" ]]; then
+    log_error "Invalid manifest: missing schema_version"
+    log_error "The manifest file may be corrupted or from an incompatible version."
+    exit 1
+  fi
+
   if [[ "$schema_version" != "1" ]]; then
-    log_error "Unsupported manifest schema version: $schema_version (expected: 1)"
+    log_error "Manifest schema version $schema_version is not supported"
+    log_error "This sync script supports schema version 1."
+    log_error "Please update the template-sync script or migrate your manifest."
     exit 1
   fi
 
@@ -252,18 +294,34 @@ fetch_upstream_templates() {
   local work_dir="$3"
   local repo_url="https://github.com/$upstream.git"
 
+  # Retry configuration
+  local max_retries=3
+  local retry_delay=5
+  local attempt
+
   log_step "Fetching templates from $upstream @ $version"
 
   # Create work directory
   mkdir -p "$work_dir"
 
-  # Clone with blob filter for efficiency (don't use --sparse flag for compatibility)
-  if ! git clone --depth 1 --filter=blob:none \
-    "$repo_url" "$work_dir/upstream" --quiet 2>/dev/null; then
-    log_error "Failed to clone upstream repository: $repo_url"
-    log_error "Please check your network connection and try again"
-    exit 1
-  fi
+  # Clone with blob filter for efficiency (with retry logic)
+  for ((attempt=1; attempt<=max_retries; attempt++)); do
+    if git clone --depth 1 --filter=blob:none \
+      "$repo_url" "$work_dir/upstream" --quiet 2>/dev/null; then
+      break
+    fi
+
+    if ((attempt < max_retries)); then
+      log_warn "Clone failed, retrying in ${retry_delay}s (attempt $attempt/$max_retries)"
+      sleep "$retry_delay"
+      rm -rf "$work_dir/upstream" 2>/dev/null || true
+    else
+      log_error "Failed to fetch upstream after $max_retries attempts"
+      log_error "Unable to reach GitHub. Please check your network connection and try again."
+      log_error "Repository URL: $repo_url"
+      exit 1
+    fi
+  done
 
   cd "$work_dir/upstream"
 
@@ -273,22 +331,25 @@ fetch_upstream_templates() {
   current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
 
   if [[ "$version" != "HEAD" && "$version" != "$current_branch" ]]; then
-    # Fetch the specific version
+    # Fetch the specific version (try branch first, then tag)
     if ! git fetch --depth 1 origin "$version" --quiet 2>/dev/null; then
       # Try as a tag
       if ! git fetch --depth 1 origin "refs/tags/$version:refs/tags/$version" --quiet 2>/dev/null; then
-        log_error "Failed to fetch version: $version"
-        log_error "The version may not exist in the upstream repository"
+        log_error "Invalid version: $version"
+        log_error "The specified version does not exist in the upstream repository."
+        log_error "Use 'latest' for the most recent release, 'main' for bleeding edge,"
+        log_error "or specify a valid tag like 'v1.0.0'."
         cd - >/dev/null
         exit 1
       fi
     fi
 
-    # Checkout the fetched version
+    # Checkout the fetched version (try branch, then tag, then FETCH_HEAD)
     if ! git checkout "$version" --quiet 2>/dev/null; then
       if ! git checkout "tags/$version" --quiet 2>/dev/null; then
         if ! git checkout FETCH_HEAD --quiet 2>/dev/null; then
           log_error "Failed to checkout version: $version"
+          log_error "The version was fetched but checkout failed unexpectedly."
           cd - >/dev/null
           exit 1
         fi
@@ -297,8 +358,12 @@ fetch_upstream_templates() {
   fi
 
   # Configure sparse-checkout to only fetch template files
-  git sparse-checkout init --cone --quiet 2>/dev/null || true
-  git sparse-checkout set .github/templates --quiet 2>/dev/null || true
+  if ! git sparse-checkout init --cone --quiet 2>/dev/null; then
+    log_warn "Sparse-checkout init failed, continuing with full checkout"
+  fi
+  if ! git sparse-checkout set .github/templates --quiet 2>/dev/null; then
+    log_warn "Sparse-checkout set failed, templates may not exist at this version"
+  fi
 
   cd - >/dev/null
 
@@ -307,6 +372,8 @@ fetch_upstream_templates() {
   if [[ ! -d "$FETCHED_TEMPLATES_PATH" ]]; then
     log_error "Templates directory not found in upstream at version: $version"
     log_error "Expected path: .github/templates"
+    log_error "The upstream repository may not have templates at this version,"
+    log_error "or the repository structure has changed."
     exit 1
   fi
 
@@ -781,6 +848,9 @@ parse_arguments() {
 # =============================================================================
 
 main() {
+  # Register cleanup trap early for signal handling
+  trap cleanup_on_exit EXIT INT TERM
+
   # Check dependencies first
   check_dependencies
 
@@ -789,8 +859,13 @@ main() {
 
   # Set default staging directory if not provided
   if [[ -z "$STAGING_DIR" ]]; then
-    STAGING_DIR=$(mktemp -d)
-    trap 'rm -rf "$STAGING_DIR"' EXIT
+    STAGING_DIR=$(mktemp -d "/tmp/template-sync.XXXXXX")
+    # Track temp directory for cleanup
+    TEMP_DIR="$STAGING_DIR"
+    if [[ ! -d "$STAGING_DIR" ]]; then
+      log_error "Failed to create temporary directory"
+      exit 1
+    fi
   fi
 
   # Display configuration in non-CI mode

@@ -381,7 +381,7 @@
           "4",
           "6"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -389,9 +389,10 @@
             "description": "Add robust retry logic to the fetch_upstream_templates() function to handle transient network failures when cloning from the upstream repository.",
             "dependencies": [],
             "details": "Enhance the fetch_upstream_templates() function in .github/scripts/template-sync.sh with:\n\n1. **Retry configuration variables:**\n   - max_retries=3\n   - retry_delay=5 (seconds)\n\n2. **Retry loop implementation:**\n   - Wrap git clone in a retry loop with exponential backoff consideration\n   - Log warning on each failed attempt with attempt count\n   - Clean up temp_dir between retries using rm -rf\n   - Exit with clear error after exhausting all retries\n\n3. **Git sparse-checkout error handling:**\n   - Wrap sparse-checkout set in error check with descriptive message\n   - Handle case where .github/templates directory doesn't exist upstream\n\n4. **Version checkout fallback chain:**\n   - Try tag first: git checkout \"tags/$version\"\n   - Fall back to branch: git checkout \"$version\"\n   - Fall back to origin ref: git checkout \"origin/$version\"\n   - Provide actionable error message listing valid options (tag, branch, SHA)\n\n5. **User-friendly error messages:**\n   - \"Unable to reach GitHub. Please check your network connection and try again.\"\n   - \"Failed to fetch upstream after N attempts. Check network connectivity and repository availability.\"\n   - \"Version 'X' not found. Use 'latest' for recent release, 'main' for bleeding edge, or a valid tag like 'v1.0.0'.\"",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "1. Test with blocked network access to verify retry logic triggers\n2. Verify retry delay occurs between attempts using time measurements\n3. Test with non-existent repository URL to confirm proper failure message\n4. Test sparse-checkout failure with repository lacking .github/templates\n5. Test version fallback chain with valid tag, valid branch, invalid version\n6. Verify temp directory cleanup occurs between retry attempts",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-01-31T18:36:59.425Z"
           },
           {
             "id": 2,
@@ -401,9 +402,10 @@
               1
             ],
             "details": "Add manifest validation to template-sync.sh:\n\n1. **Create validate_manifest() function:**\n   - Parse schema_version from manifest using get_manifest_value\n   - Handle missing schema_version with descriptive error\n\n2. **Schema version validation:**\n   - Currently support only schema_version=\"1\"\n   - For unsupported versions, provide clear error:\n     - \"Manifest schema version X is not supported\"\n     - \"This sync script supports schema version 1\"\n     - \"Please update the template-sync script or migrate your manifest\"\n\n3. **Required field validation:**\n   - Define required fields array: .upstream_repo, .template_version, .variables.PROJECT_NAME\n   - Iterate and check each field exists and is non-empty\n   - Report first missing field with clear error message\n\n4. **JSON parsing error handling:**\n   - Catch jq parsing errors for malformed JSON\n   - Provide error: \"Manifest file is not valid JSON. It may be corrupted.\"\n   - Include file path in error for debugging\n\n5. **Missing manifest handling:**\n   - Check if .github/template-state.json exists before reading\n   - Provide migration guidance: \"This repository doesn't have a template state manifest. It may have been created before the sync feature was available, or cleanup was run with an older version.\"\n   - Include link or instructions for manual manifest creation",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "1. Test with missing manifest file - verify proper error and migration guidance\n2. Test with malformed JSON (missing brackets, invalid syntax)\n3. Test manifest missing schema_version field\n4. Test manifest with unsupported schema_version (e.g., \"2\", \"0\", \"invalid\")\n5. Test manifest missing each required field individually\n6. Test manifest with empty string values for required fields\n7. Test valid manifest passes all validation checks",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-01-31T18:36:59.429Z"
           },
           {
             "id": 3,
@@ -413,9 +415,10 @@
               1
             ],
             "details": "Add robust cleanup handling to template-sync.sh:\n\n1. **Define cleanup_on_exit() function:**\n```bash\ncleanup_on_exit() {\n  local exit_code=$?\n  if [[ -n \"${TEMP_DIR:-}\" && -d \"$TEMP_DIR\" ]]; then\n    rm -rf \"$TEMP_DIR\"\n    log_info \"Cleaned up temporary directory\"\n  fi\n  exit $exit_code\n}\n```\n\n2. **Register trap early in script:**\n   - Place trap registration after variable declarations, before main logic\n   - trap cleanup_on_exit EXIT\n   - Consider also trapping INT, TERM for signal handling\n\n3. **Temporary directory creation safety:**\n   - Use mktemp -d with descriptive prefix: mktemp -d \"/tmp/template-sync.XXXXXX\"\n   - Store path in TEMP_DIR variable immediately after creation\n   - Verify directory was created successfully before proceeding\n\n4. **Error propagation:**\n   - Ensure exit code is preserved through cleanup\n   - Use $? capture at start of cleanup function\n   - Re-exit with original exit code after cleanup\n\n5. **Verbose cleanup in CI mode:**\n   - In CI mode, log when cleanup occurs for debugging\n   - Consider preserving temp dir on failure in dry-run mode for inspection",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "1. Verify temp directory is cleaned on successful script completion\n2. Verify temp directory is cleaned on script error (exit 1)\n3. Verify temp directory is cleaned on SIGINT (Ctrl+C)\n4. Verify temp directory is cleaned on SIGTERM\n5. Test that exit code is preserved through cleanup (error exit codes pass through)\n6. Verify cleanup handles case where TEMP_DIR was never set\n7. Verify cleanup handles case where temp directory was already deleted",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-01-31T18:36:59.437Z"
           },
           {
             "id": 4,
@@ -426,11 +429,13 @@
               3
             ],
             "details": "Enhance .github/workflows/template-sync.yml error handling:\n\n1. **Add continue-on-error with explicit failure handling:**\n```yaml\n- name: Run sync script\n  id: sync\n  continue-on-error: true\n  run: |\n    chmod +x .github/scripts/template-sync.sh\n    .github/scripts/template-sync.sh --version \"${{ inputs.version }}\" ${{ inputs.dry_run && '--dry-run' || '' }} --ci\n\n- name: Handle sync failure\n  if: steps.sync.outcome == 'failure'\n  run: |\n    echo \"::error::Template sync failed. Check the logs above for details.\"\n    echo \"### ❌ Sync Failed\" >> $GITHUB_STEP_SUMMARY\n    echo \"\" >> $GITHUB_STEP_SUMMARY\n    echo \"Check the 'Run sync script' step logs for error details.\" >> $GITHUB_STEP_SUMMARY\n    exit 1\n```\n\n2. **Manifest validation step:**\n   - Add separate step to check manifest exists before running sync\n   - Provide clear error with migration instructions if missing\n   - Link to documentation for manual manifest creation\n\n3. **PR creation error handling:**\n   - Wrap PR creation in error handling\n   - Handle case where branch already exists from previous failed run\n   - Handle case where PR already exists (update instead of create)\n\n4. **Job summary for errors:**\n   - Write error summaries to GITHUB_STEP_SUMMARY\n   - Include actionable next steps for common errors\n   - Include link to troubleshooting documentation\n\n5. **Artifact upload on failure:**\n   - Upload diff report and logs even on failure for debugging\n   - Use if: always() for artifact upload step",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "1. Trigger workflow with missing manifest and verify proper error message and summary\n2. Trigger workflow with invalid version and verify error handling\n3. Verify workflow artifacts are uploaded even on failure\n4. Test PR creation failure handling (existing branch, existing PR)\n5. Verify GITHUB_STEP_SUMMARY contains useful error information on failure\n6. Test that dry_run mode still shows errors appropriately\n7. Verify workflow fails with non-zero exit code when sync fails",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-01-31T18:36:59.440Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-01-31T18:36:59.440Z"
       },
       {
         "id": "8",
@@ -494,9 +499,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-01-31T18:31:45.473Z",
+      "lastModified": "2026-01-31T18:36:59.440Z",
       "taskCount": 8,
-      "completedCount": 6,
+      "completedCount": 7,
       "tags": [
         "master"
       ]
