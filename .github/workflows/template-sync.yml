@@ -43,9 +43,30 @@ jobs:
         id: manifest
         run: |
           if [[ ! -f ".github/template-state.json" ]]; then
-            echo "::error::Manifest file .github/template-state.json not found. This repository may not have been created from the template or the manifest was deleted."
+            echo "::error::Manifest file .github/template-state.json not found."
+            echo "### ❌ Manifest Not Found" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "This repository doesn't have a template state manifest at \`.github/template-state.json\`." >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "**Possible causes:**" >> "$GITHUB_STEP_SUMMARY"
+            echo "- The repository was created before the sync feature was available" >> "$GITHUB_STEP_SUMMARY"
+            echo "- The cleanup script was run with an older version" >> "$GITHUB_STEP_SUMMARY"
+            echo "- The manifest file was accidentally deleted" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "**To fix this:** Re-run the template-cleanup workflow or manually create the manifest file." >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
+
+          # Validate JSON syntax
+          if ! jq -e '.' .github/template-state.json >/dev/null 2>&1; then
+            echo "::error::Manifest file contains invalid JSON."
+            echo "### ❌ Invalid Manifest" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "The manifest file \`.github/template-state.json\` contains invalid JSON." >> "$GITHUB_STEP_SUMMARY"
+            echo "Please check for syntax errors or restore the file from version control." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
           # Capture current version before sync
           old_version=$(jq -r '.template_version // "unknown"' .github/template-state.json)
           echo "old_version=$old_version" >> "$GITHUB_OUTPUT"
@@ -58,6 +79,7 @@ jobs:
 
       - name: Run Template Sync
         id: sync
+        continue-on-error: true
         run: |
           chmod +x .github/scripts/template-sync.sh
           mkdir -p .github/reports
@@ -67,6 +89,25 @@ jobs:
             --output-dir .github/sync-staging \
             ${{ inputs.dry_run == true && '--dry-run' || '' }} \
             | tee .github/reports/sync-output.txt
+
+      - name: Handle Sync Failure
+        if: steps.sync.outcome == 'failure'
+        run: |
+          echo "::error::Template sync failed. Check the logs above for details."
+          echo "### ❌ Sync Failed" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "The template sync encountered an error. Check the 'Run Template Sync' step logs for details." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Common causes:**" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Network connectivity issues reaching GitHub" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Invalid version specified (tag/branch doesn't exist)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Corrupted or missing manifest file" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Troubleshooting:**" >> "$GITHUB_STEP_SUMMARY"
+          echo "1. Verify the version '${{ inputs.version }}' exists in the upstream repository" >> "$GITHUB_STEP_SUMMARY"
+          echo "2. Check that \`.github/template-state.json\` exists and contains valid JSON" >> "$GITHUB_STEP_SUMMARY"
+          echo "3. Try running with \`dry_run: true\` to see more details" >> "$GITHUB_STEP_SUMMARY"
+          exit 1
 
       - name: Upload Diff Report
         if: always()
@@ -136,7 +177,21 @@ jobs:
 
           echo "Updated manifest to version $NEW_VERSION"
 
+      - name: Check for Existing PR
+        id: check-pr
+        run: |
+          # Check if a PR already exists for this version
+          BRANCH_NAME="template-sync/${{ needs.sync.outputs.new_version }}"
+          EXISTING_PR=$(gh pr list --head "$BRANCH_NAME" --json number --jq '.[0].number // empty' 2>/dev/null || echo "")
+          if [[ -n "$EXISTING_PR" ]]; then
+            echo "::notice::A PR already exists for this version: #$EXISTING_PR"
+            echo "existing_pr=$EXISTING_PR" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Create Pull Request
+        id: create-pr
         uses: peter-evans/create-pull-request@v6
         with:
           branch: template-sync/${{ needs.sync.outputs.new_version }}
@@ -174,3 +229,21 @@ jobs:
           labels: |
             template-sync
             automated
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "### Template Sync Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "${{ steps.create-pr.outputs.pull-request-number }}" != "" ]]; then
+            echo "✅ **Pull Request Created:** [#${{ steps.create-pr.outputs.pull-request-number }}](${{ steps.create-pr.outputs.pull-request-url }})" >> "$GITHUB_STEP_SUMMARY"
+          elif [[ "${{ steps.check-pr.outputs.existing_pr }}" != "" ]]; then
+            echo "ℹ️ **Existing PR Updated:** #${{ steps.check-pr.outputs.existing_pr }}" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Version:** ${{ needs.sync.outputs.old_version }} → ${{ needs.sync.outputs.new_version }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "#### Changes" >> "$GITHUB_STEP_SUMMARY"
+          echo "${{ needs.sync.outputs.diff_summary }}" >> "$GITHUB_STEP_SUMMARY"
