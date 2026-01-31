@@ -616,7 +616,6 @@ apply_substitutions() {
 #   staging/claude    -> .claude/
 #   staging/serena    -> .serena/
 #   staging/taskmaster -> .taskmaster/
-#   staging/bootstrap.sh -> bootstrap.sh
 compare_files() {
   local staging_dir="$1"
 
@@ -674,19 +673,6 @@ compare_files() {
       done < <(find "$project_dir" -type f -print0 2>/dev/null)
     fi
   done
-
-  # Also check for bootstrap.sh at root
-  if [[ -f "$staging_dir/bootstrap.sh" ]]; then
-    if [[ ! -f "bootstrap.sh" ]]; then
-      ADDED_FILES+=("bootstrap.sh")
-    elif ! diff -q "$staging_dir/bootstrap.sh" "bootstrap.sh" &>/dev/null; then
-      MODIFIED_FILES+=("bootstrap.sh")
-    else
-      UNCHANGED_FILES+=("bootstrap.sh")
-    fi
-  elif [[ -f "bootstrap.sh" ]]; then
-    DELETED_FILES+=("bootstrap.sh")
-  fi
 
   log_success "Comparison complete: ${#ADDED_FILES[@]} added, ${#MODIFIED_FILES[@]} modified, ${#DELETED_FILES[@]} deleted, ${#UNCHANGED_FILES[@]} unchanged"
 }

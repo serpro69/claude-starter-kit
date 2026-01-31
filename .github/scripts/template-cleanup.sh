@@ -76,11 +76,11 @@ log_step() {
 # Convert comma-separated languages to YAML array format
 format_languages_yaml() {
   local input="$1"
-  local indent="${2:-  }"  # default 2-space indent
+  local indent="${2:-  }" # default 2-space indent
   echo "languages:"
-  IFS=',' read -ra langs <<< "$input"
+  IFS=',' read -ra langs <<<"$input"
   for lang in "${langs[@]}"; do
-    lang=$(echo "$lang" | xargs)  # trim whitespace
+    lang=$(echo "$lang" | xargs) # trim whitespace
     echo "${indent}- $lang"
   done
 }
@@ -362,7 +362,7 @@ generate_manifest() {
         TM_APPEND_SYSTEM_PROMPT: $TM_APPEND_SYSTEM_PROMPT,
         TM_PERMISSION_MODE: $TM_PERMISSION_MODE
       }
-    }' > .github/template-state.json
+    }' >.github/template-state.json
 
   log_info "Generated state manifest: .github/template-state.json"
 }
@@ -396,7 +396,7 @@ execute_cleanup() {
     skip && /^[[:space:]]*-/ { next }
     skip && /^[^[:space:]]/ { skip=0 }
     !skip { print }
-  ' "$serena_settings_file" > "$serena_settings_file.tmp" && mv "$serena_settings_file.tmp" "$serena_settings_file"
+  ' "$serena_settings_file" >"$serena_settings_file.tmp" && mv "$serena_settings_file.tmp" "$serena_settings_file"
   # Serena initial prompt - only substitute if provided
   if [ -n "$SERENA_INITIAL_PROMPT" ]; then
     sed -i "s/initial_prompt: \"\"/initial_prompt: \"$SERENA_INITIAL_PROMPT\"/g" "$serena_settings_file"
@@ -424,8 +424,8 @@ execute_cleanup() {
   cp -r .github/templates/claude ./.claude
   cp -r .github/templates/serena ./.serena
   cp -r .github/templates/taskmaster ./.taskmaster
-  if [[ -f .github/templates/bootstrap.sh ]]; then
-    cp .github/templates/bootstrap.sh .
+  if [[ -f .github/scripts/bootstrap.sh ]]; then
+    cp .github/scripts/bootstrap.sh .
   fi
 
   log_step "Cleaning up .github/ (preserving sync infrastructure)..."

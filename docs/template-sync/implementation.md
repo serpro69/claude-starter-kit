@@ -378,9 +378,6 @@ The following scenarios require manual testing with actual GitHub repositories:
    - Add guidance on when to sync
    - Document manifest file purpose
 
-3. **.github/templates/bootstrap.sh**:
-   - Add note about sync capability in output message
-
 ---
 
 ## Implementation Order

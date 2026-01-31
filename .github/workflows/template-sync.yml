@@ -159,12 +159,6 @@ jobs:
             echo "Applied changes to .taskmaster/"
           fi
 
-          # Copy bootstrap.sh if present
-          if [[ -f "$STAGING_DIR/bootstrap.sh" ]]; then
-            cp "$STAGING_DIR/bootstrap.sh" bootstrap.sh
-            echo "Applied changes to bootstrap.sh"
-          fi
-
       - name: Update Manifest Version
         run: |
           NEW_VERSION="${{ needs.sync.outputs.new_version }}"
