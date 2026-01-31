@@ -54,7 +54,7 @@ Before implementing, the developer should be familiar with:
   "synced_at": "string (ISO 8601 timestamp)",
   "variables": {
     "PROJECT_NAME": "string",
-    "LANGUAGE": "string",
+    "LANGUAGES": "string",
     "CC_MODEL": "string",
     "SERENA_INITIAL_PROMPT": "string",
     "TM_CUSTOM_SYSTEM_PROMPT": "string",
@@ -78,7 +78,7 @@ Before implementing, the developer should be familiar with:
 
 1. **Capture variables before substitution**:
    - Store all input variables (from env or CLI args) in shell variables
-   - Include: PROJECT_NAME, LANGUAGE, CC_MODEL, SERENA_INITIAL_PROMPT, etc.
+   - Include: PROJECT_NAME, LANGUAGES, CC_MODEL, SERENA_INITIAL_PROMPT, etc.
 
 2. **Determine template version**:
    - Use `git describe --tags --abbrev=0 2>/dev/null || git rev-parse --short HEAD`
@@ -414,7 +414,7 @@ jq -n \
   --arg version "$TEMPLATE_VERSION" \
   --arg synced "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
   --arg project "$PROJECT_NAME" \
-  --arg language "$LANGUAGE" \
+  --arg languages "$LANGUAGES" \
   '{
     schema_version: $schema,
     upstream_repo: $upstream,
@@ -422,7 +422,7 @@ jq -n \
     synced_at: $synced,
     variables: {
       PROJECT_NAME: $project,
-      LANGUAGE: $language
+      LANGUAGES: $languages
     }
   }' > .github/template-state.json
 ```

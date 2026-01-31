@@ -4,7 +4,7 @@
   "synced_at": "2025-01-27T10:00:00Z",
   "variables": {
     "PROJECT_NAME": "my-project",
-    "LANGUAGE": "typescript",
+    "LANGUAGES": "typescript",
     "CC_MODEL": "sonnet",
     "SERENA_INITIAL_PROMPT": "",
     "TM_CUSTOM_SYSTEM_PROMPT": "",

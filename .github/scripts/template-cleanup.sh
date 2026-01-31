@@ -11,7 +11,7 @@
 #
 # Options:
 #   --model <model>           Claude Code model (default: default)
-#   --language <lang>         Primary programming language for Serena
+#   --languages <langs>       Programming languages for Serena (comma-separated, required)
 #   --serena-prompt <prompt>  Initial prompt for Serena semantic analysis
 #   --tm-system-prompt <p>    Custom system prompt for Task Master
 #   --tm-append-prompt <p>    Additional content to append to Task Master prompt
@@ -24,7 +24,7 @@
 set -euo pipefail
 
 # Default values
-LANGUAGE=""
+LANGUAGES=""
 CC_MODEL="default"
 SERENA_INITIAL_PROMPT=""
 TM_CUSTOM_SYSTEM_PROMPT=""
@@ -40,7 +40,7 @@ CI_MODE=false
 # Called before CLI parsing so CLI args can override
 load_env_vars() {
   CC_MODEL="${CC_MODEL:-default}"
-  LANGUAGE="${LANGUAGE:-}"
+  LANGUAGES="${LANGUAGES:-}"
   SERENA_INITIAL_PROMPT="${SERENA_INITIAL_PROMPT:-}"
   TM_CUSTOM_SYSTEM_PROMPT="${TM_CUSTOM_SYSTEM_PROMPT:-}"
   TM_APPEND_SYSTEM_PROMPT="${TM_APPEND_SYSTEM_PROMPT:-}"
@@ -72,6 +72,18 @@ log_step() {
   echo -e "${CYAN}>>>${NC} $1"
 }
 
+# Convert comma-separated languages to YAML array format
+format_languages_yaml() {
+  local input="$1"
+  local indent="${2:-  }"  # default 2-space indent
+  echo "languages:"
+  IFS=',' read -ra langs <<< "$input"
+  for lang in "${langs[@]}"; do
+    lang=$(echo "$lang" | xargs)  # trim whitespace
+    echo "${indent}- $lang"
+  done
+}
+
 # Check for required dependencies
 if ! command -v jq &>/dev/null; then
   log_error "jq is required but not installed."
@@ -94,7 +106,8 @@ Usage:
 Options:
   --model <model>           Claude Code model alias (default: default)
                             Options: default, sonnet, sonnet[1m], opus, opusplan, haiku, claude-opus-4-5
-  --language <lang>         Primary programming language for Serena semantic analysis
+  --languages <langs>       Programming languages for Serena semantic analysis (required)
+                            Comma-separated list, e.g.: python,typescript or just: python
                             Primary: python, typescript, java, go, rust, csharp, cpp, ruby
                             Additional: bash, elixir, kotlin, scala, haskell, lua, php, swift, zig...
                             Note: For C use 'cpp', for JavaScript use 'typescript'
@@ -115,10 +128,13 @@ Examples:
   ./.github/scripts/template-cleanup.sh
 
   # Basic setup with TypeScript
-  ./.github/scripts/template-cleanup.sh --language typescript -y
+  ./.github/scripts/template-cleanup.sh --languages typescript -y
+
+  # Setup with multiple languages
+  ./.github/scripts/template-cleanup.sh --languages python,typescript,bash -y
 
   # Full setup with custom prompts
-  ./.github/scripts/template-cleanup.sh --model sonnet --language python --tm-permission acceptEdits -y
+  ./.github/scripts/template-cleanup.sh --model sonnet --languages python --tm-permission acceptEdits -y
 EOF
 }
 
@@ -217,15 +233,27 @@ run_interactive() {
   echo -e "  ${CYAN}Notes:${NC}"
   echo -e "    - For C, use 'cpp'. For JavaScript, use 'typescript'"
   echo -e "    - csharp requires a .sln file in the project"
-  echo -e "    - Multi-language support is on the Serena roadmap"
+  echo -e "    - Multiple languages supported (comma-separated)"
   echo -e "  ${CYAN}Docs:${NC} https://oraios.github.io/serena/01-about/020_programming-languages.html"
   echo ""
-  prompt_select "Select primary language for Serena" "" LANGUAGE \
+  prompt_select "Select primary language for Serena (required)" "" LANGUAGES \
     "python" "typescript" "java" "go" "rust" "csharp" "cpp" "ruby"
 
-  # Allow custom language if user selected nothing or wants something else
-  if [[ -z "$LANGUAGE" ]]; then
-    prompt_input "Enter language identifier (or leave empty to skip)" "" LANGUAGE
+  # Allow custom/additional languages
+  if [[ -z "$LANGUAGES" ]]; then
+    prompt_input "Enter language(s) - comma-separated (required)" "" LANGUAGES
+  else
+    local additional_langs
+    prompt_input "Add more languages? (comma-separated, or leave empty)" "" additional_langs
+    if [[ -n "$additional_langs" ]]; then
+      LANGUAGES="${LANGUAGES},${additional_langs}"
+    fi
+  fi
+
+  # Validate LANGUAGES is not empty
+  if [[ -z "$LANGUAGES" ]]; then
+    log_error "At least one language is required for Serena"
+    exit 1
   fi
 
   echo ""
@@ -264,7 +292,7 @@ show_config_summary() {
   echo ""
   echo -e "${CYAN}Configuration:${NC}"
   echo "  Claude Model:       $CC_MODEL"
-  echo "  Language:           ${LANGUAGE:-<not set>}"
+  echo "  Languages:          $LANGUAGES"
   echo "  TM Permission Mode: $TM_PERMISSION_MODE"
   if [[ -n "$SERENA_INITIAL_PROMPT" ]]; then
     echo "  Serena Prompt:      $SERENA_INITIAL_PROMPT"
@@ -313,7 +341,7 @@ generate_manifest() {
     --arg template_version "$template_version" \
     --arg synced_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
     --arg PROJECT_NAME "$project_name" \
-    --arg LANGUAGE "$LANGUAGE" \
+    --arg LANGUAGES "$LANGUAGES" \
     --arg CC_MODEL "$CC_MODEL" \
     --arg SERENA_INITIAL_PROMPT "$SERENA_INITIAL_PROMPT" \
     --arg TM_CUSTOM_SYSTEM_PROMPT "$TM_CUSTOM_SYSTEM_PROMPT" \
@@ -326,7 +354,7 @@ generate_manifest() {
       synced_at: $synced_at,
       variables: {
         PROJECT_NAME: $PROJECT_NAME,
-        LANGUAGE: $LANGUAGE,
+        LANGUAGES: $LANGUAGES,
         CC_MODEL: $CC_MODEL,
         SERENA_INITIAL_PROMPT: $SERENA_INITIAL_PROMPT,
         TM_CUSTOM_SYSTEM_PROMPT: $TM_CUSTOM_SYSTEM_PROMPT,
@@ -359,10 +387,15 @@ execute_cleanup() {
   local serena_settings_file=".github/templates/serena/project.yml"
   # Project name - always substitute with repo name
   sed -i "s/project_name: \".*\"/project_name: \"$name\"/g" "$serena_settings_file"
-  # Language - only substitute if provided
-  if [ -n "$LANGUAGE" ]; then
-    sed -i "s/language: \".*\"/language: \"$LANGUAGE\"/g" "$serena_settings_file"
-  fi
+  # Languages - use awk to replace the entire languages block (multi-line YAML array)
+  local languages_yaml
+  languages_yaml=$(format_languages_yaml "$LANGUAGES")
+  awk -v new="$languages_yaml" '
+    /^languages:/ { print new; skip=1; next }
+    skip && /^[[:space:]]*-/ { next }
+    skip && /^[^[:space:]]/ { skip=0 }
+    !skip { print }
+  ' "$serena_settings_file" > "$serena_settings_file.tmp" && mv "$serena_settings_file.tmp" "$serena_settings_file"
   # Serena initial prompt - only substitute if provided
   if [ -n "$SERENA_INITIAL_PROMPT" ]; then
     sed -i "s/initial_prompt: \"\"/initial_prompt: \"$SERENA_INITIAL_PROMPT\"/g" "$serena_settings_file"
@@ -444,8 +477,8 @@ while [[ $# -gt 0 ]]; do
     CC_MODEL="$2"
     shift 2
     ;;
-  --language)
-    LANGUAGE="$2"
+  --languages)
+    LANGUAGES="$2"
     shift 2
     ;;
   --serena-prompt)
@@ -535,6 +568,12 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   # Run interactive mode if no CLI args
   if $INTERACTIVE_MODE; then
     run_interactive
+  fi
+
+  # Validate required parameters
+  if [[ -z "$LANGUAGES" ]]; then
+    log_error "LANGUAGES is required. Provide at least one language (e.g., --languages python)"
+    exit 1
   fi
 
   # Show configuration summary

@@ -24,13 +24,12 @@ on:
           # NOTE: does not currently support 1m context.
           # Model name from: https://platform.claude.com/docs/en/about-claude/models/overview#model-names
           - claude-opus-4-5
-      LANGUAGE:
+      LANGUAGES:
         description: |
-          Primary programming language(s) of this project.
-          Used for Serena semantic analysis (e.g., "python", "typescript", "java").
+          Programming languages for Serena semantic analysis (required).
+          Comma-separated list (e.g., "python", "python,typescript", "java,kotlin").
           See Serena docs for supported languages.
-        required: false
-        default: ""
+        required: true
         type: string
       SERENA_INITIAL_PROMPT:
         description: Initial prompt/context for Serena semantic analysis.
@@ -75,7 +74,7 @@ jobs:
       - name: Cleanup
         env:
           CC_MODEL: ${{ github.event.inputs.CC_MODEL }}
-          LANGUAGE: ${{ github.event.inputs.LANGUAGE }}
+          LANGUAGES: ${{ github.event.inputs.LANGUAGES }}
           SERENA_INITIAL_PROMPT: ${{ github.event.inputs.SERENA_INITIAL_PROMPT }}
           TM_CUSTOM_SYSTEM_PROMPT: ${{ github.event.inputs.TM_CUSTOM_SYSTEM_PROMPT }}
           TM_APPEND_SYSTEM_PROMPT: ${{ github.event.inputs.TM_APPEND_SYSTEM_PROMPT }}
