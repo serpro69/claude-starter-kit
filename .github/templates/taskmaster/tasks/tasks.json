@@ -327,7 +327,7 @@
         "dependencies": [
           "3"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -335,9 +335,10 @@
             "description": "Create the compare_files() function that compares staging directory against current .claude/, .serena/, and .taskmaster/ directories to detect added, modified, deleted, and unchanged files.",
             "dependencies": [],
             "details": "Implement compare_files() in template-sync.sh with the following structure:\n\n1. Function signature: `compare_files() { local staging=\"$1\" }`\n\n2. Initialize counters and output file:\n```bash\nlocal added=0 modified=0 deleted=0 unchanged=0\nlocal changes_file=\"$staging/changes.txt\"\n> \"$changes_file\"  # Clear/create changes file\n```\n\n3. Loop through each template directory (claude, serena, taskmaster):\n```bash\nfor dir in claude serena taskmaster; do\n  local staged_dir=\"$staging/$dir\"\n  local current_dir=\".$dir\"\n```\n\n4. For each directory, find files in staging that are new or modified:\n- Use `find \"$staged_dir\" -type f -print0` with while loop\n- Check if corresponding file exists in current_dir\n- If not exists: mark as Added (\"A .$dir/$rel_path\")\n- If exists but differs (use `diff -q`): mark as Modified (\"M .$dir/$rel_path\")\n- If identical: increment unchanged counter\n\n5. Find deleted files (exist in current but not in staging):\n- Use `find \"$current_dir\" -type f -print0`\n- Check if corresponding file exists in staged_dir\n- If not: mark as Deleted (\"D .$dir/$rel_path\")\n\n6. Output statistics for use by caller:\n```bash\necho \"added=$added\"\necho \"modified=$modified\"\necho \"deleted=$deleted\"\necho \"unchanged=$unchanged\"\necho \"has_changes=$([[ $((added + modified + deleted)) -gt 0 ]] && echo true || echo false)\"\n```\n\nThe function writes change markers to changes.txt file in format: `[A|M|D] <file_path>` for later processing by diff report generation.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "1. Test with new files in staging (create temp dirs with new file, verify 'A' marker)\n2. Test with modified files (same file path, different content, verify 'M' marker)\n3. Test with deleted files (file in current but not staging, verify 'D' marker)\n4. Test with unchanged files (identical content, verify unchanged counter increments)\n5. Test mixed scenario with all change types simultaneously\n6. Verify changes.txt contains all expected entries in correct format\n7. Verify has_changes output is 'false' when all files unchanged",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-01-31T18:31:45.459Z"
           },
           {
             "id": 2,
@@ -347,9 +348,10 @@
               1
             ],
             "details": "Implement generate_diff_report() in template-sync.sh:\n\n1. Function signature: `generate_diff_report() { local staging=\"$1\" output_file=\"$2\" }`\n\n2. Read changes from the changes.txt file created by compare_files()\n\n3. Generate markdown report structure using a subshell with output redirection:\n```bash\n{\n  echo \"# Template Sync Diff Report\"\n  echo \"\"\n  echo \"## Summary\"\n  echo \"\"\n```\n\n4. Create summary table with counts:\n```bash\necho \"| Type | Count |\"\necho \"|------|-------|\"\necho \"| Added | $(grep -c '^A ' \"$changes_file\" 2>/dev/null || echo 0) |\"\necho \"| Modified | $(grep -c '^M ' \"$changes_file\" 2>/dev/null || echo 0) |\"\necho \"| Deleted | $(grep -c '^D ' \"$changes_file\" 2>/dev/null || echo 0) |\"\n```\n\n5. List changed files with emoji indicators:\n- ➕ for added files\n- 📝 for modified files  \n- ❌ for deleted files\n```bash\nwhile IFS= read -r line; do\n  local change_type=\"${line:0:1}\" file_path=\"${line:2}\"\n  case \"$change_type\" in\n    A) echo \"- ➕ \\`$file_path\\` (added)\" ;;\n    M) echo \"- 📝 \\`$file_path\\` (modified)\" ;;\n    D) echo \"- ❌ \\`$file_path\\` (deleted)\" ;;\n  esac\ndone < \"$changes_file\"\n```\n\n6. Include file diffs section for modified files:\n```bash\necho \"## File Diffs\"\nwhile IFS= read -r line; do\n  if [[ \"${line:0:1}\" == \"M\" ]]; then\n    local file_path=\"${line:2}\"\n    echo \"### \\`$file_path\\`\"\n    echo '```diff'\n    diff -u \"$file_path\" \"$staging/${file_path#.}\" 2>/dev/null || true\n    echo '```'\n  fi\ndone < \"$changes_file\"\n```\n\n7. Output to specified file: `} > \"$output_file\"`\n\nThe report should be suitable for inclusion in PR body and as a standalone artifact.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "1. Test report generation with mock changes.txt containing all change types\n2. Verify markdown renders correctly (summary table, emoji bullets, code fences)\n3. Test diff output for modified files shows unified diff format\n4. Verify deleted files don't attempt diff (would fail)\n5. Test empty changes.txt produces report with zero counts\n6. Verify output file is created at specified path\n7. Test special characters in file paths are properly escaped",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-01-31T18:31:45.464Z"
           },
           {
             "id": 3,
@@ -359,11 +361,13 @@
               1
             ],
             "details": "Implement output_ci_results() in template-sync.sh for CI mode:\n\n1. Function signature: `output_ci_results() { local staging=\"$1\" }`\n\n2. Capture compare_files() output into variables using eval:\n```bash\neval \"$(compare_files \"$staging\")\"\n```\n\n3. Output core workflow values to $GITHUB_OUTPUT:\n```bash\necho \"has_changes=$has_changes\" >> \"$GITHUB_OUTPUT\"\necho \"old_version=$(get_manifest_value '.template_version')\" >> \"$GITHUB_OUTPUT\"\necho \"new_version=$TARGET_VERSION\" >> \"$GITHUB_OUTPUT\"\n```\n\n4. Generate multiline diff_summary for PR body using heredoc syntax:\n```bash\necho \"diff_summary<<EOF\" >> \"$GITHUB_OUTPUT\"\ngrep -E '^[AMD] ' \"$staging/changes.txt\" | while read -r line; do\n  local change_type=\"${line:0:1}\" file_path=\"${line:2}\"\n  case \"$change_type\" in\n    A) echo \"- ➕ \\`$file_path\\` (added)\" ;;\n    M) echo \"- 📝 \\`$file_path\\` (modified)\" ;;\n    D) echo \"- ❌ \\`$file_path\\` (deleted)\" ;;\n  esac\ndone >> \"$GITHUB_OUTPUT\"\necho \"EOF\" >> \"$GITHUB_OUTPUT\"\n```\n\n5. Optionally output counts for debugging/logging:\n```bash\necho \"added_count=$added\" >> \"$GITHUB_OUTPUT\"\necho \"modified_count=$modified\" >> \"$GITHUB_OUTPUT\"\necho \"deleted_count=$deleted\" >> \"$GITHUB_OUTPUT\"\n```\n\n6. Integrate into main() workflow:\n- Call output_ci_results() when CI_MODE=true\n- Ensure $GITHUB_OUTPUT is set (GitHub Actions provides this)\n- Fall back to stdout if not in CI mode for local testing\n\nThis function bridges the shell script results with the GitHub Actions workflow to enable proper conditional PR creation and PR body population.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "1. Test with GITHUB_OUTPUT set to temp file, verify output format\n2. Verify has_changes=true/false based on compare_files results\n3. Test multiline diff_summary output with heredoc EOF markers\n4. Verify version values are correctly extracted from manifest\n5. Test with empty changes produces has_changes=false\n6. Test special characters in file paths are preserved in output\n7. Verify output can be parsed by GitHub Actions expressions",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-01-31T18:31:45.472Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-01-31T18:31:45.472Z"
       },
       {
         "id": "7",
@@ -490,9 +494,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-01-31T18:11:04.718Z",
+      "lastModified": "2026-01-31T18:31:45.473Z",
       "taskCount": 8,
-      "completedCount": 5,
+      "completedCount": 6,
       "tags": [
         "master"
       ]
