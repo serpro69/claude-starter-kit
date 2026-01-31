@@ -169,6 +169,13 @@ The repository includes a GitHub workflow that customizes the template:
 - Task Master can track progress alongside commits
 - Use conventional commits with task IDs: `feat: implement JWT auth (task 1.2)`
 
+### Template Sync
+- `.github/template-state.json` tracks template version and configuration variables
+- Use Actions → Template Sync to pull upstream configuration updates
+- Always review PR changes before merging to preserve local customizations
+- Sync preserves project-specific values (name, language, prompts) via manifest variables
+- User-scoped files like `.taskmaster/tasks/` and `.taskmaster/docs/` are never modified
+
 ## Testing
 
 The repository includes a comprehensive test suite for the template-sync feature located in the `test/` directory.
@@ -267,6 +274,11 @@ print_summary
 1. If semantic analysis fails, check `.serena/project.yml` has correct `language` value
 2. Run template-cleanup workflow to set language automatically
 3. See Serena documentation for supported languages and requirements (e.g., C# requires .sln file)
+
+### Template Sync Issues
+1. "Manifest not found" - Repository needs `.github/template-state.json`; see README migration section
+2. "Version not found" - Use `latest`, `main`, or existing git tags from upstream
+3. Merge conflicts in PR - Review diff, edit PR branch to preserve customizations, or revert specific files
 
 ## Resources
 

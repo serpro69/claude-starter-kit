@@ -27,3 +27,4 @@ fi
 printf "\n"
 printf "🤖 Done initializing claude-code; committing CLAUDE.md file to git and cleaning up bootstrap script...\n"
 printf "🚀 Your repo is now ready for AI-driven development workflows... Have fun!\n"
+printf "💡 Tip: Use Actions → Template Sync to receive future template updates\n"
