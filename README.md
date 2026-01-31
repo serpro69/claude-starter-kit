@@ -237,6 +237,43 @@ This is my current config, you may want to tweak it to your needs. **I can't rec
    Claude in Chrome enabled by default       false
 ```
 
+## Development
+
+### Running Tests
+
+The repository includes a test suite for the template-sync feature. Tests are located in the `test/` directory.
+
+```bash
+# Run all test suites
+for test in test/test-*.sh; do $test; done
+
+# Run individual test suite
+./test/test-manifest-jq.sh       # jq JSON pattern tests
+./test/test-template-sync.sh     # template-sync.sh function tests
+./test/test-template-cleanup.sh  # generate_manifest() tests
+```
+
+**Test Coverage:**
+
+| Test Suite | Tests | Description |
+|------------|-------|-------------|
+| test-manifest-jq.sh | 17 | JSON generation, special character handling, round-trip validation |
+| test-template-sync.sh | 33 | CLI parsing, manifest validation, substitutions, file comparison |
+| test-template-cleanup.sh | 18 | Manifest generation, variable capture, git tag/SHA detection |
+
+### Test Directory Structure
+
+```
+test/
+├── helpers.sh              # Shared test utilities and assertions
+├── test-manifest-jq.sh     # jq pattern tests
+├── test-template-sync.sh   # Sync script function tests
+├── test-template-cleanup.sh # Cleanup script tests
+└── fixtures/
+    ├── manifests/          # JSON manifest test fixtures
+    └── templates/          # Template file fixtures
+```
+
 ## Examples
 
 Some examples of the actual claude-code workflows that were executed using templates, configs, skills, and other tools from this repository can be found in [examples](./examples) directory.

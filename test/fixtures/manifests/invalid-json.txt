@@ -1,0 +1,5 @@
+{
+  "schema_version": "1",
+  "upstream_repo": "serpro69/claude-starter-kit"
+  "template_version": "v1.0.0"  // missing comma above, invalid comment
+}
