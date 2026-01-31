@@ -24,7 +24,8 @@
 set -euo pipefail
 
 # Default values
-LANGUAGES=""
+# Note: LANGUAGES is intentionally not initialized here to allow env var passthrough
+# The actual default is handled in load_env_vars()
 CC_MODEL="default"
 SERENA_INITIAL_PROMPT=""
 TM_CUSTOM_SYSTEM_PROMPT=""
