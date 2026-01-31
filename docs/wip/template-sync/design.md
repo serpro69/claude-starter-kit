@@ -89,7 +89,7 @@ Persisted during initial template cleanup. Contains:
 
 ##### Variable Name Mapping
 
-The manifest variables must align exactly with those used in `template-cleanup.sh`. This table documents the complete mapping:
+The manifest variables must align exactly with those used in `.github/scripts/template-cleanup.sh`. This table documents the complete mapping:
 
 | Manifest Variable | Shell Variable | Default Value | Target File(s) | Substitution Pattern |
 |-------------------|----------------|---------------|----------------|----------------------|
@@ -103,11 +103,11 @@ The manifest variables must align exactly with those used in `template-cleanup.s
 
 **Default Value Behaviors:**
 
-- `CC_MODEL="default"`: Special case - the model line is **removed** from settings.json rather than substituted (lines 297-301 in template-cleanup.sh)
+- `CC_MODEL="default"`: Special case - the model line is **removed** from settings.json rather than substituted (lines 297-301 in .github/scripts/template-cleanup.sh)
 - Empty strings (`""`): For optional fields, substitution only occurs if the value is non-empty (conditional sed)
 - `TM_PERMISSION_MODE="default"`: Explicit value, always substituted (not special-cased like CC_MODEL)
 
-**Source File References (template-cleanup.sh):**
+**Source File References (.github/scripts/template-cleanup.sh):**
 
 - Variable declarations: lines 27-32
 - Environment variable loading: lines 42-47
@@ -156,7 +156,7 @@ Shell script containing the core sync logic. Supports:
 
 #### 4. Modified Cleanup Script
 
-The existing `template-cleanup.sh` is enhanced to:
+The existing `.github/scripts/template-cleanup.sh` is enhanced to:
 - Write the state manifest after applying substitutions
 - Preserve the sync workflow in the files-to-keep list
 - Record the template version (from git describe or HEAD SHA)

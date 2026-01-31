@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Test suite for template-state.json manifest parsing with jq
-# These patterns will be used in template-sync.sh for reading manifests
-# and in template-cleanup.sh for generating manifests
+# These patterns will be used in .github/scripts/template-sync.sh for reading manifests
+# and in .github/scripts/template-cleanup.sh for generating manifests
 set -euo pipefail
 
 # Source shared test helpers

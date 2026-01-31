@@ -33,7 +33,7 @@
     },
     "variables": {
       "type": "object",
-      "description": "All substitution values applied during template cleanup. Variable names match those in template-cleanup.sh (lines 27-32).",
+      "description": "All substitution values applied during template cleanup. Variable names match those in .github/scripts/template-cleanup.sh (lines 27-32).",
       "required": ["PROJECT_NAME"],
       "additionalProperties": false,
       "properties": {
@@ -51,7 +51,7 @@
         },
         "CC_MODEL": {
           "type": "string",
-          "description": "Claude Code model alias. Substituted into .claude/settings.json (model field). SPECIAL: 'default' triggers line REMOVAL instead of substitution (template-cleanup.sh lines 297-301).",
+          "description": "Claude Code model alias. Substituted into .claude/settings.json (model field). SPECIAL: 'default' triggers line REMOVAL instead of substitution (.github/scripts/template-cleanup.sh lines 297-301).",
           "default": "default",
           "examples": ["sonnet", "opus", "haiku", "default"]
         },

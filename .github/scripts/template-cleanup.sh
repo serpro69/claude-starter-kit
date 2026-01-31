@@ -5,9 +5,9 @@
 # Based on .github/workflows/template-cleanup.yml
 #
 # Usage:
-#   ./template-cleanup.sh                    # Interactive mode (recommended)
-#   ./template-cleanup.sh [options]          # Non-interactive with CLI options
-#   ./template-cleanup.sh -y [options]       # Skip confirmation prompt
+#   ./.github/scripts/template-cleanup.sh                    # Interactive mode (recommended)
+#   ./.github/scripts/template-cleanup.sh [options]          # Non-interactive with CLI options
+#   ./.github/scripts/template-cleanup.sh -y [options]       # Skip confirmation prompt
 #
 # Options:
 #   --model <model>           Claude Code model (default: default)
@@ -87,9 +87,9 @@ Template Cleanup Script
 Converts the claude-starter-kit template into a project-specific setup.
 
 Usage:
-  ./template-cleanup.sh                    # Interactive mode (recommended)
-  ./template-cleanup.sh [options]          # Non-interactive with CLI options
-  ./template-cleanup.sh -y [options]       # Skip confirmation prompt
+  ./.github/scripts/template-cleanup.sh                    # Interactive mode (recommended)
+  ./.github/scripts/template-cleanup.sh [options]          # Non-interactive with CLI options
+  ./.github/scripts/template-cleanup.sh -y [options]       # Skip confirmation prompt
 
 Options:
   --model <model>           Claude Code model alias (default: default)
@@ -112,13 +112,13 @@ Options:
 
 Examples:
   # Interactive setup (recommended for first-time users)
-  ./template-cleanup.sh
+  ./.github/scripts/template-cleanup.sh
 
   # Basic setup with TypeScript
-  ./template-cleanup.sh --language typescript -y
+  ./.github/scripts/template-cleanup.sh --language typescript -y
 
   # Full setup with custom prompts
-  ./template-cleanup.sh --model sonnet --language python --tm-permission acceptEdits -y
+  ./.github/scripts/template-cleanup.sh --model sonnet --language python --tm-permission acceptEdits -y
 EOF
 }
 

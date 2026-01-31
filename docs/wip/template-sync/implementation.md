@@ -7,7 +7,7 @@ This document provides a step-by-step implementation guide for the template sync
 ## Prerequisites
 
 Before implementing, the developer should be familiar with:
-- The existing `template-cleanup.sh` script structure
+- The existing `.github/scripts/template-cleanup.sh` script structure
 - GitHub Actions workflow syntax
 - Shell scripting (bash)
 - JSON manipulation (using `jq`)
@@ -26,7 +26,7 @@ Before implementing, the developer should be familiar with:
 
 | File | Changes |
 |------|---------|
-| `template-cleanup.sh` | Add manifest creation, preserve sync workflow |
+| `.github/scripts/template-cleanup.sh` | Add manifest creation, preserve sync workflow |
 
 ### Files Generated at Runtime
 
@@ -66,11 +66,11 @@ Before implementing, the developer should be familiar with:
 
 **Acceptance Criteria**:
 - Manifest schema is documented
-- All variable names match those used in `template-cleanup.sh`
+- All variable names match those used in `.github/scripts/template-cleanup.sh`
 
 ---
 
-### Task 2: Modify template-cleanup.sh to Generate Manifest
+### Task 2: Modify .github/scripts/template-cleanup.sh to Generate Manifest
 
 **Goal**: After cleanup completes, write the state manifest with all applied variables.
 
@@ -152,7 +152,7 @@ template-sync.sh
 **`apply_substitutions(template_dir)`**:
 - Read variables from manifest
 - Apply sed substitutions to all template files
-- Mirror the logic from `template-cleanup.sh`
+- Mirror the logic from `.github/scripts/template-cleanup.sh`
 - Output to a staging directory
 
 **`compare_files(staging_dir, target_dirs)`**:
@@ -253,13 +253,13 @@ If you've customized any files that upstream also changed:
 
 This is a copy of the workflow created in Task 4, placed in the templates directory so it gets deployed during cleanup.
 
-**Modifications needed in template-cleanup.sh**:
+**Modifications needed in `.github/scripts/template-cleanup.sh`**:
 - Copy `.github/templates/workflows/` to `.github/workflows/` during deployment
 - Or add specific handling for workflow templates
 
 ---
 
-### Task 6: Update template-cleanup.sh Deployment Logic
+### Task 6: Update .github/scripts/template-cleanup.sh Deployment Logic
 
 **Goal**: Ensure sync-related files are properly deployed and preserved.
 
@@ -333,7 +333,7 @@ for test in test/test-*.sh; do $test; done
 - `compare_files()` - File change detection (added/modified/deleted/unchanged)
 - `generate_diff_report()` - Human-readable and CI output formatting
 
-**Functions Tested in template-cleanup.sh**:
+**Functions Tested in `.github/scripts/template-cleanup.sh`**:
 - `generate_manifest()` - State manifest creation with all variables
 
 #### Integration Tests (Manual)
@@ -441,7 +441,7 @@ git checkout "$VERSION"
 
 ### Substitution Logic Reuse
 
-The substitution logic should be extracted into a shared function that both `template-cleanup.sh` and `template-sync.sh` can use. This ensures consistency and reduces maintenance burden.
+The substitution logic should be extracted into a shared function that both `.github/scripts/template-cleanup.sh` and `template-sync.sh` can use. This ensures consistency and reduces maintenance burden.
 
 Consider:
 - Extracting to a shared script (`.github/scripts/substitute.sh`)
