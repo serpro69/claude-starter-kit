@@ -208,7 +208,7 @@
         "dependencies": [
           "3"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -216,9 +216,10 @@
             "description": "Create `.github/workflows/template-sync.yml` with the workflow name, `workflow_dispatch` trigger, and input definitions for version (string with 'latest' default) and dry_run (boolean with false default).",
             "dependencies": [],
             "details": "Create the initial workflow file at `.github/workflows/template-sync.yml`. Define the workflow name as 'Template Sync'. Configure `workflow_dispatch` trigger with two inputs: (1) `version` - string type, required, default 'latest', description explaining it accepts 'latest', 'main', or specific tags like 'v1.0.0'; (2) `dry_run` - boolean type, not required, default false, description explaining it previews changes without creating PR. Follow the pattern from existing `template-cleanup.yml` for consistent input formatting.\n<info added on 2026-01-27T12:34:32.337Z>\nI'll analyze the codebase to understand the workflow structure and generate the appropriate subtask update.Now I have the implementation documentation. Let me generate the update text for subtask 4.1:\n\nThe workflow structure follows the pattern from `template-cleanup.yml` with these specifications:\n\n**Job Configuration (`sync` job)**:\n- Name: \"Sync Template\"  \n- Runs-on: `ubuntu-latest`\n- Permissions: `contents: write`, `pull-requests: write`\n\n**Steps structure (per implementation.md Task 4)**:\n1. Checkout repository step using `actions/checkout@v4`\n2. Validate manifest exists (check for `.github/template-state.json`)\n3. Run sync script step: `chmod +x .github/scripts/template-sync.sh && ./.github/scripts/template-sync.sh --version=\"${{ inputs.version }}\" ${{ inputs.dry_run == true && '--dry-run' || '' }} --ci`\n4. Upload diff report as artifact using `actions/upload-artifact@v4` with name 'sync-diff-report'\n\n**Conditional second job (`create-pr`)**: Only runs if sync job outputs indicate changes found AND `inputs.dry_run == false`. Uses `needs: sync` and conditionals based on job outputs. This job creates branch `template-sync/${{ inputs.version }}`, copies staged files, updates manifest, commits changes, and creates PR using `gh pr create` with template format from implementation.md lines 219-240.\n</info added on 2026-01-27T12:34:32.337Z>",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify the workflow file is valid YAML syntax. Test that the workflow appears in GitHub Actions UI with correct input fields when manually triggered. Confirm both inputs display their descriptions and default values correctly.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-01-31T14:33:05.197Z"
           },
           {
             "id": 2,
@@ -228,9 +229,10 @@
               1
             ],
             "details": "Add the 'sync' job with `runs-on: ubuntu-latest`, required permissions (`contents: write`, `pull-requests: write`), and outputs section for `has_changes`, `old_version`, `new_version`, and `diff_summary`. Implement steps: (1) Checkout with `actions/checkout@v4` and `fetch-depth: 0`; (2) Manifest validation step that checks `.github/template-state.json` exists, outputs error message if missing; (3) Install jq dependency; (4) Run sync script step with id 'sync' that executes `.github/scripts/template-sync.sh` with `--version`, `--ci`, and conditional `--dry-run` flags; (5) Upload diff report artifact using `actions/upload-artifact@v4` with `if: always()` condition.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test with dry_run=true to verify script execution and artifact upload. Test manifest validation with missing manifest file to confirm proper error message. Verify job outputs are correctly captured from script execution.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-01-31T14:35:08.798Z"
           },
           {
             "id": 3,
@@ -241,9 +243,10 @@
               2
             ],
             "details": "Add the 'create-pr' job with `needs: sync`, conditional execution (`if: needs.sync.outputs.has_changes == 'true' && inputs.dry_run == false`), same permissions as sync job. Implement steps: (1) Checkout repository; (2) Apply staged changes by copying from `.github/sync-staging/` subdirectories (claude, serena, taskmaster) to their destination directories; (3) Update manifest version using jq to set `template_version` and `synced_at` fields; (4) Create PR using `peter-evans/create-pull-request@v6` action with branch name `template-sync/{version}`, descriptive title showing version transition, and comprehensive body including change summary and review checklist.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test conditional execution by triggering with dry_run=true (should skip) and dry_run=false (should run). Verify PR is created with correct branch naming pattern. Confirm PR body includes version transition info and change summary from sync job outputs.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-01-31T14:40:04.967Z"
           },
           {
             "id": 4,
@@ -253,11 +256,13 @@
               3
             ],
             "details": "Configure the `peter-evans/create-pull-request` action's body parameter using a heredoc or multiline string with: (1) H2 header 'Template Update' with version transition; (2) Version transition display showing old_version → new_version; (3) H3 'Changes' section populated with diff_summary from sync job; (4) H3 'Review Checklist' with checkboxes for reviewing customizations, testing Claude Code, and verifying MCP configs; (5) H3 'How to handle conflicts' section explaining the 3-step process for preserving customizations; (6) Footer indicating auto-generation. Set commit-message to 'chore: sync template to {version}' and enable delete-branch option.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Trigger workflow and verify created PR has properly formatted markdown body. Confirm all template variables (old_version, new_version, diff_summary) are correctly interpolated. Verify the review checklist renders as interactive checkboxes in GitHub UI.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-01-31T14:41:27.990Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-01-31T14:41:27.990Z"
       },
       {
         "id": "5",
@@ -481,9 +486,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-01-27T17:54:25.000Z",
+      "lastModified": "2026-01-31T14:41:27.990Z",
       "taskCount": 8,
-      "completedCount": 3,
+      "completedCount": 4,
       "tags": [
         "master"
       ]

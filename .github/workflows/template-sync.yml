@@ -1,0 +1,176 @@
+---
+# GitHub Actions Workflow for syncing downstream repositories with the upstream Claude Starter Kit template.
+# This workflow fetches the latest template version, compares files, and creates a PR with updates.
+
+name: Template Sync
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: |
+          Template version to sync to.
+          Accepts 'latest' (most recent tag), 'main' (current main branch), or a specific tag (e.g., 'v1.0.0').
+        required: true
+        default: latest
+        type: string
+      dry_run:
+        description: |
+          Preview changes without creating a PR.
+          When enabled, shows what would be updated but makes no changes to the repository.
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  sync:
+    name: Sync Template
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      has_changes: ${{ steps.sync.outputs.has_changes }}
+      old_version: ${{ steps.manifest.outputs.old_version }}
+      new_version: ${{ steps.sync.outputs.resolved_version }}
+      diff_summary: ${{ steps.sync.outputs.diff_summary }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate Manifest
+        id: manifest
+        run: |
+          if [[ ! -f ".github/template-state.json" ]]; then
+            echo "::error::Manifest file .github/template-state.json not found. This repository may not have been created from the template or the manifest was deleted."
+            exit 1
+          fi
+          # Capture current version before sync
+          old_version=$(jq -r '.template_version // "unknown"' .github/template-state.json)
+          echo "old_version=$old_version" >> "$GITHUB_OUTPUT"
+          echo "Current template version: $old_version"
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Run Template Sync
+        id: sync
+        run: |
+          chmod +x .github/scripts/template-sync.sh
+          mkdir -p .github/reports
+          .github/scripts/template-sync.sh \
+            --version "${{ inputs.version }}" \
+            --ci \
+            --output-dir .github/sync-staging \
+            ${{ inputs.dry_run == true && '--dry-run' || '' }} \
+            | tee .github/reports/sync-output.txt
+
+      - name: Upload Diff Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sync-diff-report
+          path: |
+            .github/reports/
+            .github/sync-staging/
+          retention-days: 7
+
+  create-pr:
+    name: Create Pull Request
+    needs: sync
+    if: needs.sync.outputs.has_changes == 'true' && inputs.dry_run == false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download Staged Changes
+        uses: actions/download-artifact@v4
+        with:
+          name: sync-diff-report
+          path: .github/sync-artifacts
+
+      - name: Apply Staged Changes
+        run: |
+          STAGING_DIR=".github/sync-artifacts/sync-staging/substituted"
+
+          # Copy claude config files
+          if [[ -d "$STAGING_DIR/claude" ]]; then
+            cp -r "$STAGING_DIR/claude/"* .claude/ 2>/dev/null || true
+            echo "Applied changes to .claude/"
+          fi
+
+          # Copy serena config files
+          if [[ -d "$STAGING_DIR/serena" ]]; then
+            cp -r "$STAGING_DIR/serena/"* .serena/ 2>/dev/null || true
+            echo "Applied changes to .serena/"
+          fi
+
+          # Copy taskmaster config files
+          if [[ -d "$STAGING_DIR/taskmaster" ]]; then
+            cp -r "$STAGING_DIR/taskmaster/"* .taskmaster/ 2>/dev/null || true
+            echo "Applied changes to .taskmaster/"
+          fi
+
+          # Copy bootstrap.sh if present
+          if [[ -f "$STAGING_DIR/bootstrap.sh" ]]; then
+            cp "$STAGING_DIR/bootstrap.sh" bootstrap.sh
+            echo "Applied changes to bootstrap.sh"
+          fi
+
+      - name: Update Manifest Version
+        run: |
+          NEW_VERSION="${{ needs.sync.outputs.new_version }}"
+          SYNCED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          jq --arg version "$NEW_VERSION" --arg synced_at "$SYNCED_AT" \
+            '.template_version = $version | .synced_at = $synced_at' \
+            .github/template-state.json > .github/template-state.json.tmp
+          mv .github/template-state.json.tmp .github/template-state.json
+
+          echo "Updated manifest to version $NEW_VERSION"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: template-sync/${{ needs.sync.outputs.new_version }}
+          delete-branch: true
+          title: "chore: sync template ${{ needs.sync.outputs.old_version }} → ${{ needs.sync.outputs.new_version }}"
+          body: |
+            ## Template Update
+
+            This PR updates the repository from template version **${{ needs.sync.outputs.old_version }}** to **${{ needs.sync.outputs.new_version }}**.
+
+            ### Changes
+
+            ${{ needs.sync.outputs.diff_summary }}
+
+            ### Review Checklist
+
+            - [ ] Review changed files for any customizations that should be preserved
+            - [ ] Test that Claude Code still works correctly
+            - [ ] Verify MCP server configurations are intact
+            - [ ] Confirm Task Master commands work as expected
+
+            ### How to Handle Conflicts
+
+            If you've customized any files that upstream also changed:
+
+            1. **Review the diff** for each modified file to identify conflicts
+            2. **Edit the PR branch** to preserve your customizations where needed
+            3. **Reject specific changes** by reverting individual files if upstream changes aren't wanted
+
+            > **Tip:** Files in `.claude/commands/` and `.taskmaster/docs/` are typically safe to update, while `settings.local.json` and `config.json` may contain your customizations.
+
+            ---
+            *Generated by [Template Sync](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) workflow*
+          commit-message: "chore: sync template to ${{ needs.sync.outputs.new_version }}"
+          labels: |
+            template-sync
+            automated
