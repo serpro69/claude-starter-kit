@@ -10,9 +10,11 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Test counters
+# TESTS_RUN counts test cases (log_test calls)
+# ASSERTIONS_PASSED/FAILED count individual assertions (log_pass/log_fail calls)
 TESTS_RUN=0
-TESTS_PASSED=0
-TESTS_FAILED=0
+ASSERTIONS_PASSED=0
+ASSERTIONS_FAILED=0
 TESTS_SKIPPED=0
 
 # Temporary directories for cleanup
@@ -29,12 +31,12 @@ log_test() {
 
 log_pass() {
   echo -e "${GREEN}[PASS]${NC} $1"
-  TESTS_PASSED=$((TESTS_PASSED + 1))
+  ASSERTIONS_PASSED=$((ASSERTIONS_PASSED + 1))
 }
 
 log_fail() {
   echo -e "${RED}[FAIL]${NC} $1"
-  TESTS_FAILED=$((TESTS_FAILED + 1))
+  ASSERTIONS_FAILED=$((ASSERTIONS_FAILED + 1))
 }
 
 log_skip() {
@@ -280,14 +282,14 @@ trap cleanup_temp EXIT
 print_summary() {
   echo ""
   echo "=== Test Summary ==="
-  echo "Tests run:     $TESTS_RUN"
-  echo -e "Tests passed:  ${GREEN}$TESTS_PASSED${NC}"
-  echo -e "Tests failed:  ${RED}$TESTS_FAILED${NC}"
+  echo "Test cases:        $TESTS_RUN"
+  echo -e "Assertions passed: ${GREEN}$ASSERTIONS_PASSED${NC}"
+  echo -e "Assertions failed: ${RED}$ASSERTIONS_FAILED${NC}"
   if [[ $TESTS_SKIPPED -gt 0 ]]; then
-    echo -e "Tests skipped: ${BLUE}$TESTS_SKIPPED${NC}"
+    echo -e "Tests skipped:     ${BLUE}$TESTS_SKIPPED${NC}"
   fi
 
-  if [[ $TESTS_FAILED -eq 0 ]]; then
+  if [[ $ASSERTIONS_FAILED -eq 0 ]]; then
     echo -e "\n${GREEN}All tests passed!${NC}"
     return 0
   else

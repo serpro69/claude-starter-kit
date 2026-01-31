@@ -838,5 +838,8 @@ main() {
   fi
 }
 
-# Run main with all arguments
-main "$@"
+# Run main with all arguments only if script is executed directly (not sourced)
+# This allows tests to source the file and access functions without running main()
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  main "$@"
+fi
