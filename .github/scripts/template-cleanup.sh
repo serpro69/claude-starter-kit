@@ -427,10 +427,16 @@ execute_cleanup() {
     cp .github/templates/bootstrap.sh .
   fi
 
+  log_step "Cleaning up .github/ (preserving sync infrastructure)..."
+  rm -rf .github/templates
+  rm -f .github/scripts/template-cleanup.sh
+  rm -f .github/workflows/template-cleanup.yml
+
   log_step "Cleaning up template-specific files..."
   find . -mindepth 1 -maxdepth 1 \
     ! -name '.git' \
     ! -name '.gitignore' \
+    ! -name '.github' \
     ! -name '.claude' \
     ! -name '.serena' \
     ! -name '.taskmaster' \

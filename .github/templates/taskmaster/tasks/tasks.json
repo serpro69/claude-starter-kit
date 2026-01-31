@@ -275,7 +275,7 @@
           "3",
           "4"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -283,9 +283,10 @@
             "description": "Create `.github/templates/workflows/` and `.github/templates/scripts/` directories, then add the template-sync.yml workflow (from Task 4) and template-sync.sh script (from Task 3) as template files that will be deployed to child repositories.",
             "dependencies": [],
             "details": "Create the required template directory structure and files:\n\n1. Create directories:\n   - `mkdir -p .github/templates/workflows`\n   - `mkdir -p .github/templates/scripts`\n\n2. Copy/create template files:\n   - `.github/templates/workflows/template-sync.yml` - copy from the workflow created in Task 4 (the GitHub Actions workflow with workflow_dispatch trigger, dry_run support, and PR creation logic)\n   - `.github/templates/scripts/template-sync.sh` - copy from the script created in Task 3 (the core sync logic with manifest reading, version resolution, upstream fetching, and substitution application)\n\n3. Ensure script has executable permission marker:\n   - The template file itself doesn't need chmod in git, but the deployment step will apply chmod +x\n\nFiles location after this subtask:\n- `.github/templates/workflows/template-sync.yml`\n- `.github/templates/scripts/template-sync.sh`\n\nThese files will be the \"source of truth\" that get deployed to child repositories during template-cleanup.sh execution.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "1. Verify directories exist: `ls -la .github/templates/workflows/` and `ls -la .github/templates/scripts/`\n2. Verify template-sync.yml is valid YAML: `python -c \"import yaml; yaml.safe_load(open('.github/templates/workflows/template-sync.yml'))\"`\n3. Verify template-sync.sh has bash syntax: `bash -n .github/templates/scripts/template-sync.sh`\n4. Confirm both files contain the expected content (workflow_dispatch trigger, sync functions)",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-01-31T18:11:04.705Z"
           },
           {
             "id": 2,
@@ -295,9 +296,10 @@
               1
             ],
             "details": "Update template-cleanup.sh deployment section (around line 335-341) in the execute_cleanup function:\n\n1. Add sync infrastructure deployment after existing template copies (after line 341, the bootstrap.sh copy):\n```bash\nlog_step \"Deploying templates to destination locations...\"\ncp -r .github/templates/claude ./.claude\ncp -r .github/templates/serena ./.serena\ncp -r .github/templates/taskmaster ./.taskmaster\n\n# Deploy sync infrastructure\nlog_step \"Deploying sync infrastructure...\"\nmkdir -p .github/scripts\nmkdir -p .github/workflows\nif [[ -f .github/templates/scripts/template-sync.sh ]]; then\n  cp .github/templates/scripts/template-sync.sh .github/scripts/\n  chmod +x .github/scripts/template-sync.sh\nfi\nif [[ -f .github/templates/workflows/template-sync.yml ]]; then\n  cp .github/templates/workflows/template-sync.yml .github/workflows/\nfi\n\nif [[ -f .github/templates/bootstrap.sh ]]; then\n  cp .github/templates/bootstrap.sh .\nfi\n```\n\n2. The deployment should:\n   - Create .github/scripts/ and .github/workflows/ directories if they don't exist\n   - Copy template-sync.sh to .github/scripts/ with execute permission\n   - Copy template-sync.yml to .github/workflows/\n   - Use conditional checks to gracefully handle missing template files\n\n3. File locations after deployment:\n   - `.github/scripts/template-sync.sh` (with +x permission)\n   - `.github/workflows/template-sync.yml`",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "1. Run template-cleanup.sh with --no-commit in a test environment\n2. Verify .github/workflows/template-sync.yml exists after cleanup\n3. Verify .github/scripts/template-sync.sh exists after cleanup\n4. Verify template-sync.sh has execute permission: `test -x .github/scripts/template-sync.sh`\n5. Test cleanup still works when template files are missing (should not fail)\n6. Verify existing functionality (claude/serena/taskmaster deployment) still works",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-01-31T18:11:04.709Z"
           },
           {
             "id": 3,
@@ -307,11 +309,13 @@
               2
             ],
             "details": "Review and verify the cleanup find command at lines 344-351 in template-cleanup.sh:\n\n1. The existing find command should already include `! -name '.github'` from Task 2's modification. Verify this exclusion exists:\n```bash\nfind . -mindepth 1 -maxdepth 1 \\\n  ! -name '.git' \\\n  ! -name '.gitignore' \\\n  ! -name '.github' \\     # This should exist from Task 2\n  ! -name '.claude' \\\n  ! -name '.serena' \\\n  ! -name '.taskmaster' \\\n  ! -name 'bootstrap.sh' \\\n  -exec rm -rf {} +\n```\n\n2. If the `.github` exclusion is missing, add it to preserve:\n   - `.github/template-state.json` (manifest from Task 2)\n   - `.github/workflows/template-sync.yml` (deployed workflow)\n   - `.github/scripts/template-sync.sh` (deployed script)\n\n3. Verify the consistent file structure after full cleanup:\n   - `.github/template-state.json` - manifest with config values\n   - `.github/workflows/template-sync.yml` - sync workflow\n   - `.github/scripts/template-sync.sh` - sync script\n   - `.claude/` - Claude Code configuration\n   - `.serena/` - Serena configuration\n   - `.taskmaster/` - Task Master configuration\n\n4. Document the expected final structure in inline comments if needed.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "1. Run full template-cleanup.sh and verify .github directory survives cleanup\n2. Verify .github/template-state.json exists (from Task 2 manifest generation)\n3. Verify .github/workflows/template-sync.yml exists (from subtask 2 deployment)\n4. Verify .github/scripts/template-sync.sh exists with execute permission\n5. Verify original template files (.github/templates/) are removed during cleanup\n6. Run cleanup multiple times to ensure idempotency\n7. Test that the deployed workflow can be triggered in GitHub Actions UI after push",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-01-31T18:11:04.718Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-01-31T18:11:04.718Z"
       },
       {
         "id": "6",
@@ -486,9 +490,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-01-31T14:41:27.990Z",
+      "lastModified": "2026-01-31T18:11:04.718Z",
       "taskCount": 8,
-      "completedCount": 4,
+      "completedCount": 5,
       "tags": [
         "master"
       ]
