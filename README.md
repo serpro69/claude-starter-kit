@@ -255,11 +255,11 @@ for test in test/test-*.sh; do $test; done
 
 **Test Coverage:**
 
-| Test Suite | Tests | Description |
-|------------|-------|-------------|
-| test-manifest-jq.sh | 17 | JSON generation, special character handling, round-trip validation |
-| test-template-sync.sh | 33 | CLI parsing, manifest validation, substitutions, file comparison |
-| test-template-cleanup.sh | 18 | Manifest generation, variable capture, git tag/SHA detection |
+| Test Suite               | Description                                                        |
+|--------------------------|--------------------------------------------------------------------|
+| test-manifest-jq.sh      | JSON generation, special character handling, round-trip validation |
+| test-template-sync.sh    | CLI parsing, manifest validation, substitutions, file comparison   |
+| test-template-cleanup.sh | Manifest generation, variable capture, git tag/SHA detection       |
 
 ### Test Directory Structure
 

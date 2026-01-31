@@ -489,58 +489,66 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# If no CLI arguments provided and not in CI mode, run in interactive mode
-if ! $HAS_CLI_ARGS && ! $CI_MODE; then
-  INTERACTIVE_MODE=true
-fi
+# =============================================================================
+# Main Execution (only when script is run directly, not sourced)
+# =============================================================================
 
-# Validate we're in a git repository
-if ! git rev-parse --is-inside-work-tree &>/dev/null; then
-  log_error "Not inside a git repository"
-  exit 1
-fi
-
-# Get repository root
-REPO_ROOT=$(git rev-parse --show-toplevel)
-cd "$REPO_ROOT"
-
-# Check if templates directory exists
-if [[ ! -d ".github/templates" ]]; then
-  log_error "Templates directory .github/templates not found"
-  log_error "Are you sure this is a claude-starter-kit based repository?"
-  exit 1
-fi
-
-# Prevent running on the original template repository (skip in CI mode)
-REPO_NAME=$(basename "$REPO_ROOT")
-if [[ "$REPO_NAME" == "claude-starter-kit" ]] && ! $CI_MODE; then
-  log_error "This script should not be run on the original claude-starter-kit repository"
-  exit 1
-fi
-
-# Set locale for consistent string handling
-export LC_CTYPE=C
-export LANG=C
-
-# Prepare repository-specific variables
-NAME="$REPO_NAME"
-
-# Run interactive mode if no CLI args
-if $INTERACTIVE_MODE; then
-  run_interactive
-fi
-
-# Show configuration summary
-show_config_summary "$NAME"
-
-# Confirm before proceeding
-if ! $SKIP_CONFIRM; then
-  if ! prompt_confirm "Proceed with template cleanup?" "y"; then
-    log_warn "Aborted by user"
-    exit 0
+# Allow sourcing this file to access functions without running main logic
+# This enables tests to source the file and call functions directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  # If no CLI arguments provided and not in CI mode, run in interactive mode
+  if ! $HAS_CLI_ARGS && ! $CI_MODE; then
+    INTERACTIVE_MODE=true
   fi
-  echo ""
-fi
 
-# Execute the cleanup
-execute_cleanup "$NAME"
+  # Validate we're in a git repository
+  if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+    log_error "Not inside a git repository"
+    exit 1
+  fi
+
+  # Get repository root
+  REPO_ROOT=$(git rev-parse --show-toplevel)
+  cd "$REPO_ROOT"
+
+  # Check if templates directory exists
+  if [[ ! -d ".github/templates" ]]; then
+    log_error "Templates directory .github/templates not found"
+    log_error "Are you sure this is a claude-starter-kit based repository?"
+    exit 1
+  fi
+
+  # Prevent running on the original template repository (skip in CI mode)
+  REPO_NAME=$(basename "$REPO_ROOT")
+  if [[ "$REPO_NAME" == "claude-starter-kit" ]] && ! $CI_MODE; then
+    log_error "This script should not be run on the original claude-starter-kit repository"
+    exit 1
+  fi
+
+  # Set locale for consistent string handling
+  export LC_CTYPE=C
+  export LANG=C
+
+  # Prepare repository-specific variables
+  NAME="$REPO_NAME"
+
+  # Run interactive mode if no CLI args
+  if $INTERACTIVE_MODE; then
+    run_interactive
+  fi
+
+  # Show configuration summary
+  show_config_summary "$NAME"
+
+  # Confirm before proceeding
+  if ! $SKIP_CONFIRM; then
+    if ! prompt_confirm "Proceed with template cleanup?" "y"; then
+      log_warn "Aborted by user"
+      exit 0
+    fi
+    echo ""
+  fi
+
+  # Execute the cleanup
+  execute_cleanup "$NAME"
+fi

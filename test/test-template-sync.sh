@@ -10,25 +10,10 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 FIXTURES_DIR="$SCRIPT_DIR/fixtures"
 TEMPLATE_SYNC_SCRIPT="$REPO_ROOT/.github/scripts/template-sync.sh"
 
-# We need to source the script to get access to functions, but prevent main() from running
-# by wrapping the sourcing in a way that checks if we're being sourced
-
-# Create a temporary wrapper to source functions without running main()
-source_template_sync_functions() {
-  # Extract just the functions from template-sync.sh
-  # This is done by creating a temp file that replaces main "$@" with nothing
-  local temp_script
-  temp_script=$(create_temp_dir "sync-source")/sync-functions.sh
-
-  # Copy the script but comment out the final main call
-  sed 's/^main "\$@"$/# main "$@" # disabled for testing/' "$TEMPLATE_SYNC_SCRIPT" > "$temp_script"
-
-  # shellcheck source=/dev/null
-  source "$temp_script"
-}
-
-# Source the functions
-source_template_sync_functions
+# Source the script to get access to functions
+# The script has a sourcing guard that prevents main() from running when sourced
+# shellcheck source=/dev/null
+source "$TEMPLATE_SYNC_SCRIPT"
 
 # =============================================================================
 # Section 1: Argument Parsing Tests
@@ -362,13 +347,13 @@ echo "new content" > "$test_dir/staging/claude/new-file.txt"
 # Create empty project directory
 mkdir -p "$test_dir/project/.claude"
 
-# Run compare from project directory
-cd "$test_dir/project"
+# Run compare from project directory (use pushd/popd for safe directory handling)
+pushd "$test_dir/project" > /dev/null || { log_fail "Failed to cd to test directory"; exit 1; }
 MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
 compare_files "$test_dir/staging" 2>/dev/null
+popd > /dev/null || true
 
 assert_equals "1" "${#ADDED_FILES[@]}" "One file detected as added"
-cd "$REPO_ROOT"
 
 log_test "compare_files detects modified files"
 reset_globals
@@ -380,12 +365,12 @@ mkdir -p "$test_dir/project/.claude"
 echo "new content" > "$test_dir/staging/claude/existing.txt"
 echo "old content" > "$test_dir/project/.claude/existing.txt"
 
-cd "$test_dir/project"
+pushd "$test_dir/project" > /dev/null || { log_fail "Failed to cd to test directory"; exit 1; }
 MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
 compare_files "$test_dir/staging" 2>/dev/null
+popd > /dev/null || true
 
 assert_equals "1" "${#MODIFIED_FILES[@]}" "One file detected as modified"
-cd "$REPO_ROOT"
 
 log_test "compare_files detects deleted files"
 reset_globals
@@ -396,12 +381,12 @@ mkdir -p "$test_dir/staging/claude"
 mkdir -p "$test_dir/project/.claude"
 echo "to be deleted" > "$test_dir/project/.claude/deleted.txt"
 
-cd "$test_dir/project"
+pushd "$test_dir/project" > /dev/null || { log_fail "Failed to cd to test directory"; exit 1; }
 MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
 compare_files "$test_dir/staging" 2>/dev/null
+popd > /dev/null || true
 
 assert_equals "1" "${#DELETED_FILES[@]}" "One file detected as deleted"
-cd "$REPO_ROOT"
 
 log_test "compare_files detects unchanged files"
 reset_globals
@@ -413,12 +398,12 @@ mkdir -p "$test_dir/project/.claude"
 echo "same content" > "$test_dir/staging/claude/unchanged.txt"
 echo "same content" > "$test_dir/project/.claude/unchanged.txt"
 
-cd "$test_dir/project"
+pushd "$test_dir/project" > /dev/null || { log_fail "Failed to cd to test directory"; exit 1; }
 MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
 compare_files "$test_dir/staging" 2>/dev/null
+popd > /dev/null || true
 
 assert_equals "1" "${#UNCHANGED_FILES[@]}" "One file detected as unchanged"
-cd "$REPO_ROOT"
 
 # =============================================================================
 # Section 7: Diff Report Generation Tests

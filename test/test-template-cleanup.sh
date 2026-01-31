@@ -10,27 +10,10 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 SCHEMA_FILE="$REPO_ROOT/docs/wip/template-sync/template-state-schema.json"
 TEMPLATE_CLEANUP_SCRIPT="$REPO_ROOT/template-cleanup.sh"
 
-# Extract the generate_manifest function and required helpers from template-cleanup.sh
-source_cleanup_functions() {
-  # Extract required functions from template-cleanup.sh
-  # We need: log_info, log_error, generate_manifest
-
-  # Define minimal logging functions
-  log_info() {
-    echo "[INFO] $1"
-  }
-
-  log_error() {
-    echo "[ERROR] $1" >&2
-  }
-
-  # Extract generate_manifest function from the script
-  # It starts at "generate_manifest()" and ends before "execute_cleanup()"
-  eval "$(sed -n '/^generate_manifest()/,/^execute_cleanup()/{ /^execute_cleanup/d; p }' "$TEMPLATE_CLEANUP_SCRIPT")"
-}
-
-# Source the functions
-source_cleanup_functions
+# Source the script to get access to functions
+# The script has a sourcing guard that prevents main execution when sourced
+# shellcheck source=/dev/null
+source "$TEMPLATE_CLEANUP_SCRIPT"
 
 # =============================================================================
 # Section 1: Basic Manifest Generation
