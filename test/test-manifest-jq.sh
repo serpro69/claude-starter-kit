@@ -56,7 +56,7 @@ assert_equals "my-project" "$PROJECT_NAME" "PROJECT_NAME = $PROJECT_NAME"
 
 log_test "Extract all variable keys"
 VAR_KEYS=$(jq -r '.variables | keys[]' "$EXAMPLE_MANIFEST" | sort | tr '\n' ',')
-EXPECTED_KEYS="CC_MODEL,LANGUAGE,PROJECT_NAME,SERENA_INITIAL_PROMPT,TM_APPEND_SYSTEM_PROMPT,TM_CUSTOM_SYSTEM_PROMPT,TM_PERMISSION_MODE,"
+EXPECTED_KEYS="CC_MODEL,LANGUAGES,PROJECT_NAME,SERENA_INITIAL_PROMPT,TM_APPEND_SYSTEM_PROMPT,TM_CUSTOM_SYSTEM_PROMPT,TM_PERMISSION_MODE,"
 assert_equals "$EXPECTED_KEYS" "$VAR_KEYS" "All 7 variable keys present"
 
 # =============================================================================
@@ -85,7 +85,7 @@ GENERATED=$(jq -n \
     synced_at: $synced,
     variables: {
       PROJECT_NAME: $project,
-      LANGUAGE: $language,
+      LANGUAGES: $language,
       CC_MODEL: $cc_model,
       SERENA_INITIAL_PROMPT: $serena_prompt,
       TM_CUSTOM_SYSTEM_PROMPT: $tm_custom,
@@ -176,7 +176,7 @@ ROUND_TRIP_MANIFEST=$(jq -n \
     synced_at: $synced,
     variables: {
       PROJECT_NAME: $project,
-      LANGUAGE: $language,
+      LANGUAGES: $language,
       CC_MODEL: $cc_model,
       SERENA_INITIAL_PROMPT: $serena_prompt,
       TM_CUSTOM_SYSTEM_PROMPT: $tm_custom,

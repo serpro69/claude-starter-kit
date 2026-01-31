@@ -79,6 +79,22 @@ log_step() {
 }
 
 # =============================================================================
+# Helper Functions
+# =============================================================================
+
+# Convert comma-separated languages to YAML array format
+format_languages_yaml() {
+  local input="$1"
+  local indent="${2:-  }"  # default 2-space indent
+  echo "languages:"
+  IFS=',' read -ra langs <<< "$input"
+  for lang in "${langs[@]}"; do
+    lang=$(echo "$lang" | xargs)  # trim whitespace
+    echo "${indent}- $lang"
+  done
+}
+
+# =============================================================================
 # Dependency Check
 # =============================================================================
 
@@ -163,13 +179,21 @@ validate_manifest() {
   fi
 
   # Verify all required variables exist (can be empty but must be present)
-  local required_vars=("PROJECT_NAME" "LANGUAGE" "CC_MODEL" "SERENA_INITIAL_PROMPT" "TM_CUSTOM_SYSTEM_PROMPT" "TM_APPEND_SYSTEM_PROMPT" "TM_PERMISSION_MODE")
+  local required_vars=("PROJECT_NAME" "LANGUAGES" "CC_MODEL" "SERENA_INITIAL_PROMPT" "TM_CUSTOM_SYSTEM_PROMPT" "TM_APPEND_SYSTEM_PROMPT" "TM_PERMISSION_MODE")
   for var in "${required_vars[@]}"; do
     if [[ "$(get_manifest_value ".variables.$var // \"__MISSING__\"")" == "__MISSING__" ]]; then
       log_error "Missing required variable in manifest: $var"
       exit 1
     fi
   done
+
+  # Validate LANGUAGES is not empty
+  local languages
+  languages=$(get_manifest_value '.variables.LANGUAGES')
+  if [[ -z "$languages" ]]; then
+    log_error "LANGUAGES variable cannot be empty in manifest"
+    exit 1
+  fi
 
   log_success "Manifest validation passed"
 }
@@ -315,11 +339,11 @@ apply_substitutions() {
   cp -rp "$template_dir"/* "$output_dir/"
 
   # Read all variables from manifest
-  local project_name language cc_model
+  local project_name languages cc_model
   local serena_prompt tm_custom tm_append tm_permission
 
   project_name=$(get_manifest_value '.variables.PROJECT_NAME')
-  language=$(get_manifest_value '.variables.LANGUAGE')
+  languages=$(get_manifest_value '.variables.LANGUAGES')
   cc_model=$(get_manifest_value '.variables.CC_MODEL')
   serena_prompt=$(get_manifest_value '.variables.SERENA_INITIAL_PROMPT')
   tm_custom=$(get_manifest_value '.variables.TM_CUSTOM_SYSTEM_PROMPT')
@@ -348,12 +372,15 @@ apply_substitutions() {
     escaped_project_name=$(escape_sed_replacement "$project_name")
     sed -i "s/project_name: \".*\"/project_name: \"$escaped_project_name\"/g" "$serena_settings_file"
 
-    # Language - only substitute if provided
-    if [[ -n "$language" ]]; then
-      local escaped_language
-      escaped_language=$(escape_sed_replacement "$language")
-      sed -i "s/language: \".*\"/language: \"$escaped_language\"/g" "$serena_settings_file"
-    fi
+    # Languages - use awk to replace the entire languages block (multi-line YAML array)
+    local languages_yaml
+    languages_yaml=$(format_languages_yaml "$languages")
+    awk -v new="$languages_yaml" '
+      /^languages:/ { print new; skip=1; next }
+      skip && /^[[:space:]]*-/ { next }
+      skip && /^[^[:space:]]/ { skip=0 }
+      !skip { print }
+    ' "$serena_settings_file" > "$serena_settings_file.tmp" && mv "$serena_settings_file.tmp" "$serena_settings_file"
 
     # Initial prompt - only substitute if provided
     if [[ -n "$serena_prompt" ]]; then

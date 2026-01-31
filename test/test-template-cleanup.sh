@@ -27,7 +27,7 @@ cd "$test_dir"
 
 # Set required variables
 PROJECT_NAME="test-project"
-LANGUAGE="typescript"
+LANGUAGES="typescript"
 CC_MODEL="sonnet"
 SERENA_INITIAL_PROMPT=""
 TM_CUSTOM_SYSTEM_PROMPT=""
@@ -44,7 +44,7 @@ test_dir=$(create_temp_git_repo "v1.0.0")
 cd "$test_dir"
 
 PROJECT_NAME="test-project"
-LANGUAGE=""
+LANGUAGES="bash"
 CC_MODEL=""
 SERENA_INITIAL_PROMPT=""
 TM_CUSTOM_SYSTEM_PROMPT=""
@@ -71,7 +71,7 @@ test_dir=$(create_temp_git_repo "v1.0.0")
 cd "$test_dir"
 
 PROJECT_NAME="test-project"
-LANGUAGE=""
+LANGUAGES="bash"
 CC_MODEL=""
 SERENA_INITIAL_PROMPT=""
 TM_CUSTOM_SYSTEM_PROMPT=""
@@ -89,7 +89,7 @@ test_dir=$(create_temp_git_repo "v1.0.0")
 cd "$test_dir"
 
 PROJECT_NAME="test-project"
-LANGUAGE=""
+LANGUAGES="bash"
 CC_MODEL=""
 SERENA_INITIAL_PROMPT=""
 TM_CUSTOM_SYSTEM_PROMPT=""
@@ -108,7 +108,7 @@ test_dir=$(create_temp_git_repo "v1.0.0")
 cd "$test_dir"
 
 PROJECT_NAME="test-project"
-LANGUAGE=""
+LANGUAGES="bash"
 CC_MODEL=""
 SERENA_INITIAL_PROMPT=""
 TM_CUSTOM_SYSTEM_PROMPT=""
@@ -128,7 +128,7 @@ test_dir=$(create_temp_git_repo "v1.0.0")
 cd "$test_dir"
 
 PROJECT_NAME="test-project"
-LANGUAGE=""
+LANGUAGES="bash"
 CC_MODEL=""
 SERENA_INITIAL_PROMPT=""
 TM_CUSTOM_SYSTEM_PROMPT=""
@@ -157,7 +157,7 @@ test_dir=$(create_temp_git_repo "v1.0.0")
 cd "$test_dir"
 
 PROJECT_NAME="my-awesome-project"
-LANGUAGE=""
+LANGUAGES="bash"
 CC_MODEL=""
 SERENA_INITIAL_PROMPT=""
 TM_CUSTOM_SYSTEM_PROMPT=""
@@ -175,7 +175,7 @@ test_dir=$(create_temp_git_repo "v1.0.0")
 cd "$test_dir"
 
 PROJECT_NAME="test"
-LANGUAGE="python"
+LANGUAGES="python"
 CC_MODEL="opus"
 SERENA_INITIAL_PROMPT="hello"
 TM_CUSTOM_SYSTEM_PROMPT="custom"
@@ -186,7 +186,7 @@ generate_manifest "test" >/dev/null 2>&1
 
 # Check each variable
 assert_equals "test" "$(jq -r '.variables.PROJECT_NAME' .github/template-state.json)" "PROJECT_NAME"
-assert_equals "python" "$(jq -r '.variables.LANGUAGE' .github/template-state.json)" "LANGUAGE"
+assert_equals "python" "$(jq -r '.variables.LANGUAGES' .github/template-state.json)" "LANGUAGES"
 assert_equals "opus" "$(jq -r '.variables.CC_MODEL' .github/template-state.json)" "CC_MODEL"
 assert_equals "hello" "$(jq -r '.variables.SERENA_INITIAL_PROMPT' .github/template-state.json)" "SERENA_INITIAL_PROMPT"
 assert_equals "custom" "$(jq -r '.variables.TM_CUSTOM_SYSTEM_PROMPT' .github/template-state.json)" "TM_CUSTOM_SYSTEM_PROMPT"
@@ -194,12 +194,12 @@ assert_equals "append" "$(jq -r '.variables.TM_APPEND_SYSTEM_PROMPT' .github/tem
 assert_equals "full" "$(jq -r '.variables.TM_PERMISSION_MODE' .github/template-state.json)" "TM_PERMISSION_MODE"
 cd "$REPO_ROOT"
 
-log_test "Manifest handles empty string values"
+log_test "Manifest handles empty string values for optional fields"
 test_dir=$(create_temp_git_repo "v1.0.0")
 cd "$test_dir"
 
 PROJECT_NAME="test"
-LANGUAGE=""
+LANGUAGES="bash"  # LANGUAGES is now required, use valid value
 CC_MODEL=""
 SERENA_INITIAL_PROMPT=""
 TM_CUSTOM_SYSTEM_PROMPT=""
@@ -209,8 +209,11 @@ TM_PERMISSION_MODE=""
 generate_manifest "test" >/dev/null 2>&1
 
 # Empty strings should be captured as empty, not null
-language=$(jq -r '.variables.LANGUAGE' .github/template-state.json)
-assert_equals "" "$language" "Empty LANGUAGE captured as empty string"
+cc_model=$(jq -r '.variables.CC_MODEL' .github/template-state.json)
+assert_equals "" "$cc_model" "Empty CC_MODEL captured as empty string"
+# Verify LANGUAGES has the required value
+languages=$(jq -r '.variables.LANGUAGES' .github/template-state.json)
+assert_equals "bash" "$languages" "LANGUAGES has required value"
 cd "$REPO_ROOT"
 
 # =============================================================================
@@ -224,7 +227,7 @@ test_dir=$(create_temp_git_repo "v1.0.0")
 cd "$test_dir"
 
 PROJECT_NAME="test"
-LANGUAGE=""
+LANGUAGES="bash"
 CC_MODEL=""
 SERENA_INITIAL_PROMPT='Say "hello" to the world'
 TM_CUSTOM_SYSTEM_PROMPT=""
@@ -242,7 +245,7 @@ test_dir=$(create_temp_git_repo "v1.0.0")
 cd "$test_dir"
 
 PROJECT_NAME="test"
-LANGUAGE=""
+LANGUAGES="bash"
 CC_MODEL=""
 SERENA_INITIAL_PROMPT=""
 TM_CUSTOM_SYSTEM_PROMPT='Path: C:\Users\test'
@@ -260,7 +263,7 @@ test_dir=$(create_temp_git_repo "v1.0.0")
 cd "$test_dir"
 
 PROJECT_NAME="test"
-LANGUAGE=""
+LANGUAGES="bash"
 CC_MODEL=""
 SERENA_INITIAL_PROMPT=""
 TM_CUSTOM_SYSTEM_PROMPT=""
@@ -279,7 +282,7 @@ test_dir=$(create_temp_git_repo "v1.0.0")
 cd "$test_dir"
 
 PROJECT_NAME="my-project_v2.0"
-LANGUAGE=""
+LANGUAGES="bash"
 CC_MODEL=""
 SERENA_INITIAL_PROMPT=""
 TM_CUSTOM_SYSTEM_PROMPT=""
@@ -303,7 +306,7 @@ test_dir=$(create_temp_git_repo "v2.5.0")
 cd "$test_dir"
 
 PROJECT_NAME="test"
-LANGUAGE=""
+LANGUAGES="bash"
 CC_MODEL=""
 SERENA_INITIAL_PROMPT=""
 TM_CUSTOM_SYSTEM_PROMPT=""
@@ -328,7 +331,7 @@ git commit -m "Initial" --quiet
 # No tag created
 
 PROJECT_NAME="test"
-LANGUAGE=""
+LANGUAGES="bash"
 CC_MODEL=""
 SERENA_INITIAL_PROMPT=""
 TM_CUSTOM_SYSTEM_PROMPT=""
@@ -357,7 +360,7 @@ test_dir=$(create_temp_git_repo "v1.0.0")
 cd "$test_dir"
 
 PROJECT_NAME="schema-test"
-LANGUAGE="go"
+LANGUAGES="go"
 CC_MODEL="sonnet"
 SERENA_INITIAL_PROMPT=""
 TM_CUSTOM_SYSTEM_PROMPT=""
@@ -390,7 +393,7 @@ cd "$test_dir"
 rm -rf .github 2>/dev/null || true
 
 PROJECT_NAME="test"
-LANGUAGE=""
+LANGUAGES="bash"
 CC_MODEL=""
 SERENA_INITIAL_PROMPT=""
 TM_CUSTOM_SYSTEM_PROMPT=""
@@ -410,7 +413,7 @@ mkdir -p .github
 echo '{"old": "manifest"}' > .github/template-state.json
 
 PROJECT_NAME="new-project"
-LANGUAGE=""
+LANGUAGES="bash"
 CC_MODEL=""
 SERENA_INITIAL_PROMPT=""
 TM_CUSTOM_SYSTEM_PROMPT=""

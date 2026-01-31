@@ -70,7 +70,7 @@ Persisted during initial template cleanup. Contains:
   "synced_at": "2025-01-27T10:00:00Z",
   "variables": {
     "PROJECT_NAME": "my-project",
-    "LANGUAGE": "typescript",
+    "LANGUAGES": "typescript",
     "CC_MODEL": "sonnet",
     "SERENA_INITIAL_PROMPT": "",
     "TM_CUSTOM_SYSTEM_PROMPT": "",
@@ -94,7 +94,7 @@ The manifest variables must align exactly with those used in `.github/scripts/te
 | Manifest Variable | Shell Variable | Default Value | Target File(s) | Substitution Pattern |
 |-------------------|----------------|---------------|----------------|----------------------|
 | `PROJECT_NAME` | `NAME` (from `REPO_NAME`) | `$(basename "$REPO_ROOT")` | `.serena/project.yml`, `.taskmaster/config.json` | `project_name: "..."`, `"projectName": "..."` |
-| `LANGUAGE` | `LANGUAGE` | `""` (empty) | `.serena/project.yml` | `language: "..."` |
+| `LANGUAGES` | `LANGUAGES` | Required | `.serena/project.yml` | `languages:\n  - ...` (YAML array) |
 | `CC_MODEL` | `CC_MODEL` | `"default"` | `.claude/settings.json` | `"model": "..."` (or line removal) |
 | `SERENA_INITIAL_PROMPT` | `SERENA_INITIAL_PROMPT` | `""` (empty) | `.serena/project.yml` | `initial_prompt: "..."` |
 | `TM_CUSTOM_SYSTEM_PROMPT` | `TM_CUSTOM_SYSTEM_PROMPT` | `""` (empty) | `.taskmaster/config.json` | `"customSystemPrompt": "..."` |

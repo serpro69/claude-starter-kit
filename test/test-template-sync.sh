@@ -226,7 +226,7 @@ cat > "$MANIFEST_PATH" << 'EOF'
   "synced_at": "2025-01-27T10:00:00Z",
   "variables": {
     "PROJECT_NAME": "my-custom-project",
-    "LANGUAGE": "python",
+    "LANGUAGES": "python",
     "CC_MODEL": "opus",
     "SERENA_INITIAL_PROMPT": "",
     "TM_CUSTOM_SYSTEM_PROMPT": "",
@@ -240,7 +240,8 @@ EOF
 mkdir -p "$test_dir/templates/serena"
 cat > "$test_dir/templates/serena/project.yml" << 'EOF'
 project_name: "PLACEHOLDER"
-language: ""
+languages:
+  - bash
 initial_prompt: ""
 EOF
 
@@ -265,7 +266,7 @@ cat > "$MANIFEST_PATH" << 'EOF'
   "synced_at": "2025-01-27T10:00:00Z",
   "variables": {
     "PROJECT_NAME": "test-proj",
-    "LANGUAGE": "",
+    "LANGUAGES": "bash",
     "CC_MODEL": "default",
     "SERENA_INITIAL_PROMPT": "",
     "TM_CUSTOM_SYSTEM_PROMPT": "",
@@ -306,7 +307,7 @@ cat > "$MANIFEST_PATH" << 'EOF'
   "synced_at": "2025-01-27T10:00:00Z",
   "variables": {
     "PROJECT_NAME": "test-proj",
-    "LANGUAGE": "",
+    "LANGUAGES": "bash",
     "CC_MODEL": "claude-opus",
     "SERENA_INITIAL_PROMPT": "",
     "TM_CUSTOM_SYSTEM_PROMPT": "",

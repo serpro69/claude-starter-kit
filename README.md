@@ -136,7 +136,7 @@ Here's an example `mcpServers` object that you can use as a reference:
 
 **Serena MCP Configuration Inputs:**
 
-- `LANGUAGE` - the main language(s) of your project (see [Serena Programming Language Support & Semantic Analysis Capabilities](https://github.com/oraios/serena?tab=readme-ov-file#programming-language-support--semantic-analysis-capabilities) for more details on supported languages)
+- `LANGUAGES` (required) - programming languages for your project, comma-separated (e.g., `python`, `python,typescript`). See [Serena Programming Language Support & Semantic Analysis Capabilities](https://github.com/oraios/serena?tab=readme-ov-file#programming-language-support--semantic-analysis-capabilities) for supported languages
 
 - `SERENA_INITIAL_PROMPT` - initial prompt for the project; it will always be given to the LLM upon activating the project
 

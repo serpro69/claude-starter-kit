@@ -67,7 +67,7 @@ Run `/mcp` in Claude Code to verify all four servers are connected.
 
 1. **Create from template**: Use GitHub's "Use this template" button
 2. **Run template-cleanup workflow**: Configure language and Task Master settings
-   - Set `LANGUAGE` for Serena (see Serena language support docs)
+   - Set `LANGUAGES` for Serena (comma-separated, required - see Serena language support docs)
    - Optional: Set Task Master custom prompts and permission modes
 3. **Clone repository**
 4. **Verify MCP setup**: Run `/mcp` to confirm all servers connected
