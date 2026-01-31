@@ -1,23 +1,53 @@
 #!/usr/bin/env bash
 #
-# Template Sync Script
-# Synchronizes template updates from the upstream claude-starter-kit repository.
+# template-sync.sh - Synchronize configuration from upstream claude-starter-kit template
 #
-# Usage:
-#   ./template-sync.sh                    # Sync to latest version
-#   ./template-sync.sh [options]          # Sync with custom options
+# This script fetches template updates from the upstream repository and applies
+# project-specific substitutions using values stored in the state manifest.
 #
-# Options:
+# USAGE:
+#   ./template-sync.sh                      # Sync to latest release
+#   ./template-sync.sh --version v1.2.0     # Sync to specific version
+#   ./template-sync.sh --dry-run            # Preview what would change
+#   ./template-sync.sh --ci                 # CI mode for GitHub Actions
+#
+# OPTIONS:
 #   --version VERSION     Target version to sync (default: latest)
-#   --dry-run             Preview changes without applying
-#   --ci                  CI mode for GitHub Actions outputs
-#   --output-dir DIR      Directory to stage changes (default: temp)
+#                         - "latest": Most recent tagged release
+#                         - "main": Latest from main branch
+#                         - "v1.2.3": Specific tag
+#   --dry-run             Preview changes without applying them
+#   --ci                  CI mode for GitHub Actions (structured output)
+#   --output-dir DIR      Directory for staged changes (default: temp)
 #   -h, --help            Show this help message
 #
-# Exit Codes:
+# REQUIRES:
+#   - jq (for JSON parsing)
+#   - git
+#   - curl
+#
+# EXIT CODES:
 #   0 - Success (with or without changes)
 #   1 - Operational error (missing manifest, network failure, invalid JSON)
 #   2 - Invalid CLI arguments
+#
+# TROUBLESHOOTING:
+#   "Manifest not found":
+#     - Ensure .github/template-state.json exists
+#     - For repos created before sync feature, create manifest manually (see README)
+#
+#   "Version not found":
+#     - Check available tags: git ls-remote --tags https://github.com/serpro69/claude-starter-kit
+#     - Use 'latest' for most recent release or 'main' for bleeding edge
+#
+#   "Network error":
+#     - Verify internet connectivity
+#     - Check if upstream repo is accessible
+#     - Script will retry 3 times with 5s delay
+#
+#   "Invalid JSON in manifest":
+#     - Check manifest file for syntax errors
+#     - Restore from version control if corrupted
 
 set -euo pipefail
 
@@ -149,14 +179,32 @@ check_dependencies() {
 # Manifest Functions
 # =============================================================================
 
-# Extract a value from the manifest using a jq expression
-# Usage: get_manifest_value '.variables.PROJECT_NAME'
+# get_manifest_value()
+# Extracts a value from the manifest file using a jq expression.
+#
+# Args:
+#   $1 - jq expression to evaluate (e.g., '.variables.PROJECT_NAME')
+#
+# Returns:
+#   Extracted value via stdout, or empty string if not found
+#
+# Example:
+#   project_name=$(get_manifest_value '.variables.PROJECT_NAME')
 get_manifest_value() {
   local jq_expr="$1"
   jq -r "$jq_expr" "$MANIFEST_PATH"
 }
 
-# Read and validate the manifest file exists and contains valid JSON
+# read_manifest()
+# Reads and validates the manifest file exists and contains valid JSON.
+# Verifies required top-level fields (schema_version, upstream_repo, template_version, variables).
+#
+# Returns:
+#   0 on success (manifest loaded)
+#   Exits with 1 if manifest missing, invalid JSON, or missing required fields
+#
+# Side effects:
+#   Logs info/error messages
 read_manifest() {
   # Check if manifest file exists
   if [[ ! -f "$MANIFEST_PATH" ]]; then
@@ -193,7 +241,17 @@ read_manifest() {
   log_info "Manifest loaded: $MANIFEST_PATH"
 }
 
-# Validate manifest schema and required variables
+# validate_manifest()
+# Validates manifest schema version and all required variables.
+# Checks schema_version is supported (currently: "1") and validates
+# upstream_repo format and required variable presence.
+#
+# Returns:
+#   0 on success (manifest valid)
+#   Exits with 1 if validation fails
+#
+# Side effects:
+#   Logs success/error messages
 validate_manifest() {
   # Check schema version
   local schema_version
@@ -244,9 +302,22 @@ validate_manifest() {
 # Version Resolution and Template Fetching
 # =============================================================================
 
-# Resolve target version to a concrete git ref
-# Usage: resolve_version "latest" "owner/repo"
-# Returns: tag name, branch name, or SHA (via stdout)
+# resolve_version()
+# Resolves target version string to a concrete git ref.
+#
+# Args:
+#   $1 - Target version ("latest", "main", "master", "HEAD", or specific tag/SHA)
+#   $2 - Upstream repository (owner/repo format)
+#
+# Returns:
+#   Resolved version string via stdout (tag name, branch name, or SHA)
+#   Exits with 1 if resolution fails
+#
+# Behavior:
+#   - "latest": Gets most recent tag sorted by version
+#   - "main"/"master"/"HEAD": Returns as-is
+#   - Other: Assumed to be specific tag or SHA
+#
 # Note: All logging goes to stderr to keep stdout clean for return value
 resolve_version() {
   local target="$1"
@@ -285,9 +356,23 @@ resolve_version() {
   echo "$resolved"
 }
 
-# Fetch upstream templates using git sparse-checkout
-# Usage: fetch_upstream_templates "v1.0.0" "owner/repo" "/tmp/workdir"
-# Sets FETCHED_TEMPLATES_PATH to the path of fetched templates
+# fetch_upstream_templates()
+# Fetches templates from upstream repository using git sparse-checkout.
+# Implements retry logic for network failures (3 attempts, 5s delay).
+#
+# Args:
+#   $1 - Version to fetch (tag, branch, or SHA)
+#   $2 - Upstream repository (owner/repo format)
+#   $3 - Working directory for clone operation
+#
+# Returns:
+#   0 on success
+#   Exits with 1 if fetch fails after retries or templates not found
+#
+# Side effects:
+#   Sets global FETCHED_TEMPLATES_PATH to the path of fetched templates
+#   Creates directories in work_dir
+#   Logs progress/error messages
 fetch_upstream_templates() {
   local version="$1"
   local upstream="$2"
@@ -392,9 +477,26 @@ escape_sed_replacement() {
   printf '%s' "$str" | sed -e 's/[&\\/]/\\&/g' -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g'
 }
 
-# Apply variable substitutions to fetched templates
-# Usage: apply_substitutions "/path/to/templates" "/path/to/output"
-# Mirrors the substitution logic from .github/scripts/template-cleanup.sh
+# apply_substitutions()
+# Applies project-specific variable substitutions to fetched template files.
+# Mirrors the substitution logic from template-cleanup.sh for consistency.
+#
+# Args:
+#   $1 - Source template directory (raw fetched templates)
+#   $2 - Output directory for substituted templates
+#
+# Returns:
+#   0 on success
+#
+# Substitutions applied:
+#   - Claude Code settings: CC_MODEL
+#   - Serena settings: PROJECT_NAME, LANGUAGES, SERENA_INITIAL_PROMPT
+#   - TaskMaster settings: PROJECT_NAME, TM_CUSTOM_SYSTEM_PROMPT,
+#                          TM_APPEND_SYSTEM_PROMPT, TM_PERMISSION_MODE
+#
+# Side effects:
+#   Creates output directory and copies/modifies template files
+#   Logs progress messages
 apply_substitutions() {
   local template_dir="$1"
   local output_dir="$2"
@@ -496,9 +598,25 @@ apply_substitutions() {
 # File Comparison Functions
 # =============================================================================
 
-# Compare staging directory against current project directories
-# Usage: compare_files "/path/to/staging"
-# Populates: ADDED_FILES, MODIFIED_FILES, DELETED_FILES, UNCHANGED_FILES
+# compare_files()
+# Compares staging directory against current project directories.
+# Detects added, modified, deleted, and unchanged files.
+#
+# Args:
+#   $1 - Staging directory containing substituted templates
+#
+# Returns:
+#   0 on success
+#
+# Side effects:
+#   Populates global arrays: ADDED_FILES, MODIFIED_FILES, DELETED_FILES, UNCHANGED_FILES
+#   Logs comparison summary
+#
+# Directories compared:
+#   staging/claude    -> .claude/
+#   staging/serena    -> .serena/
+#   staging/taskmaster -> .taskmaster/
+#   staging/bootstrap.sh -> bootstrap.sh
 compare_files() {
   local staging_dir="$1"
 
@@ -573,9 +691,24 @@ compare_files() {
   log_success "Comparison complete: ${#ADDED_FILES[@]} added, ${#MODIFIED_FILES[@]} modified, ${#DELETED_FILES[@]} deleted, ${#UNCHANGED_FILES[@]} unchanged"
 }
 
-# Generate a human-readable diff report
-# Usage: generate_diff_report "/path/to/staging"
-# In CI mode, also outputs GitHub Actions format
+# generate_diff_report()
+# Generates a human-readable diff report showing all changes.
+# In CI mode, also outputs GitHub Actions compatible format.
+#
+# Args:
+#   $1 - Staging directory containing substituted templates
+#
+# Returns:
+#   0 on success
+#
+# Output:
+#   - Human-readable report to stdout with colored output
+#   - In CI mode: writes to GITHUB_OUTPUT file for workflow consumption
+#   - Shows version transition, change summary, and file diffs
+#
+# Side effects:
+#   Reads from global arrays (ADDED_FILES, MODIFIED_FILES, etc.)
+#   Reads RESOLVED_VERSION global variable
 generate_diff_report() {
   local staging_dir="$1"
   local total_changes=$((${#ADDED_FILES[@]} + ${#MODIFIED_FILES[@]} + ${#DELETED_FILES[@]}))

@@ -200,6 +200,61 @@ Here's an example `mcpServers` object that you can use as a reference:
 
 6. Profit
 
+## Receiving Template Updates
+
+Repositories created from this template can receive configuration updates via the Template Sync feature.
+
+### Prerequisites
+
+- Repository must have been created after template sync feature was added, OR
+- Manually create `.github/template-state.json` (see Migration section below)
+
+### Using Template Sync
+
+1. Navigate to **Actions** → **Template Sync**
+2. Click **Run workflow**
+3. Configure options:
+   - **version**: `latest` (default), `main`, or specific tag (e.g., `v1.2.0`)
+   - **dry_run**: Check to preview changes without creating a PR
+4. Review the created Pull Request
+5. Merge to apply updates
+
+### What Gets Updated
+
+- `.claude/` - Claude Code commands, skills, scripts, settings
+- `.serena/` - Serena semantic analysis configuration
+- `.taskmaster/` - Task Master configuration and templates
+
+### What's Preserved
+
+- Project-specific values (name, language, custom prompts)
+- User-scoped files (tasks, PRDs, local settings)
+- Any gitignored files
+
+### Migration for Existing Repositories
+
+If your repository was created before the sync feature, create `.github/template-state.json` manually:
+
+```json
+{
+  "schema_version": "1",
+  "upstream_repo": "serpro69/claude-starter-kit",
+  "template_version": "v1.0.0",
+  "synced_at": "2025-01-27T00:00:00Z",
+  "variables": {
+    "PROJECT_NAME": "your-project-name",
+    "LANGUAGES": "typescript",
+    "CC_MODEL": "default",
+    "SERENA_INITIAL_PROMPT": "",
+    "TM_CUSTOM_SYSTEM_PROMPT": "",
+    "TM_APPEND_SYSTEM_PROMPT": "",
+    "TM_PERMISSION_MODE": "default"
+  }
+}
+```
+
+Then manually copy `.github/workflows/template-sync.yml` and `.github/scripts/template-sync.sh` from the [template repository](https://github.com/serpro69/claude-starter-kit).
+
 ### Post-Init Settings
 
 The following tweaks are not mandatory, but will more often than not improve your experience with CC
