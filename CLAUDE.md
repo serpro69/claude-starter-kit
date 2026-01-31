@@ -169,6 +169,86 @@ The repository includes a GitHub workflow that customizes the template:
 - Task Master can track progress alongside commits
 - Use conventional commits with task IDs: `feat: implement JWT auth (task 1.2)`
 
+## Testing
+
+The repository includes a comprehensive test suite for the template-sync feature located in the `test/` directory.
+
+### Test Directory Structure
+
+```
+test/
+├── helpers.sh                    # Shared test utilities and assertions
+├── test-manifest-jq.sh           # Tests for jq JSON patterns
+├── test-template-sync.sh         # Tests for template-sync.sh functions
+├── test-template-cleanup.sh      # Tests for generate_manifest() function
+└── fixtures/
+    ├── manifests/                # JSON manifest test fixtures
+    │   ├── valid-manifest.json
+    │   ├── invalid-json.txt
+    │   ├── missing-schema-version.json
+    │   ├── missing-variables.json
+    │   ├── unsupported-schema.json
+    │   └── invalid-upstream-repo.json
+    └── templates/                # Template file fixtures
+        ├── claude/settings.json
+        ├── serena/project.yml
+        └── taskmaster/config.json
+```
+
+### Running Tests
+
+```bash
+# Run all test suites
+for test in test/test-*.sh; do $test; done
+
+# Run individual test suite
+./test/test-manifest-jq.sh
+./test/test-template-sync.sh
+./test/test-template-cleanup.sh
+```
+
+### Test Coverage
+
+| Test Suite | Tests | Coverage |
+|------------|-------|----------|
+| test-manifest-jq.sh | 17 | jq patterns, JSON generation, special characters, round-trip validation |
+| test-template-sync.sh | 33 | CLI parsing, manifest reading/validation, sed escaping, substitutions, file comparison, diff reports |
+| test-template-cleanup.sh | 18 | Manifest generation, field validation, variable capture, special characters, git tag/SHA detection |
+
+### Writing New Tests
+
+Tests use shared utilities from `test/helpers.sh`:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+source "$(dirname "$0")/helpers.sh"
+
+log_section "Section Name"
+
+log_test "Test description"
+# ... test logic ...
+assert_equals "expected" "$actual" "Assertion message"
+
+print_summary
+```
+
+**Available Assertions:**
+- `assert_equals "expected" "actual" "message"` - Compare values
+- `assert_not_equals "unexpected" "actual" "message"` - Verify inequality
+- `assert_file_exists "path" "message"` - Check file exists
+- `assert_dir_exists "path" "message"` - Check directory exists
+- `assert_exit_code expected "command" "message"` - Verify exit code
+- `assert_output_contains "needle" "command" "message"` - Check command output
+- `assert_json_valid "json_string" "message"` - Validate JSON syntax
+- `assert_json_field "json" "jq_path" "expected" "message"` - Check JSON field
+
+**Helper Functions:**
+- `create_temp_dir "prefix"` - Create temp directory (auto-cleaned)
+- `create_temp_git_repo "tag"` - Create temp git repo with optional tag
+- `cleanup_temp` - Manual cleanup (automatic on exit)
+
 ## Common Issues
 
 ### MCP Connection Problems

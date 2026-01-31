@@ -285,42 +285,81 @@ This is a copy of the workflow created in Task 4, placed in the templates direct
 
 ### Task 7: Testing
 
-**Goal**: Verify the implementation works end-to-end.
+**Goal**: Verify the implementation works through unit tests and integration testing.
 
-**Test Scenarios**:
+**Status**: ✅ Unit tests implemented
+
+#### Unit Test Suite
+
+Located in `test/` directory with 68 total tests across 3 test files:
+
+**Test Directory Structure**:
+```
+test/
+├── helpers.sh                    # Shared test utilities
+├── test-manifest-jq.sh           # 17 tests - jq JSON patterns
+├── test-template-sync.sh         # 33 tests - template-sync.sh functions
+├── test-template-cleanup.sh      # 18 tests - generate_manifest() function
+└── fixtures/
+    ├── manifests/                # 6 JSON manifest fixtures
+    └── templates/                # 3 template file fixtures
+```
+
+**Running Tests**:
+```bash
+# Run all tests
+for test in test/test-*.sh; do $test; done
+
+# Run individual suite
+./test/test-manifest-jq.sh
+./test/test-template-sync.sh
+./test/test-template-cleanup.sh
+```
+
+**Test Coverage by Suite**:
+
+| Suite | Tests | Coverage |
+|-------|-------|----------|
+| test-manifest-jq.sh | 17 | jq patterns, JSON generation, special characters, round-trip |
+| test-template-sync.sh | 33 | CLI parsing, manifest reading/validation, sed escaping, substitutions, file comparison, diff reports |
+| test-template-cleanup.sh | 18 | Manifest generation, fields, variables, special chars, git tag/SHA detection, schema validation |
+
+**Functions Tested in template-sync.sh**:
+- `parse_arguments()` - CLI argument handling
+- `read_manifest()` - Manifest file loading and JSON validation
+- `validate_manifest()` - Schema version and field validation
+- `escape_sed_replacement()` - Special character escaping for sed
+- `apply_substitutions()` - Variable substitution logic
+- `compare_files()` - File change detection (added/modified/deleted/unchanged)
+- `generate_diff_report()` - Human-readable and CI output formatting
+
+**Functions Tested in template-cleanup.sh**:
+- `generate_manifest()` - State manifest creation with all variables
+
+#### Integration Tests (Manual)
+
+The following scenarios require manual testing with actual GitHub repositories:
 
 1. **Fresh template cleanup**:
    - Create repo from template
    - Run cleanup with various input combinations
    - Verify manifest is created with correct values
-   - Verify sync workflow is present
 
-2. **Sync with no upstream changes**:
-   - Run sync on repo at current version
-   - Verify no PR created
-   - Verify correct output message
-
-3. **Sync with upstream changes**:
+2. **Sync with upstream changes**:
    - Modify a template file in upstream
    - Create new tag
    - Run sync in child repo
-   - Verify PR created with correct changes
+   - Verify changes detected correctly
 
-4. **Dry run mode**:
-   - Run sync with dry_run=true
+3. **GitHub Actions workflow**:
+   - Trigger workflow with dry_run=true
    - Verify diff report generated
-   - Verify no PR created
+   - Trigger workflow with dry_run=false
+   - Verify PR created correctly
 
-5. **Version targeting**:
-   - Test "latest" resolves correctly
-   - Test "main" fetches from main branch
-   - Test specific tag works
-
-6. **Error handling**:
-   - Missing manifest
-   - Invalid manifest JSON
-   - Network failure during fetch
-   - Invalid version specified
+4. **Version targeting**:
+   - Test "latest" resolves to most recent tag
+   - Test specific tag version works
 
 ---
 
