@@ -54,7 +54,7 @@ You will need the following on your workstation:
 
 - [npm](https://www.npmjs.com/package/npm)
 - [uv](https://docs.astral.sh/uv/)
-- [jq](https://jqlang.github.io/jq/) - Required for template-cleanup.sh
+- [jq](https://jqlang.github.io/jq/) - Required for `.github/scripts/template-cleanup.sh`
 
 ### API Keys
 

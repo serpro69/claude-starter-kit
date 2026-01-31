@@ -71,7 +71,7 @@ jobs:
       - name: Fetch Sources
         uses: actions/checkout@v4
 
-      # Cleanup project using the template-cleanup.sh script
+      # Cleanup project using the .github/scripts/template-cleanup.sh script
       - name: Cleanup
         env:
           CC_MODEL: ${{ github.event.inputs.CC_MODEL }}
@@ -81,8 +81,8 @@ jobs:
           TM_APPEND_SYSTEM_PROMPT: ${{ github.event.inputs.TM_APPEND_SYSTEM_PROMPT }}
           TM_PERMISSION_MODE: ${{ github.event.inputs.TM_PERMISSION_MODE }}
         run: |
-          chmod +x template-cleanup.sh
-          ./template-cleanup.sh --ci --no-commit
+          chmod +x .github/scripts/template-cleanup.sh
+          ./.github/scripts/template-cleanup.sh --ci --no-commit
 
       # Commit modified files
       - name: Commit files

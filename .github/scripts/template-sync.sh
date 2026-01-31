@@ -122,7 +122,7 @@ read_manifest() {
   # Check if manifest file exists
   if [[ ! -f "$MANIFEST_PATH" ]]; then
     log_error "Manifest file not found: $MANIFEST_PATH"
-    log_error "This repository may not have been initialized with template-cleanup.sh"
+    log_error "This repository may not have been initialized with .github/scripts/template-cleanup.sh"
     exit 1
   fi
 
@@ -303,7 +303,7 @@ escape_sed_replacement() {
 
 # Apply variable substitutions to fetched templates
 # Usage: apply_substitutions "/path/to/templates" "/path/to/output"
-# Mirrors the substitution logic from template-cleanup.sh
+# Mirrors the substitution logic from .github/scripts/template-cleanup.sh
 apply_substitutions() {
   local template_dir="$1"
   local output_dir="$2"
