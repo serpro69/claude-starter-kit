@@ -134,10 +134,11 @@
             "title": "Create cove command directory structure",
             "description": "Create the directory `.github/templates/claude/commands/cove/` to house the CoVe slash command file.",
             "dependencies": [],
-            "details": "Create the directory using `mkdir -p .github/templates/claude/commands/cove/`. This follows the existing pattern where commands are organized in subdirectories under `.github/templates/claude/commands/` (like `tm/show/`, `tm/next/`, etc.). The directory must exist before the cove.md file can be created.\n<info added on 2026-02-01T15:07:12.715Z>\nI'll analyze the codebase structure to understand the slash command patterns and then provide the specific implementation details for subtask 11.1.Based on my analysis of the existing command structure in `.github/templates/claude/commands/tm/` and the design/implementation documents, here is the new text content to append to subtask 11.1:\n\n---\n\nThe command directory follows the template-based structure where files in `.github/templates/` are synced to `.claude/` during template operations. Per the implementation plan (docs/wip/cove/implementation.md Task 4), the slash command will be located at `.github/templates/claude/commands/cove/cove.md` and will handle arguments using the `$ARGUMENTS` variable pattern seen in commands like `.github/templates/claude/commands/tm/show/show-task.md`. The design document (docs/wip/cove/design.md lines 145-159) specifies two invocation modes: with arguments to verify a specific question, and without arguments to verify the previous response in the conversation.\n</info added on 2026-02-01T15:07:12.715Z>",
-            "status": "pending",
+            "details": "Create the directory using `mkdir -p .github/templates/claude/commands/cove/`. This follows the existing pattern where commands are organized in subdirectories under `.github/templates/claude/commands/` (like `tm/show/`, `tm/next/`, etc.). The directory must exist before the cove.md file can be created.\n<info added on 2026-02-01T15:07:12.715Z>\nI'll analyze the codebase structure to understand the slash command patterns and then provide the specific implementation details for subtask 11.1.Based on my analysis of the existing command structure in `.github/templates/claude/commands/tm/` and the design/implementation documents, here is the new text content to append to subtask 11.1:\n\n---\n\nThe command directory follows the template-based structure where files in `.github/templates/` are synced to `.claude/` during template operations. Per the implementation plan (docs/wip/cove/implementation.md Task 4), the slash command will be located at `.github/templates/claude/commands/cove/cove.md` and will handle arguments using the `$ARGUMENTS` variable pattern seen in commands like `.github/templates/claude/commands/tm/show/show-task.md`. The design document (docs/wip/cove/design.md lines 145-159) specifies two invocation modes: with arguments to verify a specific question, and without arguments to verify the previous response in the conversation.\n</info added on 2026-02-01T15:07:12.715Z>\n<info added on 2026-02-01T17:29:21.262Z>\nBased on the user request indicating the directory now contains both `cove.md` and `cove-isolated.md` files, here is the new text content:\n\nDirectory successfully created and verified containing both command files: cove.md (standard CoVe command) and cove-isolated.md (isolated sub-agent mode command). The structure matches the template-based pattern where `.github/templates/claude/commands/` files are synced to `.claude/commands/` during template operations.\n</info added on 2026-02-01T17:29:21.262Z>",
+            "status": "done",
             "testStrategy": "Verify directory `.github/templates/claude/commands/cove/` exists using `ls -la .github/templates/claude/commands/cove/` or checking with file explorer.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-02-01T17:30:30.804Z"
           },
           {
             "id": 2,
@@ -146,10 +147,11 @@
             "dependencies": [
               1
             ],
-            "details": "Create `.github/templates/claude/commands/cove/cove.md` following the patterns from existing commands like `show-task.md`. The file must include: (1) Brief 1-2 line description about applying CoVe for improved accuracy; (2) Arguments line: `Arguments: $ARGUMENTS`; (3) Conditional logic section explaining behavior when $ARGUMENTS is provided (apply CoVe to the question) vs when empty (verify previous response in conversation); (4) Instruction to invoke the `cove` skill and follow the process in `cove-process.md`; (5) Optional brief usage examples showing `/cove What is the time complexity of...` and `/cove` for verification.",
-            "status": "pending",
+            "details": "Create `.github/templates/claude/commands/cove/cove.md` following the patterns from existing commands like `show-task.md`. The file must include: (1) Brief 1-2 line description about applying CoVe for improved accuracy; (2) Arguments line: `Arguments: $ARGUMENTS`; (3) Conditional logic section explaining behavior when $ARGUMENTS is provided (apply CoVe to the question) vs when empty (verify previous response in conversation); (4) Instruction to invoke the `cove` skill and follow the process in `cove-process.md`; (5) Optional brief usage examples showing `/cove What is the time complexity of...` and `/cove` for verification.\n<info added on 2026-02-01T17:29:46.952Z>\nI'll analyze the codebase to understand the command structure and provide specific implementation details for the subtask update.Based on my analysis of the codebase, the file has been successfully implemented at `.github/templates/claude/commands/cove/cove.md`. The implementation includes all required elements:\n\nFile successfully created at `.github/templates/claude/commands/cove/cove.md` with complete implementation including: 1-line description of CoVe for accuracy improvement, Arguments line with $ARGUMENTS variable, conditional invocation logic distinguishing between question mode (when arguments provided) and verification mode (when empty), direct skill reference to cove-process.md with 4-step workflow summary, and two usage examples demonstrating /cove with question and /cove without arguments for verification. Implementation follows existing command patterns from show-task.md including Arguments section, multiple invocation modes with IF/ELSE structure, Process section with skill reference, and Examples section with code blocks.\n</info added on 2026-02-01T17:29:46.952Z>",
+            "status": "done",
             "testStrategy": "Verify cove.md exists and contains: $ARGUMENTS variable, description of with-arguments and no-arguments behavior, reference to cove skill/cove-process.md, formatting consistent with show-task.md pattern.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-02-01T17:30:30.812Z"
           },
           {
             "id": 3,
@@ -158,13 +160,14 @@
             "dependencies": [
               2
             ],
-            "details": "Perform validation checks: (1) Compare cove.md structure against existing commands like `show-task.md` and `next-task.md` to ensure consistent formatting; (2) Verify the skill reference points to the correct skill name `cove` which will be defined in SKILL.md; (3) Check that argument handling logic clearly distinguishes between providing a question and verifying previous response; (4) Ensure the command is concise (entry point only) and delegates workflow details to the skill; (5) Verify file uses imperative mood and matches markdown conventions from other commands.",
-            "status": "pending",
+            "details": "Perform validation checks: (1) Compare cove.md structure against existing commands like `show-task.md` and `next-task.md` to ensure consistent formatting; (2) Verify the skill reference points to the correct skill name `cove` which will be defined in SKILL.md; (3) Check that argument handling logic clearly distinguishes between providing a question and verifying previous response; (4) Ensure the command is concise (entry point only) and delegates workflow details to the skill; (5) Verify file uses imperative mood and matches markdown conventions from other commands.\n<info added on 2026-02-01T17:30:24.517Z>\nI'll analyze the codebase to verify the command structure and provide specific validation results.Based on my analysis of the codebase, here is the validation result:\n\nCommand structure confirmed: (1) Format matches tm command patterns - uses \"Arguments: $ARGUMENTS\" header followed by sections with markdown headers; (2) Skill reference verified - correctly invokes \"cove\" skill defined in `.claude/skills/cove/SKILL.md`; (3) Dual invocation modes properly documented - distinguishes between providing question ($ARGUMENTS present) vs verifying previous response ($ARGUMENTS empty); (4) Appropriate delegation - command is concise entry point (31 lines), workflow details correctly delegated to `cove-process.md` skill file; (5) Style conventions followed - uses imperative mood (\"Apply\", \"Invoke\"), consistent with other commands like `to-done.md` and `next-task.md`.\n</info added on 2026-02-01T17:30:24.517Z>",
+            "status": "done",
             "testStrategy": "Perform diff/comparison with show-task.md for structural consistency. Grep for 'cove' skill reference. Manual review that both invocation modes are clearly documented. Verify file length is appropriately concise (roughly 20-40 lines, not a full workflow document).",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-02-01T17:30:30.819Z"
           }
         ],
-        "updatedAt": "2026-02-01T15:27:14.458Z"
+        "updatedAt": "2026-02-01T17:30:30.819Z"
       },
       {
         "id": "12",
@@ -396,9 +399,10 @@
             "description": "Insert new 'Verification Modes' section after 'When to Use This Skill' section (~line 35) documenting both standard and isolated modes with their characteristics, sub-agent flags, and mode selection guide table.",
             "dependencies": [],
             "details": "Insert the new section between line 35 and 36 (after the auto-trigger note and before 'Process Overview').\n\nContent to add:\n- Section header: '## Verification Modes'\n- Standard Mode subsection with token cost (~3-5x), isolation level (best-effort), speed (faster), and reference to cove-process.md\n- Isolated Mode subsection with token cost (~8-15x), isolation level (true), speed (parallel), and reference to cove-isolated.md\n- Sub-agent customization flags table documenting --explore, --haiku, and --agent=<name> flags\n- Mode Selection Guide table with use cases mapped to recommended modes (quick fact-checking → /cove, high-stakes accuracy → /cove-isolated, codebase verification → /cove-isolated --explore, cost-sensitive → /cove or /cove-isolated --haiku)\n\nThis section should be ~35-40 lines of markdown following the format specified in the task details.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "1. Verify 'Verification Modes' section exists after line 35 (before 'Process Overview')\n2. Verify both Standard and Isolated mode subsections are present with all characteristics\n3. Verify sub-agent flags table includes all three flags with descriptions\n4. Verify Mode Selection Guide table maps at least 4 use cases to modes\n5. Verify references to both cove-process.md and cove-isolated.md are present",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-02-01T17:30:42.834Z"
           },
           {
             "id": 2,
@@ -408,12 +412,13 @@
               1
             ],
             "details": "Make three targeted updates to existing sections:\n\n1. **Process Overview section** (~line 45): Change the single workflow reference to reference both files:\n   - Old: 'See [cove-process.md](./cove-process.md) for the detailed verification workflow.'\n   - New: 'See [cove-process.md](./cove-process.md) for the standard workflow, or [cove-isolated.md](./cove-isolated.md) for the isolated sub-agent workflow.'\n\n2. **Invocation section** (~line 55): Add isolated mode command examples after existing /cove example:\n   - Add subsection 'For isolated verification with sub-agents:' with code block showing '/cove-isolated What is the time complexity of Python's sorted() function?'\n   - Add 'With flags:' subsection showing examples with --explore and --haiku flags\n\n3. **Natural Language Invocation section** (~line 70): Add isolated mode trigger phrases after existing standard mode phrases:\n   - 'use isolated verification'\n   - 'verify with sub-agents'\n   - 'use factored verification with isolation'\n\nMaintain existing formatting and structure, only adding new content without removing existing documentation.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "1. Verify Process Overview section references both cove-process.md and cove-isolated.md\n2. Verify Invocation section includes /cove-isolated example with basic usage\n3. Verify Invocation section includes flag examples (--explore and --haiku)\n4. Verify Natural Language Invocation section includes at least 3 isolated mode trigger phrases\n5. Verify all existing content is preserved and no sections were removed",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-02-01T17:30:42.837Z"
           }
         ],
-        "updatedAt": "2026-02-01T17:07:50.956Z"
+        "updatedAt": "2026-02-01T17:30:42.837Z"
       },
       {
         "id": "17",
@@ -456,7 +461,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-02-01T17:07:50.957Z",
+      "lastModified": "2026-02-01T17:30:42.837Z",
       "taskCount": 9,
       "completedCount": 8,
       "tags": [
