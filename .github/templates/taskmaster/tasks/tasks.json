@@ -219,7 +219,7 @@
           "11",
           "12"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -227,9 +227,10 @@
             "description": "Validate that all CoVe skill files exist in the correct locations with proper content structure following project conventions.",
             "dependencies": [],
             "details": "Perform file existence checks and content validation:\n\n1. **Directory structure verification:**\n   - Verify `.github/templates/claude/skills/cove/` directory exists\n   - Verify `.github/templates/claude/commands/cove/` directory exists\n\n2. **File existence checks:**\n   - `.github/templates/claude/skills/cove/SKILL.md` exists\n   - `.github/templates/claude/skills/cove/cove-process.md` exists\n   - `.github/templates/claude/commands/cove/cove.md` exists\n\n3. **SKILL.md content validation:**\n   - Parse YAML frontmatter and verify `name` field equals exactly `cove`\n   - Verify `description` field mentions verification, accuracy, or fact-checking\n   - Verify file contains reference to `cove-process.md`\n   - Compare frontmatter format against existing skills (e.g., `.github/templates/claude/skills/testing-process/SKILL.md`)\n\n4. **cove-process.md content validation:**\n   - Search for all 4 CoVe steps: Initial Answer, Generate Verification Questions, Independent Verification, Final Verified Answer\n   - Verify output format template exists with sections: Initial Answer, Verification (Q&A pairs), Final Verified Answer, Verification notes\n   - Verify tool usage guidance is present (WebSearch, context7, Read, Grep)\n\n5. **cove.md command validation:**\n   - Verify `$ARGUMENTS` variable handling exists\n   - Verify both with-arguments and no-arguments behavior documented\n   - Verify skill invocation reference is present\n\n6. **Convention compliance:**\n   - Verify no modifications made to CLAUDE.md or settings.json\n   - Compare markdown formatting against existing skills for consistency\n   - Verify imperative mood used in instructions",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Use Glob to verify directories exist, Read to examine file contents, Grep to search for required terms (YAML fields, step names, output format sections). Compare structure against existing skills like testing-process and analysis-process for convention compliance.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-02-01T15:32:44.853Z"
           },
           {
             "id": 2,
@@ -239,9 +240,10 @@
               1
             ],
             "details": "Create test documentation in `docs/wip/cove/test-scenarios.md` covering:\n\n1. **Slash command with question test:**\n   - Input: `/cove What is the default port for PostgreSQL?`\n   - Expected: Full 4-step CoVe workflow\n   - Verify: Initial Answer identifies port 5432, verification questions challenge this, independent answers confirm, final answer states verified port\n\n2. **Previous response verification test:**\n   - Step 1: Ask a factual question (e.g., \"What is TCP?\")\n   - Step 2: Invoke `/cove` without arguments\n   - Expected: CoVe applies to the previous response\n   - Verify: All 4 steps present, verification questions relevant to previous response topic\n\n3. **Natural language invocation test:**\n   - Input: \"Use chain of verification to answer: What is the memory limit for AWS Lambda?\"\n   - Expected: Skill recognized and invoked\n   - Verify: Same 4-step structure appears\n\n4. **Code verification scenario test:**\n   - Input: `/cove Is binary search O(log n) time complexity?`\n   - Expected: Verification questions about algorithm analysis\n   - Verify: Questions cover edge cases, assumptions, and technical correctness\n\n5. **Output format checklist for each test:**\n   - [ ] Initial Answer section clearly marked\n   - [ ] Verification section has 3-5 Q&A pairs\n   - [ ] Q&A pairs use independent reasoning (no self-reference)\n   - [ ] Final Verified Answer section present\n   - [ ] Verification notes list corrections OR confirm no corrections needed\n\n6. **Edge case documentation:**\n   - Ambiguous questions\n   - Questions where initial answer is already correct\n   - Questions where verification finds errors",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Review the created test-scenarios.md file to ensure all 4 test scenarios are documented with clear inputs, expected outputs, and verification checklists. Verify the document follows markdown formatting conventions.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-02-01T15:34:44.867Z"
           },
           {
             "id": 3,
@@ -252,18 +254,20 @@
               2
             ],
             "details": "Perform end-to-end validation and create final validation report:\n\n1. **Pre-validation setup:**\n   - Ensure template-sync has been run to copy CoVe files to `.claude/` directory\n   - Verify `/mcp` shows all servers connected\n   - Clear Claude Code context with `/clear`\n\n2. **Execute test scenarios from test-scenarios.md:**\n   - Run each of the 4 documented test scenarios\n   - Record actual output for each test\n   - Note any deviations from expected behavior\n\n3. **Skill integration verification:**\n   - Verify skill appears when user references CoVe or chain of verification\n   - Verify `/cove` command is recognized\n   - Verify natural language triggers skill invocation\n\n4. **Output format validation for each test:**\n   - Verify Initial Answer section is present and complete\n   - Verify 3-5 verification questions are generated\n   - Verify independent answers don't reference initial answer\n   - Verify Final Verified Answer synthesizes verification findings\n   - Verify Verification notes section present\n\n5. **Create validation-report.md in `docs/wip/cove/`:**\n   - Summary: Pass/Fail for each test scenario\n   - Detailed results for each test with actual output snippets\n   - Issues found (if any) with severity and suggested fixes\n   - Convention compliance checklist results\n   - Recommendations for improvements (if any)\n\n6. **Final checklist verification:**\n   - [ ] All 3 CoVe files exist and have correct content\n   - [ ] SKILL.md name field is exactly 'cove'\n   - [ ] cove-process.md contains all 4 steps\n   - [ ] cove.md handles arguments correctly\n   - [ ] No changes to CLAUDE.md or settings.json\n   - [ ] Output format matches design specification",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Execute all test scenarios manually in Claude Code, document results in validation-report.md. Create a pass/fail summary with evidence (output snippets). Flag any issues with clear descriptions and reproduction steps.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-02-01T15:35:59.644Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-02-01T15:35:59.644Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-02-01T15:30:59.721Z",
+      "lastModified": "2026-02-01T15:35:59.644Z",
       "taskCount": 5,
-      "completedCount": 4,
+      "completedCount": 5,
       "tags": [
         "master"
       ]
