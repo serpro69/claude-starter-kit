@@ -27,10 +27,12 @@ Chain-of-Verification (CoVe) is a prompting technique that improves LLM response
 ├── skills/
 │   └── cove/
 │       ├── SKILL.md           # Skill metadata and entry point
-│       └── cove-process.md    # Detailed verification workflow
+│       ├── cove-process.md    # Standard mode verification workflow
+│       └── cove-isolated.md   # Isolated mode workflow with sub-agents
 └── commands/
     └── cove/
-        └── cove.md            # Slash command for invocation
+        ├── cove.md            # Standard mode command
+        └── cove-isolated.md   # Isolated mode command
 ```
 
 ### Skill Structure
@@ -238,7 +240,146 @@ During verification (Step 3), Claude should use available tools:
 | `Read` | Verify code claims against actual implementation |
 | `Grep`/`Glob` | Search codebase for usage patterns |
 
+## Verification Modes
+
+CoVe offers two verification modes to balance accuracy vs. cost:
+
+### Standard Mode (`/cove`)
+
+The default mode uses prompt-based isolation within a single conversation turn.
+
+**Characteristics:**
+- All steps execute in one context window
+- "Mental reset" instructions for independence (best effort)
+- Tool-first verification encouraged
+- Fast and cost-effective (~3-5x base tokens)
+
+**Limitation:** The model can still "see" its initial answer when answering verification questions, risking hallucination repetition.
+
+### Isolated Mode (`/cove-isolated`)
+
+True factored verification using Claude Code's Task tool to spawn isolated sub-agents.
+
+**Characteristics:**
+- Each verification question answered by a separate sub-agent
+- Sub-agents receive ONLY the verification question (zero context about initial answer)
+- Hallucination repetition is impossible (true isolation)
+- Higher cost (~8-15x base tokens) but maximum accuracy
+
+**Architecture:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Main Agent (Orchestrator)                                   │
+├─────────────────────────────────────────────────────────────┤
+│ 1. Generate Initial Answer                                  │
+│ 2. Generate 3-5 Verification Questions                      │
+│ 3. For each question, spawn isolated sub-agent:             │
+│    ┌──────────────────────────────────────────────────┐     │
+│    │ Sub-Agent (No access to initial answer)          │     │
+│    │ - Receives ONLY the verification question        │     │
+│    │ - Uses tools (WebSearch, context7, etc.)         │     │
+│    │ - Returns verified answer with source            │     │
+│    └──────────────────────────────────────────────────┘     │
+│ 4. Collect all sub-agent responses (run in parallel)        │
+│ 5. Reconcile: Compare verification answers vs initial       │
+│ 6. Produce Final Verified Answer                            │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Sub-agent prompt template:**
+
+```
+You are answering a factual question. Research thoroughly using available tools
+before answering. Cite your sources.
+
+Question: {verification_question}
+
+Requirements:
+1. Use WebSearch, context7, Read, or other tools to verify your answer
+2. If you cannot find authoritative sources, state that clearly
+3. Provide a concise, factual answer with source citations
+4. Do NOT speculate - only report what you can verify
+```
+
+**Sub-agent customization flags:**
+
+| Flag | Effect | Use Case |
+|------|--------|----------|
+| (none) | `general-purpose` agent | Default, full tool access |
+| `--explore` | `Explore` agent | Codebase-related verification |
+| `--haiku` | Use haiku model | Faster/cheaper verification |
+| `--agent=<name>` | Custom agent type | User-defined verification agents |
+
+Flags can be combined: `--haiku --explore` uses Explore agent with haiku model.
+
+**Flag parsing rules:**
+1. Flags must appear before the question
+2. `--explore` is shorthand for `--agent=Explore`
+3. `--haiku` sets `model: haiku` on the selected agent
+4. `--agent=<name>` uses any custom sub-agent type by name
+
+**Parallel execution:** All verification sub-agents run concurrently. The orchestrator sends multiple Task tool calls in a single message to minimize latency.
+
+**Error handling:**
+- If a sub-agent times out: Mark that verification as "Inconclusive"
+- If a sub-agent fails: Fall back to standard mode for that question
+- If all sub-agents fail: Abort isolated mode, suggest using `/cove` instead
+
+**When to use each mode:**
+
+| Use Case | Recommended Mode |
+|----------|-----------------|
+| Quick fact-checking | `/cove` |
+| High-stakes accuracy | `/cove-isolated` |
+| Codebase verification | `/cove-isolated --explore` |
+| Cost-sensitive verification | `/cove-isolated --haiku` |
+| Custom verification workflow | `/cove-isolated --agent=custom` |
+
+### Isolated Mode Output Format
+
+```markdown
+## Initial Answer
+[Complete initial response to the question]
+
+## Verification (Isolated Mode)
+
+### Q1: [First verification question]
+**Agent:** general-purpose | **Status:** ✓ Completed
+**A1:** [Sub-agent's independent answer]
+**Source:** [Citation from sub-agent]
+
+### Q2: [Second verification question]
+**Agent:** general-purpose | **Status:** ✓ Completed
+**A2:** [Sub-agent's independent answer]
+**Source:** [Citation from sub-agent]
+
+### Q3: [Third verification question]
+**Agent:** Explore | **Status:** ✓ Completed
+**A3:** [Sub-agent's independent answer]
+**Source:** [Citation from sub-agent]
+
+## Reconciliation
+
+| Claim | Verification | Status | Action |
+|-------|--------------|--------|--------|
+| [Claim from initial] | Q1 | ✓ Confirmed | Keep |
+| [Another claim] | Q2 | ✗ Contradicted | Correct to: [value] |
+| [Third claim] | Q3 | ? Inconclusive | Mark uncertain |
+
+## Final Verified Answer
+[Revised response incorporating all corrections]
+
+**Verification notes:**
+- Isolation method: Sub-agent (true factored verification)
+- Agents used: 3x general-purpose
+- Corrections: [List specific changes]
+- Confirmations: [List verified claims]
+```
+
 ## Limitations
+
+### Standard Mode Limitations
 
 1. **Token cost** - CoVe uses 3-5x more tokens than a direct answer
 2. **Latency** - Verification adds processing time
@@ -246,9 +387,16 @@ During verification (Step 3), Claude should use available tools:
 4. **Tool availability** - Verification quality depends on access to authoritative sources
 5. **Self-verification limits** - Model may have consistent blind spots that verification doesn't catch
 6. **Factual errors only** - CoVe is effective for factual inaccuracies but has limited ability to catch flawed logical reasoning that appears internally consistent
-7. **Hallucination repetition risk** - If verification questions are not properly isolated from the initial answer, the model may repeat the same hallucinations (the "factored" verification variant mitigates this)
+7. **Hallucination repetition risk** - Model may repeat hallucinations since it can see its initial answer
 8. **Model capability ceiling** - Effectiveness is bounded by the underlying model's self-verification ability; research (Huang et al., 2024) shows LLMs have fundamental limits in detecting and correcting their own mistakes
 9. **No external knowledge injection** - CoVe relies on the model's existing knowledge; it cannot catch errors in domains where the model lacks training data
+
+### Isolated Mode Limitations
+
+1. **Higher token cost** - Uses ~8-15x base tokens due to sub-agent overhead
+2. **Increased latency** - Sub-agent spawning adds time (mitigated by parallel execution)
+3. **Sub-agent failures** - If a sub-agent times out or fails, that verification becomes inconclusive
+4. **No shared context** - Sub-agents cannot reference codebase context the main agent has already gathered (unless using `--explore`)
 
 ## References
 
