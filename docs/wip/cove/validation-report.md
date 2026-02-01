@@ -111,11 +111,27 @@ The following scenarios require manual execution in a Claude Code session:
 
 ## 6. Issues Found
 
-**No blocking issues found.**
+**One documentation accuracy issue found and corrected.**
 
 | Issue | Severity | Description | Status |
 |-------|----------|-------------|--------|
-| None | - | - | - |
+| Inaccurate accuracy claim | Medium | design.md claimed "~94% accuracy vs ~68% baseline" which does not appear in the original Meta AI research paper. The figure originated from a misinterpreted social media post. | ✅ Fixed |
+| Incomplete limitations | Low | Limitations section missing known failure modes from research literature (reasoning errors, hallucination repetition, model capability ceiling). | ✅ Fixed |
+
+### Corrections Applied (2026-02-01)
+
+1. **design.md Overview section**: Replaced unverified "94% vs 68%" claim with actual research findings:
+   - 23% F1 improvement on closed-book QA
+   - 30% accuracy gain on list-based questions
+   - 50-70% hallucination reduction across benchmarks
+
+2. **design.md Limitations section**: Added 4 additional limitations based on research:
+   - Factual errors only (not reasoning errors)
+   - Hallucination repetition risk
+   - Model capability ceiling (citing Huang et al., 2024)
+   - No external knowledge injection
+
+3. **design.md References section**: Added citations to original paper and related research.
 
 ---
 
@@ -127,6 +143,8 @@ The following scenarios require manual execution in a Claude Code session:
    - Skill recognition failures
    - Output format deviations
    - User feedback on verification quality
+
+3. **Documentation Review:** Periodically verify claims against primary sources, especially when citing research metrics.
 
 ---
 

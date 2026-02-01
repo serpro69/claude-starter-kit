@@ -6,7 +6,7 @@ Implement a new Claude Code skill that introduces the Chain-of-Verification (CoV
 
 ## Problem Statement
 
-LLMs hallucinate and can produce inaccurate responses, especially for complex questions involving facts, technical specifications, or multi-step reasoning. Traditional prompting accepts the first answer without validation. CoVe addresses this by adding a self-verification step that achieves ~94% accuracy compared to ~68% baseline on complex questions.
+LLMs hallucinate and can produce inaccurate responses, especially for complex questions involving facts, technical specifications, or multi-step reasoning. Traditional prompting accepts the first answer without validation. CoVe addresses this by adding a self-verification step. Research from Meta AI (Dhuliawala et al., 2023) demonstrates significant improvements: 23% F1 improvement on closed-book QA, 30% accuracy gain on list-based questions, and 50-70% hallucination reduction across benchmarks.
 
 ## Goals
 
