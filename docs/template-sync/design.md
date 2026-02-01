@@ -224,6 +224,7 @@ Files that are user-specific or gitignored:
 - `.claude/settings.local.json` (if it existed, would be gitignored)
 - `.taskmaster/tasks/**` (project-specific task data)
 - `.taskmaster/docs/**` (project-specific PRDs)
+- `.taskmaster/reports/**` (project-specific analysis reports)
 - `.env` files
 - Any gitignored files
 

@@ -297,7 +297,7 @@ This is a copy of the workflow created in Task 4, placed in the templates direct
 
 #### Unit Test Suite
 
-Located in `test/` directory with 68 total tests across 3 test files:
+Located in `test/` directory with 79 total tests across 3 test files:
 
 **Test Directory Structure**:
 ```
@@ -327,7 +327,7 @@ for test in test/test-*.sh; do $test; done
 | Suite | Tests | Coverage |
 |-------|-------|----------|
 | test-manifest-jq.sh | 17 | jq patterns, JSON generation, special characters, round-trip |
-| test-template-sync.sh | 33 | CLI parsing, manifest reading/validation, sed escaping, substitutions, file comparison, diff reports |
+| test-template-sync.sh | 44 | CLI parsing, manifest reading/validation, sed escaping, substitutions, file comparison, diff reports, user-scoped directory exclusions |
 | test-template-cleanup.sh | 18 | Manifest generation, fields, variables, special chars, git tag/SHA detection, schema validation |
 
 **Functions Tested in template-sync.sh**:

@@ -450,6 +450,43 @@ assert_equals "0" "${#DELETED_FILES[@]}" "No files should be flagged as deleted 
 # The sync files should be detected as unchanged
 assert_equals "2" "${#UNCHANGED_FILES[@]}" "Only the sync infrastructure files should be compared"
 
+log_test "compare_files does NOT flag taskmaster user-scoped dirs as deleted (tasks/, docs/, reports/)"
+reset_globals
+test_dir=$(create_temp_dir "compare-taskmaster-excluded")
+
+# Create staging with only template-managed taskmaster files
+mkdir -p "$test_dir/staging/taskmaster/templates"
+echo "config content" >"$test_dir/staging/taskmaster/config.json"
+echo "claude md content" >"$test_dir/staging/taskmaster/CLAUDE.md"
+echo "template content" >"$test_dir/staging/taskmaster/templates/example_prd.txt"
+
+# Create project with user-scoped directories that should NOT be flagged as deleted
+mkdir -p "$test_dir/project/.taskmaster/templates"
+mkdir -p "$test_dir/project/.taskmaster/tasks"
+mkdir -p "$test_dir/project/.taskmaster/docs"
+mkdir -p "$test_dir/project/.taskmaster/reports"
+echo "config content" >"$test_dir/project/.taskmaster/config.json"
+echo "claude md content" >"$test_dir/project/.taskmaster/CLAUDE.md"
+echo "template content" >"$test_dir/project/.taskmaster/templates/example_prd.txt"
+# User-scoped files that should be excluded from deletion detection
+echo "task data" >"$test_dir/project/.taskmaster/tasks/tasks.json"
+echo "task md" >"$test_dir/project/.taskmaster/tasks/task-1.md"
+echo "prd content" >"$test_dir/project/.taskmaster/docs/prd.txt"
+echo "report data" >"$test_dir/project/.taskmaster/reports/task-complexity-report.json"
+
+pushd "$test_dir/project" >/dev/null || {
+  log_fail "Failed to cd to test directory"
+  exit 1
+}
+MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
+compare_files "$test_dir/staging" 2>/dev/null
+popd >/dev/null || true
+
+# User-scoped files should NOT be in DELETED_FILES
+assert_equals "0" "${#DELETED_FILES[@]}" "No files should be flagged as deleted (user-scoped dirs excluded)"
+# Template-managed files should be detected as unchanged
+assert_equals "3" "${#UNCHANGED_FILES[@]}" "Only template-managed taskmaster files should be compared"
+
 # =============================================================================
 # Section 7: Diff Report Generation Tests
 # =============================================================================
