@@ -207,7 +207,9 @@ Repositories created from this template can receive configuration updates via th
 ### Prerequisites
 
 - Repository must have been created after template sync feature was added, OR
-- Manually create `.github/template-state.json` (see Migration section below)
+  - Manually create `.github/template-state.json` (see Migration section below)
+- Allow actions to create pull-requests in the repo. Go to repo Settings -> Actions
+  <img width="792" height="376" alt="image" src="https://github.com/user-attachments/assets/81343169-fa87-4631-ad5d-60fde7685538" />
 
 ### Using Template Sync
 
@@ -224,6 +226,7 @@ Repositories created from this template can receive configuration updates via th
 - `.claude/` - Claude Code commands, skills, scripts, settings
 - `.serena/` - Serena semantic analysis configuration
 - `.taskmaster/` - Task Master configuration and templates
+- The sync infa itself (workflow and script)
 
 ### What's Preserved
 
