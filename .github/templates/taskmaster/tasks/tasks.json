@@ -61,7 +61,7 @@
         "dependencies": [
           "9"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -69,9 +69,10 @@
             "description": "Create the initial section of cove-process.md containing the copyable workflow checklist following the pattern from idea-process.md. The checklist must include all 4 CoVe steps in a copy-paste friendly format.",
             "dependencies": [],
             "details": "Create the file `.github/templates/claude/skills/cove/cove-process.md` with a '### Workflow' heading and a copyable checklist block containing:\n```\nCoVe Progress:\n- [ ] Step 1: Generate Initial Answer\n- [ ] Step 2: Create Verification Questions\n- [ ] Step 3: Independent Verification\n- [ ] Step 4: Reconciliation & Final Answer\n```\nFollow the exact formatting conventions from `.github/templates/claude/skills/analysis-process/idea-process.md` which uses triple backticks for the checklist block. Include the instruction 'Copy this checklist and check off items as you complete them:' above the code block.\n<info added on 2026-02-01T15:06:49.537Z>\nI'll analyze the codebase to understand the project structure and locate the design documents mentioned in the user request.Now let me examine the specific lines mentioned in the user request (lines 119-142 of design.md for the output format template):Now let me check the Task 3 details in implementation.md:Based on my analysis of the design documents, here is the new text content that should be appended to subtask 10.1:\n\n**Design reference:** docs/wip/cove/design.md lines 119-142 contain the complete output format template that must be included in cove-process.md. This template shows the exact markdown structure with sections for Initial Answer, Verification (Q&A pairs), Final Verified Answer, and Verification notes.\n\n**Implementation reference:** docs/wip/cove/implementation.md Task 3 (lines 50-94) provides the complete content section specifications for cove-process.md including all 7 required sections: (1) Workflow Checklist with format `- [ ] Step N: Description`, (2) Step 1: Initial Response instructions, (3) Step 2: Generate Verification Questions with categories table and guidelines, (4) Step 3: Independent Verification with critical independence requirements and tool usage guidance, (5) Step 4: Reconciliation & Final Answer with discrepancy handling, (6) Output Format Template (the exact template from design.md:119-142), and (7) Tool Usage During Verification table.\n\n**Critical implementation detail from implementation.md:193-195:** Step 3 must strongly emphasize answering verification questions without referencing the initial answer. This independence prevents confirmation bias and is the key mechanism for catching errors. Use explicit language like 'Do NOT reference the initial answer' and 'Treat each question as coming from a new user'.\n\n**File location:** Create `.github/templates/claude/skills/cove/cove-process.md` (note the `.github/templates/` prefix for template files, as established by the project's template-sync infrastructure).\n</info added on 2026-02-01T15:06:49.537Z>",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify file exists at correct path. Verify checklist contains exactly 4 steps with matching step names from design spec. Verify format uses code block for copyability.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-02-01T15:20:06.664Z"
           },
           {
             "id": 2,
@@ -81,9 +82,10 @@
               1
             ],
             "details": "Add to cove-process.md two complete step sections:\n\n**Step 1: Initial Response**\n- Requirement to mark clearly as 'Initial Answer'\n- Instruction to provide complete (not abbreviated) response\n- Note areas of uncertainty\n\n**Step 2: Generate Verification Questions**\n- Instructions to create 3-5 targeted questions\n- Include markdown table with categories: Factual, Logical, Edge cases, Assumptions, Technical (copy format from design.md lines 73-79)\n- Guidelines: target critical claims, phrase for independent answering, avoid leading questions, include at least one assumption-challenging question\n\nUse imperative mood throughout ('Generate...', 'Create...') consistent with existing skills.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify Step 1 section exists with 'Initial Answer' marking requirement. Verify Step 2 contains 5-category table. Verify guidelines mention 'independently' or 'independent'. Verify 3-5 questions requirement is stated.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-02-01T15:20:06.667Z"
           },
           {
             "id": 3,
@@ -93,9 +95,10 @@
               1
             ],
             "details": "Add Step 3: Independent Verification section with strong emphasis on independence:\n\n1. **Bold/emphasized statement**: Answer each question WITHOUT referencing the initial answer\n2. Instruction to treat each question as a fresh standalone question from a new user\n3. Tool usage encouragement section with table:\n   | Tool | Use Case |\n   |------|----------|\n   | WebSearch | Current facts, recent changes |\n   | context7 | Library docs, API references |\n   | Read | Verify code claims |\n   | Grep/Glob | Search codebase patterns |\n4. Explicit warning that this independence prevents confirmation bias\n5. Use phrases like 'independently', 'without', 'do NOT reference' multiple times to reinforce the critical requirement\n\nThis section must be the most emphatic in the document per the PRD requirement.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Search document for 'without' or 'independently' - should appear multiple times in Step 3. Verify tool usage table exists with all 4 tools. Verify confirmation bias is mentioned. Verify 'do NOT reference' or similar strong language is present.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-02-01T15:20:06.675Z"
           },
           {
             "id": 4,
@@ -106,11 +109,13 @@
               3
             ],
             "details": "Add two sections to complete cove-process.md:\n\n**Step 4: Reconciliation & Final Answer**\n- Instructions for comparing verification answers vs initial answer\n- Process for identifying discrepancies\n- Rule: verification answers take precedence when conflicts arise\n- Handling for when no errors found (note corrections or confirm initial answer)\n\n**Output Format Template** section with complete markdown template:\n```markdown\n## Initial Answer\n[response]\n\n## Verification\n### Q1: [question]\n**A1:** [independent answer]\n[...repeat for 3-5 questions...]\n\n## Final Verified Answer\n[revised response]\n\n**Verification notes:**\n- [corrections or \"No corrections needed\"]\n```\n\nEnsure template exactly matches design.md format (lines 119-142) and PRD requirements.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify Step 4 mentions 'verification answers take precedence' or 'precedence'. Verify output format template exists with all 3 sections (Initial Answer, Verification, Final Verified Answer). Verify verification notes section is included in template. Verify Q1/A1 pattern shown.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-02-01T15:20:06.677Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-02-01T15:20:06.677Z"
       },
       {
         "id": "11",
@@ -252,9 +257,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-02-01T15:17:13.542Z",
+      "lastModified": "2026-02-01T15:20:06.677Z",
       "taskCount": 5,
-      "completedCount": 1,
+      "completedCount": 2,
       "tags": [
         "master"
       ]
