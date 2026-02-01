@@ -335,7 +335,7 @@
         "dependencies": [
           "14"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -343,9 +343,10 @@
             "description": "Create the command header with description of isolated mode and document all supported flags (--explore, --haiku, --agent=<name>) with their effects and use cases in a table format.",
             "dependencies": [],
             "details": "Location: `.claude/commands/cove/cove-isolated.md` lines 1-25\n\n1. Write command description (lines 1-6):\n   - Line 1: 'Apply Chain-of-Verification (CoVe) with true factored verification using isolated sub-agents.'\n   - Lines 2-4: Explain sub-agents have zero context about initial answer\n   - Line 5: 'Use when maximum accuracy is required.'\n   - Line 6: 'Arguments: $ARGUMENTS'\n\n2. Create flag documentation table (lines 8-25):\n   - Section header: '## Flags'\n   - Table with columns: Flag | Effect | Use Case\n   - Row 1: (none) | general-purpose agent | Default, full tool access\n   - Row 2: --explore | Explore agent | Codebase-related verification\n   - Row 3: --haiku | Use haiku model | Faster/cheaper verification\n   - Row 4: --agent=<name> | Custom agent type | User-defined agents\n\n3. Document flag parsing rules (lines 16-25):\n   - Flags must appear before the question\n   - Flags start with --\n   - --agent=value format for custom agents\n   - Unknown flags treated as part of question\n   - Flags can be combined in any order\n\nReference: docs/wip/cove/design.md lines 306-320 for flag specifications\n<info added on 2026-02-01T16:40:08.316Z>\nI'll analyze the codebase to understand the project structure and examine the referenced documentation before generating the subtask update.Now let me check existing command patterns to understand the invocation structure:Now let me check the skill invocation pattern:Based on my analysis of the codebase, I can now generate the new text that should be appended to subtask 15.1's details:\n\n4. Create invocation logic section (lines 27-48):\n   - Section header: '## Invocation'\n   - Parse flags from start of $ARGUMENTS\n   - Extract agent type (default: general-purpose, --explore → Explore, --agent=<name> → custom)\n   - Extract model preference (--haiku sets model: haiku)\n   - Extract question (remaining text after flags)\n   - Invoke cove skill with cove-isolated.md workflow\n   - Pass extracted parameters to workflow\n\n5. Add examples section (lines 50-60):\n   - Section header: '## Examples'\n   - Example 1: '/cove-isolated What is the default port for PostgreSQL?' (default agent)\n   - Example 2: '/cove-isolated --explore How does the auth middleware work?' (Explore agent)\n   - Example 3: '/cove-isolated --haiku What is TCP?' (haiku model)\n   - Example 4: '/cove-isolated --agent=my-verifier What is X?' (custom agent)\n   - Example 5: '/cove-isolated --haiku --explore What pattern does this codebase use?' (combined flags)\n\nDesign reference: docs/wip/cove/design.md lines 306-320 (flag specifications, parsing rules, combinations)\nImplementation reference: docs/wip/cove/implementation.md lines 204-236 (Task 7 requirements, content structure, examples)\nPattern reference: .claude/commands/cove/cove.md (invocation structure), .claude/commands/tm/show/show-task.md (argument parsing patterns)\n</info added on 2026-02-01T16:40:08.316Z>",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify: (1) Description mentions sub-agents and isolation, (2) Flag table has 4 rows with all flags, (3) Flag parsing rules are complete, (4) Format matches existing commands in .claude/commands/cove/",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-02-01T16:54:48.141Z"
           },
           {
             "id": 2,
@@ -355,9 +356,10 @@
               1
             ],
             "details": "Location: `.claude/commands/cove/cove-isolated.md` lines 27-65\n\n1. Create Invocation section (lines 27-50):\n   - Section header: '## Invocation'\n   - If $ARGUMENTS provided case (lines 29-32):\n     a. Extract any flags from beginning of $ARGUMENTS\n     b. Apply CoVe isolated verification to remaining question\n     c. Pass extracted flags to workflow\n   - If $ARGUMENTS empty case (lines 34-36):\n     'Apply CoVe isolated verification to the previous response in the conversation.'\n\n2. Create Process section (lines 52-65):\n   - Section header: '## Process'\n   - Opening: 'Invoke the `cove` skill using the `cove-isolated.md` workflow:'\n   - List 4 steps:\n     1. Generate Initial Answer (or use previous response if verifying)\n     2. Create 3-5 Verification Questions targeting potential errors\n     3. Spawn isolated sub-agents to answer each question (parallel execution)\n     4. Reconcile findings and produce final verified answer with agent metadata\n\nReference: .claude/commands/cove/cove.md for invocation pattern structure",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify: (1) Invocation handles both $ARGUMENTS cases, (2) Flag extraction logic is documented, (3) Process references cove-isolated.md workflow, (4) All 4 steps are listed with sub-agent mention in step 3",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-02-01T16:54:48.148Z"
           },
           {
             "id": 3,
@@ -367,11 +369,13 @@
               2
             ],
             "details": "Location: `.claude/commands/cove/cove-isolated.md` lines 67-95\n\n1. Section header: '## Examples' (line 67)\n\n2. Create 6 examples with explanatory text:\n   - Example 1 (lines 69-72): Basic isolated verification\n     '/cove-isolated What is the default port for PostgreSQL?'\n   \n   - Example 2 (lines 74-77): Codebase verification with Explore agent\n     '/cove-isolated --explore How does the auth middleware work in this project?'\n   \n   - Example 3 (lines 79-82): Faster verification with haiku model\n     '/cove-isolated --haiku What is the speed of light in m/s?'\n   \n   - Example 4 (lines 84-87): Custom agent type\n     '/cove-isolated --agent=general-purpose What is the capital of France?'\n   \n   - Example 5 (lines 89-92): Combined flags\n     '/cove-isolated --haiku --explore What testing pattern does this codebase use?'\n   \n   - Example 6 (lines 93-95): Verify previous response\n     '/cove-isolated'\n\n3. Format each example with:\n   - Descriptive label\n   - Code block with command\n\nReference: docs/wip/cove/implementation.md lines 228-233 for example commands",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify: (1) All 6 examples present, (2) Each example has descriptive text, (3) Examples cover all flags individually and in combination, (4) Examples match the flag specifications from section 1, (5) Code block formatting is consistent",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-02-01T16:54:48.150Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-02-01T16:54:48.150Z"
       },
       {
         "id": "16",
@@ -451,9 +455,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-02-01T16:48:26.569Z",
+      "lastModified": "2026-02-01T16:54:48.150Z",
       "taskCount": 9,
-      "completedCount": 6,
+      "completedCount": 7,
       "tags": [
         "master"
       ]
