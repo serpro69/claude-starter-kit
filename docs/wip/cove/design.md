@@ -2,7 +2,7 @@
 
 ## Overview
 
-Chain-of-Verification (CoVe) is a prompting technique that improves LLM response accuracy by making the model fact-check its own answers. Research shows this achieves ~94% accuracy on complex questions compared to a ~68% baseline.
+Chain-of-Verification (CoVe) is a prompting technique that improves LLM response accuracy by making the model fact-check its own answers. Research from Meta AI (Dhuliawala et al., 2023) demonstrates significant hallucination reduction: 23% F1 improvement on closed-book QA, 30% accuracy gain on list-based questions, and 50-70% reduction in hallucinations across benchmarks.
 
 **Core principle:** Instead of answering once and accepting the result, CoVe instructs the LLM to:
 1. Provide an initial answer
@@ -227,6 +227,15 @@ During verification (Step 3), Claude should use available tools:
 3. **Not for simple questions** - Overkill for straightforward queries
 4. **Tool availability** - Verification quality depends on access to authoritative sources
 5. **Self-verification limits** - Model may have consistent blind spots that verification doesn't catch
+6. **Factual errors only** - CoVe is effective for factual inaccuracies but has limited ability to catch flawed logical reasoning that appears internally consistent
+7. **Hallucination repetition risk** - If verification questions are not properly isolated from the initial answer, the model may repeat the same hallucinations (the "factored" verification variant mitigates this)
+8. **Model capability ceiling** - Effectiveness is bounded by the underlying model's self-verification ability; research (Huang et al., 2024) shows LLMs have fundamental limits in detecting and correcting their own mistakes
+9. **No external knowledge injection** - CoVe relies on the model's existing knowledge; it cannot catch errors in domains where the model lacks training data
+
+## References
+
+- Dhuliawala, S., Komeili, M., Xu, J., Raileanu, R., Li, X., Celikyilmaz, A., & Weston, J. (2023). Chain-of-Verification Reduces Hallucination in Large Language Models. [arXiv:2309.11495](https://arxiv.org/abs/2309.11495). Published in ACL 2024 Findings.
+- Huang, J., et al. (2024). Large Language Models Cannot Self-Correct Reasoning Yet. ICLR 2024.
 
 ## Success Metrics
 
