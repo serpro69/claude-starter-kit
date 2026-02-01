@@ -84,35 +84,53 @@ Create 3-5 targeted questions designed to expose potential errors.
 - Avoid leading questions that assume the initial answer is correct
 - Include at least one question that challenges a core assumption
 
-### Step 3: Independent Verification
+### Step 3: Independent Verification (Factored)
 
-Answer each verification question as if it were a fresh, standalone question.
+This step implements **factored verification**—the most effective variant from the Meta AI research. The key insight: if the model can see its initial answer while verifying, it may unconsciously repeat the same hallucination.
 
-**Critical requirements:**
-- Do NOT reference the initial answer when answering
-- Treat each question as coming from a new user
-- Use available tools when beneficial:
-  - `WebSearch` for current facts and documentation
-  - `context7` for library/API documentation
-  - `Read` for code verification
-  - `Grep`/`Glob` for codebase searches
+**Verification execution methods (from research):**
 
-**This independence is crucial** - it prevents confirmation bias where the model simply validates its own previous statements.
+| Method | Approach | Effectiveness |
+|--------|----------|---------------|
+| Joint | All steps in one prompt | Lowest - repeats hallucinations |
+| 2-Step | Separate planning from execution | Medium |
+| **Factored** | Each question answered in complete isolation | High |
+| **Factor+Revise** | Factored + structured reconciliation | Highest |
 
-### Step 4: Reconciliation & Final Answer
+**Factored verification protocol:**
 
-Compare verification answers against the initial response and produce a final verified answer.
+For each verification question:
+1. **Mental reset** - Treat as a brand new question from an unknown user
+2. **Tool-first verification** - Prioritize external sources (WebSearch, context7, Read) over internal knowledge
+3. **Answer in isolation** - Do NOT reference the initial answer or other verification answers
+4. **Cite sources** - Note where each answer came from
 
-**Process:**
-1. Identify discrepancies between initial answer and verification findings
-2. Determine which version is correct (verification answers take precedence)
-3. Produce revised answer incorporating corrections
-4. Explicitly note what was changed and why
+**Why factored works:** Research shows that when the model sees its draft while answering verification questions, it copies the same hallucination. Factored verification eliminates this by treating each question as completely independent.
+
+### Step 4: Reconciliation & Final Answer (Factor+Revise)
+
+The Factor+Revise pattern systematically compares each verification answer against the corresponding claim.
+
+**Structured reconciliation process:**
+
+1. **Claim-by-claim comparison** - For each verification Q&A:
+   - Identify the specific claim it verifies
+   - Compare verification answer to that claim
+   - Mark as: ✓ Confirmed, ✗ Contradicted, or ? Inconclusive
+
+2. **Resolution rules:**
+   - Contradicted → Verification answer takes precedence (used external sources)
+   - Inconclusive → Mark as uncertain or remove if not essential
+   - Confirmed → Keep with increased confidence
+
+3. **Produce revised answer** incorporating all corrections
+
+4. **Document changes** with specific corrections and sources
 
 **If no errors found:**
-- Confirm the original answer
-- Note that verification supports the initial response
-- This adds confidence to the answer
+- Confirm the original answer is accurate
+- Note that independent verification supports the initial response
+- This adds confidence—the answer has been externally validated
 
 ## Output Format
 

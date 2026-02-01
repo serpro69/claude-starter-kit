@@ -46,49 +46,77 @@ Create 3-5 targeted questions designed to expose potential errors in the initial
 
 ---
 
-## Step 3: Independent Verification
+## Step 3: Independent Verification (Factored)
 
-**CRITICAL: Answer each verification question WITHOUT referencing the initial answer.**
+**CRITICAL: Answer each verification question in complete isolation using the FACTORED approach.**
 
-This step is the key mechanism for catching errors. You must:
+This step implements "factored verification" from the Meta AI research—the most effective method for catching errors. The key insight: if you can see your initial answer while verifying, you may unconsciously repeat the same hallucination.
 
-1. **Treat each question as a fresh, standalone question** from a new user who has never seen the initial answer
-2. **Do NOT look back** at what you wrote in Step 1
-3. **Research independently** using available tools
+### Factored Verification Protocol
 
-### Why Independence Matters
+For EACH verification question:
 
-This independence prevents **confirmation bias** - the tendency to validate your own previous statements rather than objectively evaluate them. By answering verification questions without referencing the initial answer, you are more likely to catch genuine errors.
+1. **Mental reset** - Before answering, mentally "forget" the initial answer. Treat this as a brand new question from a user you've never interacted with.
 
-### Tool Usage During Verification
+2. **Tool-first verification** - Prioritize external sources over your own knowledge:
+   - Use `WebSearch` for facts, dates, statistics
+   - Use `context7` for library/API documentation
+   - Use `Read`/`Grep` for code verification
+   - Only rely on internal knowledge if tools are unavailable or inappropriate
 
-Use available tools to verify claims:
+3. **Answer in isolation** - Do NOT:
+   - Reference "my initial answer" or "I said earlier"
+   - Look back at Step 1 while answering
+   - Let other verification answers influence this one
 
-| Tool | Use Case |
-|------|----------|
-| WebSearch | Current facts, recent changes |
-| context7 | Library docs, API references |
-| Read | Verify code claims |
-| Grep/Glob | Search codebase patterns |
+4. **Cite your source** - Note where the answer came from (tool result, documentation, etc.)
+
+### Why Factored Verification Works
+
+Research shows that when the model can see its draft while answering verification questions, it copies the same hallucination. The factored approach eliminates this by:
+- Treating each question as a completely independent query
+- Prioritizing external tools over self-reference
+- Preventing cross-contamination between verification answers
+
+### Tool Usage Priority
+
+| Priority | Tool | Use Case |
+|----------|------|----------|
+| 1st | WebSearch | Current facts, dates, statistics, recent changes |
+| 2nd | context7 | Library docs, API references, technical specs |
+| 3rd | Read/Grep | Code verification, codebase patterns |
+| Last | Internal knowledge | Only when tools unavailable or not applicable |
 
 ---
 
-## Step 4: Reconciliation & Final Answer
+## Step 4: Reconciliation & Final Answer (Factor+Revise)
 
-Compare verification answers against the initial response and produce a final verified answer.
+This step implements the "Factor+Revise" pattern—systematically comparing each verification answer against the corresponding claim in the initial answer.
 
-### Process
+### Structured Reconciliation Process
 
-1. **Identify discrepancies** between initial answer and verification findings
-2. **Determine correctness** - verification answers take precedence when conflicts arise
-3. **Produce revised answer** incorporating corrections
-4. **Note what was changed** and why
+1. **Claim-by-claim comparison** - For each verification Q&A pair:
+   - Identify the specific claim in the initial answer it verifies
+   - Compare the verification answer to that claim
+   - Mark as: ✓ Confirmed, ✗ Contradicted, or ? Inconclusive
+
+2. **Resolution rules**:
+   - **Contradicted claims**: Verification answer takes precedence (it used external sources)
+   - **Inconclusive claims**: Mark as uncertain in final answer, or remove if not essential
+   - **Confirmed claims**: Keep in final answer with increased confidence
+
+3. **Produce revised answer**:
+   - Incorporate all corrections from contradicted claims
+   - Explicitly note uncertainties for inconclusive claims
+   - Preserve confirmed claims
+
+4. **Document changes** - List what was corrected and why
 
 ### If No Errors Found
 
-- Confirm the original answer
-- Note that verification supports the initial response
-- This adds confidence to the answer
+- Confirm the original answer is accurate
+- Note that independent verification supports the initial response
+- This adds confidence—the answer has been externally validated
 
 ---
 
@@ -103,20 +131,29 @@ Use this format for CoVe responses:
 ## Verification
 
 ### Q1: [First verification question]
-**A1:** [Independent answer to Q1]
+**A1:** [Independent answer - cite source: WebSearch/context7/docs/internal]
 
 ### Q2: [Second verification question]
-**A2:** [Independent answer to Q2]
+**A2:** [Independent answer - cite source]
 
 ### Q3: [Third verification question]
-**A3:** [Independent answer to Q3]
+**A3:** [Independent answer - cite source]
 
 [Additional questions as needed...]
 
+## Reconciliation
+
+| Claim | Verification | Status | Action |
+|-------|--------------|--------|--------|
+| [Claim from initial answer] | Q1 | ✓ Confirmed | Keep |
+| [Another claim] | Q2 | ✗ Contradicted | Correct to: [new value] |
+| [Third claim] | Q3 | ? Inconclusive | Mark uncertain |
+
 ## Final Verified Answer
-[Revised response incorporating verification findings]
+[Revised response incorporating all corrections from reconciliation]
 
 **Verification notes:**
-- [List any corrections made]
-- [Or note "No corrections needed - verification confirms initial answer"]
+- [List corrections: "Changed X to Y based on Q2 verification"]
+- [List confirmations: "Verified X is correct via WebSearch"]
+- [List uncertainties: "Could not verify Y - marked as uncertain"]
 ```
