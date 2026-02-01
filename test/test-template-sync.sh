@@ -547,6 +547,83 @@ assert_file_exists "$output_dir/workflows/template-sync.yml" "Workflow copied wh
 assert_file_exists "$output_dir/scripts/template-sync.sh" "Script copied when both present"
 
 # =============================================================================
+# Section 9: Version Resolution Tests
+# =============================================================================
+
+log_section "Section 9: Version Resolution"
+
+# Note: resolve_version() now resolves symbolic refs (main, master, HEAD) to actual SHAs
+# via git ls-remote. These tests require network access to GitHub.
+
+log_test "resolve_version returns specific tag as-is"
+reset_globals
+# Specific tags are returned without modification
+result=$(resolve_version "v1.0.0" "serpro69/claude-starter-kit")
+# Should return the tag name as-is
+assert_equals "v1.0.0" "$result" "Specific tag returned as-is"
+
+log_test "resolve_version resolves 'master' to SHA"
+reset_globals
+set +e
+result=$(resolve_version "master" "serpro69/claude-starter-kit" 2>/dev/null)
+exit_code=$?
+set -e
+
+if [[ $exit_code -eq 0 ]]; then
+  # Should be a full SHA (40 hex characters)
+  if [[ "$result" =~ ^[a-f0-9]{40}$ ]]; then
+    log_pass "master resolved to SHA: ${result:0:12}..."
+  else
+    log_fail "master should resolve to 40-char SHA, got: $result"
+  fi
+else
+  log_skip "Network required to resolve 'master' branch"
+fi
+
+log_test "resolve_version resolves 'HEAD' to SHA"
+reset_globals
+set +e
+result=$(resolve_version "HEAD" "serpro69/claude-starter-kit" 2>/dev/null)
+exit_code=$?
+set -e
+
+if [[ $exit_code -eq 0 ]]; then
+  # Should be a full SHA (40 hex characters)
+  if [[ "$result" =~ ^[a-f0-9]{40}$ ]]; then
+    log_pass "HEAD resolved to SHA: ${result:0:12}..."
+  else
+    log_fail "HEAD should resolve to 40-char SHA, got: $result"
+  fi
+else
+  log_skip "Network required to resolve HEAD"
+fi
+
+log_test "resolve_version resolves 'latest' to most recent tag"
+reset_globals
+set +e
+result=$(resolve_version "latest" "serpro69/claude-starter-kit" 2>/dev/null)
+exit_code=$?
+set -e
+
+if [[ $exit_code -eq 0 ]]; then
+  # Should return tag name (human-readable), not SHA
+  if [[ "$result" =~ ^v[0-9] ]]; then
+    log_pass "latest resolved to tag: $result"
+  else
+    log_fail "latest should resolve to tag name, got: $result"
+  fi
+else
+  log_skip "Network required to resolve 'latest'"
+fi
+
+log_test "resolve_version returns arbitrary values as-is (validation happens during fetch)"
+reset_globals
+# Arbitrary values (like specific tags or SHAs) are returned as-is
+# Validation of whether they exist happens in fetch_upstream_templates()
+result=$(resolve_version "v99.99.99" "serpro69/claude-starter-kit")
+assert_equals "v99.99.99" "$result" "Arbitrary value returned as-is"
+
+# =============================================================================
 # Summary
 # =============================================================================
 

@@ -114,12 +114,13 @@ SERENA_INITIAL_PROMPT=""
 TM_CUSTOM_SYSTEM_PROMPT=""
 TM_APPEND_SYSTEM_PROMPT=""
 TM_PERMISSION_MODE=""
-UPSTREAM_REPO="custom/repo"
+# Use a valid GitHub repo to test UPSTREAM_REPO is captured correctly
+UPSTREAM_REPO="serpro69/claude-starter-kit"
 
 generate_manifest "test-project" >/dev/null 2>&1
 
 upstream_repo=$(jq -r '.upstream_repo' .github/template-state.json)
-assert_equals "custom/repo" "$upstream_repo" "upstream_repo uses custom value"
+assert_equals "serpro69/claude-starter-kit" "$upstream_repo" "upstream_repo uses custom value"
 unset UPSTREAM_REPO
 cd "$REPO_ROOT"
 
@@ -299,9 +300,13 @@ cd "$REPO_ROOT"
 # Section 5: Template Version Detection
 # =============================================================================
 
-log_section "Section 5: Template Version Detection"
+log_section "Section 5: Template Version Detection (from upstream)"
 
-log_test "Manifest uses git tag for template_version"
+# Note: generate_manifest() now fetches template_version from the UPSTREAM repo
+# via git ls-remote, not from the local repo. This ensures downstream repos
+# track the actual upstream template version.
+
+log_test "Manifest fetches version from upstream repo (default)"
 test_dir=$(create_temp_git_repo "v2.5.0")
 cd "$test_dir"
 
@@ -312,23 +317,27 @@ SERENA_INITIAL_PROMPT=""
 TM_CUSTOM_SYSTEM_PROMPT=""
 TM_APPEND_SYSTEM_PROMPT=""
 TM_PERMISSION_MODE=""
+unset UPSTREAM_REPO 2>/dev/null || true
 
-generate_manifest "test" >/dev/null 2>&1
-
-template_version=$(jq -r '.template_version' .github/template-state.json)
-assert_equals "v2.5.0" "$template_version" "template_version matches git tag"
+# This requires network access to the actual upstream repo
+if generate_manifest "test" >/dev/null 2>&1; then
+  template_version=$(jq -r '.template_version' .github/template-state.json)
+  # Should NOT be the local repo's tag (v2.5.0), should be upstream's tag (v0.1.0)
+  if [[ "$template_version" == "v0.1.0" ]]; then
+    log_pass "template_version is upstream tag: $template_version"
+  elif [[ "$template_version" != "v2.5.0" ]] && [[ -n "$template_version" ]] && [[ "$template_version" != "null" ]]; then
+    log_pass "template_version is from upstream, not local repo: $template_version"
+  else
+    log_fail "template_version should be from upstream (expected v0.1.0), got: $template_version"
+  fi
+else
+  log_skip "Network required to fetch upstream version"
+fi
 cd "$REPO_ROOT"
 
-log_test "Manifest falls back to commit SHA when no tags"
-test_dir=$(create_temp_dir "git-no-tag")
+log_test "Manifest uses custom UPSTREAM_REPO when set"
+test_dir=$(create_temp_git_repo "v1.0.0")
 cd "$test_dir"
-git init --quiet
-git config user.email "test@test.com"
-git config user.name "Test User"
-echo "initial" >README.md
-git add README.md
-git commit -m "Initial" --quiet
-# No tag created
 
 PROJECT_NAME="test"
 LANGUAGES="bash"
@@ -337,16 +346,22 @@ SERENA_INITIAL_PROMPT=""
 TM_CUSTOM_SYSTEM_PROMPT=""
 TM_APPEND_SYSTEM_PROMPT=""
 TM_PERMISSION_MODE=""
+UPSTREAM_REPO="serpro69/claude-starter-kit"
 
-generate_manifest "test" >/dev/null 2>&1
-
-template_version=$(jq -r '.template_version' .github/template-state.json)
-# Should be a short SHA (7-12 characters)
-if [[ "$template_version" =~ ^[a-f0-9]{7,12}$ ]]; then
-  log_pass "template_version is commit SHA when no tags: $template_version"
+if generate_manifest "test" >/dev/null 2>&1; then
+  upstream_repo=$(jq -r '.upstream_repo' .github/template-state.json)
+  assert_equals "serpro69/claude-starter-kit" "$upstream_repo" "upstream_repo uses custom value"
+  template_version=$(jq -r '.template_version' .github/template-state.json)
+  # Should have some value (tag or SHA from upstream)
+  if [[ -n "$template_version" ]] && [[ "$template_version" != "null" ]]; then
+    log_pass "template_version fetched from custom upstream: $template_version"
+  else
+    log_fail "template_version should be fetched from upstream"
+  fi
 else
-  log_fail "template_version should be commit SHA, got: $template_version"
+  log_skip "Network required to fetch upstream version"
 fi
+unset UPSTREAM_REPO
 cd "$REPO_ROOT"
 
 # =============================================================================

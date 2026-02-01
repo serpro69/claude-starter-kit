@@ -303,46 +303,63 @@ validate_manifest() {
 # =============================================================================
 
 # resolve_version()
-# Resolves target version string to a concrete git ref.
+# Resolves target version string to a concrete git ref or SHA.
 #
 # Args:
 #   $1 - Target version ("latest", "main", "master", "HEAD", or specific tag/SHA)
 #   $2 - Upstream repository (owner/repo format)
 #
 # Returns:
-#   Resolved version string via stdout (tag name, branch name, or SHA)
+#   Resolved version string via stdout:
+#   - For "latest": returns tag name (e.g., "v1.0.0") or SHA if no tags
+#   - For "main"/"master"/"HEAD": returns actual commit SHA
+#   - For specific tag/SHA: returns as-is
 #   Exits with 1 if resolution fails
-#
-# Behavior:
-#   - "latest": Gets most recent tag sorted by version
-#   - "main"/"master"/"HEAD": Returns as-is
-#   - Other: Assumed to be specific tag or SHA
 #
 # Note: All logging goes to stderr to keep stdout clean for return value
 resolve_version() {
   local target="$1"
   local upstream="$2"
   local resolved=""
+  local repo_url="https://github.com/$upstream.git"
 
   case "$target" in
     latest)
       # Get the most recent tag sorted by version
-      resolved=$(git ls-remote --tags --sort=-v:refname "https://github.com/$upstream.git" 2>/dev/null \
-        | grep -v '\^{}' \
+      # Note: Use 'grep ... || true' to handle case when no tags exist (grep returns 1 for no matches)
+      resolved=$(git ls-remote --tags --sort=-v:refname "$repo_url" 2>/dev/null \
+        | { grep -v '\^{}' || true; } \
         | head -1 \
         | sed 's/.*refs\/tags\///')
 
-      # If no tags exist, fall back to default branch (HEAD)
+      # If no tags exist, resolve default branch to SHA
       if [[ -z "$resolved" ]]; then
         log_warn "No tags found in upstream repository, using default branch" >&2
-        resolved="HEAD"
+        resolved=$(git ls-remote "$repo_url" HEAD 2>/dev/null | cut -f1)
+        if [[ -z "$resolved" ]]; then
+          log_error "Failed to resolve default branch SHA for upstream" >&2
+          exit 1
+        fi
       fi
       ;;
-    main|master|HEAD)
-      resolved="$target"
+    main|master)
+      # Resolve branch name to actual commit SHA
+      resolved=$(git ls-remote "$repo_url" "refs/heads/$target" 2>/dev/null | cut -f1)
+      if [[ -z "$resolved" ]]; then
+        log_error "Branch '$target' not found in upstream repository" >&2
+        exit 1
+      fi
+      ;;
+    HEAD)
+      # Resolve HEAD (default branch) to actual commit SHA
+      resolved=$(git ls-remote "$repo_url" HEAD 2>/dev/null | cut -f1)
+      if [[ -z "$resolved" ]]; then
+        log_error "Failed to resolve HEAD for upstream repository" >&2
+        exit 1
+      fi
       ;;
     *)
-      # Assume specific tag or SHA
+      # Assume specific tag or SHA - return as-is
       resolved="$target"
       ;;
   esac

@@ -173,6 +173,12 @@ jobs:
             echo "Applied changes to .github/scripts/"
           fi
 
+      - name: Cleanup Staging Artifacts
+        run: |
+          # Remove staging artifacts to prevent them from being included in the PR
+          rm -rf .github/sync-artifacts .github/reports
+          echo "Cleaned up staging artifacts"
+
       - name: Update Manifest Version
         run: |
           NEW_VERSION="${{ needs.sync.outputs.new_version }}"

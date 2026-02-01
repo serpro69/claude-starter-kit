@@ -328,9 +328,26 @@ generate_manifest() {
   local project_name="$1"
   local upstream_repo="${UPSTREAM_REPO:-serpro69/claude-starter-kit}"
   local template_version
+  local repo_url="https://github.com/$upstream_repo.git"
 
-  # Determine template version from git
-  template_version=$(git describe --tags --abbrev=0 2>/dev/null || git rev-parse --short HEAD)
+  # Fetch template version from upstream repository (not the current downstream repo)
+  # Try to get the latest tag first, fall back to HEAD SHA
+  # Note: Use 'grep ... || true' to handle case when no tags exist (grep returns 1 for no matches)
+  # GIT_TERMINAL_PROMPT=0 prevents git from prompting for credentials on invalid repos
+  # Use '|| true' to prevent set -e from exiting on git errors (e.g., network issues, invalid repo)
+  template_version=$(GIT_TERMINAL_PROMPT=0 git ls-remote --tags --sort=-v:refname "$repo_url" 2>/dev/null \
+    | { grep -v '\^{}' || true; } \
+    | head -1 \
+    | sed 's/.*refs\/tags\///' || true)
+
+  if [[ -z "$template_version" ]]; then
+    # No tags exist, use HEAD SHA from upstream
+    template_version=$(GIT_TERMINAL_PROMPT=0 git ls-remote "$repo_url" HEAD 2>/dev/null | cut -f1 || true)
+    if [[ -z "$template_version" ]]; then
+      log_warn "Could not fetch upstream version, using 'initial'"
+      template_version="initial"
+    fi
+  fi
 
   # Ensure .github directory exists
   mkdir -p .github
