@@ -9,7 +9,7 @@ on:
       version:
         description: |
           Template version to sync to.
-          Accepts 'latest' (most recent tag), 'main' (current main branch), or a specific tag (e.g., 'v1.0.0').
+          Accepts 'latest' (most recent tag), 'master' (current master branch), or a specific tag (e.g., 'v1.0.0').
         required: true
         default: latest
         type: string

@@ -725,7 +725,9 @@ compare_files() {
     done < <(find "$staging_path" -type f -print0 2>/dev/null)
 
     # Find deleted files (exist in project but not in staging)
-    if [[ -d "$project_dir" ]]; then
+    # Skip for sync infrastructure directories - we only sync specific files, not entire dirs
+    # (scripts/ only syncs template-sync.sh, workflows/ only syncs template-sync.yml)
+    if [[ -d "$project_dir" && "$staging_subdir" != "scripts" && "$staging_subdir" != "workflows" ]]; then
       while IFS= read -r -d '' project_file; do
         local relative_path="${project_file#$project_dir/}"
         local staging_file="$staging_path/$relative_path"

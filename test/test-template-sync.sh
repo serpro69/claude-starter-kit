@@ -406,6 +406,35 @@ popd > /dev/null || true
 
 assert_equals "1" "${#UNCHANGED_FILES[@]}" "One file detected as unchanged"
 
+log_test "compare_files does NOT flag scripts/workflows files as deleted (sync infrastructure exclusion)"
+reset_globals
+test_dir=$(create_temp_dir "compare-scripts-excluded")
+
+# Create staging with only template-sync.sh (mimics what copy_sync_files does)
+mkdir -p "$test_dir/staging/scripts"
+mkdir -p "$test_dir/staging/workflows"
+echo "sync script content" > "$test_dir/staging/scripts/template-sync.sh"
+echo "sync workflow content" > "$test_dir/staging/workflows/template-sync.yml"
+
+# Create project with additional files (bootstrap.sh, template-cleanup.*)
+mkdir -p "$test_dir/project/.github/scripts"
+mkdir -p "$test_dir/project/.github/workflows"
+echo "sync script content" > "$test_dir/project/.github/scripts/template-sync.sh"
+echo "bootstrap content" > "$test_dir/project/.github/scripts/bootstrap.sh"
+echo "cleanup script" > "$test_dir/project/.github/scripts/template-cleanup.sh"
+echo "sync workflow content" > "$test_dir/project/.github/workflows/template-sync.yml"
+echo "cleanup workflow" > "$test_dir/project/.github/workflows/template-cleanup.yml"
+
+pushd "$test_dir/project" > /dev/null || { log_fail "Failed to cd to test directory"; exit 1; }
+MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
+compare_files "$test_dir/staging" 2>/dev/null
+popd > /dev/null || true
+
+# bootstrap.sh and template-cleanup.* should NOT be in DELETED_FILES
+assert_equals "0" "${#DELETED_FILES[@]}" "No files should be flagged as deleted in scripts/workflows dirs"
+# The sync files should be detected as unchanged
+assert_equals "2" "${#UNCHANGED_FILES[@]}" "Only the sync infrastructure files should be compared"
+
 # =============================================================================
 # Section 7: Diff Report Generation Tests
 # =============================================================================
