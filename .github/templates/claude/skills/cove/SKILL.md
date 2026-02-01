@@ -9,11 +9,29 @@ CoVe is a verification technique that improves response accuracy by making the m
 
 ## When to Use This Skill
 
+CoVe adds the most value in these scenarios:
+
+**Precision-required questions:**
+- Questions containing precision language ("exactly", "precisely", "specific")
 - Complex factual questions (dates, statistics, specifications)
+
+**Complex reasoning:**
+- Multi-step reasoning chains (3+ logical dependencies)
+- Technical claims about APIs, libraries, or version-specific behavior
+
+**Fact-checking scenarios:**
+- Historical facts, statistics, or quantitative data
 - Technical specifications and API behavior
-- Multi-step reasoning chains
+
+**High-stakes accuracy:**
+- Security-critical code paths or analysis
 - Code generation requiring accuracy verification
 - Any response where correctness is critical
+
+**Self-correction triggers:**
+- When initial response contains hedging language ("I think", "probably", "might be")
+
+> **Note:** These heuristics can be copied to your project's CLAUDE.md if you want Claude to auto-invoke CoVe for matching scenarios. By default, CoVe requires manual invocation to give you control over when to invest additional tokens/time for verification.
 
 ## Process Overview
 
@@ -35,3 +53,17 @@ Use the `/cove` command followed by your question:
 ```
 
 Or invoke `/cove` after receiving a response to verify it.
+
+## Natural Language Invocation
+
+Claude should recognize these phrases as requests to invoke the CoVe skill:
+
+- "verify this using chain of verification"
+- "use CoVe to answer"
+- "fact-check your response"
+- "double-check this with verification"
+- "use self-verification for this"
+- "apply chain of verification"
+- "verify this answer"
+
+> **Important:** This is guidance for manual recognition only. Auto-trigger is NOT implemented by default per design goals. Users who want automatic CoVe invocation for certain scenarios can add the heuristics from "When to Use This Skill" to their project's CLAUDE.md.
