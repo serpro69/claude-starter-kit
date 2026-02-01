@@ -154,10 +154,12 @@ jobs:
             echo "Applied changes to .serena/"
           fi
 
-          # Copy taskmaster config files
+          # Copy taskmaster config files (excluding user-scoped directories)
           if [[ -d "$STAGING_DIR/taskmaster" ]]; then
-            cp -r "$STAGING_DIR/taskmaster/"* .taskmaster/ 2>/dev/null || true
-            echo "Applied changes to .taskmaster/"
+            # Use rsync to exclude user-scoped directories: tasks/, docs/, reports/
+            rsync -a --exclude='tasks/' --exclude='docs/' --exclude='reports/' \
+              "$STAGING_DIR/taskmaster/" .taskmaster/ 2>/dev/null || true
+            echo "Applied changes to .taskmaster/ (excluding user-scoped dirs)"
           fi
 
           # Copy workflow files (sync infrastructure)
