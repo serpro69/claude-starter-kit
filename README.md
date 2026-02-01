@@ -314,7 +314,7 @@ for test in test/test-*.sh; do $test; done
 **Test Coverage:**
 
 | Test Suite               | Description                                                        |
-|--------------------------|--------------------------------------------------------------------|
+| ------------------------ | ------------------------------------------------------------------ |
 | test-manifest-jq.sh      | JSON generation, special character handling, round-trip validation |
 | test-template-sync.sh    | CLI parsing, manifest validation, substitutions, file comparison   |
 | test-template-cleanup.sh | Manifest generation, variable capture, git tag/SHA detection       |
