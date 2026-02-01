@@ -728,6 +728,18 @@ compare_files() {
     # Skip for sync infrastructure directories - we only sync specific files, not entire dirs
     # (scripts/ only syncs template-sync.sh, workflows/ only syncs template-sync.yml)
     if [[ -d "$project_dir" && "$staging_subdir" != "scripts" && "$staging_subdir" != "workflows" ]]; then
+      # Build find command with exclusions for user-scoped directories
+      local find_args=("$project_dir" -type f)
+
+      # Exclude user-scoped directories in .taskmaster/ (tasks, docs, reports)
+      if [[ "$staging_subdir" == "taskmaster" ]]; then
+        find_args+=(-not -path "$project_dir/tasks/*")
+        find_args+=(-not -path "$project_dir/docs/*")
+        find_args+=(-not -path "$project_dir/reports/*")
+      fi
+
+      find_args+=(-print0)
+
       while IFS= read -r -d '' project_file; do
         local relative_path="${project_file#$project_dir/}"
         local staging_file="$staging_path/$relative_path"
@@ -737,7 +749,7 @@ compare_files() {
           # File exists in project but not in staging -> Deleted
           DELETED_FILES+=("$display_path")
         fi
-      done < <(find "$project_dir" -type f -print0 2>/dev/null)
+      done < <(find "${find_args[@]}" 2>/dev/null)
     fi
   done
 

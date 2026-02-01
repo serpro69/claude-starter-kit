@@ -174,7 +174,7 @@ The repository includes a GitHub workflow that customizes the template:
 - Use Actions → Template Sync to pull upstream configuration updates
 - Always review PR changes before merging to preserve local customizations
 - Sync preserves project-specific values (name, language, prompts) via manifest variables
-- User-scoped files like `.taskmaster/tasks/` and `.taskmaster/docs/` are never modified
+- User-scoped files like `.taskmaster/tasks/`, `.taskmaster/docs/`, and `.taskmaster/reports/` are never modified
 - Sync infrastructure (workflow and script) are also updated when upstream has changes
 
 ## Testing
