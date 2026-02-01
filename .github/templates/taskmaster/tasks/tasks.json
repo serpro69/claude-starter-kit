@@ -432,7 +432,7 @@
           "15",
           "16"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -440,9 +440,10 @@
             "description": "Validate that all required files exist in the correct locations and their content matches the design specification. This includes checking file structure, workflow steps, flag parsing logic, Task tool parameters, output format templates, and error handling documentation.",
             "dependencies": [],
             "details": "**File Existence Checks:**\n\n1. Verify `.github/templates/claude/skills/cove/cove-isolated.md` exists\n2. Verify `.github/templates/claude/commands/cove/cove-isolated.md` exists\n3. Verify `.github/templates/claude/skills/cove/SKILL.md` has been updated\n\n**Content Validation for cove-isolated.md (workflow):**\n\n1. **Workflow structure:**\n   - Confirm 4-step workflow structure matches standard mode (Initial Answer, Verification Questions, Independent Verification, Reconciliation)\n   - Verify workflow checklist is present\n\n2. **Sub-agent prompt template (Step 3):**\n   - Verify sub-agent prompt contains ONLY the verification question\n   - Confirm NO initial answer context is included\n   - Check instructions for tool usage and source citation are present\n\n3. **Task tool usage documentation:**\n   - Verify `subagent_type` parameter is documented with flag-to-agent mapping\n   - Verify `model` parameter is documented (for `--haiku` flag)\n   - Verify `prompt` parameter is documented with sub-agent template reference\n   - Verify `description` parameter is documented\n   - Confirm parallel execution is explicitly instructed (single message with multiple Task calls)\n\n4. **Flag parsing:**\n   - Verify all three flags documented: `--explore`, `--haiku`, `--agent=<name>`\n   - Check flag parsing rules are clear\n   - Verify examples for each flag combination\n\n5. **Output format:**\n   - Verify agent metadata is included (Agent type, Status)\n   - Verify source citations are included\n   - Check reconciliation table format is present\n\n6. **Error handling:**\n   - Verify sub-agent timeout handling (mark as \"Inconclusive\")\n   - Verify sub-agent failure handling (fall back to standard mode for that question)\n   - Verify all-failures handling (suggest using `/cove` instead)\n\n**Content Validation for cove-isolated.md (command):**\n\n1. Verify description mentions sub-agents and true isolation\n2. Verify command references `cove-isolated.md` workflow (not `cove-process.md`)\n3. Check flag parsing rules are documented\n4. Verify examples for all flag combinations are present\n5. Confirm empty $ARGUMENTS handling (verify previous response)\n\n**SKILL.md Update Validation:**\n\n1. Verify \"Verification Modes\" section exists\n2. Check both modes (standard and isolated) are documented\n3. Verify mode selection guidance is present\n4. Confirm links to both `cove-process.md` and `cove-isolated.md` exist\n5. Verify isolated mode invocation examples are present\n\n**Standard Mode Preservation:**\n\n1. Verify `/cove` command is unchanged from current version\n2. Verify `cove-process.md` is unchanged from current version\n3. Confirm standard mode can still work independently",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Use Read tool to examine each file and verify content against design specification from `docs/wip/cove/design.md`. Use Grep to search for key terms and patterns. Create a validation report documenting all checked items with pass/fail status.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-02-01T17:34:18.636Z"
           },
           {
             "id": 2,
@@ -452,18 +453,20 @@
               1
             ],
             "details": "**Cross-Reference Validation:**\n\n1. **SKILL.md links:**\n   - Verify link to `cove-isolated.md` works and points to correct file\n   - Verify link to `cove-process.md` still works\n   - Check for any broken internal links\n\n2. **Command to workflow references:**\n   - Verify `/cove-isolated` command correctly references `cove-isolated.md` workflow\n   - Verify `/cove` command still correctly references `cove-process.md` workflow\n\n**Design Compliance Check:**\n\nCompare implementation against `docs/wip/cove/design.md`:\n\n1. **Architecture:**\n   - Verify sub-agent architecture matches design diagram (main orchestrator spawns isolated sub-agents)\n   - Confirm parallel execution is implemented as designed\n\n2. **Flag behavior:**\n   - Verify `--explore` maps to Explore agent\n   - Verify `--haiku` sets model parameter\n   - Verify `--agent=<name>` allows custom agents\n   - Confirm flag combinations work as specified\n\n3. **Output format:**\n   - Verify isolated mode output matches the template in design.md\n   - Check agent metadata format (Agent, Status, Source)\n   - Verify reconciliation table format\n\n4. **Error handling:**\n   - Confirm timeout behavior matches design\n   - Verify failure fallback matches design\n   - Check all-failures abort logic\n\n**Manual Test Scenarios Documentation:**\n\nCreate comprehensive test scenario documentation in validation report:\n\n1. **Basic isolated verification:**\n   - Command: `/cove-isolated What is the default port for PostgreSQL?`\n   - Expected: 3 sub-agents spawned in parallel using general-purpose agent\n   - Expected output: Agent metadata shown, status indicators, source citations\n\n2. **Explore flag test:**\n   - Command: `/cove-isolated --explore How does error handling work in this codebase?`\n   - Expected: Explore agents used for verification\n   - Expected output: Codebase-specific verification with file references\n\n3. **Haiku flag test:**\n   - Command: `/cove-isolated --haiku What is the speed of light?`\n   - Expected: Haiku model used for faster/cheaper responses\n   - Expected output: Faster completion, agent shows haiku model\n\n4. **Combined flags test:**\n   - Command: `/cove-isolated --haiku --explore What testing pattern does this use?`\n   - Expected: Explore agent with haiku model\n   - Expected output: Codebase analysis with haiku model efficiency\n\n5. **Verify previous response:**\n   - Interaction:\n     ```\n     User: What year was Python released?\n     Claude: [provides answer]\n     User: /cove-isolated\n     ```\n   - Expected: Isolated verification applied to previous answer about Python\n   - Expected output: Full isolated verification workflow on previous response\n\n6. **Custom agent test:**\n   - Command: `/cove-isolated --agent=general-purpose What is TCP?`\n   - Expected: Uses specified agent type explicitly\n\n7. **Error scenario tests:**\n   - Document expected behavior for sub-agent timeout\n   - Document expected behavior for sub-agent failure (single)\n   - Document expected behavior for all sub-agents failing\n\n**Final Validation Report:**\n\nCreate a structured validation report documenting:\n- All checklist items with pass/fail status\n- Any discrepancies found between implementation and design\n- Test scenarios with expected vs actual behavior\n- Recommendations for any needed corrections",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Manually trace through all internal links using Read tool. Compare implementation line-by-line against design.md. Document each test scenario with clear expected behavior. Create a final validation report in `.taskmaster/reports/task-17-validation-report.md` with all findings.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-02-01T17:34:18.638Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-02-01T17:34:18.638Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-02-01T17:30:42.837Z",
+      "lastModified": "2026-02-01T17:34:18.638Z",
       "taskCount": 9,
-      "completedCount": 8,
+      "completedCount": 9,
       "tags": [
         "master"
       ]
