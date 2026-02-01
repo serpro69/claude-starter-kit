@@ -388,7 +388,7 @@
           "14",
           "15"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -412,7 +412,8 @@
             "testStrategy": "1. Verify Process Overview section references both cove-process.md and cove-isolated.md\n2. Verify Invocation section includes /cove-isolated example with basic usage\n3. Verify Invocation section includes flag examples (--explore and --haiku)\n4. Verify Natural Language Invocation section includes at least 3 isolated mode trigger phrases\n5. Verify all existing content is preserved and no sections were removed",
             "parentId": "undefined"
           }
-        ]
+        ],
+        "updatedAt": "2026-02-01T17:07:50.956Z"
       },
       {
         "id": "17",
@@ -455,9 +456,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-02-01T16:54:48.150Z",
+      "lastModified": "2026-02-01T17:07:50.957Z",
       "taskCount": 9,
-      "completedCount": 7,
+      "completedCount": 8,
       "tags": [
         "master"
       ]

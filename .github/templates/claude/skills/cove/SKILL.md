@@ -33,6 +33,48 @@ CoVe adds the most value in these scenarios:
 
 > **Note:** These heuristics can be copied to your project's CLAUDE.md if you want Claude to auto-invoke CoVe for matching scenarios. By default, CoVe requires manual invocation to give you control over when to invest additional tokens/time for verification.
 
+## Verification Modes
+
+CoVe offers two verification modes to balance accuracy vs. cost:
+
+### Standard Mode (`/cove`)
+
+Uses prompt-based isolation within a single conversation turn.
+
+- **Token cost:** ~3-5x base tokens
+- **Isolation:** Best-effort (mental reset instructions)
+- **Speed:** Faster, single context
+- **Best for:** Quick fact-checking, cost-sensitive scenarios
+
+See [cove-process.md](./cove-process.md) for the standard workflow.
+
+### Isolated Mode (`/cove-isolated`)
+
+Uses Claude Code's Task tool to spawn isolated sub-agents for true factored verification.
+
+- **Token cost:** ~8-15x base tokens
+- **Isolation:** True (sub-agents have zero context about initial answer)
+- **Speed:** Parallel execution minimizes latency
+- **Best for:** High-stakes accuracy, codebase verification
+
+**Sub-agent customization flags:**
+| Flag | Effect |
+|------|--------|
+| `--explore` | Use Explore agent for codebase verification |
+| `--haiku` | Use haiku model for faster/cheaper verification |
+| `--agent=<name>` | Use custom agent type |
+
+See [cove-isolated.md](./cove-isolated.md) for the isolated workflow.
+
+### Mode Selection Guide
+
+| Use Case | Recommended Mode |
+|----------|------------------|
+| Quick fact-checking | `/cove` |
+| High-stakes accuracy | `/cove-isolated` |
+| Codebase verification | `/cove-isolated --explore` |
+| Cost-sensitive verification | `/cove` or `/cove-isolated --haiku` |
+
 ## Process Overview
 
 The CoVe workflow follows 4 steps:
@@ -42,7 +84,7 @@ The CoVe workflow follows 4 steps:
 3. **Independent Verification** - Answer questions without referencing the original
 4. **Reconciliation** - Revise answer based on verification findings
 
-See [cove-process.md](./cove-process.md) for the detailed verification workflow.
+See [cove-process.md](./cove-process.md) for the standard workflow, or [cove-isolated.md](./cove-isolated.md) for the isolated sub-agent workflow.
 
 ## Invocation
 
@@ -53,6 +95,19 @@ Use the `/cove` command followed by your question:
 ```
 
 Or invoke `/cove` after receiving a response to verify it.
+
+For isolated verification with sub-agents:
+
+```
+/cove-isolated What is the time complexity of Python's sorted() function?
+```
+
+With flags:
+
+```
+/cove-isolated --explore How does the auth system work?
+/cove-isolated --haiku What year was TCP standardized?
+```
 
 ## Natural Language Invocation
 
@@ -65,5 +120,11 @@ Claude should recognize these phrases as requests to invoke the CoVe skill:
 - "use self-verification for this"
 - "apply chain of verification"
 - "verify this answer"
+
+For isolated mode:
+
+- "use isolated verification"
+- "verify with sub-agents"
+- "use factored verification with isolation"
 
 > **Important:** This is guidance for manual recognition only. Auto-trigger is NOT implemented by default per design goals. Users who want automatic CoVe invocation for certain scenarios can add the heuristics from "When to Use This Skill" to their project's CLAUDE.md.
