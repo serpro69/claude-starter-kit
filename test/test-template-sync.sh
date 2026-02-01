@@ -218,7 +218,7 @@ test_dir=$(create_temp_dir "subst-test")
 
 # Create a test manifest
 MANIFEST_PATH="$test_dir/manifest.json"
-cat > "$MANIFEST_PATH" << 'EOF'
+cat >"$MANIFEST_PATH" <<'EOF'
 {
   "schema_version": "1",
   "upstream_repo": "test/repo",
@@ -238,7 +238,7 @@ EOF
 
 # Create template directory with fixtures
 mkdir -p "$test_dir/templates/serena"
-cat > "$test_dir/templates/serena/project.yml" << 'EOF'
+cat >"$test_dir/templates/serena/project.yml" <<'EOF'
 project_name: "PLACEHOLDER"
 languages:
   - bash
@@ -258,7 +258,7 @@ reset_globals
 test_dir=$(create_temp_dir "subst-model-test")
 
 MANIFEST_PATH="$test_dir/manifest.json"
-cat > "$MANIFEST_PATH" << 'EOF'
+cat >"$MANIFEST_PATH" <<'EOF'
 {
   "schema_version": "1",
   "upstream_repo": "test/repo",
@@ -277,7 +277,7 @@ cat > "$MANIFEST_PATH" << 'EOF'
 EOF
 
 mkdir -p "$test_dir/templates/claude"
-cat > "$test_dir/templates/claude/settings.json" << 'EOF'
+cat >"$test_dir/templates/claude/settings.json" <<'EOF'
 {
   "model": "sonnet",
   "permissions": {}
@@ -299,7 +299,7 @@ reset_globals
 test_dir=$(create_temp_dir "subst-model-value-test")
 
 MANIFEST_PATH="$test_dir/manifest.json"
-cat > "$MANIFEST_PATH" << 'EOF'
+cat >"$MANIFEST_PATH" <<'EOF'
 {
   "schema_version": "1",
   "upstream_repo": "test/repo",
@@ -318,7 +318,7 @@ cat > "$MANIFEST_PATH" << 'EOF'
 EOF
 
 mkdir -p "$test_dir/templates/claude"
-cat > "$test_dir/templates/claude/settings.json" << 'EOF'
+cat >"$test_dir/templates/claude/settings.json" <<'EOF'
 {
   "model": "placeholder",
   "permissions": {}
@@ -343,16 +343,19 @@ test_dir=$(create_temp_dir "compare-added")
 
 # Create staging with a file
 mkdir -p "$test_dir/staging/claude"
-echo "new content" > "$test_dir/staging/claude/new-file.txt"
+echo "new content" >"$test_dir/staging/claude/new-file.txt"
 
 # Create empty project directory
 mkdir -p "$test_dir/project/.claude"
 
 # Run compare from project directory (use pushd/popd for safe directory handling)
-pushd "$test_dir/project" > /dev/null || { log_fail "Failed to cd to test directory"; exit 1; }
+pushd "$test_dir/project" >/dev/null || {
+  log_fail "Failed to cd to test directory"
+  exit 1
+}
 MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
 compare_files "$test_dir/staging" 2>/dev/null
-popd > /dev/null || true
+popd >/dev/null || true
 
 assert_equals "1" "${#ADDED_FILES[@]}" "One file detected as added"
 
@@ -363,13 +366,16 @@ test_dir=$(create_temp_dir "compare-modified")
 # Create staging and project with same file, different content
 mkdir -p "$test_dir/staging/claude"
 mkdir -p "$test_dir/project/.claude"
-echo "new content" > "$test_dir/staging/claude/existing.txt"
-echo "old content" > "$test_dir/project/.claude/existing.txt"
+echo "new content" >"$test_dir/staging/claude/existing.txt"
+echo "old content" >"$test_dir/project/.claude/existing.txt"
 
-pushd "$test_dir/project" > /dev/null || { log_fail "Failed to cd to test directory"; exit 1; }
+pushd "$test_dir/project" >/dev/null || {
+  log_fail "Failed to cd to test directory"
+  exit 1
+}
 MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
 compare_files "$test_dir/staging" 2>/dev/null
-popd > /dev/null || true
+popd >/dev/null || true
 
 assert_equals "1" "${#MODIFIED_FILES[@]}" "One file detected as modified"
 
@@ -380,12 +386,15 @@ test_dir=$(create_temp_dir "compare-deleted")
 # Create staging without the file, project with it
 mkdir -p "$test_dir/staging/claude"
 mkdir -p "$test_dir/project/.claude"
-echo "to be deleted" > "$test_dir/project/.claude/deleted.txt"
+echo "to be deleted" >"$test_dir/project/.claude/deleted.txt"
 
-pushd "$test_dir/project" > /dev/null || { log_fail "Failed to cd to test directory"; exit 1; }
+pushd "$test_dir/project" >/dev/null || {
+  log_fail "Failed to cd to test directory"
+  exit 1
+}
 MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
 compare_files "$test_dir/staging" 2>/dev/null
-popd > /dev/null || true
+popd >/dev/null || true
 
 assert_equals "1" "${#DELETED_FILES[@]}" "One file detected as deleted"
 
@@ -396,13 +405,16 @@ test_dir=$(create_temp_dir "compare-unchanged")
 # Create identical files in staging and project
 mkdir -p "$test_dir/staging/claude"
 mkdir -p "$test_dir/project/.claude"
-echo "same content" > "$test_dir/staging/claude/unchanged.txt"
-echo "same content" > "$test_dir/project/.claude/unchanged.txt"
+echo "same content" >"$test_dir/staging/claude/unchanged.txt"
+echo "same content" >"$test_dir/project/.claude/unchanged.txt"
 
-pushd "$test_dir/project" > /dev/null || { log_fail "Failed to cd to test directory"; exit 1; }
+pushd "$test_dir/project" >/dev/null || {
+  log_fail "Failed to cd to test directory"
+  exit 1
+}
 MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
 compare_files "$test_dir/staging" 2>/dev/null
-popd > /dev/null || true
+popd >/dev/null || true
 
 assert_equals "1" "${#UNCHANGED_FILES[@]}" "One file detected as unchanged"
 
@@ -413,22 +425,25 @@ test_dir=$(create_temp_dir "compare-scripts-excluded")
 # Create staging with only template-sync.sh (mimics what copy_sync_files does)
 mkdir -p "$test_dir/staging/scripts"
 mkdir -p "$test_dir/staging/workflows"
-echo "sync script content" > "$test_dir/staging/scripts/template-sync.sh"
-echo "sync workflow content" > "$test_dir/staging/workflows/template-sync.yml"
+echo "sync script content" >"$test_dir/staging/scripts/template-sync.sh"
+echo "sync workflow content" >"$test_dir/staging/workflows/template-sync.yml"
 
 # Create project with additional files (bootstrap.sh, template-cleanup.*)
 mkdir -p "$test_dir/project/.github/scripts"
 mkdir -p "$test_dir/project/.github/workflows"
-echo "sync script content" > "$test_dir/project/.github/scripts/template-sync.sh"
-echo "bootstrap content" > "$test_dir/project/.github/scripts/bootstrap.sh"
-echo "cleanup script" > "$test_dir/project/.github/scripts/template-cleanup.sh"
-echo "sync workflow content" > "$test_dir/project/.github/workflows/template-sync.yml"
-echo "cleanup workflow" > "$test_dir/project/.github/workflows/template-cleanup.yml"
+echo "sync script content" >"$test_dir/project/.github/scripts/template-sync.sh"
+echo "bootstrap content" >"$test_dir/project/.github/scripts/bootstrap.sh"
+echo "cleanup script" >"$test_dir/project/.github/scripts/template-cleanup.sh"
+echo "sync workflow content" >"$test_dir/project/.github/workflows/template-sync.yml"
+echo "cleanup workflow" >"$test_dir/project/.github/workflows/template-cleanup.yml"
 
-pushd "$test_dir/project" > /dev/null || { log_fail "Failed to cd to test directory"; exit 1; }
+pushd "$test_dir/project" >/dev/null || {
+  log_fail "Failed to cd to test directory"
+  exit 1
+}
 MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
 compare_files "$test_dir/staging" 2>/dev/null
-popd > /dev/null || true
+popd >/dev/null || true
 
 # bootstrap.sh and template-cleanup.* should NOT be in DELETED_FILES
 assert_equals "0" "${#DELETED_FILES[@]}" "No files should be flagged as deleted in scripts/workflows dirs"
@@ -517,7 +532,7 @@ test_dir=$(create_temp_dir "copy-sync-workflow")
 
 # Create upstream directory structure with workflow
 mkdir -p "$test_dir/upstream/.github/workflows"
-echo "name: Template Sync" > "$test_dir/upstream/.github/workflows/template-sync.yml"
+echo "name: Template Sync" >"$test_dir/upstream/.github/workflows/template-sync.yml"
 
 # Create output directory
 output_dir="$test_dir/output"
@@ -532,7 +547,7 @@ test_dir=$(create_temp_dir "copy-sync-script")
 
 # Create upstream directory structure with script
 mkdir -p "$test_dir/upstream/.github/scripts"
-echo "#!/bin/bash" > "$test_dir/upstream/.github/scripts/template-sync.sh"
+echo "#!/bin/bash" >"$test_dir/upstream/.github/scripts/template-sync.sh"
 
 # Create output directory
 output_dir="$test_dir/output"
@@ -564,8 +579,8 @@ test_dir=$(create_temp_dir "copy-sync-both")
 # Create upstream directory structure with both files
 mkdir -p "$test_dir/upstream/.github/workflows"
 mkdir -p "$test_dir/upstream/.github/scripts"
-echo "name: Template Sync" > "$test_dir/upstream/.github/workflows/template-sync.yml"
-echo "#!/bin/bash" > "$test_dir/upstream/.github/scripts/template-sync.sh"
+echo "name: Template Sync" >"$test_dir/upstream/.github/workflows/template-sync.yml"
+echo "#!/bin/bash" >"$test_dir/upstream/.github/scripts/template-sync.sh"
 
 # Create output directory
 output_dir="$test_dir/output"

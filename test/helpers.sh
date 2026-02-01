@@ -137,7 +137,7 @@ assert_exit_code() {
   local message="${3:-Command should exit with code $expected}"
 
   set +e
-  eval "$command" > /dev/null 2>&1
+  eval "$command" >/dev/null 2>&1
   local actual=$?
   set -e
 
@@ -196,7 +196,7 @@ assert_json_valid() {
   local json="$1"
   local message="${2:-JSON should be valid}"
 
-  if echo "$json" | jq '.' > /dev/null 2>&1; then
+  if echo "$json" | jq '.' >/dev/null 2>&1; then
     log_pass "$message"
     return 0
   else
@@ -250,7 +250,7 @@ create_temp_git_repo() {
     git init --quiet
     git config user.email "test@test.com"
     git config user.name "Test User"
-    echo "initial" > README.md
+    echo "initial" >README.md
     git add README.md
     git commit -m "Initial commit" --quiet
 
