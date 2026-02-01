@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-All validation checks pass. The isolated mode implementation is complete and matches the design specification in `docs/wip/cove/design.md`.
+All validation checks pass. The isolated mode implementation is complete and matches the design specification in `docs/cove/design.md`.
 
 ---
 
@@ -176,7 +176,7 @@ All relative paths are consistent within the `.github/templates/claude/` structu
 
 ## 6. Design Compliance Check
 
-Compared implementation against `docs/wip/cove/design.md`:
+Compared implementation against `docs/cove/design.md`:
 
 ### 6.1 Architecture ✓ PASS
 

@@ -63,8 +63,8 @@ Responses must follow this structure:
 
 ## Design Documents
 
-- Design specification: `docs/wip/cove/design.md`
-- Implementation plan: `docs/wip/cove/implementation.md`
+- Design specification: `docs/cove/design.md`
+- Implementation plan: `docs/cove/implementation.md`
 
 ## Dependencies
 

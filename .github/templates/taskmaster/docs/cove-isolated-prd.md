@@ -87,5 +87,5 @@ Requirements:
 
 ## Design Documents
 
-- Design specification: `docs/wip/cove/design.md` (Verification Modes section)
-- Implementation plan: `docs/wip/cove/implementation.md` (Tasks 6-9)
+- Design specification: `docs/cove/design.md` (Verification Modes section)
+- Implementation plan: `docs/cove/implementation.md` (Tasks 6-9)
