@@ -127,7 +127,7 @@
         "dependencies": [
           "9"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -163,7 +163,8 @@
             "testStrategy": "Perform diff/comparison with show-task.md for structural consistency. Grep for 'cove' skill reference. Manual review that both invocation modes are clearly documented. Verify file length is appropriately concise (roughly 20-40 lines, not a full workflow document).",
             "parentId": "undefined"
           }
-        ]
+        ],
+        "updatedAt": "2026-02-01T15:27:14.458Z"
       },
       {
         "id": "12",
@@ -257,9 +258,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-02-01T15:20:06.677Z",
+      "lastModified": "2026-02-01T15:27:14.458Z",
       "taskCount": 5,
-      "completedCount": 2,
+      "completedCount": 3,
       "tags": [
         "master"
       ]
