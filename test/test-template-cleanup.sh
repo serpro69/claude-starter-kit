@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/helpers.sh"
 
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-SCHEMA_FILE="$REPO_ROOT/docs/wip/template-sync/template-state-schema.json"
+SCHEMA_FILE="$REPO_ROOT/docs/template-sync/template-state-schema.json"
 TEMPLATE_CLEANUP_SCRIPT="$REPO_ROOT/.github/scripts/template-cleanup.sh"
 
 # Source the script to get access to functions
@@ -199,7 +199,7 @@ test_dir=$(create_temp_git_repo "v1.0.0")
 cd "$test_dir"
 
 PROJECT_NAME="test"
-LANGUAGES="bash"  # LANGUAGES is now required, use valid value
+LANGUAGES="bash" # LANGUAGES is now required, use valid value
 CC_MODEL=""
 SERENA_INITIAL_PROMPT=""
 TM_CUSTOM_SYSTEM_PROMPT=""
@@ -325,7 +325,7 @@ cd "$test_dir"
 git init --quiet
 git config user.email "test@test.com"
 git config user.name "Test User"
-echo "initial" > README.md
+echo "initial" >README.md
 git add README.md
 git commit -m "Initial" --quiet
 # No tag created
@@ -410,7 +410,7 @@ log_test "generate_manifest overwrites existing manifest"
 test_dir=$(create_temp_git_repo "v1.0.0")
 cd "$test_dir"
 mkdir -p .github
-echo '{"old": "manifest"}' > .github/template-state.json
+echo '{"old": "manifest"}' >.github/template-state.json
 
 PROJECT_NAME="new-project"
 LANGUAGES="bash"

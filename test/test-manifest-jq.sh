@@ -10,7 +10,7 @@ source "$SCRIPT_DIR/helpers.sh"
 
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 EXAMPLE_MANIFEST="$REPO_ROOT/.github/templates/template-state.example.json"
-SCHEMA_FILE="$REPO_ROOT/docs/wip/template-sync/template-state-schema.json"
+SCHEMA_FILE="$REPO_ROOT/docs/template-sync/template-state-schema.json"
 FIXTURES_DIR="$SCRIPT_DIR/fixtures/manifests"
 
 # =============================================================================
@@ -20,7 +20,7 @@ FIXTURES_DIR="$SCRIPT_DIR/fixtures/manifests"
 log_section "Section 1: Basic JSON Validation"
 
 log_test "Example manifest is valid JSON"
-if jq '.' "$EXAMPLE_MANIFEST" > /dev/null 2>&1; then
+if jq '.' "$EXAMPLE_MANIFEST" >/dev/null 2>&1; then
   log_pass "Valid JSON syntax"
 else
   log_fail "Invalid JSON syntax"
@@ -190,9 +190,9 @@ RT_PROJECT=$(echo "$ROUND_TRIP_MANIFEST" | jq -r '.variables.PROJECT_NAME')
 RT_SERENA=$(echo "$ROUND_TRIP_MANIFEST" | jq -r '.variables.SERENA_INITIAL_PROMPT')
 RT_PERMISSION=$(echo "$ROUND_TRIP_MANIFEST" | jq -r '.variables.TM_PERMISSION_MODE')
 
-if [[ "$RT_PROJECT" == "test-project" ]] && \
-   [[ "$RT_SERENA" == 'Test prompt with "quotes"' ]] && \
-   [[ "$RT_PERMISSION" == "full" ]]; then
+if [[ "$RT_PROJECT" == "test-project" ]] &&
+  [[ "$RT_SERENA" == 'Test prompt with "quotes"' ]] &&
+  [[ "$RT_PERMISSION" == "full" ]]; then
   log_pass "Round-trip preserves all values including special characters"
 else
   log_fail "Round-trip failed"
@@ -208,7 +208,7 @@ fi
 log_section "Section 6: Schema Validation"
 
 log_test "Validate example manifest against JSON Schema"
-if command -v uv &> /dev/null; then
+if command -v uv &>/dev/null; then
   if uv run --with check-jsonschema check-jsonschema --schemafile "$SCHEMA_FILE" "$EXAMPLE_MANIFEST" 2>&1; then
     log_pass "Example manifest passes schema validation"
   else
@@ -225,14 +225,14 @@ fi
 log_section "Section 7: Test Fixtures Validation"
 
 log_test "Valid fixture is valid JSON"
-if jq '.' "$FIXTURES_DIR/valid-manifest.json" > /dev/null 2>&1; then
+if jq '.' "$FIXTURES_DIR/valid-manifest.json" >/dev/null 2>&1; then
   log_pass "valid-manifest.json is valid JSON"
 else
   log_fail "valid-manifest.json is invalid JSON"
 fi
 
 log_test "Invalid JSON fixture is actually invalid"
-if jq '.' "$FIXTURES_DIR/invalid-json.txt" > /dev/null 2>&1; then
+if jq '.' "$FIXTURES_DIR/invalid-json.txt" >/dev/null 2>&1; then
   log_fail "invalid-json.txt should be invalid JSON but parsed successfully"
 else
   log_pass "invalid-json.txt is correctly invalid JSON"
