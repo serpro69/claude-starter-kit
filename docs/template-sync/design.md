@@ -214,6 +214,10 @@ Files that originate from `.github/templates/`:
 - `.taskmaster/CLAUDE.md`
 - `.taskmaster/templates/**`
 
+Sync infrastructure files (synced directly, not from templates/):
+- `.github/workflows/template-sync.yml`
+- `.github/scripts/template-sync.sh`
+
 ### User-Scoped Files (never touched)
 
 Files that are user-specific or gitignored:

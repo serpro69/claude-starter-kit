@@ -175,6 +175,7 @@ The repository includes a GitHub workflow that customizes the template:
 - Always review PR changes before merging to preserve local customizations
 - Sync preserves project-specific values (name, language, prompts) via manifest variables
 - User-scoped files like `.taskmaster/tasks/` and `.taskmaster/docs/` are never modified
+- Sync infrastructure (workflow and script) are also updated when upstream has changes
 
 ## Testing
 
@@ -219,7 +220,7 @@ for test in test/test-*.sh; do $test; done
 | Test Suite | Tests | Coverage |
 |------------|-------|----------|
 | test-manifest-jq.sh | 17 | jq patterns, JSON generation, special characters, round-trip validation |
-| test-template-sync.sh | 33 | CLI parsing, manifest reading/validation, sed escaping, substitutions, file comparison, diff reports |
+| test-template-sync.sh | 37 | CLI parsing, manifest reading/validation, sed escaping, substitutions, file comparison, diff reports, sync infrastructure copying |
 | test-template-cleanup.sh | 18 | Manifest generation, field validation, variable capture, special characters, git tag/SHA detection |
 
 ### Writing New Tests

@@ -145,7 +145,7 @@ template-sync.sh
 
 **`fetch_upstream_templates(version)`**:
 - Create temp directory
-- Use git sparse-checkout to fetch only `.github/templates/`
+- Use git sparse-checkout to fetch `.github/templates/` and sync infrastructure files
 - Clone with depth=1 for efficiency
 - Return path to fetched templates
 
@@ -155,8 +155,14 @@ template-sync.sh
 - Mirror the logic from `.github/scripts/template-cleanup.sh`
 - Output to a staging directory
 
+**`copy_sync_files(upstream_dir, output_dir)`**:
+- Copy sync infrastructure files from upstream to staging
+- Copies `.github/workflows/template-sync.yml` and `.github/scripts/template-sync.sh`
+- No substitution needed - files are synced as-is
+- Handles missing files gracefully
+
 **`compare_files(staging_dir, target_dirs)`**:
-- Compare staged files against `.claude/`, `.serena/`, `.taskmaster/`
+- Compare staged files against `.claude/`, `.serena/`, `.taskmaster/`, `.github/workflows/`, `.github/scripts/`
 - Generate list of: added, modified, deleted, unchanged
 - Return diff statistics
 

@@ -477,6 +477,76 @@ assert_output_contains "has_changes=true" "echo '$output'" "CI mode outputs has_
 assert_output_contains "added_count=1" "echo '$output'" "CI mode outputs added_count"
 
 # =============================================================================
+# Section 8: Sync Infrastructure Copying Tests
+# =============================================================================
+
+log_section "Section 8: Sync Infrastructure Copying"
+
+log_test "copy_sync_files copies workflow when present"
+reset_globals
+test_dir=$(create_temp_dir "copy-sync-workflow")
+
+# Create upstream directory structure with workflow
+mkdir -p "$test_dir/upstream/.github/workflows"
+echo "name: Template Sync" > "$test_dir/upstream/.github/workflows/template-sync.yml"
+
+# Create output directory
+output_dir="$test_dir/output"
+
+copy_sync_files "$test_dir/upstream" "$output_dir" 2>/dev/null
+
+assert_file_exists "$output_dir/workflows/template-sync.yml" "Workflow copied to staging"
+
+log_test "copy_sync_files copies script when present"
+reset_globals
+test_dir=$(create_temp_dir "copy-sync-script")
+
+# Create upstream directory structure with script
+mkdir -p "$test_dir/upstream/.github/scripts"
+echo "#!/bin/bash" > "$test_dir/upstream/.github/scripts/template-sync.sh"
+
+# Create output directory
+output_dir="$test_dir/output"
+
+copy_sync_files "$test_dir/upstream" "$output_dir" 2>/dev/null
+
+assert_file_exists "$output_dir/scripts/template-sync.sh" "Script copied to staging"
+
+log_test "copy_sync_files handles missing files gracefully"
+reset_globals
+test_dir=$(create_temp_dir "copy-sync-missing")
+
+# Create upstream directory structure without sync files
+mkdir -p "$test_dir/upstream/.github"
+
+# Create output directory
+output_dir="$test_dir/output"
+
+# Should not fail even if files don't exist
+copy_sync_files "$test_dir/upstream" "$output_dir" 2>/dev/null
+exit_code=$?
+
+assert_equals "0" "$exit_code" "copy_sync_files succeeds even when files are missing"
+
+log_test "copy_sync_files copies both files when both present"
+reset_globals
+test_dir=$(create_temp_dir "copy-sync-both")
+
+# Create upstream directory structure with both files
+mkdir -p "$test_dir/upstream/.github/workflows"
+mkdir -p "$test_dir/upstream/.github/scripts"
+echo "name: Template Sync" > "$test_dir/upstream/.github/workflows/template-sync.yml"
+echo "#!/bin/bash" > "$test_dir/upstream/.github/scripts/template-sync.sh"
+
+# Create output directory
+output_dir="$test_dir/output"
+
+copy_sync_files "$test_dir/upstream" "$output_dir" 2>/dev/null
+
+assert_file_exists "$output_dir/workflows/template-sync.yml" "Workflow copied when both present"
+assert_file_exists "$output_dir/scripts/template-sync.sh" "Script copied when both present"
+
+# =============================================================================
 # Summary
 # =============================================================================
 

@@ -442,11 +442,11 @@ fetch_upstream_templates() {
     fi
   fi
 
-  # Configure sparse-checkout to only fetch template files
+  # Configure sparse-checkout to fetch template files and sync infrastructure
   if ! git sparse-checkout init --cone --quiet 2>/dev/null; then
     log_warn "Sparse-checkout init failed, continuing with full checkout"
   fi
-  if ! git sparse-checkout set .github/templates --quiet 2>/dev/null; then
+  if ! git sparse-checkout set .github/templates .github/workflows/template-sync.yml .github/scripts/template-sync.sh --quiet 2>/dev/null; then
     log_warn "Sparse-checkout set failed, templates may not exist at this version"
   fi
 
@@ -594,6 +594,52 @@ apply_substitutions() {
   log_success "Substitutions applied to $output_dir"
 }
 
+# copy_sync_files()
+# Copies sync infrastructure files (workflow and script) from upstream to staging.
+# These files are synced as-is without variable substitution.
+#
+# Args:
+#   $1 - Upstream directory (parent of .github/)
+#   $2 - Output directory for staged files
+#
+# Returns:
+#   0 on success
+#
+# Side effects:
+#   Creates workflows/ and scripts/ subdirectories in output_dir
+#   Copies template-sync.yml and template-sync.sh if they exist
+copy_sync_files() {
+  local upstream_dir="$1"
+  local output_dir="$2"
+
+  log_step "Copying sync infrastructure files"
+
+  # Create staging subdirectories
+  mkdir -p "$output_dir/workflows" "$output_dir/scripts"
+
+  local copied=0
+
+  # Copy workflow if it exists
+  if [[ -f "$upstream_dir/.github/workflows/template-sync.yml" ]]; then
+    cp "$upstream_dir/.github/workflows/template-sync.yml" "$output_dir/workflows/"
+    log_info "Copied template-sync.yml"
+    copied=$((copied + 1))
+  fi
+
+  # Copy script if it exists
+  if [[ -f "$upstream_dir/.github/scripts/template-sync.sh" ]]; then
+    cp "$upstream_dir/.github/scripts/template-sync.sh" "$output_dir/scripts/"
+    log_info "Copied template-sync.sh"
+    copied=$((copied + 1))
+  fi
+
+  if ((copied > 0)); then
+    log_success "Copied $copied sync infrastructure file(s)"
+  else
+    log_info "No sync infrastructure files found in upstream"
+  fi
+}
+
 # =============================================================================
 # File Comparison Functions
 # =============================================================================
@@ -632,6 +678,8 @@ compare_files() {
     ["claude"]=".claude"
     ["serena"]=".serena"
     ["taskmaster"]=".taskmaster"
+    ["workflows"]=".github/workflows"
+    ["scripts"]=".github/scripts"
   )
 
   for staging_subdir in "${!dir_map[@]}"; do
@@ -1036,6 +1084,9 @@ main() {
   SUBSTITUTED_TEMPLATES_PATH="$STAGING_DIR/substituted"
   apply_substitutions "$FETCHED_TEMPLATES_PATH" "$SUBSTITUTED_TEMPLATES_PATH"
 
+  # Copy sync infrastructure files (no substitution needed)
+  copy_sync_files "$STAGING_DIR/upstream" "$SUBSTITUTED_TEMPLATES_PATH"
+
   # Display substituted templates info
   if ! $CI_MODE; then
     echo ""
@@ -1061,6 +1112,6 @@ main() {
 
 # Run main with all arguments only if script is executed directly (not sourced)
 # This allows tests to source the file and access functions without running main()
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+if [[ "${BASH_SOURCE[0]:-}" == "${0:-}" ]]; then
   main "$@"
 fi

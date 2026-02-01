@@ -160,6 +160,19 @@ jobs:
             echo "Applied changes to .taskmaster/"
           fi
 
+          # Copy workflow files (sync infrastructure)
+          if [[ -d "$STAGING_DIR/workflows" ]]; then
+            cp -r "$STAGING_DIR/workflows/"* .github/workflows/ 2>/dev/null || true
+            echo "Applied changes to .github/workflows/"
+          fi
+
+          # Copy script files (sync infrastructure, preserve executable permissions)
+          if [[ -d "$STAGING_DIR/scripts" ]]; then
+            cp -r "$STAGING_DIR/scripts/"* .github/scripts/ 2>/dev/null || true
+            chmod +x .github/scripts/*.sh 2>/dev/null || true
+            echo "Applied changes to .github/scripts/"
+          fi
+
       - name: Update Manifest Version
         run: |
           NEW_VERSION="${{ needs.sync.outputs.new_version }}"
