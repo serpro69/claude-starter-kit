@@ -246,6 +246,8 @@ jobs:
 
       - name: Summary
         if: always()
+        env:
+          DIFF_SUMMARY: ${{ needs.sync.outputs.diff_summary }}
         run: |
           echo "### Template Sync Results" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
@@ -260,4 +262,5 @@ jobs:
           echo "**Version:** ${{ needs.sync.outputs.old_version }} → ${{ needs.sync.outputs.new_version }}" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "#### Changes" >> "$GITHUB_STEP_SUMMARY"
-          echo "${{ needs.sync.outputs.diff_summary }}" >> "$GITHUB_STEP_SUMMARY"
+          # Use printf to avoid bash interpreting backticks in markdown as command substitution
+          printf '%s\n' "$DIFF_SUMMARY" >> "$GITHUB_STEP_SUMMARY"
