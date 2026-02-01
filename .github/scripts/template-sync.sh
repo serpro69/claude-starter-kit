@@ -706,7 +706,16 @@ compare_files() {
     # Skip if staging subdir doesn't exist
     [[ ! -d "$staging_path" ]] && continue
 
-    # Find all files in staging
+    # Build find command with exclusions for user-scoped directories in .taskmaster/
+    local staging_find_args=("$staging_path" -type f)
+    if [[ "$staging_subdir" == "taskmaster" ]]; then
+      staging_find_args+=(-not -path "$staging_path/tasks/*")
+      staging_find_args+=(-not -path "$staging_path/docs/*")
+      staging_find_args+=(-not -path "$staging_path/reports/*")
+    fi
+    staging_find_args+=(-print0)
+
+    # Find all files in staging (excluding user-scoped directories)
     while IFS= read -r -d '' staging_file; do
       local relative_path="${staging_file#$staging_path/}"
       local project_file="$project_dir/$relative_path"
@@ -722,7 +731,7 @@ compare_files() {
         # Files are identical -> Unchanged
         UNCHANGED_FILES+=("$display_path")
       fi
-    done < <(find "$staging_path" -type f -print0 2>/dev/null)
+    done < <(find "${staging_find_args[@]}" 2>/dev/null)
 
     # Find deleted files (exist in project but not in staging)
     # Skip for sync infrastructure directories - we only sync specific files, not entire dirs

@@ -487,6 +487,50 @@ assert_equals "0" "${#DELETED_FILES[@]}" "No files should be flagged as deleted 
 # Template-managed files should be detected as unchanged
 assert_equals "3" "${#UNCHANGED_FILES[@]}" "Only template-managed taskmaster files should be compared"
 
+log_test "compare_files does NOT flag taskmaster user-scoped dirs as added/modified (tasks/, docs/, reports/)"
+reset_globals
+test_dir=$(create_temp_dir "compare-taskmaster-added")
+
+# Create staging with template-managed files AND user-scoped files
+# This simulates upstream having files in user-scoped directories
+mkdir -p "$test_dir/staging/taskmaster/templates"
+mkdir -p "$test_dir/staging/taskmaster/tasks"
+mkdir -p "$test_dir/staging/taskmaster/docs"
+mkdir -p "$test_dir/staging/taskmaster/reports"
+echo "config content" >"$test_dir/staging/taskmaster/config.json"
+echo "claude md content" >"$test_dir/staging/taskmaster/CLAUDE.md"
+echo "template content" >"$test_dir/staging/taskmaster/templates/example_prd.txt"
+# User-scoped files in staging that should NOT be synced
+echo "upstream tasks.json" >"$test_dir/staging/taskmaster/tasks/tasks.json"
+echo "upstream task-1.md" >"$test_dir/staging/taskmaster/tasks/task-1.md"
+echo "upstream prd.txt" >"$test_dir/staging/taskmaster/docs/prd.txt"
+echo "upstream report.json" >"$test_dir/staging/taskmaster/reports/complexity.json"
+
+# Create project with different user-scoped content (should NOT be flagged as modified)
+mkdir -p "$test_dir/project/.taskmaster/templates"
+mkdir -p "$test_dir/project/.taskmaster/tasks"
+mkdir -p "$test_dir/project/.taskmaster/docs"
+mkdir -p "$test_dir/project/.taskmaster/reports"
+echo "config content" >"$test_dir/project/.taskmaster/config.json"
+echo "claude md content" >"$test_dir/project/.taskmaster/CLAUDE.md"
+echo "template content" >"$test_dir/project/.taskmaster/templates/example_prd.txt"
+# Project has DIFFERENT user-scoped content
+echo "project tasks.json - DIFFERENT" >"$test_dir/project/.taskmaster/tasks/tasks.json"
+echo "project prd.txt - DIFFERENT" >"$test_dir/project/.taskmaster/docs/prd.txt"
+# Project has files that don't exist in upstream (should NOT be flagged)
+echo "project custom task" >"$test_dir/project/.taskmaster/tasks/task-99.md"
+
+pushd "$test_dir/project" >/dev/null || true
+MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
+compare_files "$test_dir/staging" 2>/dev/null
+popd >/dev/null || true
+
+# User-scoped files should NOT be in ADDED_FILES or MODIFIED_FILES
+assert_equals "0" "${#ADDED_FILES[@]}" "No files should be flagged as added (user-scoped dirs excluded from staging)"
+assert_equals "0" "${#MODIFIED_FILES[@]}" "No files should be flagged as modified (user-scoped dirs excluded from staging)"
+# Template-managed files should be detected as unchanged
+assert_equals "3" "${#UNCHANGED_FILES[@]}" "Only template-managed taskmaster files should be compared"
+
 # =============================================================================
 # Section 7: Diff Report Generation Tests
 # =============================================================================
