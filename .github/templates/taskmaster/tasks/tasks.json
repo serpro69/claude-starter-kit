@@ -177,7 +177,7 @@
           "9",
           "10"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -185,9 +185,10 @@
             "description": "Add a new section titled 'Natural Language Invocation' to SKILL.md that lists the phrases Claude should recognize as requests to invoke the CoVe skill without explicit /cove command.",
             "dependencies": [],
             "details": "Edit `.github/templates/claude/skills/cove/SKILL.md` to add a new section after the existing content. The section should include:\n\n**Section Header:** '## Natural Language Invocation'\n\n**Introductory text:** Brief explanation that Claude should recognize these phrases as requests to invoke the CoVe skill.\n\n**Trigger phrases list (minimum 5):**\n- \"verify this using chain of verification\"\n- \"use CoVe to answer\"\n- \"fact-check your response\"\n- \"double-check this with verification\"\n- \"use self-verification for this\"\n\n**Important notes to include:**\n- This is guidance for manual recognition only\n- Auto-trigger is NOT implemented by default (per PRD non-goal)\n- Users who want auto-trigger behavior can reference this section in their project CLAUDE.md to enable automatic invocation\n\nFollow the markdown formatting conventions from existing skills (imperative mood, concise bullet points).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "1. Verify SKILL.md contains 'Natural Language Invocation' section header\n2. Verify at least 5 trigger phrases are documented in a bullet list\n3. Grep for 'verify this using chain of verification' and 'use CoVe' phrases\n4. Verify explicit note that auto-trigger is NOT default behavior\n5. Verify mention of users adding to CLAUDE.md for auto-trigger",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-02-01T15:30:59.719Z"
           },
           {
             "id": 2,
@@ -197,11 +198,13 @@
               1
             ],
             "details": "Add a new section to SKILL.md titled '## When to Use' or integrate with existing when-to-use content. Document the specific scenarios where CoVe provides the most value:\n\n**Precision indicators:**\n- Questions containing precision language (\"exactly\", \"precisely\", \"specific\")\n\n**Complexity indicators:**\n- Multi-step reasoning chains (3+ logical dependencies)\n- Technical claims about APIs, libraries, or version-specific behavior\n\n**Fact-checking scenarios:**\n- Historical facts, statistics, or quantitative data\n- Security-critical code paths or analysis\n\n**Self-correction triggers:**\n- When initial response contains hedging language (\"I think\", \"probably\", \"might be\")\n\n**Implementation notes:**\n- These are guidelines for when CoVe adds value, not automatic triggers\n- Reference design.md lines 170-177 for auto-trigger indicator specification\n- Users can copy these heuristics to their CLAUDE.md to enable auto-invocation if desired\n\nThis section serves dual purposes: helping users decide when to manually invoke /cove, and providing copy-paste heuristics for those who want to configure auto-trigger in their project.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "1. Verify 'When to Use' section exists with guidance content\n2. Verify at least 6 indicator types are documented (precision, multi-step, technical claims, historical facts, security-critical, hedging language)\n3. Verify explicit mention that users can add auto-trigger to CLAUDE.md\n4. Verify section does NOT implement auto-trigger itself\n5. Verify formatting is consistent with existing skill documentation patterns",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-02-01T15:30:59.721Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-02-01T15:30:59.721Z"
       },
       {
         "id": "13",
@@ -258,9 +261,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-02-01T15:27:14.458Z",
+      "lastModified": "2026-02-01T15:30:59.721Z",
       "taskCount": 5,
-      "completedCount": 3,
+      "completedCount": 4,
       "tags": [
         "master"
       ]
