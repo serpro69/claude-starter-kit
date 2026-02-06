@@ -21,9 +21,6 @@ on:
           - opus
           - opusplan
           - haiku
-          # NOTE: does not currently support 1m context.
-          # Model name from: https://platform.claude.com/docs/en/about-claude/models/overview#model-names
-          - claude-opus-4-5
       LANGUAGES:
         description: |
           Programming languages for Serena semantic analysis (required).

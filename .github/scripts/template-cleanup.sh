@@ -106,7 +106,8 @@ Usage:
 
 Options:
   --model <model>           Claude Code model alias (default: default)
-                            Options: default, sonnet, sonnet[1m], opus, opusplan, haiku, claude-opus-4-5
+                            Options: default, sonnet, sonnet[1m], opus, opusplan, haiku
+                            (See https://code.claude.com/docs/en/model-config#model-aliases for more details.)
   --languages <langs>       Programming languages for Serena semantic analysis (required)
                             Comma-separated list, e.g.: python,typescript or just: python
                             Primary: python, typescript, java, go, rust, csharp, cpp, ruby
@@ -220,7 +221,7 @@ run_interactive() {
 
   # Model selection
   prompt_select "Select Claude Code model" "default" CC_MODEL \
-    "default" "sonnet" "sonnet[1m]" "opus" "opusplan" "haiku" "claude-opus-4-5"
+    "default" "sonnet" "sonnet[1m]" "opus" "opusplan" "haiku"
 
   echo ""
 

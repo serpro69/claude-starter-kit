@@ -290,7 +290,7 @@ This is my current config, you may want to tweak it to your needs. **I can't rec
    Notifications                             Auto
    Output style                              default
    Editor mode                               vim
-   Model                                     claude-opus-4-5
+   Model                                     opus
    Auto-connect to IDE (external terminal)   false
    Claude in Chrome enabled by default       false
 ```
