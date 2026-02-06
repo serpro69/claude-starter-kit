@@ -106,7 +106,7 @@ Usage:
 
 Options:
   --model <model>           Claude Code model alias (default: default)
-                            Options: default, sonnet, sonnet[1m], opus, opusplan, haiku
+                            Options: default, sonnet, sonnet[1m], opus, opus[1m], opusplan, haiku
                             (See https://code.claude.com/docs/en/model-config#model-aliases for more details.)
   --languages <langs>       Programming languages for Serena semantic analysis (required)
                             Comma-separated list, e.g.: python,typescript or just: python
@@ -221,7 +221,7 @@ run_interactive() {
 
   # Model selection
   prompt_select "Select Claude Code model" "default" CC_MODEL \
-    "default" "sonnet" "sonnet[1m]" "opus" "opusplan" "haiku"
+    "default" "sonnet" "sonnet[1m]" "opus" "opus[1m]" "opusplan" "haiku"
 
   echo ""
 
@@ -336,10 +336,10 @@ generate_manifest() {
   # Note: Use 'grep ... || true' to handle case when no tags exist (grep returns 1 for no matches)
   # GIT_TERMINAL_PROMPT=0 prevents git from prompting for credentials on invalid repos
   # Use '|| true' to prevent set -e from exiting on git errors (e.g., network issues, invalid repo)
-  template_version=$(GIT_TERMINAL_PROMPT=0 git ls-remote --tags --sort=-v:refname "$repo_url" 2>/dev/null \
-    | { grep -v '\^{}' || true; } \
-    | head -1 \
-    | sed 's/.*refs\/tags\///' || true)
+  template_version=$(GIT_TERMINAL_PROMPT=0 git ls-remote --tags --sort=-v:refname "$repo_url" 2>/dev/null |
+    { grep -v '\^{}' || true; } |
+    head -1 |
+    sed 's/.*refs\/tags\///' || true)
 
   if [[ -z "$template_version" ]]; then
     # No tags exist, use HEAD SHA from upstream

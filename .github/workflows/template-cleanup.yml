@@ -19,6 +19,7 @@ on:
           - sonnet
           - sonnet[1m]
           - opus
+          - opus[1m]
           - opusplan
           - haiku
       LANGUAGES:
