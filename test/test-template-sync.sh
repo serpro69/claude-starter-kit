@@ -28,6 +28,9 @@ reset_globals() {
   DRY_RUN=false
   CI_MODE=false
   TARGET_VERSION="latest"
+  # Reset exclusion tracking arrays
+  EXCLUDED_FILES=()
+  SYNC_EXCLUSIONS=()
 }
 
 log_test "parse_arguments with --version flag"
@@ -747,6 +750,66 @@ reset_globals
 # Validation of whether they exist happens in fetch_upstream_templates()
 result=$(resolve_version "v99.99.99" "serpro69/claude-starter-kit")
 assert_equals "v99.99.99" "$result" "Arbitrary value returned as-is"
+
+# =============================================================================
+# Section 10: Sync Exclusion - is_excluded() Tests
+# =============================================================================
+
+log_section "Section 10: Sync Exclusion - is_excluded()"
+
+log_test "is_excluded returns 1 when no exclusions configured"
+reset_globals
+SYNC_EXCLUSIONS=()
+set +e
+is_excluded ".claude/settings.json"
+exit_code=$?
+set -e
+assert_equals "1" "$exit_code" "No exclusions means not excluded"
+
+log_test "is_excluded returns 0 for exact path match"
+reset_globals
+SYNC_EXCLUSIONS=(".claude/commands/cove/cove.md")
+set +e
+is_excluded ".claude/commands/cove/cove.md"
+exit_code=$?
+set -e
+assert_equals "0" "$exit_code" "Exact path match is excluded"
+
+log_test "is_excluded returns 0 for glob pattern with trailing wildcard"
+reset_globals
+SYNC_EXCLUSIONS=(".claude/commands/cove/*")
+set +e
+is_excluded ".claude/commands/cove/cove.md"
+exit_code=$?
+set -e
+assert_equals "0" "$exit_code" "Glob wildcard matches file in directory"
+
+log_test "is_excluded returns 1 for non-matching path"
+reset_globals
+SYNC_EXCLUSIONS=(".claude/commands/cove/*")
+set +e
+is_excluded ".claude/commands/tm/list.md"
+exit_code=$?
+set -e
+assert_equals "1" "$exit_code" "Non-matching path is not excluded"
+
+log_test "is_excluded matches across directory separators (bash case * crosses /)"
+reset_globals
+SYNC_EXCLUSIONS=(".claude/commands/cove/*")
+set +e
+is_excluded ".claude/commands/cove/subdir/file.md"
+exit_code=$?
+set -e
+assert_equals "0" "$exit_code" "Glob * matches across directory separators"
+
+log_test "is_excluded handles multiple patterns (second pattern matches)"
+reset_globals
+SYNC_EXCLUSIONS=(".serena/project.yml" ".claude/commands/cove/*")
+set +e
+is_excluded ".claude/commands/cove/cove.md"
+exit_code=$?
+set -e
+assert_equals "0" "$exit_code" "Second pattern in list matches"
 
 # =============================================================================
 # Summary
