@@ -277,22 +277,27 @@ This is my current config, you may want to tweak it to your needs. **I can't rec
 ────────────────────────────────────────────────────────────
  Configure Claude Code preferences
 
-   Auto-compact                              false
-   Show tips                                 true
-   Thinking mode                             true
-   Prompt suggestions                        true
-   Rewind code (checkpoints)                 true
-   Verbose output                            false
-   Terminal progress bar                     true
-   Default permission mode                   Default
-   Respect .gitignore in file picker         true
-   Theme                                     Dark mode
-   Notifications                             Auto
-   Output style                              default
-   Editor mode                               vim
-   Model                                     opus
-   Auto-connect to IDE (external terminal)   false
-   Claude in Chrome enabled by default       false
+    Auto-compact                              false
+    Show tips                                 true
+    Reduce motion                             false
+    Thinking mode                             true
+    Prompt suggestions                        true
+    Rewind code (checkpoints)                 true
+    Verbose output                            false
+    Terminal progress bar                     true
+    Default permission mode                   Default
+    Respect .gitignore in file picker         true
+    Auto-update channel                       latest
+    Theme                                     Dark mode
+    Notifications                             Auto
+    Output style                              default
+    Language                                  Default (English)
+    Editor mode                               vim
+    Show code diff footer                     true
+    Show PR status footer                     true
+    Model                                     opus
+    Auto-connect to IDE (external terminal)   false
+    Claude in Chrome enabled by default       false
 ```
 
 ## Development
