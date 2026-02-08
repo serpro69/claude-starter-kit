@@ -81,6 +81,20 @@
           "examples": ["default", "full", "minimal"]
         }
       }
+    },
+    "sync_exclusions": {
+      "type": "array",
+      "description": "Optional array of glob patterns for project-relative paths to exclude from template sync. Files matching these patterns will not be added, modified, or flagged as deleted during sync. Patterns use bash case-statement glob syntax where * matches any characters including directory separators.",
+      "default": [],
+      "items": {
+        "type": "string",
+        "description": "Glob pattern for a project-relative path (e.g., '.claude/commands/cove/*')"
+      },
+      "examples": [
+        [],
+        [".claude/commands/cove/*"],
+        [".claude/commands/cove/*", ".claude/skills/cove/*", ".taskmaster/templates/example_prd.txt"]
+      ]
     }
   }
 }
