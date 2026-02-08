@@ -1,0 +1,16 @@
+{
+  "schema_version": "1",
+  "upstream_repo": "serpro69/claude-starter-kit",
+  "template_version": "v1.0.0",
+  "synced_at": "2025-01-27T10:00:00Z",
+  "variables": {
+    "PROJECT_NAME": "my-project",
+    "LANGUAGES": "typescript",
+    "CC_MODEL": "sonnet",
+    "SERENA_INITIAL_PROMPT": "",
+    "TM_CUSTOM_SYSTEM_PROMPT": "",
+    "TM_APPEND_SYSTEM_PROMPT": "",
+    "TM_PERMISSION_MODE": "default"
+  },
+  "sync_exclusions": [".claude/commands/cove/*", 42, true]
+}

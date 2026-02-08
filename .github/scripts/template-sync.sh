@@ -275,6 +275,14 @@ read_manifest() {
   done
 
   log_info "Manifest loaded: $MANIFEST_PATH"
+
+  # Load sync exclusions if present (optional field)
+  if jq -e '.sync_exclusions' "$MANIFEST_PATH" &>/dev/null; then
+    mapfile -t SYNC_EXCLUSIONS < <(jq -r '.sync_exclusions[]' "$MANIFEST_PATH")
+    if [[ ${#SYNC_EXCLUSIONS[@]} -gt 0 ]]; then
+      log_info "Loaded ${#SYNC_EXCLUSIONS[@]} sync exclusion pattern(s)"
+    fi
+  fi
 }
 
 # validate_manifest()
@@ -329,6 +337,20 @@ validate_manifest() {
   if [[ -z "$languages" ]]; then
     log_error "LANGUAGES variable cannot be empty in manifest"
     exit 1
+  fi
+
+  # Validate sync_exclusions if present (optional field)
+  if jq -e '.sync_exclusions' "$MANIFEST_PATH" &>/dev/null; then
+    # Must be an array
+    if ! jq -e '.sync_exclusions | type == "array"' "$MANIFEST_PATH" &>/dev/null; then
+      log_error "sync_exclusions must be an array"
+      exit 1
+    fi
+    # All elements must be strings
+    if ! jq -e '.sync_exclusions | all(type == "string")' "$MANIFEST_PATH" &>/dev/null; then
+      log_error "All sync_exclusions elements must be strings"
+      exit 1
+    fi
   fi
 
   log_success "Manifest validation passed"
