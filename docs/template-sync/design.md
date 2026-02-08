@@ -195,6 +195,7 @@ The PR-based approach handles customizations gracefully:
 | Upstream changed, local unchanged | File updated in PR |
 | Upstream changed, local also changed | PR shows upstream version; user resolves |
 | User-only files (gitignored) | Never touched |
+| User-excluded (sync_exclusions) | Ignored by sync |
 
 **Key principle**: Users always see the diff before merge. No silent overwrites.
 
@@ -227,6 +228,10 @@ Files that are user-specific or gitignored:
 - `.taskmaster/reports/**` (project-specific analysis reports)
 - `.env` files
 - Any gitignored files
+
+### User-Excluded Files (ignored by sync)
+
+Files matching patterns in the manifest `sync_exclusions` array. These are template-managed files that the user has intentionally removed and wants to keep excluded from future syncs. Excluded files are not added, modified, or flagged as deleted during sync. See `docs/template-sync/sync-exclusions/design.md` for full details.
 
 ### Project-Specific Files (preserved via substitution)
 
@@ -270,7 +275,7 @@ When manifest `schema_version` changes:
 
 ## Limitations
 
-1. **All-or-nothing updates**: Cannot selectively update specific directories
+1. **All-or-nothing updates**: Cannot selectively update specific directories (partially addressed by `sync_exclusions` for per-file opt-out; see `docs/template-sync/sync-exclusions/design.md`)
 2. **No automatic merging**: Conflicts require manual resolution in PR
 3. **Requires GitHub Actions**: Local-only users need manual process
 4. **Single upstream**: Cannot sync from multiple template sources
