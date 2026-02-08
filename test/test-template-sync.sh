@@ -872,6 +872,162 @@ set -e
 assert_not_equals "0" "$exit_code" "validate_manifest fails when sync_exclusions contains non-strings"
 
 # =============================================================================
+# Section 12: compare_files() Exclusion Integration Tests
+# =============================================================================
+
+log_section "Section 12: compare_files() Exclusion Integration"
+
+log_test "compare_files excludes matching files from ADDED"
+reset_globals
+test_dir=$(create_temp_dir "compare-excl-added")
+
+# Create staging with a file that matches exclusion pattern
+mkdir -p "$test_dir/staging/claude/commands/cove"
+echo "excluded content" >"$test_dir/staging/claude/commands/cove/cove.md"
+
+# Create empty project directory
+mkdir -p "$test_dir/project/.claude/commands/cove"
+
+# Set exclusion pattern
+SYNC_EXCLUSIONS=(".claude/commands/cove/*")
+
+pushd "$test_dir/project" >/dev/null || {
+  log_fail "Failed to cd to test directory"
+  exit 1
+}
+MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
+compare_files "$test_dir/staging" 2>/dev/null
+popd >/dev/null || true
+
+assert_equals "0" "${#ADDED_FILES[@]}" "Excluded file not in ADDED_FILES"
+assert_equals "1" "${#EXCLUDED_FILES[@]}" "Excluded file tracked in EXCLUDED_FILES"
+
+log_test "compare_files excludes matching files from MODIFIED"
+reset_globals
+test_dir=$(create_temp_dir "compare-excl-modified")
+
+# Create staging and project with same file (different content) matching exclusion
+mkdir -p "$test_dir/staging/claude/commands/cove"
+mkdir -p "$test_dir/project/.claude/commands/cove"
+echo "new content" >"$test_dir/staging/claude/commands/cove/cove.md"
+echo "old content" >"$test_dir/project/.claude/commands/cove/cove.md"
+
+SYNC_EXCLUSIONS=(".claude/commands/cove/*")
+
+pushd "$test_dir/project" >/dev/null || {
+  log_fail "Failed to cd to test directory"
+  exit 1
+}
+MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
+compare_files "$test_dir/staging" 2>/dev/null
+popd >/dev/null || true
+
+assert_equals "0" "${#MODIFIED_FILES[@]}" "Excluded file not in MODIFIED_FILES"
+assert_equals "1" "${#EXCLUDED_FILES[@]}" "Excluded file tracked in EXCLUDED_FILES"
+
+log_test "compare_files skips excluded files in deletion detection"
+reset_globals
+test_dir=$(create_temp_dir "compare-excl-deleted")
+
+# Create project with file matching exclusion (not in staging)
+mkdir -p "$test_dir/staging/claude"
+mkdir -p "$test_dir/project/.claude/commands/cove"
+echo "local only" >"$test_dir/project/.claude/commands/cove/cove.md"
+
+SYNC_EXCLUSIONS=(".claude/commands/cove/*")
+
+pushd "$test_dir/project" >/dev/null || {
+  log_fail "Failed to cd to test directory"
+  exit 1
+}
+MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
+compare_files "$test_dir/staging" 2>/dev/null
+popd >/dev/null || true
+
+assert_equals "0" "${#DELETED_FILES[@]}" "Excluded file not in DELETED_FILES"
+
+log_test "compare_files categorizes non-excluded files normally alongside exclusions"
+reset_globals
+test_dir=$(create_temp_dir "compare-excl-mixed")
+
+# Create staging with excluded and non-excluded files
+mkdir -p "$test_dir/staging/claude/commands/cove"
+mkdir -p "$test_dir/staging/claude/commands/tm"
+echo "excluded" >"$test_dir/staging/claude/commands/cove/cove.md"
+echo "included" >"$test_dir/staging/claude/commands/tm/list.md"
+
+# Create empty project dirs
+mkdir -p "$test_dir/project/.claude/commands/cove"
+mkdir -p "$test_dir/project/.claude/commands/tm"
+
+SYNC_EXCLUSIONS=(".claude/commands/cove/*")
+
+pushd "$test_dir/project" >/dev/null || {
+  log_fail "Failed to cd to test directory"
+  exit 1
+}
+MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
+compare_files "$test_dir/staging" 2>/dev/null
+popd >/dev/null || true
+
+assert_equals "1" "${#ADDED_FILES[@]}" "Non-excluded file still categorized as added"
+assert_equals "1" "${#EXCLUDED_FILES[@]}" "Excluded file tracked"
+assert_equals "0" "${#MODIFIED_FILES[@]}" "No modified files"
+
+log_test "compare_files handles multiple exclusion patterns"
+reset_globals
+test_dir=$(create_temp_dir "compare-excl-multi")
+
+# Create staging with files matching different exclusion patterns
+mkdir -p "$test_dir/staging/claude/commands/cove"
+mkdir -p "$test_dir/staging/claude/skills/cove"
+mkdir -p "$test_dir/staging/claude/commands/tm"
+echo "excluded1" >"$test_dir/staging/claude/commands/cove/cove.md"
+echo "excluded2" >"$test_dir/staging/claude/skills/cove/skill.md"
+echo "included" >"$test_dir/staging/claude/commands/tm/list.md"
+
+# Create empty project dirs
+mkdir -p "$test_dir/project/.claude/commands/cove"
+mkdir -p "$test_dir/project/.claude/skills/cove"
+mkdir -p "$test_dir/project/.claude/commands/tm"
+
+SYNC_EXCLUSIONS=(".claude/commands/cove/*" ".claude/skills/cove/*")
+
+pushd "$test_dir/project" >/dev/null || {
+  log_fail "Failed to cd to test directory"
+  exit 1
+}
+MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
+compare_files "$test_dir/staging" 2>/dev/null
+popd >/dev/null || true
+
+assert_equals "1" "${#ADDED_FILES[@]}" "Non-excluded file categorized as added"
+assert_equals "2" "${#EXCLUDED_FILES[@]}" "Both excluded files tracked"
+
+log_test "compare_files does not double-count files in EXCLUDED_FILES"
+reset_globals
+test_dir=$(create_temp_dir "compare-excl-nodup")
+
+# Create file in both staging and project matching exclusion
+mkdir -p "$test_dir/staging/claude/commands/cove"
+mkdir -p "$test_dir/project/.claude/commands/cove"
+echo "same content" >"$test_dir/staging/claude/commands/cove/cove.md"
+echo "same content" >"$test_dir/project/.claude/commands/cove/cove.md"
+
+SYNC_EXCLUSIONS=(".claude/commands/cove/*")
+
+pushd "$test_dir/project" >/dev/null || {
+  log_fail "Failed to cd to test directory"
+  exit 1
+}
+MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
+compare_files "$test_dir/staging" 2>/dev/null
+popd >/dev/null || true
+
+assert_equals "1" "${#EXCLUDED_FILES[@]}" "Excluded file counted only once (not double-counted)"
+assert_equals "0" "${#UNCHANGED_FILES[@]}" "Excluded file not in UNCHANGED_FILES"
+
+# =============================================================================
 # Summary
 # =============================================================================
 
