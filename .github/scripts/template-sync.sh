@@ -747,6 +747,7 @@ compare_files() {
   MODIFIED_FILES=()
   DELETED_FILES=()
   UNCHANGED_FILES=()
+  EXCLUDED_FILES=()
 
   # Directories to compare (staging subdir -> project dir)
   local -A dir_map=(
@@ -778,6 +779,12 @@ compare_files() {
       local relative_path="${staging_file#$staging_path/}"
       local project_file="$project_dir/$relative_path"
       local display_path="$project_dir/$relative_path"
+
+      # Check exclusion before categorization
+      if is_excluded "$display_path"; then
+        EXCLUDED_FILES+=("$display_path")
+        continue
+      fi
 
       if [[ ! -f "$project_file" ]]; then
         # File exists in staging but not in project -> Added
@@ -812,6 +819,11 @@ compare_files() {
         local staging_file="$staging_path/$relative_path"
         local display_path="$project_dir/$relative_path"
 
+        # Skip excluded files in deletion detection (don't add to EXCLUDED_FILES to avoid double-counting)
+        if is_excluded "$display_path"; then
+          continue
+        fi
+
         if [[ ! -f "$staging_file" ]]; then
           # File exists in project but not in staging -> Deleted
           DELETED_FILES+=("$display_path")
@@ -820,7 +832,7 @@ compare_files() {
     fi
   done
 
-  log_success "Comparison complete: ${#ADDED_FILES[@]} added, ${#MODIFIED_FILES[@]} modified, ${#DELETED_FILES[@]} deleted, ${#UNCHANGED_FILES[@]} unchanged"
+  log_success "Comparison complete: ${#ADDED_FILES[@]} added, ${#MODIFIED_FILES[@]} modified, ${#DELETED_FILES[@]} deleted, ${#UNCHANGED_FILES[@]} unchanged, ${#EXCLUDED_FILES[@]} excluded"
 }
 
 # generate_diff_report()

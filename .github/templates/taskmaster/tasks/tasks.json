@@ -582,7 +582,7 @@
           "18",
           "19"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -619,7 +619,8 @@
             "testStrategy": "Tests: 1) Create project with file matching exclusion pattern, staging without it - verify file NOT in DELETED_FILES and loop continues. 2) Verify excluded files are not double-counted: create file in both staging and project matching exclusion - run compare_files() - verify EXCLUDED_FILES count is 1 not 2. 3) Verify summary log output contains 'excluded' count. 4) Full integration: run compare_files() with mix of added, modified, deleted, unchanged, and excluded files - verify all arrays populated correctly and summary accurate.",
             "parentId": "undefined"
           }
-        ]
+        ],
+        "updatedAt": "2026-02-08T15:09:24.301Z"
       },
       {
         "id": "21",
@@ -757,9 +758,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-02-08T15:01:59.401Z",
+      "lastModified": "2026-02-08T15:09:24.301Z",
       "taskCount": 15,
-      "completedCount": 11,
+      "completedCount": 12,
       "tags": [
         "master"
       ]
