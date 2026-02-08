@@ -72,6 +72,10 @@ MODIFIED_FILES=()
 DELETED_FILES=()
 UNCHANGED_FILES=()
 
+# Exclusion tracking arrays
+EXCLUDED_FILES=()
+SYNC_EXCLUSIONS=()
+
 # Resolved version (for reporting)
 RESOLVED_VERSION=""
 
@@ -145,6 +149,38 @@ format_languages_yaml() {
     lang=$(echo "$lang" | xargs)  # trim whitespace
     echo "${indent}- $lang"
   done
+}
+
+# is_excluded()
+# Checks if a file path matches any exclusion pattern.
+#
+# Args:
+#   $1 - Project-relative file path (e.g., ".claude/commands/cove/cove.md")
+#
+# Returns:
+#   0 if path matches an exclusion pattern (excluded)
+#   1 if path does not match any pattern (not excluded)
+#
+# Note: Uses bash case statement glob matching where * matches any characters including /
+is_excluded() {
+  local path="$1"
+
+  # If no exclusions configured, nothing is excluded
+  if [[ ${#SYNC_EXCLUSIONS[@]} -eq 0 ]]; then
+    return 1
+  fi
+
+  local pattern
+  for pattern in "${SYNC_EXCLUSIONS[@]}"; do
+    # IMPORTANT: pattern must be unquoted for glob expansion in case
+    case "$path" in
+      $pattern)
+        return 0  # Excluded
+        ;;
+    esac
+  done
+
+  return 1  # Not excluded
 }
 
 # =============================================================================
