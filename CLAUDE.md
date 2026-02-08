@@ -177,6 +177,11 @@ The repository includes a GitHub workflow that customizes the template:
 - User-scoped files like `.taskmaster/tasks/`, `.taskmaster/docs/`, and `.taskmaster/reports/` are never modified
 - Sync infrastructure (workflow and script) are also updated when upstream has changes
 
+### Sync Exclusions
+- Users can add `sync_exclusions` array to `.github/template-state.json` to prevent specific paths from being synced
+- Patterns use glob syntax (e.g., `.claude/commands/cove/*`)
+- See README.md "Configuring Sync Exclusions" section for details
+
 ## Testing
 
 The repository includes a comprehensive test suite for the template-sync feature located in the `test/` directory.

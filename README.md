@@ -234,6 +234,37 @@ Repositories created from this template can receive configuration updates via th
 - User-scoped files (tasks, PRDs, local settings)
 - Any gitignored files
 
+### Configuring Sync Exclusions
+
+If you've deleted template files that you don't need (e.g., specific skills or commands), you can prevent sync from re-adding them by configuring exclusion patterns in your manifest.
+
+Edit `.github/template-state.json` and add a `sync_exclusions` array:
+
+```json
+{
+  "schema_version": "1",
+  "upstream_repo": "serpro69/claude-starter-kit",
+  "template_version": "v0.2.0",
+  "synced_at": "2025-01-27T10:00:00Z",
+  "sync_exclusions": [
+    ".claude/commands/cove/*",
+    ".claude/skills/cove/*"
+  ],
+  "variables": { "..." : "..." }
+}
+```
+
+**Pattern syntax:**
+- Patterns use glob syntax where `*` matches any characters including directory separators
+- Patterns are matched against project-relative paths (e.g., `.claude/commands/cove/cove.md`)
+- Common patterns: `.claude/commands/cove/*` (entire directory), `.taskmaster/templates/example_prd.txt` (single file)
+
+**Behavior:**
+- Excluded files are NOT added if they exist upstream but not locally
+- Excluded files are NOT updated if they exist in both places
+- Excluded files are NOT flagged as deleted if they exist locally but not upstream
+- Excluded files appear as "Excluded" in the sync report for transparency
+
 ### Migration for Existing Repositories
 
 If your repository was created before the sync feature, create `.github/template-state.json` manually:
