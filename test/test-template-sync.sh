@@ -812,6 +812,66 @@ set -e
 assert_equals "0" "$exit_code" "Second pattern in list matches"
 
 # =============================================================================
+# Section 11: Manifest sync_exclusions - read_manifest() and validate_manifest()
+# =============================================================================
+
+log_section "Section 11: Manifest sync_exclusions Loading and Validation"
+
+log_test "read_manifest loads sync_exclusions from manifest"
+reset_globals
+MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest-with-exclusions.json"
+read_manifest 2>/dev/null
+assert_equals "2" "${#SYNC_EXCLUSIONS[@]}" "SYNC_EXCLUSIONS has 2 patterns"
+assert_equals ".claude/commands/cove/*" "${SYNC_EXCLUSIONS[0]}" "First exclusion pattern correct"
+assert_equals ".claude/skills/cove/*" "${SYNC_EXCLUSIONS[1]}" "Second exclusion pattern correct"
+
+log_test "read_manifest handles missing sync_exclusions (optional field)"
+reset_globals
+MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
+read_manifest 2>/dev/null
+assert_equals "0" "${#SYNC_EXCLUSIONS[@]}" "SYNC_EXCLUSIONS is empty when field absent"
+
+log_test "validate_manifest accepts valid sync_exclusions array"
+reset_globals
+MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest-with-exclusions.json"
+read_manifest 2>/dev/null || true
+set +e
+output=$(validate_manifest 2>&1)
+exit_code=$?
+set -e
+assert_equals "0" "$exit_code" "validate_manifest passes with valid sync_exclusions"
+
+log_test "validate_manifest accepts manifest without sync_exclusions"
+reset_globals
+MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
+read_manifest 2>/dev/null || true
+set +e
+output=$(validate_manifest 2>&1)
+exit_code=$?
+set -e
+assert_equals "0" "$exit_code" "validate_manifest passes without sync_exclusions"
+
+log_test "validate_manifest rejects sync_exclusions that is not an array"
+reset_globals
+MANIFEST_PATH="$FIXTURES_DIR/manifests/exclusions-not-array.json"
+read_manifest 2>/dev/null || true
+set +e
+output=$(validate_manifest 2>&1)
+exit_code=$?
+set -e
+assert_not_equals "0" "$exit_code" "validate_manifest fails when sync_exclusions is a string"
+
+log_test "validate_manifest rejects sync_exclusions with non-string elements"
+reset_globals
+MANIFEST_PATH="$FIXTURES_DIR/manifests/exclusions-non-string-elements.json"
+read_manifest 2>/dev/null || true
+set +e
+output=$(validate_manifest 2>&1)
+exit_code=$?
+set -e
+assert_not_equals "0" "$exit_code" "validate_manifest fails when sync_exclusions contains non-strings"
+
+# =============================================================================
 # Summary
 # =============================================================================
 

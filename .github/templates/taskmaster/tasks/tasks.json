@@ -531,7 +531,7 @@
         "dependencies": [
           "18"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -568,7 +568,8 @@
             "testStrategy": "1. Run the full test suite after making the change to verify no regressions. 2. Verify that tests using reset_globals() properly reset both new arrays to empty. 3. Add a specific test that sets SYNC_EXCLUSIONS, calls reset_globals(), and verifies it's empty.",
             "parentId": "undefined"
           }
-        ]
+        ],
+        "updatedAt": "2026-02-08T15:01:59.400Z"
       },
       {
         "id": "20",
@@ -756,9 +757,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-02-08T14:54:10.660Z",
+      "lastModified": "2026-02-08T15:01:59.401Z",
       "taskCount": 15,
-      "completedCount": 10,
+      "completedCount": 11,
       "tags": [
         "master"
       ]
