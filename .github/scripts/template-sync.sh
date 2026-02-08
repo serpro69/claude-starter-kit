@@ -869,6 +869,7 @@ generate_diff_report() {
         echo "modified_count=${#MODIFIED_FILES[@]}"
         echo "deleted_count=${#DELETED_FILES[@]}"
         echo "unchanged_count=${#UNCHANGED_FILES[@]}"
+        echo "excluded_count=${#EXCLUDED_FILES[@]}"
         echo "total_changes=$total_changes"
         echo "resolved_version=$RESOLVED_VERSION"
         echo "diff_summary<<EOF"
@@ -883,6 +884,7 @@ generate_diff_report() {
       echo "modified_count=${#MODIFIED_FILES[@]}"
       echo "deleted_count=${#DELETED_FILES[@]}"
       echo "unchanged_count=${#UNCHANGED_FILES[@]}"
+      echo "excluded_count=${#EXCLUDED_FILES[@]}"
       echo "total_changes=$total_changes"
       echo "resolved_version=$RESOLVED_VERSION"
       echo "::endgroup::"
@@ -913,6 +915,7 @@ generate_diff_report() {
   echo -e "    Modified:  ${YELLOW}${#MODIFIED_FILES[@]}${NC}"
   echo -e "    Deleted:   ${RED}${#DELETED_FILES[@]}${NC}"
   echo -e "    Unchanged: ${#UNCHANGED_FILES[@]}"
+  echo -e "    Excluded:  ${#EXCLUDED_FILES[@]}"
   echo ""
 
   # List added files
@@ -967,6 +970,15 @@ generate_diff_report() {
     echo ""
   fi
 
+  # List excluded files
+  if [[ ${#EXCLUDED_FILES[@]} -gt 0 ]]; then
+    echo -e "  ${CYAN}Excluded files (via sync_exclusions):${NC}"
+    for file in "${EXCLUDED_FILES[@]}"; do
+      echo -e "    ${CYAN}○${NC} $file"
+    done
+    echo ""
+  fi
+
   echo -e "${BOLD}═══════════════════════════════════════════════════════════════${NC}"
   echo ""
 
@@ -995,6 +1007,7 @@ generate_markdown_summary() {
   echo "| Added | ${#ADDED_FILES[@]} |"
   echo "| Modified | ${#MODIFIED_FILES[@]} |"
   echo "| Deleted | ${#DELETED_FILES[@]} |"
+  echo "| Excluded | ${#EXCLUDED_FILES[@]} |"
   echo ""
 
   if [[ ${#ADDED_FILES[@]} -gt 0 ]]; then
@@ -1019,6 +1032,17 @@ generate_markdown_summary() {
     echo "### Deleted Files"
     echo ""
     for file in "${DELETED_FILES[@]}"; do
+      echo "- \`$file\`"
+    done
+    echo ""
+  fi
+
+  if [[ ${#EXCLUDED_FILES[@]} -gt 0 ]]; then
+    echo "### Excluded Files"
+    echo ""
+    echo "_These files were skipped due to \`sync_exclusions\` patterns in the manifest:_"
+    echo ""
+    for file in "${EXCLUDED_FILES[@]}"; do
       echo "- \`$file\`"
     done
     echo ""
