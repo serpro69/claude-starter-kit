@@ -632,7 +632,7 @@
         "dependencies": [
           "20"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -668,7 +668,8 @@
             "testStrategy": "1. Set EXCLUDED_FILES=(.claude/commands/cove/* .claude/skills/cove/*)\n2. Call generate_markdown_summary with mock staging dir\n3. Verify markdown table contains '| Excluded | 2 |' row\n4. Verify output contains '### Excluded Files' header\n5. Verify explanatory italicized text about sync_exclusions is present\n6. Verify each excluded file is listed with backtick formatting",
             "parentId": "undefined"
           }
-        ]
+        ],
+        "updatedAt": "2026-02-08T15:27:07.625Z"
       },
       {
         "id": "22",
@@ -758,9 +759,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-02-08T15:09:24.301Z",
+      "lastModified": "2026-02-08T15:27:07.625Z",
       "taskCount": 15,
-      "completedCount": 12,
+      "completedCount": 13,
       "tags": [
         "master"
       ]

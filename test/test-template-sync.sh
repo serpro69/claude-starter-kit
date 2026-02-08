@@ -1028,6 +1028,141 @@ assert_equals "1" "${#EXCLUDED_FILES[@]}" "Excluded file counted only once (not 
 assert_equals "0" "${#UNCHANGED_FILES[@]}" "Excluded file not in UNCHANGED_FILES"
 
 # =============================================================================
+# Section 13: Reporting Functions - Excluded Files Display
+# =============================================================================
+
+log_section "Section 13: Reporting Functions - Excluded Files Display"
+
+log_test "generate_diff_report shows excluded count in summary"
+reset_globals
+test_dir=$(create_temp_dir "diff-report-excluded-summary")
+mkdir -p "$test_dir/staging"
+
+MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
+RESOLVED_VERSION="v2.0.0"
+ADDED_FILES=("file1.txt")
+MODIFIED_FILES=()
+DELETED_FILES=()
+UNCHANGED_FILES=()
+EXCLUDED_FILES=(".claude/commands/cove/cove.md" ".claude/skills/cove/SKILL.md")
+
+output=$(generate_diff_report "$test_dir/staging" 2>&1)
+assert_output_contains "Excluded:" "echo '$output'" "Report shows 'Excluded:' line in summary"
+
+log_test "generate_diff_report lists excluded files with marker"
+reset_globals
+test_dir=$(create_temp_dir "diff-report-excluded-list")
+mkdir -p "$test_dir/staging"
+
+MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
+RESOLVED_VERSION="v2.0.0"
+ADDED_FILES=("file1.txt")
+MODIFIED_FILES=()
+DELETED_FILES=()
+UNCHANGED_FILES=()
+EXCLUDED_FILES=(".claude/commands/cove/cove.md" ".claude/skills/cove/SKILL.md")
+
+output=$(generate_diff_report "$test_dir/staging" 2>&1)
+assert_output_contains "Excluded files (via sync_exclusions):" "echo '$output'" "Report shows excluded files header"
+assert_output_contains ".claude/commands/cove/cove.md" "echo '$output'" "Report lists first excluded file"
+assert_output_contains ".claude/skills/cove/SKILL.md" "echo '$output'" "Report lists second excluded file"
+
+log_test "generate_diff_report CI mode includes excluded_count"
+reset_globals
+test_dir=$(create_temp_dir "diff-report-ci-excluded")
+mkdir -p "$test_dir/staging"
+
+MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
+RESOLVED_VERSION="v2.0.0"
+CI_MODE=true
+ADDED_FILES=()
+MODIFIED_FILES=()
+DELETED_FILES=()
+UNCHANGED_FILES=()
+EXCLUDED_FILES=(".claude/commands/cove/cove.md" ".claude/skills/cove/SKILL.md")
+
+output=$(generate_diff_report "$test_dir/staging" 2>&1)
+assert_output_contains "excluded_count=2" "echo '$output'" "CI mode outputs excluded_count=2"
+
+log_test "excluded_count does NOT affect has_changes"
+reset_globals
+test_dir=$(create_temp_dir "diff-report-excluded-no-changes")
+mkdir -p "$test_dir/staging"
+
+MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
+RESOLVED_VERSION="v2.0.0"
+CI_MODE=true
+ADDED_FILES=()
+MODIFIED_FILES=()
+DELETED_FILES=()
+UNCHANGED_FILES=()
+EXCLUDED_FILES=(".claude/commands/cove/cove.md")
+
+output=$(generate_diff_report "$test_dir/staging" 2>&1)
+assert_output_contains "has_changes=false" "echo '$output'" "has_changes is false when only excluded files present"
+assert_output_contains "excluded_count=1" "echo '$output'" "excluded_count still reported"
+
+log_test "generate_markdown_summary includes excluded files section"
+reset_globals
+test_dir=$(create_temp_dir "markdown-summary-excluded")
+mkdir -p "$test_dir/staging"
+
+MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
+RESOLVED_VERSION="v2.0.0"
+ADDED_FILES=()
+MODIFIED_FILES=()
+DELETED_FILES=()
+EXCLUDED_FILES=(".claude/commands/cove/cove.md" ".claude/skills/cove/SKILL.md")
+
+output=$(generate_markdown_summary "$test_dir/staging" 2>&1)
+assert_output_contains "| Excluded | 2 |" "echo '$output'" "Markdown table contains Excluded row"
+assert_output_contains "### Excluded Files" "echo '$output'" "Markdown contains Excluded Files heading"
+assert_output_contains "sync_exclusions" "echo '$output'" "Markdown contains explanatory text about sync_exclusions"
+assert_output_contains ".claude/commands/cove/cove.md" "echo '$output'" "Markdown lists first excluded file"
+assert_output_contains ".claude/skills/cove/SKILL.md" "echo '$output'" "Markdown lists second excluded file"
+
+log_test "generate_diff_report does not show excluded section when no exclusions"
+reset_globals
+test_dir=$(create_temp_dir "diff-report-no-excluded")
+mkdir -p "$test_dir/staging"
+
+MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
+RESOLVED_VERSION="v2.0.0"
+ADDED_FILES=("file1.txt")
+MODIFIED_FILES=()
+DELETED_FILES=()
+UNCHANGED_FILES=()
+EXCLUDED_FILES=()
+
+output=$(generate_diff_report "$test_dir/staging" 2>&1)
+# Should NOT contain the excluded files header when there are no exclusions
+if [[ "$output" == *"Excluded files (via sync_exclusions):"* ]]; then
+  log_fail "Report should not show excluded files section when EXCLUDED_FILES is empty"
+else
+  log_pass "Report correctly omits excluded files section when no exclusions"
+fi
+
+log_test "generate_markdown_summary omits excluded section when no exclusions"
+reset_globals
+test_dir=$(create_temp_dir "markdown-no-excluded")
+mkdir -p "$test_dir/staging"
+
+MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
+RESOLVED_VERSION="v2.0.0"
+ADDED_FILES=("file1.txt")
+MODIFIED_FILES=()
+DELETED_FILES=()
+EXCLUDED_FILES=()
+
+output=$(generate_markdown_summary "$test_dir/staging" 2>&1)
+assert_output_contains "| Excluded | 0 |" "echo '$output'" "Markdown table shows Excluded count 0"
+if [[ "$output" == *"### Excluded Files"* ]]; then
+  log_fail "Markdown should not show Excluded Files section when EXCLUDED_FILES is empty"
+else
+  log_pass "Markdown correctly omits Excluded Files section when no exclusions"
+fi
+
+# =============================================================================
 # Summary
 # =============================================================================
 
