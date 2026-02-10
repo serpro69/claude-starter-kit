@@ -11,11 +11,13 @@ This is a starter template repository designed to provide a complete development
 This is a **configuration-only repository** - there is no application code. The architecture consists of three integrated MCP server configurations:
 
 ### 1. Claude Code Configuration (`.claude/`)
+
 - **settings.local.json**: Permission allowlist/denylist for tools and MCP servers
 - **commands/tm/**: 50+ slash commands for Task Master workflows organized hierarchically
 - **TM_COMMANDS_GUIDE.md**: Complete command reference for Task Master integration
 
 ### 2. Serena MCP Configuration (`.serena/`)
+
 - **project.yml**: Semantic code analysis configuration
   - Language detection (empty by default - set via template-cleanup workflow)
   - Gitignore integration
@@ -25,6 +27,7 @@ This is a **configuration-only repository** - there is no application code. The 
 Purpose: Provides intelligent code navigation, symbol analysis, and semantic understanding of codebases through LSP integration.
 
 ### 3. Task Master Configuration (`.taskmaster/`)
+
 - **config.json**: AI model configuration for task generation and management
   - Main model: claude-code/sonnet
   - Research model: claude-code/opus
@@ -40,10 +43,12 @@ Purpose: Provides AI-powered task management, PRD parsing, complexity analysis, 
 The following API keys must be configured in `~/.claude.json` under the `mcpServers` object (NOT in this repository):
 
 ### Essential Keys
+
 - **Context7 API Key** (`CONTEXT7_API_KEY`): Up-to-date library documentation
 - **Gemini API Key** (`GEMINI_API_KEY`): Pal MCP server (or alternative provider - see pal docs)
 
 ### Task Master Keys (at least one required)
+
 - `ANTHROPIC_API_KEY` (recommended for Claude models)
 - `PERPLEXITY_API_KEY` (recommended for research features)
 - `OPENAI_API_KEY`, `GOOGLE_API_KEY`, `MISTRAL_API_KEY`, `OPENROUTER_API_KEY`, `XAI_API_KEY`
@@ -79,6 +84,7 @@ Run `/mcp` in Claude Code to verify all four servers are connected.
 The `.claude/settings.local.json` file controls tool access:
 
 ### Allowed Tools (Auto-approved)
+
 - File operations: `cat`, `ls`, `mkdir`
 - All Context7 tools for documentation lookup
 - Serena read-only tools: `get_symbols_overview`, `find_file`, `find_symbol`, `list_dir`, `search_for_pattern`
@@ -87,6 +93,7 @@ The `.claude/settings.local.json` file controls tool access:
 - `WebSearch` for documentation lookup
 
 ### Denied Tools
+
 - Direct CLI: `Bash(task-master:*)` (use MCP tools instead)
 - Generated reports: `consensus*.md`, `review*.md` (prevent context pollution)
 
@@ -95,7 +102,9 @@ The `.claude/settings.local.json` file controls tool access:
 Task Master is the primary workflow orchestration system. Key integration points:
 
 ### Slash Command Structure
+
 Commands are organized under `/project:tm/[category]/[action]`:
+
 - Setup: `/project:tm/setup/quick-install`, `/project:tm/init/quick`
 - Daily: `/project:tm/next`, `/project:tm/list`, `/project:tm/show <id>`
 - Status: `/project:tm/set-status/to-{done|in-progress|review|pending|deferred|cancelled} <id>`
@@ -103,6 +112,7 @@ Commands are organized under `/project:tm/[category]/[action]`:
 - Workflows: `/project:tm/workflows/smart-flow`, `/project:tm/workflows/auto-implement`
 
 ### Working with Tasks
+
 1. Parse requirements: `/project:tm/parse-prd .taskmaster/docs/prd.txt`
 2. Analyze complexity: `/project:tm/analyze-complexity --research`
 3. Expand tasks: `/project:tm/expand/all`
@@ -111,7 +121,9 @@ Commands are organized under `/project:tm/[category]/[action]`:
 6. Complete: `/project:tm/set-status/to-done <id>`
 
 ### MCP vs CLI
+
 **Always prefer MCP tools over CLI commands** - the permission configuration enforces this by denying `Bash(task-master:*)`. Benefits:
+
 - Better error handling
 - Automatic permission management
 - Structured outputs
@@ -124,6 +136,7 @@ See `.taskmaster/CLAUDE.md` for complete 400+ line Task Master integration guide
 Serena provides semantic code analysis - use it efficiently:
 
 ### Intelligent Code Reading Strategy
+
 1. **Never read entire files** unless absolutely necessary
 2. **Start with overview**: Use `get_symbols_overview` to see top-level structure
 3. **Target symbol reads**: Use `find_symbol` with `include_body=true` only for specific symbols
@@ -131,13 +144,16 @@ Serena provides semantic code analysis - use it efficiently:
 5. **Reference tracking**: Use `find_referencing_symbols` to understand usage
 
 ### Symbol Navigation
+
 Symbols are identified by `name_path` and `relative_path`:
+
 - Top-level: `ClassName` or `function_name`
 - Methods: `ClassName/method_name`
 - Nested: `OuterClass/InnerClass/method`
 - Python constructors: `ClassName/__init__`
 
 ### Efficiency Principles
+
 - Read symbol bodies incrementally as needed
 - Use `depth` parameter to get method lists without bodies: `find_symbol("Foo", depth=1, include_body=False)`
 - Avoid re-reading code you've already seen
@@ -146,30 +162,36 @@ Symbols are identified by `name_path` and `relative_path`:
 ## Important Notes
 
 ### File Management
+
 - **Never manually edit** `.taskmaster/tasks/tasks.json` - use Task Master commands
 - **Never manually edit** `.taskmaster/config.json` - use `/project:tm/models/setup`
 - Task markdown files in `.taskmaster/tasks/*.md` are auto-generated
 
 ### Template Cleanup Workflow
+
 The repository includes a GitHub workflow that customizes the template:
+
 - Sets Serena language configuration
 - Configures Task Master custom system prompts
 - Allows permission mode customization
 - Run once after creating repository from template
 
 ### Context Management
+
 - Use `/clear` frequently between different tasks
 - This CLAUDE.md is automatically loaded
 - Task Master commands pull task context on demand
 - Generated reports (consensus, reviews) are denied from Read tool to prevent context bloat
 
 ### Git Integration
+
 - Repository is a Git repo (branch: master)
 - Serena respects `.gitignore` by default
 - Task Master can track progress alongside commits
 - Use conventional commits with task IDs: `feat: implement JWT auth (task 1.2)`
 
 ### Template Sync
+
 - `.github/template-state.json` tracks template version and configuration variables
 - Use Actions → Template Sync to pull upstream configuration updates
 - Always review PR changes before merging to preserve local customizations
@@ -178,6 +200,7 @@ The repository includes a GitHub workflow that customizes the template:
 - Sync infrastructure (workflow and script) are also updated when upstream has changes
 
 ### Sync Exclusions
+
 - Users can add `sync_exclusions` array to `.github/template-state.json` to prevent specific paths from being synced
 - Patterns use glob syntax (e.g., `.claude/commands/cove/*`)
 - See README.md "Configuring Sync Exclusions" section for details
@@ -222,11 +245,11 @@ for test in test/test-*.sh; do $test; done
 
 ### Test Coverage
 
-| Test Suite | Tests | Coverage |
-|------------|-------|----------|
-| test-manifest-jq.sh | 17 | jq patterns, JSON generation, special characters, round-trip validation |
-| test-template-sync.sh | 37 | CLI parsing, manifest reading/validation, sed escaping, substitutions, file comparison, diff reports, sync infrastructure copying |
-| test-template-cleanup.sh | 18 | Manifest generation, field validation, variable capture, special characters, git tag/SHA detection |
+| Test Suite               | Tests | Coverage                                                                                                                          |
+| ------------------------ | ----- | --------------------------------------------------------------------------------------------------------------------------------- |
+| test-manifest-jq.sh      | 17    | jq patterns, JSON generation, special characters, round-trip validation                                                           |
+| test-template-sync.sh    | 37    | CLI parsing, manifest reading/validation, sed escaping, substitutions, file comparison, diff reports, sync infrastructure copying |
+| test-template-cleanup.sh | 18    | Manifest generation, field validation, variable capture, special characters, git tag/SHA detection                                |
 
 ### Writing New Tests
 
@@ -248,6 +271,7 @@ print_summary
 ```
 
 **Available Assertions:**
+
 - `assert_equals "expected" "actual" "message"` - Compare values
 - `assert_not_equals "unexpected" "actual" "message"` - Verify inequality
 - `assert_file_exists "path" "message"` - Check file exists
@@ -258,6 +282,7 @@ print_summary
 - `assert_json_field "json" "jq_path" "expected" "message"` - Check JSON field
 
 **Helper Functions:**
+
 - `create_temp_dir "prefix"` - Create temp directory (auto-cleaned)
 - `create_temp_git_repo "tag"` - Create temp git repo with optional tag
 - `cleanup_temp` - Manual cleanup (automatic on exit)
@@ -265,23 +290,27 @@ print_summary
 ## Common Issues
 
 ### MCP Connection Problems
+
 1. Check `~/.claude.json` has all four servers configured with correct API keys
 2. Verify Node.js and uv installed for server execution
 3. Use `--mcp-debug` flag when starting Claude Code
 4. Run `/mcp` to see connection status
 
 ### Task Master AI Failures
+
 1. Verify at least one API key configured in `.taskmaster/config.json`
 2. Check model configuration: `/project:tm/models`
 3. AI operations take up to a minute - be patient
 4. Use `--research` flag for enhanced operations (requires Perplexity or research-capable model)
 
 ### Serena Language Detection
+
 1. If semantic analysis fails, check `.serena/project.yml` has correct `language` value
 2. Run template-cleanup workflow to set language automatically
 3. See Serena documentation for supported languages and requirements (e.g., C# requires .sln file)
 
 ### Template Sync Issues
+
 1. "Manifest not found" - Repository needs `.github/template-state.json`; see README migration section
 2. "Version not found" - Use `latest`, `main`, or existing git tags from upstream
 3. Merge conflicts in PR - Review diff, edit PR branch to preserve customizations, or revert specific files
@@ -293,6 +322,19 @@ print_summary
 - **Serena Language Support**: https://github.com/oraios/serena#programming-language-support
 - **Pal Getting Started**: https://github.com/BeehiveInnovations/pal-mcp-server/blob/main/docs/getting-started.md
 - **Context7**: https://context7.com/
+
+## Claude-Code Behavioral Instructions
+
+Always follow these guidelines for the given phase.
+
+### Exploration Phase
+
+When you run Explore:
+
+- DO NOT spawn exploration agents unless explicitly asked to do so by the user. **Always explore everything on your own** to gain a complete and thorough understanding.
+  <!-- Why: Claude tends to first spawn exploration agents,
+       and then re-reads all the files on it's own...
+       resulting in double token consumption -->
 
 ## Task Master AI Instructions
 
