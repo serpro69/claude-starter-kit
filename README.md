@@ -2,75 +2,106 @@
 
 [![Mentioned in Awesome Claude Code](https://awesome.re/mentioned-badge-flat.svg)](https://github.com/hesreallyhim/awesome-claude-code)
 
-Starter template repo for all your Claude Code needs
+Starter template repo for all your Claude Code needs — pre-configured MCP servers, skills, sub-agents, commands, and hooks for AI-powered development workflows.
 
 ## About
 
-This is a starter template repository designed to provide a complete development environment for Claude-Code with pre-configured MCP servers and tools for AI-powered, collaborative, development workflows. The defaults are intentionally minimal, containing only configuration templates for three primary systems: Claude Code, Serena, and Task Master. Users can opt-in to additional claude-code features like [skills](https://code.claude.com/docs/en/skills), [plugins](https://code.claude.com/docs/en/plugins), [hooks](https://code.claude.com/docs/en/hooks-guide), [sub-agents](https://code.claude.com/docs/en/sub-agents), and so on.
+This is a template repository that gives you a ready-to-use Claude Code development environment. It ships with mcp servers, development-related skills, task orchestration tooling, hooks, slash commands — all configured and wired together.
 
 > [!NOTE]
-> This configuration also focuses on collaborative development workflows where multiple developers are working on the same code-base, which is one of the reasons why most of claude- and mcp-related settings are local-scoped (i.e. most claude settings will be in `.claude/settings.local.json` so they can be shared with the entire dev team, and not in user-scoped `~/claude/settings.json`, which are harder to share with others.)
->
-> For this same reason, most of the claude/mcp configuration files are not git-ignored, but instead committed to the repo.
+> We focus on collaborative development. Most claude- and mcp-related settings are project-scoped (`.claude/settings.json`) so they can be shared across your team via git, rather than living in user-scoped `~/.claude.local.json`.
 
-## Features
+## What's Included
 
-- **🤖 Four Pre-Configured MCP Servers**
-  - **Context7**: Up-to-date library documentation and code examples
-  - **Serena**: Semantic code analysis with LSP integration for intelligent navigation
-  - **Task Master**: AI-powered task management and workflow orchestration
-  - **Pal**: Multi-model AI integration for debugging, code review, and planning
+### MCP Servers
 
-- **⚙️ Automated Template Cleanup**
-  - GitHub Actions workflow for one-click repository initialization
-  - Configurable inputs for language detection and Task Master settings
-  - Automatic cleanup of template-specific files for a clean starting point
+Four servers, configured at user-level (`~/.claude.json`) to keep API keys out of the repo:
 
-- **📋 50+ Task Master Slash Commands**
-  - Pre-configured hierarchical command structure under `/project:tm/`
-  - Commands for task management, complexity analysis, PRD parsing, and workflows
-  - Complete command reference in `.claude/TM_COMMANDS_GUIDE.md`
+| Server                                                                | Purpose                                                                                |
+| --------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| **[Context7](https://context7.com/)**                                 | Up-to-date library documentation and code examples                                     |
+| **[Serena](https://github.com/oraios/serena)**                        | Semantic code analysis via LSP — symbol navigation, reference tracking, targeted reads |
+| **[Task Master](https://github.com/eyaltoledano/claude-task-master)** | AI-powered task management — PRD parsing, complexity analysis, workflow orchestration  |
+| **[Pal](https://github.com/BeehiveInnovations/pal-mcp-server)**       | Multi-model AI integration — chat, debugging, code review, planning, security audit    |
 
-- **🔍 Intelligent Code Navigation**
-  - Serena's symbol-based code analysis for efficient exploration
-  - Token-efficient reading with overview and targeted symbol queries
-  - Reference tracking and semantic understanding across your codebase
+### Skills (`.claude/skills/`)
 
-- **📝 Configuration Templates**
-  - Ready-to-use templates for `.serena/`, `.taskmaster/`, and `.claude/` directories
-  - Placeholder-based customization with repository-specific values
-  - Permission configuration for tool access control
+Skills are specialized workflows Claude invokes during different development phases:
 
-- **📚 Comprehensive Documentation**
-  - Project-level `CLAUDE.md` with integration guidance
-  - Task Master integration guide with 400+ lines of best practices
-  - Complete workflow specification and command references
+| Skill                      | When to use                                                                                                                                                              |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **analysis-process**       | Pre-implementation. Turns ideas/specs into PRDs, design docs, and implementation plans.                                                                                  |
+| **implementation-process** | Execute an implementation plan with batched steps and architect review checkpoints.                                                                                      |
+| **testing-process**        | After writing code. Guidelines for test coverage — table-driven tests, mocking, integration, benchmarks.                                                                 |
+| **documentation-process**  | Post-implementation. Updates ARCHITECTURE.md, TESTING.md, and records ADRs.                                                                                              |
+| **development-guidelines** | During implementation. Enforces best practices like using latest deps and context7 for docs.                                                                             |
+| **solid-code-review**      | Code review with a senior-engineer lens. Checks SOLID principles, security, code quality. Includes language-specific checklists for Go, Java, JS/TS, Kotlin, and Python. |
+| **cove**                   | Chain-of-Verification prompting. Two modes: standard (prompt-based) and isolated (sub-agent). For high-stakes accuracy and fact-checking.                                |
+
+### Sub-Agents (`.claude/agents/`)
+
+Three agents for task-driven development workflows:
+
+| Agent                 | Role                                                                                                                 |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **task-orchestrator** | Analyzes task dependencies, identifies parallelization opportunities, deploys executors. Runs on Opus.               |
+| **task-executor**     | Implements specific tasks — transforms task specs into working code with progress tracking. Runs on Sonnet.          |
+| **task-checker**      | QA verification — checks implementations against requirements, runs tests before marking tasks done. Runs on Sonnet. |
+
+### Commands (`.claude/commands/`)
+
+Slash commands organized hierarchically:
+
+- **Task Master** (`/project:tm/`) — 47 commands covering the full task lifecycle:
+  - **Setup**: `init`, `install-taskmaster`, `setup-models`
+  - **Daily workflow**: `next`, `list`, `show`, `set-status/to-{done,in-progress,review,...}`
+  - **Task management**: `add-task`, `update`, `expand`, `remove-task`
+  - **Analysis**: `analyze-complexity`, `complexity-report`, `analyze-project`
+  - **Dependencies**: `add-dependency`, `remove-dependency`, `validate-dependencies`, `fix-dependencies`
+  - **Subtasks**: `add-subtask`, `remove-subtask`, `clear-subtasks`
+  - **Workflows**: `smart-workflow`, `command-pipeline`, `auto-implement-tasks`
+  - Full reference: `.claude/TM_COMMANDS_GUIDE.md`
+- **CoVe** (`/project:cove/`) — 2 commands for Chain-of-Verification prompting (standard and isolated modes)
+
+### Hooks (`.claude/hooks/`)
+
+- **Bash validation** (`PreToolUse`) — blocks bash commands that touch `.env`, `.git/`, `node_modules`, `build/`, `dist/`, `venv/`, and other sensitive paths
+
+### Other Configuration
+
+- **Permission allowlist/denylist** (`.claude/settings.json`) — auto-approves safe tools (context7, serena read-only, task master, pal code review) while blocking dangerous ones
+- **Status line** (`.claude/scripts/statusline.sh`) — minimalistic statusline that shows current model and context window usage percentage
+- **Serena config** (`.serena/project.yml`) — language detection, gitignore integration, encoding settings
+- **Task Master config** (`.taskmaster/config.json`) — AI model roles (main/research/fallback), task defaults
+
+### Template Infrastructure
+
+- **template-cleanup** workflow — one-click GitHub Action to initialize a new repo from this template
+- **template-sync** workflow — pull upstream configuration updates into your project via PR
+- **Sync exclusions** — prevent specific files from being re-added during sync
+- **Test suite** — 72 tests across 3 suites covering the sync/cleanup infrastructure
 
 ## Requirements
-
-You will need the following on your workstation:
 
 ### Tools
 
 - [npm](https://www.npmjs.com/package/npm)
 - [uv](https://docs.astral.sh/uv/)
-- [jq](https://jqlang.github.io/jq/) - Required for `.github/scripts/template-cleanup.sh`
+- [jq](https://jqlang.github.io/jq/) — required for template-cleanup
 
 ### API Keys
 
 - [Context7](https://context7.com/) API key
-- Gemini API key for [pal-mcp-server](https://github.com/BeehiveInnovations/pal-mcp-server). You don't need to use gemini and can configure pal with any other provider/models. See [pal getting started docs](https://github.com/BeehiveInnovations/pal-mcp-server/blob/main/docs/getting-started.md) for more details.
+- Gemini API key for [Pal](https://github.com/BeehiveInnovations/pal-mcp-server) (or [any other provider](https://github.com/BeehiveInnovations/pal-mcp-server/blob/main/docs/getting-started.md))
 
-### Claude `claude.json` mcp settings
-
-You need to have `mcpServers` present and configured in your `~/.claude.json`.
+### MCP Server Configuration
 
 > [!NOTE]
-> The reason we put them in the user's `claude.json` configuration, instead of repo local settings, is to prevent committing API keys, which some MCP servers might require.
->
-> These configs are also generic enough that they can be re-used across every project, and hence is better placed in user's settings.
+> MCP servers must be configured in `~/.claude.json` (not in the repo) to keep API keys safe.
+> These configs are generic enough to reuse across all your projects.
 
-Here's an example `mcpServers` object that you can use as a reference:
+<details>
+<summary>Example <code>mcpServers</code> configuration</summary>
 
 ```json
 {
@@ -126,33 +157,35 @@ Here's an example `mcpServers` object that you can use as a reference:
 }
 ```
 
+See [Pal configuration docs](https://github.com/BeehiveInnovations/pal-mcp-server/blob/main/docs/configuration.md) for model and thinking mode options.
+
+</details>
+
 ## Quick Start
 
-1. [Create a new project based on this template repository](https://github.com/new?template_name=claude-starter-kit&template_owner=serpro69) using the Use this template button.
+1. [Create a new project from this template](https://github.com/new?template_name=claude-starter-kit&template_owner=serpro69) using the **Use this template** button.
 
 2. A scaffold repo will appear in your GitHub account.
 
-3. Run the `template-cleanup` workflow from your new repo, and provide some inputs for your specific use-case.
+3. Run the **template-cleanup** workflow from your new repo's Actions tab. Provide inputs:
 
-**Serena MCP Configuration Inputs:**
+**Serena:**
 
-- `LANGUAGES` (required) - programming languages for your project, comma-separated (e.g., `python`, `python,typescript`). See [Serena Programming Language Support & Semantic Analysis Capabilities](https://github.com/oraios/serena?tab=readme-ov-file#programming-language-support--semantic-analysis-capabilities) for supported languages
-
-- `SERENA_INITIAL_PROMPT` - initial prompt for the project; it will always be given to the LLM upon activating the project
+- `LANGUAGES` (required) — programming languages, comma-separated (e.g., `python`, `python,typescript`).
+  See [supported languages](https://github.com/oraios/serena?tab=readme-ov-file#programming-language-support--semantic-analysis-capabilities).
+- `SERENA_INITIAL_PROMPT` — initial prompt given to the LLM on project activation
 
 > [!TIP]
 > Take a look at serena [project.yaml](./.github/templates/serena/project.yml) configuration file for more details.
 
-**Task-Master MCP Configuration Inputs:**
+**Task Master:**
 
-- `TM_CUSTOM_SYSTEM_PROMPT` - custom system prompt to override Claude Code's default behavior
+- `TM_CUSTOM_SYSTEM_PROMPT` — override Claude Code's default system prompt
+- `TM_APPEND_SYSTEM_PROMPT` — append to the system prompt
+- `TM_PERMISSION_MODE` — permission mode for file system operations
 
-- `TM_APPEND_SYSTEM_PROMPT` - append additional content to the system prompt
-
-- `TM_PERMISSION_MODE` - permission mode for file system operations
-
-> [!TIP]
-> See [Task Master Advanced Claude Code Settings Usage](https://github.com/eyaltoledano/claude-task-master/blob/main/docs/examples/claude-code-usage.md#advanced-settings-usage) for more details on the above parameters.
+  > [!TIP]
+  > See [Task Master advanced settings](https://github.com/eyaltoledano/claude-task-master/blob/main/docs/examples/claude-code-usage.md#advanced-settings-usage) for details on these parameters.
 
 4. Clone your new repo and cd into it
 
@@ -178,88 +211,68 @@ Here's an example `mcpServers` object that you can use as a reference:
    ● I have access to the following skills:
 
      Available Skills
-
-     analysis-process
-     Turn the idea for a feature into a fully-formed PRD/design/specification and implementation-plan. Use in pre-implementation (idea-to-design) stages to make sure you
-     understand the requirements and have a correct implementation plan before writing actual code.
-
-     documentation-process
-     After implementing a new feature or fixing a bug, make sure to document the changes. Use after finishing the implementation phase for a feature or a bug-fix.
-
-     task-master-process
-     Workflow for task-master-ai when working with task-master tasks and PRDs. Use when creating or parsing PRDs from requirements, adding/updating/expanding tasks and other task-master-ai operations.
-
-     testing-process
-     Guidelines describing how to test the code. Use whenever writing new or updating existing code, for example after implementing a new feature or fixing a bug.
+     ...
 
      ---
      These skills provide specialized workflows for different stages of development. You can invoke any of them by asking me to use a specific skill (e.g., "use the analysis-process skill" or "help me document this feature").
    ```
 
-5. Update the `README.md` with a full description of your project, then run `chmod +x bootstrap.sh && ./bootstrap.sh` to finalize initialization of the repo.
+5. Update the `README.md` with your project description, then run `chmod +x bootstrap.sh && ./bootstrap.sh` to finalize initialization.
 
 6. Profit
 
 ## Receiving Template Updates
 
-Repositories created from this template can receive configuration updates via the Template Sync feature.
+Repos created from this template can pull configuration updates via the **Template Sync** workflow.
 
 ### Prerequisites
 
-- Repository must have been created after template sync feature was added, OR
-  - Manually create `.github/template-state.json` (see Migration section below)
-- Allow actions to create pull-requests in the repo. Go to repo Settings -> Actions
+- `.github/template-state.json` must exist (created automatically for new repos, or [manually for older ones](#migration-for-existing-repositories))
+- Allow actions to create pull-requests: repo **Settings** → **Actions**
   <img width="792" height="376" alt="image" src="https://github.com/user-attachments/assets/81343169-fa87-4631-ad5d-60fde7685538" />
 
 ### Using Template Sync
 
-1. Navigate to **Actions** → **Template Sync**
-2. Click **Run workflow**
-3. Configure options:
-   - **version**: `latest` (default), `main`, or specific tag (e.g., `v1.2.0`)
-   - **dry_run**: Check to preview changes without creating a PR
-4. Review the created Pull Request
+1. Go to **Actions** → **Template Sync** → **Run workflow**
+2. Choose a version: `latest` (default), `master`, or a specific tag (e.g., `v1.2.3`)
+3. Optionally enable **dry_run** to preview changes without creating a PR
+4. Review and merge the created PR
 5. Merge to apply updates
 
-### What Gets Updated
+### What Gets Synced
 
-- `.claude/` - Claude Code commands, skills, scripts, settings
-- `.serena/` - Serena semantic analysis configuration
-- `.taskmaster/` - Task Master configuration and templates
-- The sync infa itself (workflow and script)
+**Updated:** `.claude/` (commands, skills, agents, scripts, settings), `.serena/`, `.taskmaster/` configs, and the sync infrastructure itself
 
-### What's Preserved
+**Preserved:** Project-specific values (name, language, prompts), user-scoped files (tasks, PRDs, local settings), gitignored files
 
-- Project-specific values (name, language, custom prompts)
-- User-scoped files (tasks, PRDs, local settings)
-- Any gitignored files
+### Sync Exclusions
 
-### Configuring Sync Exclusions
-
-If you've deleted template files that you don't need (e.g., specific skills or commands), you can prevent sync from re-adding them by configuring exclusion patterns in your manifest.
+If you've removed template files you don't need, prevent sync from re-adding them:
 
 Edit `.github/template-state.json` and add a `sync_exclusions` array:
 
-```json
+```diff
 {
   "schema_version": "1",
   "upstream_repo": "serpro69/claude-starter-kit",
   "template_version": "v0.2.0",
   "synced_at": "2025-01-27T10:00:00Z",
-  "sync_exclusions": [
-    ".claude/commands/cove/*",
-    ".claude/skills/cove/*"
-  ],
++ "sync_exclusions": [
++   ".claude/commands/cove/*",
++   ".claude/skills/cove/*"
++ ],
   "variables": { "..." : "..." }
 }
 ```
 
 **Pattern syntax:**
+
 - Patterns use glob syntax where `*` matches any characters including directory separators
 - Patterns are matched against project-relative paths (e.g., `.claude/commands/cove/cove.md`)
 - Common patterns: `.claude/commands/cove/*` (entire directory), `.taskmaster/templates/example_prd.txt` (single file)
 
 **Behavior:**
+
 - Excluded files are NOT added if they exist upstream but not locally
 - Excluded files are NOT updated if they exist in both places
 - Excluded files are NOT flagged as deleted if they exist locally but not upstream
@@ -267,17 +280,17 @@ Edit `.github/template-state.json` and add a `sync_exclusions` array:
 
 ### Migration for Existing Repositories
 
-If your repository was created before the sync feature, create `.github/template-state.json` manually:
+If your repo was created before the sync feature (or even if your repo wasn't created from this template at all), create `.github/template-state.json`:
 
 ```json
 {
   "schema_version": "1",
   "upstream_repo": "serpro69/claude-starter-kit",
   "template_version": "v1.0.0",
-  "synced_at": "2025-01-27T00:00:00Z",
+  "synced_at": "1970-01-01T00:00:00Z",
   "variables": {
-    "PROJECT_NAME": "your-project-name",
-    "LANGUAGES": "typescript",
+    "PROJECT_NAME": "my-cool-project",
+    "LANGUAGES": "go",
     "CC_MODEL": "default",
     "SERENA_INITIAL_PROMPT": "",
     "TM_CUSTOM_SYSTEM_PROMPT": "",
@@ -287,7 +300,7 @@ If your repository was created before the sync feature, create `.github/template
 }
 ```
 
-Then manually copy `.github/workflows/template-sync.yml` and `.github/scripts/template-sync.sh` from the [template repository](https://github.com/serpro69/claude-starter-kit).
+Then copy `.github/workflows/template-sync.yml` and `.github/scripts/template-sync.sh` from the [template repository](https://github.com/serpro69/claude-starter-kit).
 
 ### Post-Init Settings
 
@@ -299,6 +312,9 @@ The following tweaks are not mandatory, but will more often than not improve you
 > The following config parameters can be easily configured via `claude /config` command.
 >
 > The config file can also be modified manually and is usually found at `~/.claude.json`
+
+<details>
+<summary>Recommended <code>/config</code> settings</summary>
 
 This is my current config, you may want to tweak it to your needs. **I can't recommend enough disabling auto-compact** feature and controlling the context window manually. I've seen many a time claude starting to compact conversations in the middle of a task, which produces very poor results for the remaining work it does after compacting.
 
@@ -331,43 +347,78 @@ This is my current config, you may want to tweak it to your needs. **I can't rec
     Claude in Chrome enabled by default       false
 ```
 
+</details>
+
 ## Development
 
 ### Running Tests
 
-The repository includes a test suite for the template-sync feature. Tests are located in the `test/` directory.
+Tests across 3 suites covere the template sync/cleanup infrastructure:
 
 ```bash
 # Run all test suites
 for test in test/test-*.sh; do $test; done
 
-# Run individual test suite
+# Run individual suites
 ./test/test-manifest-jq.sh       # jq JSON pattern tests
 ./test/test-template-sync.sh     # template-sync.sh function tests
 ./test/test-template-cleanup.sh  # generate_manifest() tests
 ```
 
-**Test Coverage:**
-
-| Test Suite               | Description                                                        |
+| Test Suite               | Coverage                                                           |
 | ------------------------ | ------------------------------------------------------------------ |
 | test-manifest-jq.sh      | JSON generation, special character handling, round-trip validation |
 | test-template-sync.sh    | CLI parsing, manifest validation, substitutions, file comparison   |
 | test-template-cleanup.sh | Manifest generation, variable capture, git tag/SHA detection       |
 
-### Test Directory Structure
+## Repository Structure
 
 ```
+.claude/
+├── agents/                 # 3 sub-agents (orchestrator, executor, checker)
+├── commands/
+│   ├── cove/              # 2 CoVe verification commands
+│   └── tm/                # 47 Task Master commands
+├── hooks/                 # Bash validation hook config
+├── scripts/               # statusline.sh, validate-bash.sh
+├── skills/                # 7 development workflow skills
+├── settings.json          # Shared permission config
+└── TM_COMMANDS_GUIDE.md   # Task Master command reference
+
+.serena/
+└── project.yml            # Serena LSP configuration
+
+.taskmaster/
+├── config.json            # AI model configuration
+├── docs/                  # PRDs and requirements
+├── reports/               # Analysis reports
+├── tasks/                 # Task database and generated files
+├── templates/             # Example PRD template
+└── CLAUDE.md              # Task Master integration guide (400+ lines)
+
+.github/
+├── scripts/               # template-cleanup.sh, template-sync.sh, bootstrap.sh
+├── workflows/             # template-cleanup, template-sync
+└── template-state.json    # Sync manifest and variables
+
 test/
-├── helpers.sh              # Shared test utilities and assertions
-├── test-manifest-jq.sh     # jq pattern tests
-├── test-template-sync.sh   # Sync script function tests
-├── test-template-cleanup.sh # Cleanup script tests
-└── fixtures/
-    ├── manifests/          # JSON manifest test fixtures
-    └── templates/          # Template file fixtures
+├── helpers.sh             # Shared test utilities and assertions
+├── test-*.sh              # 3 test suites
+└── fixtures/              # Test manifests and templates
 ```
 
 ## Examples
 
-Some examples of the actual claude-code workflows that were executed using templates, configs, skills, and other tools from this repository can be found in [examples](./examples) directory.
+Examples of actual Claude Code workflows executed using this template's configs, skills, and tools: [examples/](./examples)
+
+## Contributing
+
+Feel free to open new PRs/issues. Any contributions you make are greatly appreciated.
+
+## License
+
+Copyright &copy; 2025 - present, [serpro69](https://github.com/serpro69)
+
+Distributed under the MIT License.
+
+See [`LICENSE.md`](https://github.com/serpro69/claude-starter-kit/blob/master/LICENSE.md) file for more information.
