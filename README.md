@@ -144,7 +144,7 @@ Slash commands organized hierarchically:
       "$HOME/.local/bin/uvx --from git+https://github.com/BeehiveInnovations/pal-mcp-server.git pal-mcp-server"
     ],
     "env": {
-      "PATH": "/usr/local/bin:/usr/bin:/bin:~/.local/bin",
+      "PATH": "/usr/local/bin:/usr/bin:/bin:$HOME/.local/bin",
       # see https://github.com/BeehiveInnovations/pal-mcp-server/blob/main/docs/configuration.md#model-configuration
       "DEFAULT_MODEL": "auto",
       # see https://github.com/BeehiveInnovations/pal-mcp-server/blob/main/docs/advanced-usage.md#thinking-modes
@@ -160,6 +160,38 @@ Slash commands organized hierarchically:
 See [Pal configuration docs](https://github.com/BeehiveInnovations/pal-mcp-server/blob/main/docs/configuration.md) for model and thinking mode options.
 
 </details>
+
+> [!TIP]
+> If you're using my [claude-in-docker](https://github.com/serpro69/claude-in-docker) images, consider replacing `npx` and `uvx` calls with direct tool invocations. The images come shipped with all of the above MCP tools pre-installed, and you will avoid downloading dependencies every time you launch claude cli.
+>
+> ```json
+>   "serena": {
+>     "type": "stdio",
+>     "command": "serena",
+>     "args": [
+>       "start-mcp-server",
+>       "--context",
+>       "ide-assistant",
+>       "--project",
+>       "."
+>     ],
+>     "env": {}
+>   },
+>   "task-master-ai": {
+>     "type": "stdio",
+>     "command": "task-master-ai",
+>     "args": [],
+>     "headers": {}
+>   },
+>   "pal": {
+>     "command": "pal-mcp-server",
+>     "args": [],
+>     "env": { ... }
+>   }
+> ```
+>
+> You also may want to look into your `env` settings for the given mcp server, especially the `PATH` variable, and make sure you're not adding anything custom that may not be avaiable in the image.
+> This may cause the mcp server to fail to connect.
 
 ## Quick Start
 
