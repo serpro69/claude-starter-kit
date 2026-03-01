@@ -2,7 +2,7 @@
   "models": {
     "main": {
       "provider": "claude-code",
-      "modelId": "sonnet[1m]",
+      "modelId": "sonnet",
       "maxTokens": 64000,
       "temperature": 0.2
     },
@@ -14,7 +14,7 @@
     },
     "fallback": {
       "provider": "claude-code",
-      "modelId": "sonnet[1m]",
+      "modelId": "sonnet",
       "maxTokens": 64000,
       "temperature": 0.2
     }
