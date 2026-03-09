@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx vite build:*)",
+      "Bash(npx vitest:*)",
+      "Bash(npm run dev:*)",
+      "Bash(git -C /Users/admin/repos/ai-workflows status)",
+      "Bash(git -C /Users/admin/repos/ai-workflows log --oneline -3)",
+      "WebFetch(domain:clinicaltables.nlm.nih.gov)",
+      "Bash(git commit:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}

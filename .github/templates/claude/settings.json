@@ -1,4 +1,8 @@
 {
+  "env": {
+    "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "64000",
+    "MAX_MCP_OUTPUT_TOKENS": "64000"
+  },
   "permissions": {
     "allow": [
       "Bash(cat:*)",
@@ -60,11 +64,8 @@
     ],
     "ask": []
   },
+  "model": "opus",
   "enabledMcpjsonServers": [],
-  "env": {
-    "CLAUDE_CODE_MAX_OUTPUT_TOKENS": 64000,
-    "MAX_MCP_OUTPUT_TOKENS": 64000
-  },
   "hooks": {
     "PreToolUse": [
       {
@@ -78,9 +79,14 @@
       }
     ]
   },
-  "model": "opus",
   "statusLine": {
     "type": "command",
     "command": "bash $CLAUDE_PROJECT_DIR/.claude/scripts/statusline.sh"
+  },
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "figma@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "sentry@claude-plugins-official": true
   }
 }
