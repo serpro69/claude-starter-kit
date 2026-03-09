@@ -63,7 +63,8 @@
   "enabledMcpjsonServers": [],
   "env": {
     "CLAUDE_CODE_MAX_OUTPUT_TOKENS": 64000,
-    "MAX_MCP_OUTPUT_TOKENS": 64000
+    "MAX_MCP_OUTPUT_TOKENS": 64000,
+    "CLAUDE_STATUSLINE_THEME": "catppuccin-dark"
   },
   "hooks": {
     "PreToolUse": [
