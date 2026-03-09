@@ -70,7 +70,7 @@ Slash commands organized hierarchically:
 ### Other Configuration
 
 - **Permission allowlist/denylist** (`.claude/settings.json`) — auto-approves safe tools (context7, serena read-only, task master, pal code review) while blocking dangerous ones
-- **Status line** (`.claude/scripts/statusline.sh`) — minimalistic statusline that shows current model and context window usage percentage
+- **Status line** (`.claude/scripts/statusline_enhanced.sh`) — rich statusline with model, context %, git branch, session duration, thinking mode, and rate limits. Set `CLAUDE_STATUSLINE_THEME` to `darcula-dark`, `darcula-light`, `nord-dark`, `nord-light`, `catppuccin-dark`, or `catppuccin-light` (choose `-dark`/`-light` to match your terminal background; defaults to built-in palette)
 - **Serena config** (`.serena/project.yml`) — language detection, gitignore integration, encoding settings
 - **Task Master config** (`.taskmaster/config.json`) — AI model roles (main/research/fallback), task defaults
 
