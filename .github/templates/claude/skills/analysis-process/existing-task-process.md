@@ -1,13 +1,14 @@
-### Workflow
+### Workflow: Continue WIP Feature
 
-- Get the task from task-master
-- Does it have linked documentation for the design and implementation plan?
-  - **YES:**
-    - Read the design and implementation documentation and understand what needs to be done and how.
-    - Check any relevant contributing guidelines and documentation.
-      - Places to look at may include @./CONTRIBUTING.md and @./docs directory. You may also ask your human counterpart for any relevant docs.
-      - Read only relevant docs to save context, don't try to read every single doc file.
-    - Then proceed with implementing the task.
-  - **NO:**
-    - Follow the [Ideas and Prototypes](#ideas-and-prototypes) section.
-    - Instead of creating a new task as the last step, update the existing task with necessary information.
+1. **Find the feature** — Locate the feature directory in `/docs/wip/`. If multiple WIP features exist, ask the user which one to work on.
+
+2. **Review progress** — Read `tasks.md` to understand:
+   - Which tasks are done, in-progress, or pending
+   - What dependencies exist between remaining tasks
+   - Any notes logged on previous subtasks
+
+3. **Review context** — Read the linked `design.md` and `implementation.md` to understand the full picture. Also check any relevant contributing guidelines and documentation.
+
+4. **Assess readiness:**
+   - **If tasks are well-documented and clear** → proceed to implement using the `implementation-process` skill.
+   - **If tasks need refinement** (missing details, unclear subtasks, gaps in the plan) → update `tasks.md` and/or the design/implementation docs before proceeding. Follow the documentation guidelines from the [Ideas and Prototypes](#ideas-and-prototypes) section.

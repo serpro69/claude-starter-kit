@@ -8,11 +8,10 @@ This is a starter template repository providing a complete development environme
 
 ## Architecture
 
-Three integrated MCP server configurations:
+Two integrated MCP server configurations:
 
-1. **Claude Code** (`.claude/`): Permission allowlist/denylist (`settings.local.json`), 50+ Task Master slash commands (`commands/tm/`), command reference (`TM_COMMANDS_GUIDE.md`)
+1. **Claude Code** (`.claude/`): Permission allowlist/denylist (`settings.local.json`), skills, agents, and custom commands
 2. **Serena** (`.serena/`): Semantic code analysis via LSP — language detection, gitignore integration, tool exclusions (`project.yml`)
-3. **Task Master** (`.taskmaster/`): AI-powered task management — model config (`config.json`), integration guide (`CLAUDE.md`), PRD template (`templates/example_prd.txt`)
 
 For API keys and MCP server setup, see the "MCP Server Configuration" section in `README.md`.
 
@@ -53,38 +52,18 @@ Symbols are identified by `name_path` and `relative_path`:
 - Track which symbols you've read and reuse that context
 - Use symbolic tools before reading full files
 
-## Task Master Integration
+## Task Tracking
 
-Task Master is the primary workflow orchestration system. Always prefer MCP tools over CLI commands — the permission configuration enforces this by denying `Bash(task-master:*)`.
+Task tracking uses simple markdown files co-located with feature design docs:
 
-### Slash Command Structure
+- **Location:** `/docs/wip/[feature]/tasks.md` alongside `design.md` and `implementation.md`
+- **Created by:** `analysis-process` skill (Step 6 of the idea workflow)
+- **Consumed by:** `implementation-process` skill (reads tasks, updates status/checkboxes during execution)
+- **Format:** H2 headings per task, checkbox subtasks, bold key-value status/dependencies
 
-Commands are organized under `/project:tm/[category]/[action]`:
-
-- Setup: `/project:tm/setup/quick-install`, `/project:tm/init/quick`
-- Daily: `/project:tm/next`, `/project:tm/list`, `/project:tm/show <id>`
-- Status: `/project:tm/set-status/to-{done|in-progress|review|pending|deferred|cancelled} <id>`
-- Analysis: `/project:tm/analyze-complexity`, `/project:tm/expand <id>`
-- Workflows: `/project:tm/workflows/smart-flow`, `/project:tm/workflows/auto-implement`
-
-### Working with Tasks
-
-1. Parse requirements: `/project:tm/parse-prd .taskmaster/docs/prd.txt`
-2. Analyze complexity: `/project:tm/analyze-complexity --research`
-3. Expand tasks: `/project:tm/expand/all`
-4. Get next task: `/project:tm/next`
-5. Update progress: Use MCP `update_subtask` to log implementation notes
-6. Complete: `/project:tm/set-status/to-done <id>`
-
-See `.taskmaster/CLAUDE.md` for the complete 400+ line Task Master integration guide.
+The full workflow: `analysis-process` (design + create tasks) → `implementation-process` (execute tasks) → `testing-process` (verify) → `documentation-process` (document)
 
 ## Project Rules
-
-### File Management
-
-- **Edit `tasks.json` only via Task Master commands** — use MCP tools or slash commands
-- **Edit `config.json` only via** `/project:tm/models/setup`
-- Task markdown files in `.taskmaster/tasks/*.md` are auto-generated
 
 ### Permission Configuration
 
@@ -94,12 +73,11 @@ See `.claude/settings.local.json` for the full tool allowlist/denylist.
 
 - Use `/clear` between different tasks to reset context
 - This CLAUDE.md is automatically loaded
-- Task Master commands pull task context on demand
 
 ### Git Integration
 
 - Serena respects `.gitignore` by default
-- Use conventional commits with task IDs: `feat: implement JWT auth (task 1.2)`
+- Use conventional commits: `feat: implement JWT auth`
 
 ### Template Sync
 
@@ -107,7 +85,6 @@ See `.claude/settings.local.json` for the full tool allowlist/denylist.
 - Use Actions → Template Sync to pull upstream configuration updates
 - Always review PR changes before merging to preserve local customizations
 - Sync preserves project-specific values (name, language, prompts) via manifest variables
-- User-scoped files like `.taskmaster/tasks/`, `.taskmaster/docs/`, and `.taskmaster/reports/` are never modified
 
 ### Sync Exclusions
 
@@ -127,10 +104,4 @@ Tests use shared utilities from `test/helpers.sh`. See that file for available a
 
 ## Troubleshooting
 
-See `README.md` for detailed troubleshooting of MCP connection issues, Task Master AI failures, Serena language detection, and template sync problems.
-
-## Task Master AI Instructions
-
-**IMPORTANT!!! Import Task Master's development workflow commands and guidelines, treat as if import is in the main CLAUDE.md file.**
-
-@./.taskmaster/CLAUDE.md
+See `README.md` for detailed troubleshooting of MCP connection issues, Serena language detection, and template sync problems.

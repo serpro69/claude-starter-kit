@@ -8,9 +8,6 @@
     "LANGUAGES": "typescript",
     "CC_MODEL": "sonnet",
     "SERENA_INITIAL_PROMPT": "",
-    "TM_CUSTOM_SYSTEM_PROMPT": "",
-    "TM_APPEND_SYSTEM_PROMPT": "",
-    "TM_PERMISSION_MODE": "default",
     "CC_STATUSLINE": "enhanced"
   }
 }

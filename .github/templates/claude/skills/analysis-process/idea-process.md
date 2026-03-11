@@ -9,10 +9,7 @@ Task Progress:
 - [ ] Step 3: Help refine the idea/feature
 - [ ] Step 4: Describe the design
 - [ ] Step 5: Document the design
-- [ ] Step 6: Create task-master PRD
-- [ ] Step 7: Parse the PRD with research
-- [ ] Step 8: Expand the new task into subtasks
-- [ ] Step 9: Update the tasks/subtasks to include links to relevant design and implementation plan docs
+- [ ] Step 6: Create the task list
 ```
 
 **Step 1: Understand the current state of the project**
@@ -60,20 +57,16 @@ But, of course, **DO NOT:**
 - **DO NOT add commit message templates** to tasks, that the developer should use when committing the changes.
 - **DO NOT add other small, generic details that do not bring value** and/or are not specifically relevant to this particular feature. For example, adding something like "to run tests, execute: 'go test ./...'" to a task does not bring value. Remember, the developer is experienced and skilled!
 
-**Step 6: Create task-master PRD**
+**Step 6: Create the task list**
 
-Create a new task-master PRD based on the design.
+Based on the implementation plan documented in Step 5, create a `tasks.md` file in the same `/docs/wip/[feature-title]/` directory.
 
-**Step 7: Parse the PRD with research**
+Follow the structure and conventions in the [example task file](./example-tasks.md). Key points:
 
-Parse the task-master PRD with research.
-
-**Step 8: Expand the new task into subtasks**
-
-Expand the task-master task into subtasks with links to existing design and implementation documents.
-
-**Step 9: Update the tasks/subtasks to include links to relevant design and implementation plan docs**
-
-After expanding the tasks into subtasks, we need to ensure that tasks also have links to relevant design and implementation plan docs created in Step 5.
-
-Update each parent task's details section with links to relevant docs.
+- **Header metadata** links back to design/implementation docs and tracks overall feature status
+- **One H2 per task** with status, dependencies, and a link to the relevant docs section
+- **Checkbox subtasks** are concrete, actionable implementation steps — specific enough that a developer with no project context can follow them
+- **Subtask descriptions** name the file/function/component being touched and what to do with it — not vague ("implement auth") but precise ("create `internal/auth/token.go` with `GenerateToken` and `ValidateToken` functions")
+- **Dependencies** reference other tasks by number when ordering matters
+- **Status values:** `pending`, `in-progress`, `done`, `blocked` (with reason)
+- Tasks should map roughly 1:1 to atomic, self-contained commits

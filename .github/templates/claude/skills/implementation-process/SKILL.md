@@ -15,17 +15,18 @@ Load plan, review critically, execute tasks in batches, report for review betwee
 
 ### Step 1: Load and Review Plan
 
-1. Read plan file
-2. Review critically - identify any questions or concerns about the plan
-3. If concerns: Raise them with your human partner before starting
-4. If no concerns: Get the task from taskmaster
-<!-- TODO: what's the purpose of this? 4. If no concerns: Create TodoWrite and proceed -->
+1. Read the feature's `tasks.md` file to get the task list and current progress
+2. Read the linked `design.md` and `implementation.md` for full context
+3. Identify the next pending task (one whose dependencies are all done)
+4. Review critically — identify any questions or concerns about the plan
+5. If concerns: Raise them with your human partner before starting
 
 ### Step 2: Execute Sub-Task
 
-1. Update status to in-progress
+1. Update `tasks.md`: set the task's status to `in-progress`
 2. Follow the plan exactly
-3. Run verifications as specified; use `testing-process` skill
+3. Check off subtasks (`- [x]`) in `tasks.md` as you complete them
+4. Run verifications as specified; use `testing-process` skill
 
 ### Step 3: Report
 
@@ -33,19 +34,20 @@ Load plan, review critically, execute tasks in batches, report for review betwee
 - Show verification output
 - Prompt user for code-review; if user responds 'yes' - run `zen` mcp code-review with gemini-3-pro
 - Based on user and code-review feedback: apply changes if needed and finalize the sub-task
-- When completed mark as done
+- When completed, update `tasks.md`: set the task's status to `done`
 
 ### Step 4: Continue
 
-- Execute next sub-task
-- Repeat until all sub-tasks are completed
+- Move to the next pending task in `tasks.md`
+- Repeat until all tasks are completed
 
 ### Step 5: Complete Development
 
-After all sub-tasks complete and verified:
+After all tasks complete and verified:
 
 - Use `testing-process` skill to verify and validate functionality
 - Use `documentation-process` skill to create or update any relevant docs
+- Update the feature status in `tasks.md` header to `done`
 
 ## When to Stop and Ask for Help
 
