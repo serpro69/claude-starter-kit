@@ -70,3 +70,4 @@ Follow the structure and conventions in the [example task file](./example-tasks.
 - **Dependencies** reference other tasks by number when ordering matters
 - **Status values:** `pending`, `in-progress`, `done`, `blocked` (with reason)
 - Tasks should map roughly 1:1 to atomic, self-contained commits
+- **Always include a final verification task** that depends on all other tasks — it should invoke `testing-process` to run the full test suite and `documentation-process` to update any relevant docs

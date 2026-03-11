@@ -45,3 +45,11 @@
 - [ ] 4.1 Add bcrypt hashing to `internal/auth/password.go` with cost factor from config
 - [ ] 4.2 Create migration to add `password_hash` column to users table
 - [ ] 4.3 Update user registration flow to hash passwords on create
+
+## Task 5: Final verification
+- **Status:** pending
+- **Depends on:** Task 1, Task 2, Task 3, Task 4
+
+### Subtasks
+- [ ] 5.1 Run `testing-process` skill to verify all tasks — full test suite, integration tests, edge cases
+- [ ] 5.2 Run `documentation-process` skill to update any relevant docs
