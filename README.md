@@ -17,11 +17,11 @@ This is a template repository that gives you a ready-to-use Claude Code developm
 
 Three servers, configured at user-level (`~/.claude.json`) to keep API keys out of the repo:
 
-| Server                                                                | Purpose                                                                                |
-| --------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| **[Context7](https://context7.com/)**                                 | Up-to-date library documentation and code examples                                     |
-| **[Serena](https://github.com/oraios/serena)**                        | Semantic code analysis via LSP — symbol navigation, reference tracking, targeted reads |
-| **[Pal](https://github.com/BeehiveInnovations/pal-mcp-server)**       | Multi-model AI integration — chat, debugging, code review, planning, security audit    |
+| Server                                                          | Purpose                                                                                |
+| --------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| **[Context7](https://context7.com/)**                           | Up-to-date library documentation and code examples                                     |
+| **[Serena](https://github.com/oraios/serena)**                  | Semantic code analysis via LSP — symbol navigation, reference tracking, targeted reads |
+| **[Pal](https://github.com/BeehiveInnovations/pal-mcp-server)** | Multi-model AI integration — chat, debugging, code review, planning, security audit    |
 
 ### Skills (`.claude/skills/`)
 
@@ -29,7 +29,7 @@ Skills are specialized workflows Claude invokes during different development pha
 
 | Skill                      | When to use                                                                                                                                                              |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **analysis-process**       | Pre-implementation. Turns ideas/specs into design docs, implementation plans, and task lists.                                                                             |
+| **analysis-process**       | Pre-implementation. Turns ideas/specs into design docs, implementation plans, and task lists.                                                                            |
 | **implementation-process** | Execute an implementation plan with batched steps and architect review checkpoints.                                                                                      |
 | **testing-process**        | After writing code. Guidelines for test coverage — table-driven tests, mocking, integration, benchmarks.                                                                 |
 | **documentation-process**  | Post-implementation. Updates ARCHITECTURE.md, TESTING.md, and records ADRs.                                                                                              |
@@ -40,6 +40,7 @@ Skills are specialized workflows Claude invokes during different development pha
 ### Commands (`.claude/commands/`)
 
 - **CoVe** (`/project:cove/`) — 2 commands for Chain-of-Verification prompting (standard and isolated modes)
+- **Migrate from Task Master** (`/project:migrate-from-taskmaster`) — one-time migration from Task Master MCP to native markdown task tracking
 
 ### Hooks (`.claude/hooks/`)
 
@@ -260,6 +261,46 @@ Edit `.github/template-state.json` and add a `sync_exclusions` array:
 - Excluded files are NOT updated if they exist in both places
 - Excluded files are NOT flagged as deleted if they exist locally but not upstream
 - Excluded files appear as "Excluded" in the sync report for transparency
+
+### Migrating from Task Master
+
+Task Master MCP was removed in favor of native markdown-based task tracking integrated into the `analysis-process` and `implementation-process` skills.
+
+The easiest way to migrate is to run the migration command in Claude Code:
+
+```
+/project:migrate-from-taskmaster
+```
+
+It will port pending tasks, clean up TM files, update configs, and walk you through each step with confirmation prompts.
+
+<details>
+<summary>Manual migration steps</summary>
+
+If you prefer to migrate manually, follow these steps after syncing:
+
+1. **Port any pending tasks** to the new format: create `/docs/wip/[feature]/tasks.md` files following the [example task file](./.github/templates/claude/skills/analysis-process/example-tasks.md). Completed tasks don't need porting.
+
+1. **Remove Task Master files and config:**
+
+   ```bash
+   rm -rf .taskmaster
+   rm -rf .claude/commands/tm
+   rm -f .claude/TM_COMMANDS_GUIDE.md
+   rm -f .claude/agents/task-orchestrator.md
+   rm -f .claude/agents/task-executor.md
+   rm -f .claude/agents/task-checker.md
+   ```
+
+3. **Remove Task Master from `~/.claude.json`:** delete the `task-master-ai` entry from your `mcpServers` config.
+
+4. **Remove TM variables from `.github/template-state.json`:** delete `TM_CUSTOM_SYSTEM_PROMPT`, `TM_APPEND_SYSTEM_PROMPT`, and `TM_PERMISSION_MODE` from the `variables` object.
+
+5. **Remove TM references from `CLAUDE.md`:** delete the "Task Master Integration" and "Task Master AI Instructions" sections (including the `@./.taskmaster/CLAUDE.md` import).
+
+Task tracking now lives in simple markdown files (`/docs/wip/[feature]/tasks.md`) created by the `analysis-process` skill and consumed by `implementation-process`. No external MCP server required.
+
+</details>
 
 ### Migration for Existing Repositories
 
