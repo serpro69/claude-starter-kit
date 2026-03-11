@@ -234,7 +234,11 @@ jobs:
             > ```bash
             > git checkout template-sync/abcdef
             > git checkout origin/master -- .claude/settings.json
-            > git commit "Undo claude settings changes"
+            > git reset HEAD -- .claude/settings.json
+            > git add --patch .claude/settings.json
+            > # select hunks to undo
+            > git add .claude/settings.json
+            > git commit -m "Undo claude settings changes"
             > git push origin template-sync/abcdef
             > ```
 
