@@ -67,7 +67,16 @@ If `.github/template-state.json` exists, remove these variables from the `variab
 
 The old template-sync workflow and script contain taskmaster-specific sync logic that will cause issues on future syncs (see https://github.com/serpro69/claude-starter-kit/issues/17).
 
-Run the sync script to update them:
+If `.claude/scripts/sync-workflow.sh` does not exist, fetch it first:
+
+```bash
+mkdir -p .claude/scripts
+curl -fsSL "https://raw.githubusercontent.com/serpro69/claude-starter-kit/master/.github/templates/claude/scripts/sync-workflow.sh" \
+  -o .claude/scripts/sync-workflow.sh
+chmod +x .claude/scripts/sync-workflow.sh
+```
+
+Then run it:
 
 ```bash
 bash .claude/scripts/sync-workflow.sh latest
