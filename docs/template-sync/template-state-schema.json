@@ -67,7 +67,7 @@
           "description": "Initial prompt/context for Serena MCP server. Substituted into .serena/project.yml (initial_prompt field). Only applied if non-empty.",
           "default": "",
           "examples": ["", "You are working on a TypeScript project"]
-        },
+        }
       }
     },
     "sync_exclusions": {
