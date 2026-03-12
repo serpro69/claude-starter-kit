@@ -429,6 +429,13 @@ execute_cleanup() {
   rm -f .github/scripts/template-cleanup.sh
   rm -f .github/workflows/template-cleanup.yml
 
+  log_step "Preserving docs/update.sh..."
+  local tmpfile=""
+  if [[ -f docs/update.sh ]]; then
+    tmpfile="$(mktemp)"
+    cp docs/update.sh "$tmpfile"
+  fi
+
   log_step "Cleaning up template-specific files..."
   find . -mindepth 1 -maxdepth 1 \
     ! -name '.git' \
@@ -438,6 +445,13 @@ execute_cleanup() {
     ! -name '.serena' \
     ! -name 'bootstrap.sh' \
     -exec rm -rf {} +
+
+  if [[ -n "$tmpfile" ]]; then
+    mkdir -p docs
+    cp "$tmpfile" docs/update.sh
+    chmod +x docs/update.sh
+    rm -f "$tmpfile"
+  fi
 
   log_step "Generating template state manifest..."
   generate_manifest "$name"
