@@ -72,7 +72,7 @@
       }
     ]
   },
-  "model": "opus",
+  "model": "opus[1m]",
   "statusLine": {
     "type": "command",
     "command": "bash $CLAUDE_PROJECT_DIR/.claude/scripts/statusline_enhanced.sh"
