@@ -53,4 +53,5 @@
 ### Subtasks
 - [ ] 5.1 Run `testing-process` skill to verify all tasks — full test suite, integration tests, edge cases
 - [ ] 5.2 Run `documentation-process` skill to update any relevant docs
-- [ ] 7.3 Run `solid-code-review` skill with the project language input to review the implementation
+- [ ] 5.3 Run `solid-code-review` skill with the project language input to review the implementation
+- [ ] 5.4 Run `implementation-review` skill to verify implementation matches design and implementation docs
