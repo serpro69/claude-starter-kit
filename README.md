@@ -1,4 +1,4 @@
-# claude-starter-kit
+# claude-sak
 
 [![Mentioned in Awesome Claude Code](https://awesome.re/mentioned-badge-flat.svg)](https://github.com/hesreallyhim/awesome-claude-code)
 
@@ -158,7 +158,7 @@ See [Pal configuration docs](https://github.com/BeehiveInnovations/pal-mcp-serve
 
 ## Quick Start
 
-1. [Create a new project from this template](https://github.com/new?template_name=claude-starter-kit&template_owner=serpro69) using the **Use this template** button.
+1. [Create a new project from this template](https://github.com/new?template_name=claude-sak&template_owner=serpro69) using the **Use this template** button.
 
 2. A scaffold repo will appear in your GitHub account.
 
@@ -239,7 +239,7 @@ Edit `.github/template-state.json` and add a `sync_exclusions` array:
 ```diff
 {
   "schema_version": "1",
-  "upstream_repo": "serpro69/claude-starter-kit",
+  "upstream_repo": "serpro69/claude-sak",
   "template_version": "v0.2.0",
   "synced_at": "2025-01-27T10:00:00Z",
 + "sync_exclusions": [
@@ -299,13 +299,13 @@ If you prefer to migrate manually, follow these steps after syncing:
 
 5. **Remove TM references from `CLAUDE.md`:** delete the "Task Master Integration" and "Task Master AI Instructions" sections (including the `@./.taskmaster/CLAUDE.md` import).
 
-6. **Update the template-sync workflow** ([why?](https://github.com/serpro69/claude-starter-kit/issues/17)): the old workflow contains taskmaster-specific sync logic that will break future syncs. Run `/project:sync-workflow latest` or manually replace both files:
+6. **Update the template-sync workflow** ([why?](https://github.com/serpro69/claude-sak/issues/17)): the old workflow contains taskmaster-specific sync logic that will break future syncs. Run `/project:sync-workflow latest` or manually replace both files:
 
    ```bash
    VERSION="v0.3.0"  # or use latest tag
-   curl -fsSL "https://raw.githubusercontent.com/serpro69/claude-starter-kit/${VERSION}/.github/workflows/template-sync.yml" \
+   curl -fsSL "https://raw.githubusercontent.com/serpro69/claude-sak/${VERSION}/.github/workflows/template-sync.yml" \
      -o .github/workflows/template-sync.yml
-   curl -fsSL "https://raw.githubusercontent.com/serpro69/claude-starter-kit/${VERSION}/.github/scripts/template-sync.sh" \
+   curl -fsSL "https://raw.githubusercontent.com/serpro69/claude-sak/${VERSION}/.github/scripts/template-sync.sh" \
      -o .github/scripts/template-sync.sh
    chmod +x .github/scripts/template-sync.sh
    ```
@@ -321,7 +321,7 @@ If your repo was created before the sync feature (or even if your repo wasn't cr
 ```json
 {
   "schema_version": "1",
-  "upstream_repo": "serpro69/claude-starter-kit",
+  "upstream_repo": "serpro69/claude-sak",
   "template_version": "v1.0.0",
   "synced_at": "1970-01-01T00:00:00Z",
   "variables": {
@@ -333,7 +333,7 @@ If your repo was created before the sync feature (or even if your repo wasn't cr
 }
 ```
 
-Then copy `.github/workflows/template-sync.yml` and `.github/scripts/template-sync.sh` from the [template repository](https://github.com/serpro69/claude-starter-kit).
+Then copy `.github/workflows/template-sync.yml` and `.github/scripts/template-sync.sh` from the [template repository](https://github.com/serpro69/claude-sak).
 
 ### Post-Init Settings
 
@@ -443,4 +443,4 @@ Copyright &copy; 2025 - present, [serpro69](https://github.com/serpro69)
 
 Distributed under the MIT License.
 
-See [`LICENSE.md`](https://github.com/serpro69/claude-starter-kit/blob/master/LICENSE.md) file for more information.
+See [`LICENSE.md`](https://github.com/serpro69/claude-sak/blob/master/LICENSE.md) file for more information.

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Template Cleanup Script
-# Converts the claude-starter-kit template into a project-specific setup.
+# Converts the claude-sak template into a project-specific setup.
 # Based on .github/workflows/template-cleanup.yml
 #
 # Usage:
@@ -91,7 +91,7 @@ fi
 show_help() {
   cat <<'EOF'
 Template Cleanup Script
-Converts the claude-starter-kit template into a project-specific setup.
+Converts the claude-sak template into a project-specific setup.
 
 Usage:
   ./.github/scripts/template-cleanup.sh                    # Interactive mode (recommended)
@@ -320,7 +320,7 @@ show_config_summary() {
 # Generate state manifest for template sync
 generate_manifest() {
   local project_name="$1"
-  local upstream_repo="${UPSTREAM_REPO:-serpro69/claude-starter-kit}"
+  local upstream_repo="${UPSTREAM_REPO:-serpro69/claude-sak}"
   local template_version
   local repo_url="https://github.com/$upstream_repo.git"
 
@@ -556,14 +556,14 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   # Check if templates directory exists
   if [[ ! -d ".github/templates" ]]; then
     log_error "Templates directory .github/templates not found"
-    log_error "Are you sure this is a claude-starter-kit based repository?"
+    log_error "Are you sure this is a claude-sak based repository?"
     exit 1
   fi
 
   # Prevent running on the original template repository (skip in CI mode)
   REPO_NAME=$(basename "$REPO_ROOT")
-  if [[ "$REPO_NAME" == "claude-starter-kit" ]] && ! $CI_MODE; then
-    log_error "This script should not be run on the original claude-starter-kit repository"
+  if [[ "$REPO_NAME" == "claude-sak" ]] && ! $CI_MODE; then
+    log_error "This script should not be run on the original claude-sak repository"
     exit 1
   fi
 

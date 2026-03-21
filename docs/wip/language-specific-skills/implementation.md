@@ -3,7 +3,7 @@
 ## Prerequisites
 
 Before starting implementation, ensure you understand:
-- The claude-starter-kit repository structure (especially `.claude/skills/` and `.github/workflows/`)
+- The claude-sak repository structure (especially `.claude/skills/` and `.github/workflows/`)
 - How Claude Code skills work (YAML frontmatter, markdown content, skill invocation)
 - GitHub Actions workflow syntax for template-cleanup automation
 - The existing skill patterns in `analysis-process/`, `testing-process/`, etc.

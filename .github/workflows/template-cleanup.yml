@@ -36,11 +36,11 @@ on:
         type: string
 
 jobs:
-  # Run cleaning process only if workflow is triggered by the non-"claude-starter-kit" repository.
+  # Run cleaning process only if workflow is triggered by the non-"claude-sak" repository.
   template-cleanup:
     name: Template Cleanup
     runs-on: ubuntu-latest
-    if: github.event.repository.name != 'claude-starter-kit'
+    if: github.event.repository.name != 'claude-sak'
     permissions:
       contents: write
     steps:

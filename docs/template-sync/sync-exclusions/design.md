@@ -2,7 +2,7 @@
 
 ## Problem Statement
 
-When users create a repository from the `claude-starter-kit` template and delete files that are not relevant to their project (e.g., specific skills, commands, or configurations), the Template Sync feature re-adds those files in the next sync PR. There is currently no mechanism for users to tell sync "I intentionally removed this; don't bring it back."
+When users create a repository from the `claude-sak` template and delete files that are not relevant to their project (e.g., specific skills, commands, or configurations), the Template Sync feature re-adds those files in the next sync PR. There is currently no mechanism for users to tell sync "I intentionally removed this; don't bring it back."
 
 This creates friction: users must either manually revert unwanted additions from every sync PR, or stop using sync entirely.
 
@@ -52,7 +52,7 @@ The `sync_exclusions` field is **optional** and added at the top level of the ma
 ```json
 {
   "schema_version": "1",
-  "upstream_repo": "serpro69/claude-starter-kit",
+  "upstream_repo": "serpro69/claude-sak",
   "template_version": "v0.2.0",
   "synced_at": "2025-01-27T10:00:00Z",
   "sync_exclusions": [

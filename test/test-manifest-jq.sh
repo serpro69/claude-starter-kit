@@ -40,7 +40,7 @@ assert_equals "1" "$SCHEMA_VERSION" "schema_version = $SCHEMA_VERSION"
 
 log_test "Extract upstream_repo"
 UPSTREAM_REPO=$(jq -r '.upstream_repo' "$EXAMPLE_MANIFEST")
-assert_equals "serpro69/claude-starter-kit" "$UPSTREAM_REPO" "upstream_repo = $UPSTREAM_REPO"
+assert_equals "serpro69/claude-sak" "$UPSTREAM_REPO" "upstream_repo = $UPSTREAM_REPO"
 
 log_test "Extract template_version"
 TEMPLATE_VERSION=$(jq -r '.template_version' "$EXAMPLE_MANIFEST")
@@ -68,7 +68,7 @@ log_section "Section 3: Manifest Generation Pattern"
 log_test "Generate manifest with jq -n"
 GENERATED=$(jq -n \
   --arg schema "1" \
-  --arg upstream "serpro69/claude-starter-kit" \
+  --arg upstream "serpro69/claude-sak" \
   --arg version "v1.0.0" \
   --arg synced "2025-01-27T10:00:00Z" \
   --arg project "my-project" \

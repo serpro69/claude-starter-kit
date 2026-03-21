@@ -92,7 +92,7 @@ unset UPSTREAM_REPO 2>/dev/null || true
 generate_manifest "test-project" >/dev/null 2>&1
 
 upstream_repo=$(jq -r '.upstream_repo' .github/template-state.json)
-assert_equals "serpro69/claude-starter-kit" "$upstream_repo" "upstream_repo has default value"
+assert_equals "serpro69/claude-sak" "$upstream_repo" "upstream_repo has default value"
 cd "$REPO_ROOT"
 
 log_test "Manifest uses custom UPSTREAM_REPO when set"
@@ -105,12 +105,12 @@ CC_MODEL=""
 CC_STATUSLINE="enhanced"
 SERENA_INITIAL_PROMPT=""
 # Use a valid GitHub repo to test UPSTREAM_REPO is captured correctly
-UPSTREAM_REPO="serpro69/claude-starter-kit"
+UPSTREAM_REPO="serpro69/claude-sak"
 
 generate_manifest "test-project" >/dev/null 2>&1
 
 upstream_repo=$(jq -r '.upstream_repo' .github/template-state.json)
-assert_equals "serpro69/claude-starter-kit" "$upstream_repo" "upstream_repo uses custom value"
+assert_equals "serpro69/claude-sak" "$upstream_repo" "upstream_repo uses custom value"
 unset UPSTREAM_REPO
 cd "$REPO_ROOT"
 
@@ -314,11 +314,11 @@ LANGUAGES="bash"
 CC_MODEL=""
 CC_STATUSLINE="enhanced"
 SERENA_INITIAL_PROMPT=""
-UPSTREAM_REPO="serpro69/claude-starter-kit"
+UPSTREAM_REPO="serpro69/claude-sak"
 
 if generate_manifest "test" >/dev/null 2>&1; then
   upstream_repo=$(jq -r '.upstream_repo' .github/template-state.json)
-  assert_equals "serpro69/claude-starter-kit" "$upstream_repo" "upstream_repo uses custom value"
+  assert_equals "serpro69/claude-sak" "$upstream_repo" "upstream_repo uses custom value"
   template_version=$(jq -r '.template_version' .github/template-state.json)
   # Should have some value (tag or SHA from upstream)
   if [[ -n "$template_version" ]] && [[ "$template_version" != "null" ]]; then
