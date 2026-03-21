@@ -1,11 +1,11 @@
-# Repo Rename: claude-starter-kit -> claude-sak
+# Repo Rename: claude-starter-kit -> claude-toolbox
 
 > Issue: [#36](https://github.com/serpro69/claude-starter-kit/issues/36)
 > Related: [#33](https://github.com/serpro69/claude-starter-kit/issues/33) (plugin extraction — coordinate naming)
 
 ## Problem Statement
 
-The repository name `claude-starter-kit` is too generic, gets lost in search results, and doesn't convey the tool's purpose well. Renaming to `claude-sak` (Swiss Army Knife) improves discoverability and memorability.
+The repository name `claude-starter-kit` is too generic, gets lost in search results, and doesn't convey the tool's purpose well. Renaming to `claude-toolbox` (Swiss Army Knife) improves discoverability and memorability.
 
 The name `claude-starter-kit` appears in ~80+ locations across scripts, workflows, tests, fixtures, and documentation. Beyond a simple find-and-replace, existing users who created repositories from this template have hardcoded references to the old name in their local files and manifests.
 
@@ -54,7 +54,7 @@ When a GitHub repo is renamed, GitHub sets up redirects:
 #### Self-Healing Path
 
 1. User triggers template-sync (works via git redirect)
-2. Sync fetches updated templates from upstream (now named `claude-sak`)
+2. Sync fetches updated templates from upstream (now named `claude-toolbox`)
 3. Updated `sync-workflow.sh` with new repo name is delivered to the user's repo
 4. User merges the sync PR — `sync-workflow.sh` is now fixed
 
@@ -64,17 +64,17 @@ The only gap: the user's `template-state.json` `upstream_repo` field is not upda
 
 ### 1. In-Repo Rename
 
-Replace all occurrences of `claude-starter-kit` with `claude-sak` across the entire repository. This is a mechanical find-and-replace with two special cases:
+Replace all occurrences of `claude-starter-kit` with `claude-toolbox` across the entire repository. This is a mechanical find-and-replace with two special cases:
 
-- **Workflow guards**: `!= 'claude-starter-kit'` becomes `!= 'claude-sak'`
-- **Serena project name**: `project_name: "claude-starter-kit"` becomes `project_name: "claude-sak"`
+- **Workflow guards**: `!= 'claude-starter-kit'` becomes `!= 'claude-toolbox'`
+- **Serena project name**: `project_name: "claude-starter-kit"` becomes `project_name: "claude-toolbox"`
 
 ### 2. Manifest Migration in template-sync.sh
 
 Add a migration step early in the sync script's `main()` function that detects and rewrites stale `upstream_repo` values:
 
 - **When:** After `read_manifest()` and `validate_manifest()`, before `resolve_version()`
-- **What:** If `upstream_repo` equals `serpro69/claude-starter-kit`, rewrite the manifest file in-place to `serpro69/claude-sak` and reload
+- **What:** If `upstream_repo` equals `serpro69/claude-starter-kit`, rewrite the manifest file in-place to `serpro69/claude-toolbox` and reload
 - **Why:** Ensures the manifest is correct going forward, and eliminates dependency on GitHub's redirect (which can break if someone creates a repo with the old name)
 - **Logging:** Emit a `log_info` message so the user sees the migration happened
 
@@ -87,7 +87,7 @@ Add a migration step early in the sync script's `main()` function that detects a
 
 ### 4. Relationship to #33 (Plugin Extraction)
 
-The plugin extraction design docs (`docs/wip/extract-plugin/`) contain extensive references to `claude-starter-kit` in marketplace names, install commands, and repository URLs. The rename should land before (or simultaneously with) plugin extraction so that all plugin-related names use `claude-sak` from the start. No special coordination mechanism is needed — the rename PR simply needs to merge first.
+The plugin extraction design docs (`docs/wip/extract-plugin/`) contain extensive references to `claude-starter-kit` in marketplace names, install commands, and repository URLs. The rename should land before (or simultaneously with) plugin extraction so that all plugin-related names use `claude-toolbox` from the start. No special coordination mechanism is needed — the rename PR simply needs to merge first.
 
 ## Out of Scope
 

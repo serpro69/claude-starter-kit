@@ -10,7 +10,7 @@ The rename involves three categories of work: (1) mechanical find-and-replace ac
 
 ### Target String
 
-All occurrences of the literal string `claude-starter-kit` are replaced with `claude-sak`. There are no partial matches or regex edge cases to worry about — the string is unique and unambiguous.
+All occurrences of the literal string `claude-starter-kit` are replaced with `claude-toolbox`. There are no partial matches or regex edge cases to worry about — the string is unique and unambiguous.
 
 ### Files by Category
 
@@ -75,7 +75,7 @@ In `.github/scripts/template-sync.sh`, inside the `main()` function, after `read
 
 ```
 if upstream_repo from manifest == "serpro69/claude-starter-kit":
-    log_info "Migrating upstream_repo from serpro69/claude-starter-kit to serpro69/claude-sak"
+    log_info "Migrating upstream_repo from serpro69/claude-starter-kit to serpro69/claude-toolbox"
     rewrite upstream_repo in template-state.json using jq
     reload manifest into memory
 ```
@@ -84,7 +84,7 @@ if upstream_repo from manifest == "serpro69/claude-starter-kit":
 
 - Use `jq` to update the `upstream_repo` field in-place in the manifest file (`.github/template-state.json`)
 - The manifest is already loaded into a global variable by `read_manifest()` — after the file rewrite, re-run `read_manifest()` to refresh the in-memory state
-- This migration is idempotent: if `upstream_repo` is already `serpro69/claude-sak`, the condition doesn't trigger
+- This migration is idempotent: if `upstream_repo` is already `serpro69/claude-toolbox`, the condition doesn't trigger
 - The migration runs in both CI mode and local mode
 
 ### Function Structure
@@ -94,8 +94,8 @@ Create a dedicated `migrate_manifest()` function (not inline in `main()`) to kee
 ### Testing
 
 Add test cases in `test/test-template-sync.sh`:
-- Test that a manifest with `upstream_repo = "serpro69/claude-starter-kit"` gets rewritten to `"serpro69/claude-sak"` after migration
-- Test that a manifest already set to `"serpro69/claude-sak"` is not modified
+- Test that a manifest with `upstream_repo = "serpro69/claude-starter-kit"` gets rewritten to `"serpro69/claude-toolbox"` after migration
+- Test that a manifest already set to `"serpro69/claude-toolbox"` is not modified
 - Test that the migration logs an info message when it triggers
 
 ## 3. Post-Merge Steps (Manual)
@@ -103,7 +103,7 @@ Add test cases in `test/test-template-sync.sh`:
 These steps happen after the code changes are merged. They are not automated and should be documented in the PR description.
 
 1. **Tag a release** on the commit just before the rename PR merges — this preserves `raw.githubusercontent.com` URLs for users pinned to specific versions
-2. **Rename the repo** in GitHub Settings > General > Repository name: `claude-starter-kit` → `claude-sak`
+2. **Rename the repo** in GitHub Settings > General > Repository name: `claude-starter-kit` → `claude-toolbox`
 3. **Verify the redirect** — confirm `git ls-remote https://github.com/serpro69/claude-starter-kit.git` resolves to the renamed repo
 4. **Update GitHub topics/description** if needed to reflect the new name
 5. **Update any external references** (e.g., blog posts, social media links) — these are outside the scope of this repo but worth noting

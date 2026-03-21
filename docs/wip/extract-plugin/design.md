@@ -1,6 +1,6 @@
 # Design: Extract to Claude Code Plugin
 
-> Issue: [#33](https://github.com/serpro69/claude-starter-kit/issues/33)
+> Issue: [#33](https://github.com/serpro69/claude-toolbox/issues/33)
 > Status: Draft
 > Created: 2026-03-20
 
@@ -11,7 +11,7 @@ Extract skills, commands, hooks, and utility scripts from the template into a Cl
 After this change, the repository serves dual purposes:
 
 1. **Template repository** — users create new repos from this template, getting project-specific configuration (settings, CLAUDE.md instructions, Serena config, statusline, sync infrastructure)
-2. **Plugin marketplace** — users install the `kk` plugin via `/plugin install kk@claude-starter-kit` to get skills, commands, hooks, and scripts
+2. **Plugin marketplace** — users install the `kk` plugin via `/plugin install kk@claude-toolbox` to get skills, commands, hooks, and scripts
 
 ## Problem Statement
 
@@ -59,7 +59,7 @@ The repo root contains `.claude-plugin/marketplace.json` — the marketplace cat
 ```json
 {
   "extraKnownMarketplaces": {
-    "claude-starter-kit": {
+    "claude-toolbox": {
       "source": {
         "source": "local",
         "path": "./klaude-plugin"
@@ -67,7 +67,7 @@ The repo root contains `.claude-plugin/marketplace.json` — the marketplace cat
     }
   },
   "enabledPlugins": {
-    "kk@claude-starter-kit": true
+    "kk@claude-toolbox": true
   }
 }
 ```
@@ -76,16 +76,16 @@ The repo root contains `.claude-plugin/marketplace.json` — the marketplace cat
 ```json
 {
   "extraKnownMarketplaces": {
-    "claude-starter-kit": {
+    "claude-toolbox": {
       "source": {
         "source": "git-subdir",
-        "url": "https://github.com/serpro69/claude-starter-kit.git",
+        "url": "https://github.com/serpro69/claude-toolbox.git",
         "path": "klaude-plugin"
       }
     }
   },
   "enabledPlugins": {
-    "kk@claude-starter-kit": true
+    "kk@claude-toolbox": true
   }
 }
 ```
@@ -126,7 +126,7 @@ The bootstrap script changes:
 
 1. No longer runs `claude -p --permission-mode "acceptEdits" /init`
 2. Adds the `@.claude/CLAUDE.extra.md` import to CLAUDE.md
-3. Runs `claude plugin install kk@claude-starter-kit` to install the plugin
+3. Runs `claude plugin install kk@claude-toolbox` to install the plugin
 4. Commits and cleans up
 
 ### Template Sync (existing repos)
@@ -140,7 +140,7 @@ The sync script needs a one-time migration path for existing downstream repos:
 1. Delete known template-managed files from `.claude/` — only files that were previously synced from the template (specific skills, commands, hooks config, validate-bash.sh)
 2. Add `extraKnownMarketplaces` and `enabledPlugins` to the local `settings.json`
 3. Set `"plugin_migrated": true` in `template-state.json`
-4. Add instructions in the PR description to run `/plugin install kk@claude-starter-kit` after merge
+4. Add instructions in the PR description to run `/plugin install kk@claude-toolbox` after merge
 
 **Post-migration syncs**: Only sync the slimmed template (settings.json, CLAUDE.extra.md, statusline scripts, serena config, sync infrastructure). Plugin updates happen through the plugin system itself.
 

@@ -2,11 +2,11 @@
 
 ## Overview
 
-Enable repositories created from the `claude-starter-kit` template to receive configuration updates from the upstream template repository.
+Enable repositories created from the `claude-toolbox` template to receive configuration updates from the upstream template repository.
 
 ## Problem Statement
 
-Currently, `claude-starter-kit` functions as a one-time template:
+Currently, `claude-toolbox` functions as a one-time template:
 - Users create a repo, run cleanup, and template files are deleted
 - No mechanism exists to receive updates when the template improves
 - Users wanting updates must manually copy changes from upstream
@@ -36,7 +36,7 @@ Implement a "rehydration" sync mechanism:
 ## User Stories
 
 ### US1: Receive Template Updates
-As a developer using a repo created from claude-starter-kit, I want to receive configuration updates when the template improves, so I can benefit from new skills, commands, and fixes.
+As a developer using a repo created from claude-toolbox, I want to receive configuration updates when the template improves, so I can benefit from new skills, commands, and fixes.
 
 ### US2: Preserve Customizations
 As a developer who has configured project-specific settings, I want the sync process to preserve my project name, language, and custom prompts, so I don't have to reconfigure after each update.

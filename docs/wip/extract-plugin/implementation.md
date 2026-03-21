@@ -12,13 +12,13 @@ Create `klaude-plugin/.claude-plugin/plugin.json`:
 ```json
 {
   "name": "kk",
-  "description": "Development workflow skills, commands, and hooks from claude-starter-kit",
+  "description": "Development workflow skills, commands, and hooks from claude-toolbox",
   "version": "0.4.0",
   "author": {
     "name": "serpro69"
   },
-  "homepage": "https://github.com/serpro69/claude-starter-kit",
-  "repository": "https://github.com/serpro69/claude-starter-kit",
+  "homepage": "https://github.com/serpro69/claude-toolbox",
+  "repository": "https://github.com/serpro69/claude-toolbox",
   "license": "MIT",
   "keywords": ["development", "workflow", "code-review", "testing", "documentation"]
 }
@@ -83,12 +83,12 @@ Create `.claude-plugin/marketplace.json` at the repo root:
 
 ```json
 {
-  "name": "claude-starter-kit",
+  "name": "claude-toolbox",
   "owner": {
     "name": "serpro69"
   },
   "metadata": {
-    "description": "Development workflow plugin from claude-starter-kit"
+    "description": "Development workflow plugin from claude-toolbox"
   },
   "plugins": [
     {
@@ -127,7 +127,7 @@ Add marketplace and plugin configuration:
 ```json
 {
   "extraKnownMarketplaces": {
-    "claude-starter-kit": {
+    "claude-toolbox": {
       "source": {
         "source": "local",
         "path": "./klaude-plugin"
@@ -135,7 +135,7 @@ Add marketplace and plugin configuration:
     }
   },
   "enabledPlugins": {
-    "kk@claude-starter-kit": true
+    "kk@claude-toolbox": true
   }
 }
 ```
@@ -160,10 +160,10 @@ In `execute_cleanup()`:
    ```json
    {
      "extraKnownMarketplaces": {
-       "claude-starter-kit": {
+       "claude-toolbox": {
          "source": {
            "source": "git-subdir",
-           "url": "https://github.com/serpro69/claude-starter-kit.git",
+           "url": "https://github.com/serpro69/claude-toolbox.git",
            "path": "klaude-plugin"
          }
        }
@@ -187,7 +187,7 @@ Replace the current bootstrap logic:
 
 **New**:
 1. Append `@.claude/CLAUDE.extra.md` import to CLAUDE.md (create minimal CLAUDE.md if it doesn't exist)
-2. Run `claude plugin install kk@claude-starter-kit`
+2. Run `claude plugin install kk@claude-toolbox`
 3. Commit and clean up
 
 Remove the `/init` call entirely (per issue #23, it's proving useless). Let users run `/init` on their own when the repo has actual code.
@@ -244,7 +244,7 @@ When `needs_plugin_migration()` returns true:
 3. **Update settings.json**: Use `jq` to:
    - Remove the `hooks` section
    - Add `extraKnownMarketplaces` with the GitHub `git-subdir` source
-   - Add `enabledPlugins` with `"kk@claude-starter-kit": true`
+   - Add `enabledPlugins` with `"kk@claude-toolbox": true`
    - Preserve all other settings
 
 4. **Update template-state.json**: Add `"plugin_migrated": true` using `jq`.
@@ -257,7 +257,7 @@ When migration is detected, append additional content to the PR body:
 
 - Explain that skills/commands have been migrated to a plugin
 - List the files that were removed
-- **Include instruction to run `/plugin install kk@claude-starter-kit` after merging**
+- **Include instruction to run `/plugin install kk@claude-toolbox` after merging**
 - Note that skills are now namespaced: `/skill-name` → `/kk:skill-name`
 
 ### 4.5 Update `compare_files()`

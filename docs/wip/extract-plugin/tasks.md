@@ -16,7 +16,7 @@
 - [ ] 1.3 Move all 4 command directories from `.github/templates/claude/commands/` to `klaude-plugin/commands/` (cove, implementation-review, migrate-from-taskmaster, sync-workflow)
 - [ ] 1.4 Move `.github/templates/claude/scripts/validate-bash.sh` to `klaude-plugin/scripts/validate-bash.sh`
 - [ ] 1.5 Create `klaude-plugin/hooks/hooks.json` — extract the `hooks` object from `settings.json`, update script path to `${CLAUDE_PLUGIN_ROOT}/scripts/validate-bash.sh`
-- [ ] 1.6 Create `.claude-plugin/marketplace.json` at repo root with name `claude-starter-kit`, owner `serpro69`, single plugin entry pointing to `./klaude-plugin`
+- [ ] 1.6 Create `.claude-plugin/marketplace.json` at repo root with name `claude-toolbox`, owner `serpro69`, single plugin entry pointing to `./klaude-plugin`
 - [ ] 1.7 Scan all moved skill/command files for `$CLAUDE_PROJECT_DIR/.claude/` path references and cross-skill references — update any that now need `${CLAUDE_PLUGIN_ROOT}` or `/kk:` prefix. Leave references to template files (e.g., `sync-workflow.sh`) pointing at `$CLAUDE_PROJECT_DIR`
 
 ## Task 2: Update template configuration
@@ -28,7 +28,7 @@
 - [ ] 2.1 Delete `.github/templates/claude/skills/` directory (entire tree — files already moved in Task 1)
 - [ ] 2.2 Delete `.github/templates/claude/commands/` directory (entire tree — files already moved in Task 1)
 - [ ] 2.3 Delete `.github/templates/claude/scripts/validate-bash.sh` (already moved in Task 1)
-- [ ] 2.4 Update `.github/templates/claude/settings.json` — remove the `hooks` section, add `extraKnownMarketplaces` with local path source and `enabledPlugins` with `kk@claude-starter-kit`
+- [ ] 2.4 Update `.github/templates/claude/settings.json` — remove the `hooks` section, add `extraKnownMarketplaces` with local path source and `enabledPlugins` with `kk@claude-toolbox`
 - [ ] 2.5 Update `.github/templates/claude/CLAUDE.extra.md` — change skill name references to namespaced form (`analysis-process` → `/kk:analysis-process`, etc.)
 - [ ] 2.6 Review root `CLAUDE.md` for any skill name or `.claude/` path references that need updating
 
@@ -38,10 +38,10 @@
 - **Docs:** [implementation.md#phase-3-update-template-cleanup](./implementation.md#phase-3-update-template-cleanup)
 
 ### Subtasks
-- [ ] 3.1 In `execute_cleanup()`, add `jq`-based marketplace rewrite — replace the local-path `extraKnownMarketplaces` source in `settings.json` with the GitHub `git-subdir` source (`serpro69/claude-starter-kit`, path `klaude-plugin`)
+- [ ] 3.1 In `execute_cleanup()`, add `jq`-based marketplace rewrite — replace the local-path `extraKnownMarketplaces` source in `settings.json` with the GitHub `git-subdir` source (`serpro69/claude-toolbox`, path `klaude-plugin`)
 - [ ] 3.2 Add deletion of `klaude-plugin/` and `.claude-plugin/` directories during cleanup — either add to the `find` exclusion/removal logic or handle as separate `rm -rf` before the general cleanup step
 - [ ] 3.3 Update the "Next steps" output at the end of cleanup — remove the `/init` step, mention the plugin is available via marketplace
-- [ ] 3.4 Update `bootstrap.sh` — remove the `claude -p --permission-mode "acceptEdits" /init` call, keep the `@.claude/CLAUDE.extra.md` import logic, add `claude plugin install kk@claude-starter-kit`, update commit message
+- [ ] 3.4 Update `bootstrap.sh` — remove the `claude -p --permission-mode "acceptEdits" /init` call, keep the `@.claude/CLAUDE.extra.md` import logic, add `claude plugin install kk@claude-toolbox`, update commit message
 - [ ] 3.5 Review `.github/workflows/template-cleanup.yml` for any path or step references that need updating
 
 ## Task 4: Update template-sync script
@@ -59,7 +59,7 @@
   - Use `jq` to add `"plugin_migrated": true` to `template-state.json`
   - Track removed files for the diff report
 - [ ] 4.4 Wire migration into the main sync flow — call `needs_plugin_migration()` after fetching upstream, call `run_plugin_migration()` before `compare_files()` if needed
-- [ ] 4.5 Update PR description generation — when migration occurred, append explanation of the plugin change, list removed files, include instruction to run `/plugin install kk@claude-starter-kit` after merge, note skill namespace change
+- [ ] 4.5 Update PR description generation — when migration occurred, append explanation of the plugin change, list removed files, include instruction to run `/plugin install kk@claude-toolbox` after merge, note skill namespace change
 - [ ] 4.6 Verify `compare_files()` and `apply_substitutions()` work correctly with the slimmer template (they operate on whatever files exist, so likely no changes needed — verify by reading the code)
 - [ ] 4.7 Review `.github/workflows/template-sync.yml` for any path or step references that need updating — specifically the "Apply Staged Changes" step which copies files to `.claude/`
 

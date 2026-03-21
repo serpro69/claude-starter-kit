@@ -57,7 +57,7 @@ excluded_tools: []
 # (contrary to the memories, which are loaded on demand).
 initial_prompt: ""
 # the name by which the project can be referenced within Serena
-project_name: "claude-starter-kit"
+project_name: "claude-toolbox"
 
 # list of mode names to that are always to be included in the set of active modes
 # The full set of modes to be activated is base_modes + default_modes.

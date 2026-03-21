@@ -596,14 +596,14 @@ log_section "Section 9: Version Resolution"
 log_test "resolve_version returns specific tag as-is"
 reset_globals
 # Specific tags are returned without modification
-result=$(resolve_version "v1.0.0" "serpro69/claude-starter-kit")
+result=$(resolve_version "v1.0.0" "serpro69/claude-toolbox")
 # Should return the tag name as-is
 assert_equals "v1.0.0" "$result" "Specific tag returned as-is"
 
 log_test "resolve_version resolves 'master' to SHA"
 reset_globals
 set +e
-result=$(resolve_version "master" "serpro69/claude-starter-kit" 2>/dev/null)
+result=$(resolve_version "master" "serpro69/claude-toolbox" 2>/dev/null)
 exit_code=$?
 set -e
 
@@ -621,7 +621,7 @@ fi
 log_test "resolve_version resolves 'HEAD' to SHA"
 reset_globals
 set +e
-result=$(resolve_version "HEAD" "serpro69/claude-starter-kit" 2>/dev/null)
+result=$(resolve_version "HEAD" "serpro69/claude-toolbox" 2>/dev/null)
 exit_code=$?
 set -e
 
@@ -639,7 +639,7 @@ fi
 log_test "resolve_version resolves 'latest' to most recent tag"
 reset_globals
 set +e
-result=$(resolve_version "latest" "serpro69/claude-starter-kit" 2>/dev/null)
+result=$(resolve_version "latest" "serpro69/claude-toolbox" 2>/dev/null)
 exit_code=$?
 set -e
 
@@ -658,7 +658,7 @@ log_test "resolve_version returns arbitrary values as-is (validation happens dur
 reset_globals
 # Arbitrary values (like specific tags or SHAs) are returned as-is
 # Validation of whether they exist happens in fetch_upstream_templates()
-result=$(resolve_version "v99.99.99" "serpro69/claude-starter-kit")
+result=$(resolve_version "v99.99.99" "serpro69/claude-toolbox")
 assert_equals "v99.99.99" "$result" "Arbitrary value returned as-is"
 
 # =============================================================================
@@ -1071,6 +1071,75 @@ if [[ "$output" == *"### Excluded Files"* ]]; then
 else
   log_pass "Markdown correctly omits Excluded Files section when no exclusions"
 fi
+
+# =============================================================================
+# Section 14: Manifest Migration Tests
+# =============================================================================
+
+log_section "Section 14: Manifest Migration"
+
+log_test "migrate_manifest rewrites old upstream_repo to new value"
+reset_globals
+test_dir=$(mktemp -d)
+cat > "$test_dir/manifest.json" <<'JSON'
+{
+  "schema_version": "1",
+  "upstream_repo": "serpro69/claude-starter-kit",
+  "template_version": "v1.0.0",
+  "synced_at": "2025-01-27T10:00:00Z",
+  "variables": {
+    "PROJECT_NAME": "my-project",
+    "LANGUAGES": "typescript",
+    "CC_MODEL": "sonnet",
+    "SERENA_INITIAL_PROMPT": ""
+  }
+}
+JSON
+MANIFEST_PATH="$test_dir/manifest.json"
+read_manifest
+validate_manifest
+migrate_manifest
+result=$(jq -r '.upstream_repo' "$MANIFEST_PATH")
+assert_equals "serpro69/claude-toolbox" "$result" "upstream_repo rewritten to serpro69/claude-toolbox"
+rm -rf "$test_dir"
+
+log_test "migrate_manifest does not modify manifest with current upstream_repo"
+reset_globals
+test_dir=$(mktemp -d)
+cp "$FIXTURES_DIR/manifests/valid-manifest.json" "$test_dir/manifest.json"
+MANIFEST_PATH="$test_dir/manifest.json"
+read_manifest
+validate_manifest
+# Capture file checksum before migration
+before=$(md5sum "$MANIFEST_PATH" | cut -d' ' -f1)
+migrate_manifest
+after=$(md5sum "$MANIFEST_PATH" | cut -d' ' -f1)
+assert_equals "$before" "$after" "manifest not modified when upstream_repo is already current"
+rm -rf "$test_dir"
+
+log_test "migrate_manifest emits log message when migration triggers"
+reset_globals
+test_dir=$(mktemp -d)
+cat > "$test_dir/manifest.json" <<'JSON'
+{
+  "schema_version": "1",
+  "upstream_repo": "serpro69/claude-starter-kit",
+  "template_version": "v1.0.0",
+  "synced_at": "2025-01-27T10:00:00Z",
+  "variables": {
+    "PROJECT_NAME": "my-project",
+    "LANGUAGES": "typescript",
+    "CC_MODEL": "sonnet",
+    "SERENA_INITIAL_PROMPT": ""
+  }
+}
+JSON
+MANIFEST_PATH="$test_dir/manifest.json"
+read_manifest
+validate_manifest
+output=$(migrate_manifest 2>&1)
+assert_output_contains "Migrating upstream_repo" "echo '$output'" "migration emits log message"
+rm -rf "$test_dir"
 
 # =============================================================================
 # Summary

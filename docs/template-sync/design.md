@@ -2,7 +2,7 @@
 
 ## Problem Statement
 
-The `claude-starter-kit` repository is designed as a one-time template. Once users create a new repository from the template and run the cleanup workflow, the template source files are deleted. This means:
+The `claude-toolbox` repository is designed as a one-time template. Once users create a new repository from the template and run the cleanup workflow, the template source files are deleted. This means:
 
 1. Users cannot receive updates when the template improves (new skills, better configs, bug fixes)
 2. There's no mechanism to track which template version a repository was created from
@@ -23,7 +23,7 @@ Implement a "rehydration" approach that allows child repositories to pull update
 ```
 ┌─────────────────────┐
 │   Upstream Repo     │
-│ (claude-starter-kit)│
+│ (claude-toolbox)│
 │                     │
 │ .github/templates/  │
 │   ├── claude/       │
@@ -65,7 +65,7 @@ Persisted during initial template cleanup. Contains:
 ```json
 {
   "schema_version": "1",
-  "upstream_repo": "serpro69/claude-starter-kit",
+  "upstream_repo": "serpro69/claude-toolbox",
   "template_version": "v1.0.0",
   "synced_at": "2025-01-27T10:00:00Z",
   "variables": {

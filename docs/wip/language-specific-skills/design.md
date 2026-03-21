@@ -2,7 +2,7 @@
 
 ## Overview
 
-This feature extends the claude-starter-kit template with language-specific development skills that provide comprehensive guidance on code style, testing strategies, tooling, and best practices for Go, Python, Java, Kotlin, and JavaScript/TypeScript.
+This feature extends the claude-toolbox template with language-specific development skills that provide comprehensive guidance on code style, testing strategies, tooling, and best practices for Go, Python, Java, Kotlin, and JavaScript/TypeScript.
 
 ## Problem Statement
 

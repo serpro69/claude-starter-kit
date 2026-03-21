@@ -41,10 +41,10 @@ log_test "CLAUDE.extra.md template exists"
 assert_file_exists "$REPO_ROOT/.github/templates/claude/CLAUDE.extra.md" "Template CLAUDE.extra.md should exist"
 
 log_test "CLAUDE.extra.md template contains behavioral instructions"
-if grep -q "## Claude-Code Behavioral Instructions" "$REPO_ROOT/.github/templates/claude/CLAUDE.extra.md"; then
+if grep -q "## Behavioral Instructions" "$REPO_ROOT/.github/templates/claude/CLAUDE.extra.md"; then
   log_pass "Template contains behavioral instructions section"
 else
-  log_fail "Template should contain '## Claude-Code Behavioral Instructions'"
+  log_fail "Template should contain '## Behavioral Instructions'"
 fi
 
 log_test "CLAUDE.extra.md template contains Serena best practices"
@@ -61,11 +61,11 @@ else
   log_fail "Template should contain '## Task Tracking'"
 fi
 
-log_test "CLAUDE.extra.md template contains sync exclusions"
-if grep -q "### Sync Exclusions" "$REPO_ROOT/.github/templates/claude/CLAUDE.extra.md"; then
-  log_pass "Template contains sync exclusions section"
+log_test "CLAUDE.extra.md template contains exploration phase"
+if grep -q "### Exploration Phase" "$REPO_ROOT/.github/templates/claude/CLAUDE.extra.md"; then
+  log_pass "Template contains exploration phase section"
 else
-  log_fail "Template should contain '### Sync Exclusions'"
+  log_fail "Template should contain '### Exploration Phase'"
 fi
 
 # =============================================================================

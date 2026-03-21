@@ -25,7 +25,7 @@ jobs:
   sync:
     name: Sync Template
     runs-on: ubuntu-latest
-    if: github.event.repository.name != 'claude-starter-kit'
+    if: github.event.repository.name != 'claude-toolbox'
     permissions:
       contents: write
       pull-requests: write
@@ -187,6 +187,15 @@ jobs:
         run: |
           NEW_VERSION="${{ needs.sync.outputs.new_version }}"
           SYNCED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          # Migrate upstream_repo if still using old repository name
+          CURRENT_REPO=$(jq -r '.upstream_repo' .github/template-state.json)
+          if [[ "$CURRENT_REPO" == "serpro69/claude-starter-kit" ]]; then
+            echo "Migrating upstream_repo from serpro69/claude-starter-kit to serpro69/claude-toolbox"
+            jq '.upstream_repo = "serpro69/claude-toolbox"' \
+              .github/template-state.json > .github/template-state.json.tmp
+            mv .github/template-state.json.tmp .github/template-state.json
+          fi
 
           jq --arg version "$NEW_VERSION" --arg synced_at "$SYNCED_AT" \
             '.template_version = $version | .synced_at = $synced_at' \

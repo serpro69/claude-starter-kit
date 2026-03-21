@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# template-sync.sh - Synchronize configuration from upstream claude-starter-kit template
+# template-sync.sh - Synchronize configuration from upstream claude-toolbox template
 #
 # This script fetches template updates from the upstream repository and applies
 # project-specific substitutions using values stored in the state manifest.
@@ -37,7 +37,7 @@
 #     - For repos created before sync feature, create manifest manually (see README)
 #
 #   "Version not found":
-#     - Check available tags: git ls-remote --tags https://github.com/serpro69/claude-starter-kit
+#     - Check available tags: git ls-remote --tags https://github.com/serpro69/claude-toolbox
 #     - Use 'latest' for most recent release or 'main' for bleeding edge
 #
 #   "Network error":
@@ -354,6 +354,37 @@ validate_manifest() {
   fi
 
   log_success "Manifest validation passed"
+}
+
+# migrate_manifest()
+# Migrates the manifest's upstream_repo from the old repository name
+# (serpro69/claude-starter-kit) to the new name (serpro69/claude-toolbox).
+# This ensures existing users' manifests are updated on their next sync.
+#
+# Returns:
+#   0 on success (migration applied or not needed)
+#   Exits with 1 if manifest rewrite fails
+#
+# Side effects:
+#   Rewrites MANIFEST_PATH in-place if migration needed
+#   Reloads manifest via read_manifest() after rewrite
+#   Logs info message when migration is triggered
+migrate_manifest() {
+  local upstream_repo
+  upstream_repo=$(get_manifest_value '.upstream_repo')
+
+  if [[ "$upstream_repo" == "serpro69/claude-starter-kit" ]]; then
+    log_info "Migrating upstream_repo from serpro69/claude-starter-kit to serpro69/claude-toolbox"
+    local tmp
+    tmp=$(mktemp "/tmp/manifest-migrate.XXXXXX")
+    if ! jq '.upstream_repo = "serpro69/claude-toolbox"' "$MANIFEST_PATH" > "$tmp"; then
+      rm -f "$tmp"
+      log_error "Failed to migrate manifest"
+      exit 1
+    fi
+    mv "$tmp" "$MANIFEST_PATH"
+    read_manifest
+  fi
 }
 
 # =============================================================================
@@ -1013,7 +1044,7 @@ generate_markdown_summary() {
 show_help() {
   cat <<'EOF'
 Template Sync Script
-Synchronizes template updates from the upstream claude-starter-kit repository.
+Synchronizes template updates from the upstream claude-toolbox repository.
 
 Usage:
   ./template-sync.sh                    # Sync to latest version
@@ -1139,6 +1170,7 @@ main() {
   # Read and validate manifest
   read_manifest
   validate_manifest
+  migrate_manifest
 
   # Display manifest info
   if ! $CI_MODE; then

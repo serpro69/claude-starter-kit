@@ -2,7 +2,7 @@
 
 ## Problem Statement
 
-Users who create repositories from the `claude-starter-kit` template and delete files they don't need (e.g., specific skills or commands) find that Template Sync re-adds those files in every sync PR. There is no way to tell sync "I intentionally removed this; don't bring it back."
+Users who create repositories from the `claude-toolbox` template and delete files they don't need (e.g., specific skills or commands) find that Template Sync re-adds those files in every sync PR. There is no way to tell sync "I intentionally removed this; don't bring it back."
 
 ## Solution
 

@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/serpro69/claude-starter-kit/template-state-schema.json",
+  "$id": "https://github.com/serpro69/claude-toolbox/template-state-schema.json",
   "title": "Template State Manifest",
   "description": "Schema for .github/template-state.json - tracks template version and substitution variables for sync operations. See docs/wip/template-sync/design.md for variable mapping details.",
   "type": "object",
@@ -17,7 +17,7 @@
       "type": "string",
       "description": "Source template repository in owner/repo format. Used to fetch upstream templates during sync.",
       "pattern": "^[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+$",
-      "examples": ["serpro69/claude-starter-kit"]
+      "examples": ["serpro69/claude-toolbox"]
     },
     "template_version": {
       "type": "string",
@@ -41,7 +41,7 @@
           "type": "string",
           "description": "Repository name, derived from $(basename \"$REPO_ROOT\") during cleanup. Substituted into .serena/project.yml (project_name).",
           "minLength": 1,
-          "examples": ["my-project", "claude-starter-kit"]
+          "examples": ["my-project", "claude-toolbox"]
         },
         "LANGUAGES": {
           "type": "string",

@@ -12,7 +12,7 @@
 
 set -euo pipefail
 
-UPSTREAM_REPO="serpro69/claude-starter-kit"
+UPSTREAM_REPO="serpro69/claude-toolbox"
 UPSTREAM_URL="https://github.com/$UPSTREAM_REPO"
 RAW_URL="https://raw.githubusercontent.com/$UPSTREAM_REPO"
 
