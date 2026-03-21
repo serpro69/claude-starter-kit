@@ -2,11 +2,11 @@
 
 [![Mentioned in Awesome Claude Code](https://awesome.re/mentioned-badge-flat.svg)](https://github.com/hesreallyhim/awesome-claude-code)
 
-Starter template repo for all your Claude Code needs — pre-configured MCP servers, skills, sub-agents, commands, and hooks for AI-powered development workflows.
+claude-sak is a "Swiss Army Knife" for all your Claude Code workflows — pre-configured MCP servers, skills, sub-agents, commands, hooks, statuslines with themes, and more - everything you need for AI-powered development workflows, used and battle-tested daily on many of my own projects.
 
 ## About
 
-This is a template repository that gives you a ready-to-use Claude Code development environment. It ships with mcp servers, development-related skills, hooks, slash commands — all configured and wired together.
+This is a template repository and claude-plugin system that gives you a ready-to-use Claude Code development environment. It ships with mcp servers, development-related skills, hooks, slash commands — all configured and wired together.
 
 > [!NOTE]
 > We focus on collaborative development. Most claude- and mcp-related settings are project-scoped (`.claude/settings.json`) so they can be shared across your team via git, rather than living in user-scoped `~/.claude.local.json`.
