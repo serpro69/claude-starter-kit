@@ -129,8 +129,8 @@ Add marketplace and plugin configuration:
   "extraKnownMarketplaces": {
     "claude-toolbox": {
       "source": {
-        "source": "local",
-        "path": "./klaude-plugin"
+        "source": "directory",
+        "path": "."
       }
     }
   },

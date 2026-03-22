@@ -61,8 +61,8 @@ The repo root contains `.claude-plugin/marketplace.json` — the marketplace cat
   "extraKnownMarketplaces": {
     "claude-toolbox": {
       "source": {
-        "source": "local",
-        "path": "./klaude-plugin"
+        "source": "directory",
+        "path": "."
       }
     }
   },

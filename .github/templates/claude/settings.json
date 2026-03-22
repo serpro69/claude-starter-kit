@@ -62,8 +62,8 @@
   "extraKnownMarketplaces": {
     "claude-toolbox": {
       "source": {
-        "source": "local",
-        "path": "./klaude-plugin"
+        "source": "directory",
+        "path": "."
       }
     }
   },
