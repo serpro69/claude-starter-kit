@@ -227,8 +227,8 @@ Edit `.github/template-state.json` and add a `sync_exclusions` array:
 **Pattern syntax:**
 
 - Patterns use glob syntax where `*` matches any characters including directory separators
-- Patterns are matched against project-relative paths (e.g., `.claude/commands/cove/cove.md`)
-- Common patterns: `.claude/commands/cove/*` (entire directory), `.serena/project.yml` (single file)
+- Patterns are matched against project-relative paths (e.g., `.claude/settings.json`)
+- Common patterns: `.claude/CLAUDE.extra.md` (single file), `.serena/*` (entire directory)
 
 **Behavior:**
 
