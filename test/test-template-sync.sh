@@ -1142,6 +1142,179 @@ assert_output_contains "Migrating upstream_repo" "echo '$output'" "migration emi
 rm -rf "$test_dir"
 
 # =============================================================================
+# Section: Plugin Migration Detection
+# =============================================================================
+
+log_section "Plugin Migration Detection"
+
+log_test "needs_plugin_migration returns true when upstream has plugin and not yet migrated"
+reset_globals
+test_dir=$(create_temp_dir "plugin-migration")
+# Create upstream with plugin manifest
+mkdir -p "$test_dir/upstream/klaude-plugin/.claude-plugin"
+echo '{"name":"kk"}' > "$test_dir/upstream/klaude-plugin/.claude-plugin/plugin.json"
+# Create manifest without plugin_migrated flag
+mkdir -p "$test_dir/project/.github"
+cat > "$test_dir/project/.github/template-state.json" <<'JSON'
+{
+  "schema_version": "1",
+  "upstream_repo": "serpro69/claude-toolbox",
+  "template_version": "v0.4.0",
+  "synced_at": "2025-01-27T10:00:00Z",
+  "variables": {
+    "PROJECT_NAME": "test",
+    "LANGUAGES": "bash",
+    "CC_MODEL": "default",
+    "SERENA_INITIAL_PROMPT": ""
+  }
+}
+JSON
+MANIFEST_PATH="$test_dir/project/.github/template-state.json"
+if needs_plugin_migration "$test_dir/upstream"; then
+  log_pass "Migration needed when upstream has plugin and no flag set"
+else
+  log_fail "Should need migration when upstream has plugin and no plugin_migrated flag"
+fi
+
+log_test "needs_plugin_migration returns false when already migrated"
+reset_globals
+# Add plugin_migrated flag
+jq '.plugin_migrated = true' "$test_dir/project/.github/template-state.json" > "$test_dir/project/.github/template-state.json.tmp"
+mv "$test_dir/project/.github/template-state.json.tmp" "$test_dir/project/.github/template-state.json"
+MANIFEST_PATH="$test_dir/project/.github/template-state.json"
+if needs_plugin_migration "$test_dir/upstream"; then
+  log_fail "Should not need migration when plugin_migrated is true"
+else
+  log_pass "No migration needed when plugin_migrated flag is set"
+fi
+
+log_test "needs_plugin_migration returns false when upstream has no plugin"
+reset_globals
+test_dir2=$(create_temp_dir "plugin-migration-no-upstream")
+# Upstream without plugin manifest
+mkdir -p "$test_dir2/upstream"
+mkdir -p "$test_dir2/project/.github"
+cat > "$test_dir2/project/.github/template-state.json" <<'JSON'
+{
+  "schema_version": "1",
+  "upstream_repo": "serpro69/claude-toolbox",
+  "template_version": "v0.3.0",
+  "synced_at": "2025-01-27T10:00:00Z",
+  "variables": {
+    "PROJECT_NAME": "test",
+    "LANGUAGES": "bash",
+    "CC_MODEL": "default",
+    "SERENA_INITIAL_PROMPT": ""
+  }
+}
+JSON
+MANIFEST_PATH="$test_dir2/project/.github/template-state.json"
+if needs_plugin_migration "$test_dir2/upstream"; then
+  log_fail "Should not need migration when upstream has no plugin"
+else
+  log_pass "No migration needed when upstream lacks plugin manifest"
+fi
+
+# =============================================================================
+# Section: Plugin Migration Execution
+# =============================================================================
+
+log_section "Plugin Migration Execution"
+
+log_test "run_plugin_migration removes skills, commands, and validate-bash.sh"
+reset_globals
+test_dir=$(create_temp_dir "plugin-exec")
+mkdir -p "$test_dir/.claude/skills/cove" "$test_dir/.claude/skills/analysis-process"
+mkdir -p "$test_dir/.claude/commands/cove" "$test_dir/.claude/commands/sync-workflow"
+mkdir -p "$test_dir/.claude/scripts"
+echo "skill" > "$test_dir/.claude/skills/cove/SKILL.md"
+echo "skill" > "$test_dir/.claude/skills/analysis-process/SKILL.md"
+echo "cmd" > "$test_dir/.claude/commands/cove/cove.md"
+echo "cmd" > "$test_dir/.claude/commands/sync-workflow/sync-workflow.md"
+echo "script" > "$test_dir/.claude/scripts/validate-bash.sh"
+echo "keep" > "$test_dir/.claude/scripts/statusline.sh"
+cat > "$test_dir/.claude/settings.json" <<'JSON'
+{
+  "hooks": {"PreToolUse": [{"matcher": "Bash"}]},
+  "model": "sonnet"
+}
+JSON
+mkdir -p "$test_dir/.github"
+cat > "$test_dir/.github/template-state.json" <<'JSON'
+{
+  "schema_version": "1",
+  "upstream_repo": "serpro69/claude-toolbox",
+  "template_version": "v0.4.0",
+  "synced_at": "2025-01-27T10:00:00Z",
+  "variables": {
+    "PROJECT_NAME": "test",
+    "LANGUAGES": "bash",
+    "CC_MODEL": "default",
+    "SERENA_INITIAL_PROMPT": ""
+  }
+}
+JSON
+MANIFEST_PATH="$test_dir/.github/template-state.json"
+DELETED_FILES=()
+pushd "$test_dir" >/dev/null
+run_plugin_migration >/dev/null 2>&1
+popd >/dev/null
+
+# Verify deletions
+if [[ ! -d "$test_dir/.claude/skills" ]]; then
+  log_pass "skills/ directory removed"
+else
+  log_fail "skills/ directory should be removed"
+fi
+if [[ ! -d "$test_dir/.claude/commands" ]]; then
+  log_pass "commands/ directory removed"
+else
+  log_fail "commands/ directory should be removed"
+fi
+if [[ ! -f "$test_dir/.claude/scripts/validate-bash.sh" ]]; then
+  log_pass "validate-bash.sh removed"
+else
+  log_fail "validate-bash.sh should be removed"
+fi
+# statusline.sh should be preserved
+assert_file_exists "$test_dir/.claude/scripts/statusline.sh" "statusline.sh preserved"
+
+log_test "run_plugin_migration updates settings.json"
+settings_json=$(cat "$test_dir/.claude/settings.json")
+if echo "$settings_json" | jq -e '.hooks' &>/dev/null; then
+  log_fail "hooks should be removed from settings.json"
+else
+  log_pass "hooks removed from settings.json"
+fi
+if echo "$settings_json" | jq -e '.extraKnownMarketplaces' &>/dev/null; then
+  log_pass "extraKnownMarketplaces added to settings.json"
+else
+  log_fail "extraKnownMarketplaces should be added to settings.json"
+fi
+if echo "$settings_json" | jq -e '.enabledPlugins."kk@claude-toolbox"' &>/dev/null; then
+  log_pass "enabledPlugins added to settings.json"
+else
+  log_fail "enabledPlugins should be added to settings.json"
+fi
+# model should be preserved
+assert_json_field "$settings_json" '.model' "sonnet" "model preserved in settings.json"
+
+log_test "run_plugin_migration sets plugin_migrated flag in manifest"
+manifest_json=$(cat "$test_dir/.github/template-state.json")
+if echo "$manifest_json" | jq -e '.plugin_migrated == true' &>/dev/null; then
+  log_pass "plugin_migrated flag set in manifest"
+else
+  log_fail "plugin_migrated should be true in manifest"
+fi
+
+log_test "run_plugin_migration tracks deleted files"
+if [[ ${#DELETED_FILES[@]} -gt 0 ]]; then
+  log_pass "DELETED_FILES populated (${#DELETED_FILES[@]} entries)"
+else
+  log_fail "DELETED_FILES should have entries for removed files"
+fi
+
+# =============================================================================
 # Summary
 # =============================================================================
 
