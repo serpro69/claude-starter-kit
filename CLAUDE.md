@@ -8,10 +8,11 @@ This is a starter template repository providing a complete development environme
 
 ## Architecture
 
-Two integrated MCP server configurations:
+Three integrated components:
 
-1. **Claude Code** (`.claude/`): Project settings (`settings.json`), skills, agents, and custom commands
-2. **Serena** (`.serena/`): Semantic code analysis via LSP — language detection, gitignore integration, tool exclusions (`project.yml`)
+1. **Claude Code** (`.claude/`): Project settings (`settings.json`), statusline scripts, and sync infrastructure
+2. **kk plugin** (`klaude-plugin/`): Skills, commands, hooks, and utility scripts — distributed via the Claude Code plugin system
+3. **Serena** (`.serena/`): Semantic code analysis via LSP — language detection, gitignore integration, tool exclusions (`project.yml`)
 
 For API keys and MCP server setup, see the "MCP Server Configuration" section in `README.md`.
 

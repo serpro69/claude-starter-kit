@@ -20,17 +20,17 @@
 - [x] 1.7 Scan all moved skill/command files for `$CLAUDE_PROJECT_DIR/.claude/` path references and cross-skill references — update any that now need `${CLAUDE_PLUGIN_ROOT}` or `/kk:` prefix. Leave references to template files (e.g., `sync-workflow.sh`) pointing at `$CLAUDE_PROJECT_DIR`
 
 ## Task 2: Update template configuration
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1
 - **Docs:** [implementation.md#phase-2-update-the-template](./implementation.md#phase-2-update-the-template)
 
 ### Subtasks
-- [ ] 2.1 Delete `.github/templates/claude/skills/` directory (entire tree — files already moved in Task 1)
-- [ ] 2.2 Delete `.github/templates/claude/commands/` directory (entire tree — files already moved in Task 1)
-- [ ] 2.3 Delete `.github/templates/claude/scripts/validate-bash.sh` (already moved in Task 1)
-- [ ] 2.4 Update `.github/templates/claude/settings.json` — remove the `hooks` section, add `extraKnownMarketplaces` with local path source and `enabledPlugins` with `kk@claude-toolbox`
-- [ ] 2.5 Update `.github/templates/claude/CLAUDE.extra.md` — change skill name references to namespaced form (`analysis-process` → `/kk:analysis-process`, etc.)
-- [ ] 2.6 Review root `CLAUDE.md` for any skill name or `.claude/` path references that need updating
+- [x] 2.1 Delete `.github/templates/claude/skills/` directory (entire tree — files already moved in Task 1)
+- [x] 2.2 Delete `.github/templates/claude/commands/` directory (entire tree — files already moved in Task 1)
+- [x] 2.3 Delete `.github/templates/claude/scripts/validate-bash.sh` (already moved in Task 1)
+- [x] 2.4 Update `.github/templates/claude/settings.json` — remove the `hooks` section, add `extraKnownMarketplaces` with local path source and `enabledPlugins` with `kk@claude-toolbox`
+- [x] 2.5 Update `.github/templates/claude/CLAUDE.extra.md` — change skill name references to namespaced form (`analysis-process` → `/kk:analysis-process`, etc.)
+- [x] 2.6 Review root `CLAUDE.md` for any skill name or `.claude/` path references that need updating
 
 ## Task 3: Update template-cleanup script
 - **Status:** pending
