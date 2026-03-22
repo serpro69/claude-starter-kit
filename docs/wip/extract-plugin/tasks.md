@@ -33,16 +33,16 @@
 - [x] 2.6 Review root `CLAUDE.md` for any skill name or `.claude/` path references that need updating
 
 ## Task 3: Update template-cleanup script
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1, Task 2
 - **Docs:** [implementation.md#phase-3-update-template-cleanup](./implementation.md#phase-3-update-template-cleanup)
 
 ### Subtasks
-- [ ] 3.1 In `execute_cleanup()`, add `jq`-based marketplace rewrite — replace the local-path `extraKnownMarketplaces` source in `settings.json` with the GitHub `git-subdir` source (`serpro69/claude-toolbox`, path `klaude-plugin`)
-- [ ] 3.2 Add deletion of `klaude-plugin/` and `.claude-plugin/` directories during cleanup — either add to the `find` exclusion/removal logic or handle as separate `rm -rf` before the general cleanup step
-- [ ] 3.3 Update the "Next steps" output at the end of cleanup — remove the `/init` step, mention the plugin is available via marketplace
-- [ ] 3.4 Update `bootstrap.sh` — remove the `claude -p --permission-mode "acceptEdits" /init` call, keep the `@.claude/CLAUDE.extra.md` import logic, add `claude plugin install kk@claude-toolbox`, update commit message
-- [ ] 3.5 Review `.github/workflows/template-cleanup.yml` for any path or step references that need updating
+- [x] 3.1 In `execute_cleanup()`, add `jq`-based marketplace rewrite — replace the local-path `extraKnownMarketplaces` source in `settings.json` with the GitHub `git-subdir` source (`serpro69/claude-toolbox`, path `klaude-plugin`)
+- [x] 3.2 Add deletion of `klaude-plugin/` and `.claude-plugin/` directories during cleanup (already handled by existing find cleanup) — either add to the `find` exclusion/removal logic or handle as separate `rm -rf` before the general cleanup step
+- [x] 3.3 Update the "Next steps" output at the end of cleanup — remove the `/init` step, mention the plugin is available via marketplace
+- [x] 3.4 Update `bootstrap.sh` — remove the `claude -p --permission-mode "acceptEdits" /init` call, keep the `@.claude/CLAUDE.extra.md` import logic, add `claude plugin install kk@claude-toolbox`, update commit message
+- [x] 3.5 Review `.github/workflows/template-cleanup.yml` (no changes needed — delegates to script) for any path or step references that need updating
 
 ## Task 4: Update template-sync script
 - **Status:** pending
