@@ -27,34 +27,11 @@ Three servers, configured at user-level (`~/.claude.json`) to keep API keys out 
 | **[Serena](https://github.com/oraios/serena)**                  | Semantic code analysis via LSP — symbol navigation, reference tracking, targeted reads |
 | **[Pal](https://github.com/BeehiveInnovations/pal-mcp-server)** | Multi-model AI integration — chat, debugging, code review, planning, security audit    |
 
-### kk Plugin (`klaude-plugin/`)
+### kk Plugin ([`klaude-plugin/`](./klaude-plugin/README.md))
 
-The **kk** plugin contains all development workflow functionality, distributed via the Claude Code plugin system. Skills are invoked as `/kk:skill-name`.
+The **kk** plugin contains all development workflow functionality — 9 skills, 4 commands, and hooks — distributed via the Claude Code plugin system. Skills are invoked as `/kk:skill-name`.
 
-#### Skills
-
-| Skill                      | When to use                                                                                                                                                              |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **analysis-process**       | Pre-implementation. Turns ideas/specs into design docs, implementation plans, and task lists.                                                                            |
-| **implementation-process** | Execute an implementation plan with batched steps and architect review checkpoints.                                                                                      |
-| **testing-process**        | After writing code. Guidelines for test coverage — table-driven tests, mocking, integration, benchmarks.                                                                 |
-| **documentation-process**  | Post-implementation. Updates ARCHITECTURE.md, TESTING.md, and records ADRs.                                                                                              |
-| **development-guidelines** | During implementation. Enforces best practices like using latest deps and context7 for docs.                                                                             |
-| **solid-code-review**      | Code review with a senior-engineer lens. Checks SOLID principles, security, code quality. Includes language-specific checklists for Go, Java, JS/TS, Kotlin, and Python. |
-| **implementation-review**  | Verify implemented code matches design/implementation docs. Detects spec deviations, missing implementations, and outdated docs.                                         |
-| **merge-docs**             | Semantically compare and merge two competing design docs for the same feature into one unified document.                                                                 |
-| **cove**                   | Chain-of-Verification prompting. Two modes: standard (prompt-based) and isolated (sub-agent). For high-stakes accuracy and fact-checking.                                |
-
-#### Commands
-
-- **CoVe** (`/kk:cove:cove`, `/kk:cove:cove-isolated`) — Chain-of-Verification prompting (standard and isolated modes)
-- **Implementation Review** (`/kk:implementation-review`) — verify implementation against design docs
-- **Migrate from Task Master** (`/kk:migrate-from-taskmaster:migrate`) — one-time migration from Task Master MCP to native markdown task tracking
-- **Sync Workflow** (`/kk:sync-workflow:sync-workflow [version]`) — update the template-sync workflow and script from upstream
-
-#### Hooks
-
-- **Bash validation** (`PreToolUse`) — blocks bash commands that touch `.env`, `.git/`, `node_modules`, `build/`, `dist/`, `venv/`, and other sensitive paths
+Includes: **analysis-process**, **implementation-process**, **testing-process**, **documentation-process**, **development-guidelines**, **solid-code-review**, **implementation-review**, **merge-docs**, **cove** (Chain-of-Verification). Plus commands for CoVe, implementation review, Task Master migration, and sync workflow updates. See the [plugin README](./klaude-plugin/README.md) for full details.
 
 ### Other Configuration
 
@@ -313,11 +290,12 @@ Task tracking now lives in simple markdown files (`/docs/wip/[feature]/tasks.md`
 
 ### Upgrading to the Plugin System (v0.5.0+)
 
-If you're upgrading from a version before the plugin system, skills and commands have moved from the template to the **kk** plugin:
+Skills and commands have moved from the template to the **kk** plugin:
 
 - Skills are now namespaced: `/analysis-process` → `/kk:analysis-process`
 - Commands are now namespaced: `/project:cove` → `/kk:cove:cove`
-- The template-sync workflow will handle the migration automatically on next sync
+- The template-sync workflow handles migration automatically on next sync
+- After merging the sync PR, run `/plugin install kk@claude-toolbox`
 
 ### Migration for Existing Repositories
 
