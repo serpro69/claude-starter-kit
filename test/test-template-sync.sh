@@ -1291,10 +1291,10 @@ if echo "$settings_json" | jq -e '.extraKnownMarketplaces' &>/dev/null; then
 else
   log_fail "extraKnownMarketplaces should be added to settings.json"
 fi
-if echo "$settings_json" | jq -e '.enabledPlugins."kk@claude-toolbox"' &>/dev/null; then
-  log_pass "enabledPlugins added to settings.json"
+if echo "$settings_json" | jq -e '.enabledPlugins' &>/dev/null; then
+  log_fail "enabledPlugins should not be set (user installs plugin separately)"
 else
-  log_fail "enabledPlugins should be added to settings.json"
+  log_pass "enabledPlugins not set in migrated settings.json"
 fi
 # model should be preserved
 assert_json_field "$settings_json" '.model' "sonnet" "model preserved in settings.json"

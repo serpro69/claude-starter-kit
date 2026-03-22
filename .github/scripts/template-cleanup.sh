@@ -402,7 +402,7 @@ execute_cleanup() {
     '.extraKnownMarketplaces."claude-toolbox".source = {
       "source": "github",
       "repo": $repo
-    }' "$cc_settings_file" > "${cc_settings_file}.tmp" && mv "${cc_settings_file}.tmp" "$cc_settings_file"
+    } | del(.enabledPlugins)' "$cc_settings_file" > "${cc_settings_file}.tmp" && mv "${cc_settings_file}.tmp" "$cc_settings_file"
 
   # Serena MCP Settings
   local serena_settings_file=".github/templates/serena/project.yml"

@@ -492,9 +492,6 @@ run_plugin_migration() {
              "repo": $repo
            }
          }
-       } |
-       .enabledPlugins = {
-         "kk@claude-toolbox": true
        }' "$settings_file" > "$tmp"; then
       mv "$tmp" "$settings_file"
       log_info "Updated $settings_file for plugin system"
@@ -776,7 +773,7 @@ apply_substitutions() {
         '.extraKnownMarketplaces."claude-toolbox".source = {
           "source": "github",
           "repo": $repo
-        }' "$cc_settings_file" > "${cc_settings_file}.tmp" && mv "${cc_settings_file}.tmp" "$cc_settings_file"
+        } | del(.enabledPlugins."kk@claude-toolbox") | if .enabledPlugins == {} then del(.enabledPlugins) else . end' "$cc_settings_file" > "${cc_settings_file}.tmp" && mv "${cc_settings_file}.tmp" "$cc_settings_file"
     fi
 
     log_info "Applied Claude Code settings"
