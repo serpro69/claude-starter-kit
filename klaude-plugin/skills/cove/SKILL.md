@@ -42,7 +42,7 @@ CoVe adds the most value in these scenarios:
 
 CoVe offers two verification modes to balance accuracy vs. cost:
 
-### Standard Mode (`/kk:cove`)
+### Standard Mode (`/cove`)
 
 Uses prompt-based isolation within a single conversation turn.
 
@@ -75,10 +75,10 @@ See [cove-isolated.md](./cove-isolated.md) for the isolated workflow.
 
 | Use Case                    | Recommended Mode                          |
 | --------------------------- | ----------------------------------------- |
-| Quick fact-checking         | `/kk:cove`                                |
-| High-stakes accuracy        | `/kk:cove:cove-isolated`                  |
+| Quick fact-checking         | `/cove`                                        |
+| High-stakes accuracy        | `/kk:cove:cove-isolated`                       |
 | Codebase verification       | `/kk:cove:cove-isolated --explore`             |
-| Cost-sensitive verification | `/kk:cove` or `/kk:cove:cove-isolated --haiku` |
+| Cost-sensitive verification | `/cove` or `/kk:cove:cove-isolated --haiku`    |
 
 ## Process Overview
 
@@ -93,13 +93,13 @@ See [cove-process.md](./cove-process.md) for the standard workflow, or [cove-iso
 
 ## Invocation
 
-Use the `/kk:cove` command followed by your question:
+Use the `/cove` skill followed by your question:
 
 ```
-/kk:cove What is the time complexity of Python's sorted() function?
+/cove What is the time complexity of Python's sorted() function?
 ```
 
-Or invoke `/kk:cove` after receiving a response to verify it.
+Or invoke `/cove` after receiving a response to verify it.
 
 For isolated verification with sub-agents:
 

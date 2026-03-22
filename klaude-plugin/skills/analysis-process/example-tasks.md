@@ -51,7 +51,7 @@
 - **Depends on:** Task 1, Task 2, Task 3, Task 4
 
 ### Subtasks
-- [ ] 5.1 Run `kk:testing-process` skill to verify all tasks — full test suite, integration tests, edge cases
-- [ ] 5.2 Run `kk:documentation-process` skill to update any relevant docs
-- [ ] 5.3 Run `kk:solid-code-review` skill with the project language input to review the implementation
-- [ ] 5.4 Run `kk:implementation-review` skill to verify implementation matches design and implementation docs
+- [ ] 5.1 Run `testing-process` skill to verify all tasks — full test suite, integration tests, edge cases
+- [ ] 5.2 Run `documentation-process` skill to update any relevant docs
+- [ ] 5.3 Run `solid-code-review` skill with the project language input to review the implementation
+- [ ] 5.4 Run `implementation-review` skill to verify implementation matches design and implementation docs

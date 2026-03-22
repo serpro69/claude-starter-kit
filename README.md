@@ -29,7 +29,7 @@ Three servers, configured at user-level (`~/.claude.json`) to keep API keys out 
 
 ### kk Plugin ([`klaude-plugin/`](./klaude-plugin/README.md))
 
-The **kk** plugin contains all development workflow functionality — 9 skills, 4 commands, and hooks — distributed via the Claude Code plugin system. Skills are invoked as `/kk:skill-name`.
+The **kk** plugin contains all development workflow functionality — 9 skills, 4 commands, and hooks — distributed via the Claude Code plugin system. Skills are invoked as `/skill-name`, commands as `/kk:dir:command`.
 
 Includes: **analysis-process**, **implementation-process**, **testing-process**, **documentation-process**, **development-guidelines**, **solid-code-review**, **implementation-review**, **merge-docs**, **cove** (Chain-of-Verification). Plus commands for CoVe, implementation review, Task Master migration, and sync workflow updates. See the [plugin README](./klaude-plugin/README.md) for full details.
 
@@ -284,7 +284,7 @@ If you prefer to migrate manually, follow these steps after syncing:
    chmod +x .github/scripts/template-sync.sh
    ```
 
-Task tracking now lives in simple markdown files (`/docs/wip/[feature]/tasks.md`) created by the `kk:analysis-process` skill and consumed by `kk:implementation-process`. No external MCP server required.
+Task tracking now lives in simple markdown files (`/docs/wip/[feature]/tasks.md`) created by the `analysis-process` skill and consumed by `implementation-process`. No external MCP server required.
 
 </details>
 
@@ -292,7 +292,7 @@ Task tracking now lives in simple markdown files (`/docs/wip/[feature]/tasks.md`
 
 Skills and commands have moved from the template to the **kk** plugin:
 
-- Skills are now namespaced: `/analysis-process` → `/kk:analysis-process`
+- Skills remain unprefixed: `/analysis-process` (annotated with `(kk)` in the menu)
 - Commands are now namespaced: `/project:cove` → `/kk:cove:cove`
 - The template-sync workflow handles migration automatically on next sync
 - After merging the sync PR, run `/plugin install kk@claude-toolbox`

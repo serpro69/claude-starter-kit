@@ -184,19 +184,29 @@ else
 fi
 
 # =============================================================================
-# Section 7: Cross-references use kk: namespace
+# Section 7: Cross-references
 # =============================================================================
 
 log_section "Section 7: Cross-references"
 
-log_test "No unprefixed skill invocations in plugin files"
-# Search for backtick-wrapped skill names without kk: prefix
-unprefixed=$(grep -rE '`(analysis-process|implementation-process|testing-process|documentation-process|solid-code-review|implementation-review|merge-docs)`' \
-  "$REPO_ROOT/klaude-plugin/" 2>/dev/null | grep -v 'name:' || true)
-if [[ -z "$unprefixed" ]]; then
-  log_pass "All skill references use kk: prefix"
+log_test "Skill references do NOT have kk: prefix (skills are unprefixed)"
+# Skills should be referenced without kk: prefix in skill files
+wrongly_prefixed=$(grep -rE '`kk:(analysis-process|implementation-process|testing-process|documentation-process|solid-code-review|implementation-review|merge-docs)`' \
+  "$REPO_ROOT/klaude-plugin/skills/" 2>/dev/null || true)
+if [[ -z "$wrongly_prefixed" ]]; then
+  log_pass "Skill references correctly unprefixed"
 else
-  log_fail "Found unprefixed skill references: $unprefixed"
+  log_fail "Found wrongly-prefixed skill references: $wrongly_prefixed"
+fi
+
+log_test "Command references use /kk: prefix"
+# Commands in command files should use /kk: prefix in examples
+has_kk_commands=$(grep -rE '/kk:(cove|implementation-review|migrate-from-taskmaster|sync-workflow):' \
+  "$REPO_ROOT/klaude-plugin/commands/" 2>/dev/null || true)
+if [[ -n "$has_kk_commands" ]]; then
+  log_pass "Command references use /kk: prefix"
+else
+  log_fail "Command references should use /kk: prefix"
 fi
 
 # =============================================================================

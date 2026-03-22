@@ -12,7 +12,7 @@ The plugin is installed automatically when using the claude-toolbox template. To
 
 ## Skills
 
-Skills are invoked as `/kk:skill-name`:
+Skills are invoked as `/skill-name` (no namespace prefix — annotated with `(kk)` in the menu):
 
 | Skill                      | When to use                                                                                                                                                              |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -31,7 +31,7 @@ Skills are invoked as `/kk:skill-name`:
 The skills are designed to work together in a pipeline:
 
 ```
-kk:analysis-process → kk:implementation-process → kk:testing-process → kk:documentation-process
+analysis-process → implementation-process → testing-process → documentation-process
 ```
 
 1. **analysis-process** — design docs + implementation plan + task list
@@ -61,7 +61,7 @@ Use **solid-code-review** and **implementation-review** at any point for quality
 
 If you're upgrading from a version before the plugin system (< v0.5.0):
 
-- Skills are now namespaced: `/analysis-process` → `/kk:analysis-process`
+- Skills remain unprefixed: `/analysis-process` (annotated with `(kk)` in the menu)
 - Commands are now namespaced: `/project:cove` → `/kk:cove:cove`
 - The template-sync workflow handles migration automatically on next sync
 - After merging the sync PR, run `/plugin install kk@claude-toolbox`

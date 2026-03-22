@@ -26,7 +26,7 @@ Load plan, review critically, execute tasks in batches, report for review betwee
 1. Update `tasks.md`: set the task's status to `in-progress`
 2. Follow the plan exactly
 3. Check off subtasks (`- [x]`) in `tasks.md` as you complete them
-4. Run verifications as specified; use `kk:testing-process` skill
+4. Run verifications as specified; use `testing-process` skill
 
 ### Step 3: Report
 
@@ -45,8 +45,8 @@ Load plan, review critically, execute tasks in batches, report for review betwee
 
 After all tasks complete and verified:
 
-- Use `kk:testing-process` skill to verify and validate functionality
-- Use `kk:documentation-process` skill to create or update any relevant docs
+- Use `testing-process` skill to verify and validate functionality
+- Use `documentation-process` skill to create or update any relevant docs
 - Update the feature status in `tasks.md` header to `done`
 
 ## When to Stop and Ask for Help

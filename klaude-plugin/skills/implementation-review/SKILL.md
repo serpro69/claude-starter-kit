@@ -26,7 +26,7 @@ Each finding is classified by type (what kind of mismatch) and severity (how urg
 
 ## Severity Levels
 
-Same P0–P3 scale as `kk:solid-code-review`, adapted for spec conformance:
+Same P0–P3 scale as `solid-code-review`, adapted for spec conformance:
 
 | Level | Name | Description | Action |
 |-------|------|-------------|--------|
@@ -62,4 +62,4 @@ See [review-process.md](./review-process.md) for the detailed step-by-step proce
 
 ## Invocation
 
-Use the `/kk:implementation-review [feature-name]` command, or invoke naturally when a user asks to verify implementation against docs.
+Use the `/implementation-review [feature-name]` command, or invoke naturally when a user asks to verify implementation against docs.

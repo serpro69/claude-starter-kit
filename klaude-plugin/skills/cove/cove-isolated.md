@@ -255,7 +255,7 @@ If ALL sub-agents fail, abort isolated mode entirely:
 
 ```
 Isolated mode unavailable due to sub-agent failures.
-Please use `/kk:cove` for standard mode verification instead.
+Please use `/cove` for standard mode verification instead.
 ```
 
-3. Suggest the user retry with `/kk:cove` (standard mode)
+3. Suggest the user retry with `/cove` (standard mode)

@@ -1190,7 +1190,7 @@ generate_markdown_summary() {
     echo ""
     echo "**After merging this PR:**"
     echo "1. Run \`/plugin install kk@claude-toolbox\` to install the plugin"
-    echo "2. Skills are now namespaced: \`/skill-name\` → \`/kk:skill-name\`"
+    echo "2. Commands are now namespaced: \`/project:command\` → \`/kk:dir:command\` (skills remain unprefixed)"
     echo ""
   fi
 }

@@ -70,4 +70,4 @@ Follow the structure and conventions in the [example task file](./example-tasks.
 - **Dependencies** reference other tasks by number when ordering matters
 - **Status values:** `pending`, `in-progress`, `done`, `blocked` (with reason)
 - Tasks should map roughly 1:1 to atomic, self-contained commits
-- **Always include a final verification task** that depends on all other tasks — it should invoke `kk:testing-process` to run the full test suite, `kk:documentation-process` to update any relevant docs, `kk:solid-code-review` with project's language input to review the code, and `kk:implementation-review` to verify the implementation matches the design and implementation docs
+- **Always include a final verification task** that depends on all other tasks — it should invoke `testing-process` to run the full test suite, `documentation-process` to update any relevant docs, `solid-code-review` with project's language input to review the code, and `implementation-review` to verify the implementation matches the design and implementation docs
