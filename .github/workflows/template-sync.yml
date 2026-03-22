@@ -34,6 +34,7 @@ jobs:
       old_version: ${{ steps.manifest.outputs.old_version }}
       new_version: ${{ steps.sync.outputs.resolved_version }}
       diff_summary: ${{ steps.sync.outputs.diff_summary }}
+      plugin_migrated: ${{ steps.sync.outputs.plugin_migrated }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
@@ -137,6 +138,23 @@ jobs:
         with:
           name: sync-diff-report
           path: .github/sync-artifacts
+
+      - name: Run Plugin Migration
+        if: needs.sync.outputs.plugin_migrated == 'true'
+        run: |
+          echo "Migrating to kk plugin system..."
+          # Remove template-managed skills, commands, hooks, and validator
+          rm -rf .claude/skills .claude/commands
+          rm -f .claude/scripts/validate-bash.sh
+          # Remove hooks from settings.json (substituted template will provide marketplace config)
+          if [[ -f .claude/settings.json ]] && jq -e '.hooks' .claude/settings.json &>/dev/null; then
+            jq 'del(.hooks)' .claude/settings.json > .claude/settings.json.tmp
+            mv .claude/settings.json.tmp .claude/settings.json
+          fi
+          # Set plugin_migrated flag in manifest
+          jq '.plugin_migrated = true' .github/template-state.json > .github/template-state.json.tmp
+          mv .github/template-state.json.tmp .github/template-state.json
+          echo "Plugin migration complete"
 
       - name: Apply Staged Changes
         run: |

@@ -45,23 +45,23 @@
 - [x] 3.5 Review `.github/workflows/template-cleanup.yml` (no changes needed — delegates to script) for any path or step references that need updating
 
 ## Task 4: Update template-sync script
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1, Task 2
 - **Docs:** [implementation.md#phase-4-update-template-sync](./implementation.md#phase-4-update-template-sync)
 
 ### Subtasks
-- [ ] 4.1 In `fetch_upstream_templates()`, add `klaude-plugin/.claude-plugin/plugin.json` to the `git sparse-checkout set` command for migration detection
-- [ ] 4.2 Add `needs_plugin_migration()` function — checks fetched upstream for `klaude-plugin/.claude-plugin/plugin.json` AND local `template-state.json` for absence of `"plugin_migrated": true`
-- [ ] 4.3 Add `run_plugin_migration()` function implementing the migration logic:
+- [x] 4.1 In `fetch_upstream_templates()`, add `klaude-plugin/.claude-plugin/plugin.json` to the `git sparse-checkout set` command for migration detection
+- [x] 4.2 Add `needs_plugin_migration()` function — checks fetched upstream for `klaude-plugin/.claude-plugin/plugin.json` AND local `template-state.json` for absence of `"plugin_migrated": true`
+- [x] 4.3 Add `run_plugin_migration()` function implementing the migration logic:
   - Build static list of known template-managed files to delete (all skills, commands, hooks, validate-bash.sh — see implementation.md for full list)
   - Delete each file/directory, skip non-existent ones
   - Use `jq` to update `settings.json`: remove `hooks`, add `extraKnownMarketplaces` (GitHub git-subdir source), add `enabledPlugins`
   - Use `jq` to add `"plugin_migrated": true` to `template-state.json`
   - Track removed files for the diff report
-- [ ] 4.4 Wire migration into the main sync flow — call `needs_plugin_migration()` after fetching upstream, call `run_plugin_migration()` before `compare_files()` if needed
-- [ ] 4.5 Update PR description generation — when migration occurred, append explanation of the plugin change, list removed files, include instruction to run `/plugin install kk@claude-toolbox` after merge, note skill namespace change
-- [ ] 4.6 Verify `compare_files()` and `apply_substitutions()` work correctly with the slimmer template (they operate on whatever files exist, so likely no changes needed — verify by reading the code)
-- [ ] 4.7 Review `.github/workflows/template-sync.yml` for any path or step references that need updating — specifically the "Apply Staged Changes" step which copies files to `.claude/`
+- [x] 4.4 Wire migration into the main sync flow — call `needs_plugin_migration()` after fetching upstream, call `run_plugin_migration()` before `compare_files()` if needed
+- [x] 4.5 Update PR description generation — when migration occurred, append explanation of the plugin change, list removed files, include instruction to run `/plugin install kk@claude-toolbox` after merge, note skill namespace change
+- [x] 4.6 Verify `compare_files()` and `apply_substitutions()` work correctly with the slimmer template (they operate on whatever files exist, so likely no changes needed — verify by reading the code)
+- [x] 4.7 Review `.github/workflows/template-sync.yml` — added plugin_migrated output, migration step in create-pr job for any path or step references that need updating — specifically the "Apply Staged Changes" step which copies files to `.claude/`
 
 ## Task 5: Update tests
 - **Status:** pending
