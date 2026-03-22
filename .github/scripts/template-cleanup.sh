@@ -396,6 +396,15 @@ execute_cleanup() {
     sed -i "s/statusline_enhanced\.sh/statusline.sh/g" "$cc_settings_file"
   fi
 
+  # Plugin marketplace — replace local-path source with GitHub git-subdir source
+  local upstream_repo="${UPSTREAM_REPO:-serpro69/claude-toolbox}"
+  jq --arg url "https://github.com/$upstream_repo.git" \
+    '.extraKnownMarketplaces."claude-toolbox".source = {
+      "source": "git-subdir",
+      "url": $url,
+      "path": "klaude-plugin"
+    }' "$cc_settings_file" > "${cc_settings_file}.tmp" && mv "${cc_settings_file}.tmp" "$cc_settings_file"
+
   # Serena MCP Settings
   local serena_settings_file=".github/templates/serena/project.yml"
   # Project name - always substitute with repo name
@@ -479,7 +488,7 @@ execute_cleanup() {
   echo -e "${GREEN}Next steps:${NC}"
   echo "  1. Run 'claude' to start Claude Code"
   echo "  2. Run '/mcp' to verify MCP servers are connected"
-  echo "  3. Run '/init' to initialize project-specific CLAUDE.md"
+  echo "  3. The kk plugin (skills, commands, hooks) is available via the claude-toolbox marketplace"
   echo ""
 }
 
