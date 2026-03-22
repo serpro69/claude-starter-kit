@@ -396,13 +396,12 @@ execute_cleanup() {
     sed -i "s/statusline_enhanced\.sh/statusline.sh/g" "$cc_settings_file"
   fi
 
-  # Plugin marketplace — replace local-path source with GitHub git-subdir source
+  # Plugin marketplace — replace local-path source with GitHub git source
   local upstream_repo="${UPSTREAM_REPO:-serpro69/claude-toolbox}"
   jq --arg url "https://github.com/$upstream_repo.git" \
     '.extraKnownMarketplaces."claude-toolbox".source = {
-      "source": "git-subdir",
-      "url": $url,
-      "path": "klaude-plugin"
+      "source": "git",
+      "url": $url
     }' "$cc_settings_file" > "${cc_settings_file}.tmp" && mv "${cc_settings_file}.tmp" "$cc_settings_file"
 
   # Serena MCP Settings

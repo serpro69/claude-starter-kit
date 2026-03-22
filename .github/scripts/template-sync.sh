@@ -488,9 +488,8 @@ run_plugin_migration() {
        .extraKnownMarketplaces = {
          "claude-toolbox": {
            "source": {
-             "source": "git-subdir",
-             "url": $url,
-             "path": "klaude-plugin"
+             "source": "git",
+             "url": $url
            }
          }
        } |
@@ -768,16 +767,15 @@ apply_substitutions() {
       sed -i "s/statusline_enhanced\.sh/statusline.sh/g" "$cc_settings_file"
     fi
 
-    # Plugin marketplace — replace local-path source with GitHub git-subdir source
-    # (upstream template uses local path; downstream repos use git-subdir)
+    # Plugin marketplace — replace local-path source with GitHub git source
+    # (upstream template uses directory source; downstream repos use git)
     local upstream_repo
     upstream_repo=$(get_manifest_value '.upstream_repo')
     if jq -e '.extraKnownMarketplaces' "$cc_settings_file" &>/dev/null; then
       jq --arg url "https://github.com/$upstream_repo.git" \
         '.extraKnownMarketplaces."claude-toolbox".source = {
-          "source": "git-subdir",
-          "url": $url,
-          "path": "klaude-plugin"
+          "source": "git",
+          "url": $url
         }' "$cc_settings_file" > "${cc_settings_file}.tmp" && mv "${cc_settings_file}.tmp" "$cc_settings_file"
     fi
 

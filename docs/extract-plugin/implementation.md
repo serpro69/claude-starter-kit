@@ -156,15 +156,14 @@ Check the root `CLAUDE.md` for any references to skill names or `.claude/` paths
 
 In `execute_cleanup()`:
 
-1. **Marketplace rewrite**: After variable substitution, replace the local-path marketplace config in `settings.json` with the GitHub `git-subdir` source:
+1. **Marketplace rewrite**: After variable substitution, replace the local-path marketplace config in `settings.json` with the GitHub `git` source:
    ```json
    {
      "extraKnownMarketplaces": {
        "claude-toolbox": {
          "source": {
-           "source": "git-subdir",
-           "url": "https://github.com/serpro69/claude-toolbox.git",
-           "path": "klaude-plugin"
+           "source": "git",
+           "url": "https://github.com/serpro69/claude-toolbox.git"
          }
        }
      }
@@ -243,7 +242,7 @@ When `needs_plugin_migration()` returns true:
 
 3. **Update settings.json**: Use `jq` to:
    - Remove the `hooks` section
-   - Add `extraKnownMarketplaces` with the GitHub `git-subdir` source
+   - Add `extraKnownMarketplaces` with the GitHub `git` source
    - Add `enabledPlugins` with `"kk@claude-toolbox": true`
    - Preserve all other settings
 

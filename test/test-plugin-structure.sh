@@ -51,9 +51,10 @@ assert_json_valid "$marketplace_json" "Marketplace manifest is valid JSON"
 log_test "marketplace.json has correct name"
 assert_json_field "$marketplace_json" '.name' "claude-toolbox" "Marketplace name is claude-toolbox"
 
-log_test "marketplace.json plugin source points to ./klaude-plugin"
-source_path=$(echo "$marketplace_json" | jq -r '.plugins[0].source')
-assert_equals "./klaude-plugin" "$source_path" "Plugin source is ./klaude-plugin"
+log_test "marketplace.json plugin source references klaude-plugin"
+source_type=$(echo "$marketplace_json" | jq -r '.plugins[0].source')
+plugin_path=$(echo "$marketplace_json" | jq -r '.plugins[0].path')
+assert_equals "klaude-plugin" "$plugin_path" "Plugin path is klaude-plugin"
 
 log_test "marketplace.json plugin name matches plugin.json"
 mp_plugin_name=$(echo "$marketplace_json" | jq -r '.plugins[0].name')
