@@ -7,6 +7,7 @@
     "PROJECT_NAME": "my-project",
     "LANGUAGES": "typescript",
     "CC_MODEL": "sonnet",
+    "CC_EFFORT_LEVEL": "high",
     "SERENA_INITIAL_PROMPT": ""
   }
 }

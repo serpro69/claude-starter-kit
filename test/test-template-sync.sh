@@ -181,6 +181,102 @@ set -e
 assert_equals "0" "$exit_code" "validate_manifest succeeds for valid manifest"
 
 # =============================================================================
+# Section 3b: Manifest Variable Backfill Tests
+# =============================================================================
+
+log_section "Section 3b: Manifest Variable Backfill"
+
+log_test "backfill_manifest_variables adds CC_STATUSLINE when missing"
+reset_globals
+test_dir=$(create_temp_dir "backfill-statusline")
+MANIFEST_PATH="$test_dir/manifest.json"
+cat >"$MANIFEST_PATH" <<'EOF'
+{
+  "schema_version": "1",
+  "upstream_repo": "serpro69/claude-toolbox",
+  "template_version": "v1.0.0",
+  "synced_at": "2025-01-27T10:00:00Z",
+  "variables": {
+    "PROJECT_NAME": "test-proj",
+    "LANGUAGES": "bash",
+    "CC_MODEL": "sonnet",
+    "SERENA_INITIAL_PROMPT": ""
+  }
+}
+EOF
+backfill_manifest_variables 2>/dev/null
+result=$(jq -r '.variables.CC_STATUSLINE' "$MANIFEST_PATH")
+assert_equals "enhanced" "$result" "CC_STATUSLINE backfilled with default 'enhanced'"
+
+log_test "backfill_manifest_variables adds CC_EFFORT_LEVEL when missing"
+reset_globals
+test_dir=$(create_temp_dir "backfill-effort")
+MANIFEST_PATH="$test_dir/manifest.json"
+cat >"$MANIFEST_PATH" <<'EOF'
+{
+  "schema_version": "1",
+  "upstream_repo": "serpro69/claude-toolbox",
+  "template_version": "v1.0.0",
+  "synced_at": "2025-01-27T10:00:00Z",
+  "variables": {
+    "PROJECT_NAME": "test-proj",
+    "LANGUAGES": "bash",
+    "CC_MODEL": "sonnet",
+    "SERENA_INITIAL_PROMPT": ""
+  }
+}
+EOF
+backfill_manifest_variables 2>/dev/null
+result=$(jq -r '.variables.CC_EFFORT_LEVEL' "$MANIFEST_PATH")
+assert_equals "high" "$result" "CC_EFFORT_LEVEL backfilled with default 'high'"
+
+log_test "backfill_manifest_variables adds both missing variables at once"
+reset_globals
+test_dir=$(create_temp_dir "backfill-both")
+MANIFEST_PATH="$test_dir/manifest.json"
+cat >"$MANIFEST_PATH" <<'EOF'
+{
+  "schema_version": "1",
+  "upstream_repo": "serpro69/claude-toolbox",
+  "template_version": "v1.0.0",
+  "synced_at": "2025-01-27T10:00:00Z",
+  "variables": {
+    "PROJECT_NAME": "test-proj",
+    "LANGUAGES": "bash",
+    "CC_MODEL": "sonnet",
+    "SERENA_INITIAL_PROMPT": ""
+  }
+}
+EOF
+backfill_manifest_variables 2>/dev/null
+assert_equals "enhanced" "$(jq -r '.variables.CC_STATUSLINE' "$MANIFEST_PATH")" "CC_STATUSLINE backfilled"
+assert_equals "high" "$(jq -r '.variables.CC_EFFORT_LEVEL' "$MANIFEST_PATH")" "CC_EFFORT_LEVEL backfilled"
+
+log_test "backfill_manifest_variables does not overwrite existing values"
+reset_globals
+test_dir=$(create_temp_dir "backfill-noop")
+MANIFEST_PATH="$test_dir/manifest.json"
+cat >"$MANIFEST_PATH" <<'EOF'
+{
+  "schema_version": "1",
+  "upstream_repo": "serpro69/claude-toolbox",
+  "template_version": "v1.0.0",
+  "synced_at": "2025-01-27T10:00:00Z",
+  "variables": {
+    "PROJECT_NAME": "test-proj",
+    "LANGUAGES": "bash",
+    "CC_MODEL": "sonnet",
+    "CC_EFFORT_LEVEL": "low",
+    "CC_STATUSLINE": "basic",
+    "SERENA_INITIAL_PROMPT": ""
+  }
+}
+EOF
+backfill_manifest_variables 2>/dev/null
+assert_equals "low" "$(jq -r '.variables.CC_EFFORT_LEVEL' "$MANIFEST_PATH")" "Existing CC_EFFORT_LEVEL preserved"
+assert_equals "basic" "$(jq -r '.variables.CC_STATUSLINE' "$MANIFEST_PATH")" "Existing CC_STATUSLINE preserved"
+
+# =============================================================================
 # Section 4: Escape Function Tests
 # =============================================================================
 
@@ -324,6 +420,116 @@ apply_substitutions "$test_dir/templates" "$output_dir" 2>/dev/null
 
 result=$(grep 'model' "$output_dir/claude/settings.json")
 assert_output_contains "claude-opus" "echo '$result'" "CC_MODEL value substituted"
+
+log_test "apply_substitutions substitutes CC_EFFORT_LEVEL"
+reset_globals
+test_dir=$(create_temp_dir "subst-effort-level-test")
+
+MANIFEST_PATH="$test_dir/manifest.json"
+cat >"$MANIFEST_PATH" <<'EOF'
+{
+  "schema_version": "1",
+  "upstream_repo": "test/repo",
+  "template_version": "v1.0.0",
+  "synced_at": "2025-01-27T10:00:00Z",
+  "variables": {
+    "PROJECT_NAME": "test-proj",
+    "LANGUAGES": "bash",
+    "CC_MODEL": "sonnet",
+    "CC_EFFORT_LEVEL": "medium",
+    "SERENA_INITIAL_PROMPT": ""
+  }
+}
+EOF
+
+mkdir -p "$test_dir/templates/claude"
+cat >"$test_dir/templates/claude/settings.json" <<'EOF'
+{
+  "effortLevel": "high",
+  "model": "sonnet",
+  "permissions": {}
+}
+EOF
+
+output_dir="$test_dir/output"
+apply_substitutions "$test_dir/templates" "$output_dir" 2>/dev/null
+
+result=$(grep 'effortLevel' "$output_dir/claude/settings.json")
+assert_output_contains "medium" "echo '$result'" "CC_EFFORT_LEVEL value substituted"
+
+log_test "apply_substitutions removes effortLevel line when CC_EFFORT_LEVEL=default"
+reset_globals
+test_dir=$(create_temp_dir "subst-effort-level-default-test")
+
+MANIFEST_PATH="$test_dir/manifest.json"
+cat >"$MANIFEST_PATH" <<'EOF'
+{
+  "schema_version": "1",
+  "upstream_repo": "test/repo",
+  "template_version": "v1.0.0",
+  "synced_at": "2025-01-27T10:00:00Z",
+  "variables": {
+    "PROJECT_NAME": "test-proj",
+    "LANGUAGES": "bash",
+    "CC_MODEL": "sonnet",
+    "CC_EFFORT_LEVEL": "default",
+    "SERENA_INITIAL_PROMPT": ""
+  }
+}
+EOF
+
+mkdir -p "$test_dir/templates/claude"
+cat >"$test_dir/templates/claude/settings.json" <<'EOF'
+{
+  "effortLevel": "high",
+  "model": "sonnet",
+  "permissions": {}
+}
+EOF
+
+output_dir="$test_dir/output"
+apply_substitutions "$test_dir/templates" "$output_dir" 2>/dev/null
+
+if grep -q '"effortLevel"' "$output_dir/claude/settings.json"; then
+  log_fail "CC_EFFORT_LEVEL=default should remove effortLevel line"
+else
+  log_pass "CC_EFFORT_LEVEL=default removes effortLevel line from settings"
+fi
+
+log_test "apply_substitutions defaults CC_EFFORT_LEVEL to high when missing from manifest"
+reset_globals
+test_dir=$(create_temp_dir "subst-effort-level-fallback-test")
+
+MANIFEST_PATH="$test_dir/manifest.json"
+cat >"$MANIFEST_PATH" <<'EOF'
+{
+  "schema_version": "1",
+  "upstream_repo": "test/repo",
+  "template_version": "v1.0.0",
+  "synced_at": "2025-01-27T10:00:00Z",
+  "variables": {
+    "PROJECT_NAME": "test-proj",
+    "LANGUAGES": "bash",
+    "CC_MODEL": "sonnet",
+    "SERENA_INITIAL_PROMPT": ""
+  }
+}
+EOF
+
+mkdir -p "$test_dir/templates/claude"
+cat >"$test_dir/templates/claude/settings.json" <<'EOF'
+{
+  "effortLevel": "placeholder",
+  "model": "sonnet",
+  "permissions": {}
+}
+EOF
+
+output_dir="$test_dir/output"
+apply_substitutions "$test_dir/templates" "$output_dir" 2>/dev/null
+
+result=$(grep 'effortLevel' "$output_dir/claude/settings.json")
+assert_output_contains "high" "echo '$result'" "CC_EFFORT_LEVEL defaults to high when missing"
 
 # =============================================================================
 # Section 6: File Comparison Tests

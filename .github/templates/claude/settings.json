@@ -3,6 +3,7 @@
     "commit": "",
     "pr": ""
   },
+  "effortLevel": "high",
   "permissions": {
     "defaultMode": "default",
     "allow": [

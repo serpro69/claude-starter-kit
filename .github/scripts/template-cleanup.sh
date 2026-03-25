@@ -11,6 +11,7 @@
 #
 # Options:
 #   --model <model>           Claude Code model (default: default)
+#   --effort-level <level>    Claude Code effort level (default: high)
 #   --languages <langs>       Programming languages for Serena (comma-separated, required)
 #   --serena-prompt <prompt>  Initial prompt for Serena semantic analysis
 #   --statusline <style>      Statusline style: enhanced (default) or basic
@@ -25,6 +26,7 @@ set -euo pipefail
 # Note: LANGUAGES is intentionally not initialized here to allow env var passthrough
 # The actual default is handled in load_env_vars()
 CC_MODEL="default"
+CC_EFFORT_LEVEL="high"
 SERENA_INITIAL_PROMPT=""
 CC_STATUSLINE="enhanced"
 NO_COMMIT=false
@@ -37,6 +39,7 @@ CI_MODE=false
 # Called before CLI parsing so CLI args can override
 load_env_vars() {
   CC_MODEL="${CC_MODEL:-default}"
+  CC_EFFORT_LEVEL="${CC_EFFORT_LEVEL:-high}"
   CC_STATUSLINE="${CC_STATUSLINE:-enhanced}"
   LANGUAGES="${LANGUAGES:-}"
   SERENA_INITIAL_PROMPT="${SERENA_INITIAL_PROMPT:-}"
@@ -79,6 +82,13 @@ format_languages_yaml() {
   done
 }
 
+# Use GNU sed (gsed on macOS, sed on Linux)
+if command -v gsed &>/dev/null; then
+  SED="gsed"
+else
+  SED="sed"
+fi
+
 # Check for required dependencies
 if ! command -v jq &>/dev/null; then
   log_error "jq is required but not installed."
@@ -102,6 +112,10 @@ Options:
   --model <model>           Claude Code model alias (default: default)
                             Options: default, sonnet, sonnet[1m], opus, opus[1m], opusplan, haiku
                             (See https://code.claude.com/docs/en/model-config#model-aliases for more details.)
+  --effort-level <level>    Claude Code effort level (default: high)
+                            Controls reasoning depth for responses.
+                            Options: high, medium, low, default
+                            'default' removes the setting so Claude Code uses its built-in default.
   --languages <langs>       Programming languages for Serena semantic analysis (required)
                             Comma-separated list, e.g.: python,typescript or just: python
                             Primary: python, typescript, java, go, rust, csharp, cpp, ruby
@@ -218,6 +232,18 @@ run_interactive() {
 
   echo ""
 
+  # Effort level selection
+  echo -e "${YELLOW}Effort Level Options:${NC}"
+  echo -e "  high:    Maximum reasoning depth (recommended)"
+  echo -e "  medium:  Balanced reasoning depth"
+  echo -e "  low:     Minimal reasoning depth"
+  echo -e "  default: Use Claude Code's built-in default"
+  echo ""
+  prompt_select "Select effort level" "high" CC_EFFORT_LEVEL \
+    "high" "medium" "low" "default"
+
+  echo ""
+
   # Statusline selection
   echo -e "${YELLOW}Statusline Options:${NC}"
   echo -e "  basic:    Simple one-line display (model + context %)"
@@ -293,6 +319,7 @@ show_config_summary() {
   echo ""
   echo -e "${CYAN}Configuration:${NC}"
   echo "  Claude Model:       $CC_MODEL"
+  echo "  Effort Level:       $CC_EFFORT_LEVEL"
   echo "  Statusline:         $CC_STATUSLINE"
   echo "  Languages:          $LANGUAGES"
   if [[ -n "$SERENA_INITIAL_PROMPT" ]]; then
@@ -355,6 +382,7 @@ generate_manifest() {
     --arg PROJECT_NAME "$project_name" \
     --arg LANGUAGES "$LANGUAGES" \
     --arg CC_MODEL "$CC_MODEL" \
+    --arg CC_EFFORT_LEVEL "$CC_EFFORT_LEVEL" \
     --arg CC_STATUSLINE "$CC_STATUSLINE" \
     --arg SERENA_INITIAL_PROMPT "$SERENA_INITIAL_PROMPT" \
     '{
@@ -366,6 +394,7 @@ generate_manifest() {
         PROJECT_NAME: $PROJECT_NAME,
         LANGUAGES: $LANGUAGES,
         CC_MODEL: $CC_MODEL,
+        CC_EFFORT_LEVEL: $CC_EFFORT_LEVEL,
         CC_STATUSLINE: $CC_STATUSLINE,
         SERENA_INITIAL_PROMPT: $SERENA_INITIAL_PROMPT
       }
@@ -386,14 +415,21 @@ execute_cleanup() {
   # Claude Code model - remove line for "default" (uses Claude Code's default), otherwise substitute
   if [[ "$CC_MODEL" == "default" ]]; then
     # Remove the model line entirely so Claude Code uses its built-in default
-    sed -i '/"model":/d' "$cc_settings_file"
+    $SED -i '/"model":/d' "$cc_settings_file"
   else
-    sed -i "s/\"model\": \".*\"/\"model\": \"$CC_MODEL\"/g" "$cc_settings_file"
+    $SED -i "s/\"model\": \".*\"/\"model\": \"$CC_MODEL\"/g" "$cc_settings_file"
+  fi
+
+  # Claude Code effort level - remove line for "default", otherwise substitute
+  if [[ "$CC_EFFORT_LEVEL" == "default" ]]; then
+    $SED -i '/"effortLevel":/d' "$cc_settings_file"
+  else
+    $SED -i "s/\"effortLevel\": \".*\"/\"effortLevel\": \"$CC_EFFORT_LEVEL\"/g" "$cc_settings_file"
   fi
 
   # Claude Code Statusline
   if [[ "$CC_STATUSLINE" == "basic" ]]; then
-    sed -i "s/statusline_enhanced\.sh/statusline.sh/g" "$cc_settings_file"
+    $SED -i "s/statusline_enhanced\.sh/statusline.sh/g" "$cc_settings_file"
   fi
 
   # Plugin marketplace — replace directory source with GitHub source for downstream
@@ -407,7 +443,7 @@ execute_cleanup() {
   # Serena MCP Settings
   local serena_settings_file=".github/templates/serena/project.yml"
   # Project name - always substitute with repo name
-  sed -i "s/project_name: \".*\"/project_name: \"$name\"/g" "$serena_settings_file"
+  $SED -i "s/project_name: \".*\"/project_name: \"$name\"/g" "$serena_settings_file"
   # Languages - use awk to replace the entire languages block (multi-line YAML array)
   local languages_yaml
   languages_yaml=$(format_languages_yaml "$LANGUAGES")
@@ -419,7 +455,7 @@ execute_cleanup() {
   ' "$serena_settings_file" >"$serena_settings_file.tmp" && mv "$serena_settings_file.tmp" "$serena_settings_file"
   # Serena initial prompt - only substitute if provided
   if [ -n "$SERENA_INITIAL_PROMPT" ]; then
-    sed -i "s/initial_prompt: \"\"/initial_prompt: \"$SERENA_INITIAL_PROMPT\"/g" "$serena_settings_file"
+    $SED -i "s/initial_prompt: \"\"/initial_prompt: \"$SERENA_INITIAL_PROMPT\"/g" "$serena_settings_file"
   fi
 
   log_step "Removing existing configuration directories..."
@@ -500,6 +536,10 @@ while [[ $# -gt 0 ]]; do
   case $1 in
   --model)
     CC_MODEL="$2"
+    shift 2
+    ;;
+  --effort-level)
+    CC_EFFORT_LEVEL="$2"
     shift 2
     ;;
   --languages)

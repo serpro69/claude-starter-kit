@@ -186,6 +186,13 @@ is_excluded() {
   return 1  # Not excluded
 }
 
+# Use GNU sed (gsed on macOS, sed on Linux)
+if command -v gsed &>/dev/null; then
+  SED="gsed"
+else
+  SED="sed"
+fi
+
 # =============================================================================
 # Dependency Check
 # =============================================================================
@@ -386,6 +393,58 @@ migrate_manifest() {
       exit 1
     fi
     mv "$tmp" "$MANIFEST_PATH"
+    read_manifest
+  fi
+}
+
+# backfill_manifest_variables()
+# Adds missing optional variables to the manifest with their default values.
+# This ensures the manifest is always explicit about what values are being used,
+# even for variables that were introduced after the downstream repo was created.
+#
+# Returns:
+#   0 on success
+#
+# Side effects:
+#   Rewrites MANIFEST_PATH in-place if any variables are added
+#   Reloads manifest via read_manifest() after rewrite
+#   Logs info message listing backfilled variables
+backfill_manifest_variables() {
+  local defaults=(
+    "CC_STATUSLINE:enhanced"
+    "CC_EFFORT_LEVEL:high"
+  )
+
+  local needs_update=false
+  local backfilled=()
+
+  for entry in "${defaults[@]}"; do
+    local var="${entry%%:*}"
+    local default_val="${entry#*:}"
+    if [[ "$(get_manifest_value ".variables.$var // \"__MISSING__\"")" == "__MISSING__" ]]; then
+      needs_update=true
+      backfilled+=("$var=$default_val")
+    fi
+  done
+
+  if $needs_update; then
+    local tmp
+    tmp=$(mktemp "/tmp/manifest-backfill.XXXXXX")
+    local jq_expr='.'
+    for entry in "${defaults[@]}"; do
+      local var="${entry%%:*}"
+      local default_val="${entry#*:}"
+      if [[ "$(get_manifest_value ".variables.$var // \"__MISSING__\"")" == "__MISSING__" ]]; then
+        jq_expr="$jq_expr | .variables.$var = \"$default_val\""
+      fi
+    done
+    if ! jq "$jq_expr" "$MANIFEST_PATH" > "$tmp"; then
+      rm -f "$tmp"
+      log_warn "Failed to backfill manifest variables"
+      return 0
+    fi
+    mv "$tmp" "$MANIFEST_PATH"
+    log_info "Backfilled missing manifest variables: ${backfilled[*]}"
     read_manifest
   fi
 }
@@ -708,7 +767,7 @@ fetch_upstream_templates() {
 escape_sed_replacement() {
   local str="$1"
   # Escape: & \ / and newlines for sed replacement string
-  printf '%s' "$str" | sed -e 's/[&\\/]/\\&/g' -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g'
+  printf '%s' "$str" | $SED -e 's/[&\\/]/\\&/g' -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g'
 }
 
 # apply_substitutions()
@@ -723,7 +782,7 @@ escape_sed_replacement() {
 #   0 on success
 #
 # Substitutions applied:
-#   - Claude Code settings: CC_MODEL
+#   - Claude Code settings: CC_MODEL, CC_EFFORT_LEVEL
 #   - Serena settings: PROJECT_NAME, LANGUAGES, SERENA_INITIAL_PROMPT
 #
 # Side effects:
@@ -740,11 +799,12 @@ apply_substitutions() {
   cp -rp "$template_dir"/* "$output_dir/"
 
   # Read all variables from manifest
-  local project_name languages cc_model cc_statusline serena_prompt
+  local project_name languages cc_model cc_effort_level cc_statusline serena_prompt
 
   project_name=$(get_manifest_value '.variables.PROJECT_NAME')
   languages=$(get_manifest_value '.variables.LANGUAGES')
   cc_model=$(get_manifest_value '.variables.CC_MODEL')
+  cc_effort_level=$(get_manifest_value '.variables.CC_EFFORT_LEVEL // "high"')
   cc_statusline=$(get_manifest_value '.variables.CC_STATUSLINE // "enhanced"')
   serena_prompt=$(get_manifest_value '.variables.SERENA_INITIAL_PROMPT')
 
@@ -753,15 +813,23 @@ apply_substitutions() {
   if [[ -f "$cc_settings_file" ]]; then
     if [[ "$cc_model" == "default" ]]; then
       # Remove the model line entirely so Claude Code uses its built-in default
-      sed -i '/"model":/d' "$cc_settings_file"
+      $SED -i '/"model":/d' "$cc_settings_file"
     else
       local escaped_model
       escaped_model=$(escape_sed_replacement "$cc_model")
-      sed -i "s/\"model\": \".*\"/\"model\": \"$escaped_model\"/g" "$cc_settings_file"
+      $SED -i "s/\"model\": \".*\"/\"model\": \"$escaped_model\"/g" "$cc_settings_file"
+    fi
+    # Effort level - remove line for "default", otherwise substitute
+    if [[ "$cc_effort_level" == "default" ]]; then
+      $SED -i '/"effortLevel":/d' "$cc_settings_file"
+    else
+      local escaped_effort_level
+      escaped_effort_level=$(escape_sed_replacement "$cc_effort_level")
+      $SED -i "s/\"effortLevel\": \".*\"/\"effortLevel\": \"$escaped_effort_level\"/g" "$cc_settings_file"
     fi
     # Statusline - template defaults to enhanced (statusline2.sh); switch to basic if requested
     if [[ "$cc_statusline" == "basic" ]]; then
-      sed -i "s/statusline_enhanced\.sh/statusline.sh/g" "$cc_settings_file"
+      $SED -i "s/statusline_enhanced\.sh/statusline.sh/g" "$cc_settings_file"
     fi
 
     # Plugin marketplace — replace directory source with GitHub source
@@ -785,7 +853,7 @@ apply_substitutions() {
     # Project name - always substitute
     local escaped_project_name
     escaped_project_name=$(escape_sed_replacement "$project_name")
-    sed -i "s/project_name: \".*\"/project_name: \"$escaped_project_name\"/g" "$serena_settings_file"
+    $SED -i "s/project_name: \".*\"/project_name: \"$escaped_project_name\"/g" "$serena_settings_file"
 
     # Languages - use awk to replace the entire languages block (multi-line YAML array)
     local languages_yaml
@@ -801,7 +869,7 @@ apply_substitutions() {
     if [[ -n "$serena_prompt" ]]; then
       local escaped_serena_prompt
       escaped_serena_prompt=$(escape_sed_replacement "$serena_prompt")
-      sed -i "s/initial_prompt: \"\"/initial_prompt: \"$escaped_serena_prompt\"/g" "$serena_settings_file"
+      $SED -i "s/initial_prompt: \"\"/initial_prompt: \"$escaped_serena_prompt\"/g" "$serena_settings_file"
     fi
     log_info "Applied Serena settings"
   fi
@@ -1324,6 +1392,7 @@ main() {
   read_manifest
   validate_manifest
   migrate_manifest
+  backfill_manifest_variables
 
   # Display manifest info
   if ! $CI_MODE; then

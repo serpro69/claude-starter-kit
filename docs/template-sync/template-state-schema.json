@@ -55,6 +55,13 @@
           "default": "default",
           "examples": ["sonnet", "opus", "haiku", "default"]
         },
+        "CC_EFFORT_LEVEL": {
+          "type": "string",
+          "description": "Claude Code effort level. Controls reasoning depth. Substituted into .claude/settings.json (effortLevel field). 'default' triggers line REMOVAL (same as CC_MODEL).",
+          "default": "high",
+          "enum": ["low", "medium", "high", "default"],
+          "examples": ["high", "medium", "low"]
+        },
         "CC_STATUSLINE": {
           "type": "string",
           "description": "Claude Code statusline style. 'enhanced' uses statusline_enhanced.sh (rich multi-line with rate limits, git, session timer). 'basic' uses statusline.sh (simple one-line: model + context %). Substituted into .claude/settings.json (statusLine.command field).",
