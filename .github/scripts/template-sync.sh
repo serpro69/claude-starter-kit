@@ -790,6 +790,14 @@ apply_substitutions() {
   # --- Claude Code Settings (claude/settings.json) ---
   local cc_settings_file="$output_dir/claude/settings.json"
   if [[ -f "$cc_settings_file" ]]; then
+    # Use downstream's settings.json as the base if it exists, so we only
+    # modify managed keys and avoid key-reordering noise in diffs.
+    # Falls back to the upstream template copy for first-time sync.
+    local downstream_settings=".claude/settings.json"
+    if [[ -f "$downstream_settings" ]]; then
+      cp "$downstream_settings" "$cc_settings_file"
+    fi
+
     local statusline_script="statusline_enhanced.sh"
     if [[ "$cc_statusline" == "basic" ]]; then
       statusline_script="statusline.sh"
@@ -812,9 +820,7 @@ apply_substitutions() {
       # Statusline script
       .statusLine.command = (.statusLine.command | gsub("statusline_enhanced\\.sh"; $statusline_script)) |
       # Plugin marketplace: directory -> github source for downstream
-      (if .extraKnownMarketplaces then
-        .extraKnownMarketplaces."claude-toolbox".source = { "source": "github", "repo": $repo }
-      else . end)
+      .extraKnownMarketplaces."claude-toolbox".source = { "source": "github", "repo": $repo }
       ' "$cc_settings_file" > "${cc_settings_file}.tmp" && mv "${cc_settings_file}.tmp" "$cc_settings_file"
 
     log_info "Applied Claude Code settings"
