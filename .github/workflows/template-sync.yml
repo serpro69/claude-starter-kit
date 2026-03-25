@@ -78,6 +78,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y jq
+          # Install yq (mikefarah) for YAML processing
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
 
       - name: Fetch target sync script from upstream
         run: |
@@ -239,6 +242,18 @@ jobs:
               .github/template-state.json > .github/template-state.json.tmp
             mv .github/template-state.json.tmp .github/template-state.json
           fi
+
+          # Backfill missing optional variables with defaults
+          DEFAULTS='{"CC_STATUSLINE":"enhanced","CC_EFFORT_LEVEL":"high","CC_PERMISSION_MODE":"default"}'
+          for key in $(echo "$DEFAULTS" | jq -r 'keys[]'); do
+            if [[ "$(jq -r ".variables.$key // \"__MISSING__\"" .github/template-state.json)" == "__MISSING__" ]]; then
+              default_val=$(echo "$DEFAULTS" | jq -r ".$key")
+              jq --arg k "$key" --arg v "$default_val" '.variables[$k] = $v' \
+                .github/template-state.json > .github/template-state.json.tmp
+              mv .github/template-state.json.tmp .github/template-state.json
+              echo "Backfilled $key=$default_val"
+            fi
+          done
 
           jq --arg version "$NEW_VERSION" --arg synced_at "$SYNCED_AT" \
             '.template_version = $version | .synced_at = $synced_at' \

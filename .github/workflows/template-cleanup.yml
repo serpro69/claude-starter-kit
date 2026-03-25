@@ -22,6 +22,28 @@ on:
           - opus[1m]
           - opusplan
           - haiku
+      CC_EFFORT_LEVEL:
+        description: |
+          Claude Code effort level. Controls reasoning depth.
+          'default' removes the setting so Claude Code uses its built-in default.
+        required: true
+        default: high
+        type: choice
+        options:
+          - high
+          - medium
+          - low
+          - default
+      CC_PERMISSION_MODE:
+        description: |
+          Claude Code permissions default mode.
+        required: true
+        default: default
+        type: choice
+        options:
+          - default
+          - plan
+          - bypassPermissions
       LANGUAGES:
         description: |
           Programming languages for Serena semantic analysis (required).
@@ -48,10 +70,18 @@ jobs:
       - name: Fetch Sources
         uses: actions/checkout@v6
 
+      - name: Install Dependencies
+        run: |
+          # Install yq (mikefarah) for YAML processing
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
       # Cleanup project using the .github/scripts/template-cleanup.sh script
       - name: Cleanup
         env:
           CC_MODEL: ${{ github.event.inputs.CC_MODEL }}
+          CC_EFFORT_LEVEL: ${{ github.event.inputs.CC_EFFORT_LEVEL }}
+          CC_PERMISSION_MODE: ${{ github.event.inputs.CC_PERMISSION_MODE }}
           LANGUAGES: ${{ github.event.inputs.LANGUAGES }}
           SERENA_INITIAL_PROMPT: ${{ github.event.inputs.SERENA_INITIAL_PROMPT }}
         run: |
