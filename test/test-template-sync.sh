@@ -230,9 +230,9 @@ backfill_manifest_variables 2>/dev/null
 result=$(jq -r '.variables.CC_EFFORT_LEVEL' "$MANIFEST_PATH")
 assert_equals "high" "$result" "CC_EFFORT_LEVEL backfilled with default 'high'"
 
-log_test "backfill_manifest_variables adds both missing variables at once"
+log_test "backfill_manifest_variables adds all missing variables at once"
 reset_globals
-test_dir=$(create_temp_dir "backfill-both")
+test_dir=$(create_temp_dir "backfill-all")
 MANIFEST_PATH="$test_dir/manifest.json"
 cat >"$MANIFEST_PATH" <<'EOF'
 {
@@ -251,6 +251,7 @@ EOF
 backfill_manifest_variables 2>/dev/null
 assert_equals "enhanced" "$(jq -r '.variables.CC_STATUSLINE' "$MANIFEST_PATH")" "CC_STATUSLINE backfilled"
 assert_equals "high" "$(jq -r '.variables.CC_EFFORT_LEVEL' "$MANIFEST_PATH")" "CC_EFFORT_LEVEL backfilled"
+assert_equals "default" "$(jq -r '.variables.CC_PERMISSION_MODE' "$MANIFEST_PATH")" "CC_PERMISSION_MODE backfilled"
 
 log_test "backfill_manifest_variables does not overwrite existing values"
 reset_globals
@@ -267,6 +268,7 @@ cat >"$MANIFEST_PATH" <<'EOF'
     "LANGUAGES": "bash",
     "CC_MODEL": "sonnet",
     "CC_EFFORT_LEVEL": "low",
+    "CC_PERMISSION_MODE": "plan",
     "CC_STATUSLINE": "basic",
     "SERENA_INITIAL_PROMPT": ""
   }
@@ -274,6 +276,7 @@ cat >"$MANIFEST_PATH" <<'EOF'
 EOF
 backfill_manifest_variables 2>/dev/null
 assert_equals "low" "$(jq -r '.variables.CC_EFFORT_LEVEL' "$MANIFEST_PATH")" "Existing CC_EFFORT_LEVEL preserved"
+assert_equals "plan" "$(jq -r '.variables.CC_PERMISSION_MODE' "$MANIFEST_PATH")" "Existing CC_PERMISSION_MODE preserved"
 assert_equals "basic" "$(jq -r '.variables.CC_STATUSLINE' "$MANIFEST_PATH")" "Existing CC_STATUSLINE preserved"
 
 # =============================================================================
@@ -530,6 +533,79 @@ apply_substitutions "$test_dir/templates" "$output_dir" 2>/dev/null
 
 result=$(grep 'effortLevel' "$output_dir/claude/settings.json")
 assert_output_contains "high" "echo '$result'" "CC_EFFORT_LEVEL defaults to high when missing"
+
+log_test "apply_substitutions substitutes CC_PERMISSION_MODE"
+reset_globals
+test_dir=$(create_temp_dir "subst-permission-mode-test")
+
+MANIFEST_PATH="$test_dir/manifest.json"
+cat >"$MANIFEST_PATH" <<'EOF'
+{
+  "schema_version": "1",
+  "upstream_repo": "test/repo",
+  "template_version": "v1.0.0",
+  "synced_at": "2025-01-27T10:00:00Z",
+  "variables": {
+    "PROJECT_NAME": "test-proj",
+    "LANGUAGES": "bash",
+    "CC_MODEL": "sonnet",
+    "CC_PERMISSION_MODE": "plan",
+    "SERENA_INITIAL_PROMPT": ""
+  }
+}
+EOF
+
+mkdir -p "$test_dir/templates/claude"
+cat >"$test_dir/templates/claude/settings.json" <<'EOF'
+{
+  "permissions": {
+    "defaultMode": "default"
+  },
+  "model": "sonnet"
+}
+EOF
+
+output_dir="$test_dir/output"
+apply_substitutions "$test_dir/templates" "$output_dir" 2>/dev/null
+
+result=$(grep 'defaultMode' "$output_dir/claude/settings.json")
+assert_output_contains "plan" "echo '$result'" "CC_PERMISSION_MODE value substituted"
+
+log_test "apply_substitutions defaults CC_PERMISSION_MODE to default when missing from manifest"
+reset_globals
+test_dir=$(create_temp_dir "subst-permission-mode-fallback-test")
+
+MANIFEST_PATH="$test_dir/manifest.json"
+cat >"$MANIFEST_PATH" <<'EOF'
+{
+  "schema_version": "1",
+  "upstream_repo": "test/repo",
+  "template_version": "v1.0.0",
+  "synced_at": "2025-01-27T10:00:00Z",
+  "variables": {
+    "PROJECT_NAME": "test-proj",
+    "LANGUAGES": "bash",
+    "CC_MODEL": "sonnet",
+    "SERENA_INITIAL_PROMPT": ""
+  }
+}
+EOF
+
+mkdir -p "$test_dir/templates/claude"
+cat >"$test_dir/templates/claude/settings.json" <<'EOF'
+{
+  "permissions": {
+    "defaultMode": "placeholder"
+  },
+  "model": "sonnet"
+}
+EOF
+
+output_dir="$test_dir/output"
+apply_substitutions "$test_dir/templates" "$output_dir" 2>/dev/null
+
+result=$(grep 'defaultMode' "$output_dir/claude/settings.json")
+assert_output_contains "default" "echo '$result'" "CC_PERMISSION_MODE defaults to default when missing"
 
 # =============================================================================
 # Section 6: File Comparison Tests

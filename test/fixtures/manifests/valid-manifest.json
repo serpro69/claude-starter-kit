@@ -8,6 +8,7 @@
     "LANGUAGES": "typescript",
     "CC_MODEL": "sonnet",
     "CC_EFFORT_LEVEL": "high",
+    "CC_PERMISSION_MODE": "default",
     "SERENA_INITIAL_PROMPT": ""
   }
 }

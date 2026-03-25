@@ -30,6 +30,7 @@ PROJECT_NAME="test-project"
 LANGUAGES="typescript"
 CC_MODEL="sonnet"
 CC_EFFORT_LEVEL="high"
+CC_PERMISSION_MODE="default"
 CC_STATUSLINE="enhanced"
 SERENA_INITIAL_PROMPT=""
 
@@ -164,7 +165,7 @@ project_name=$(jq -r '.variables.PROJECT_NAME' .github/template-state.json)
 assert_equals "my-awesome-project" "$project_name" "PROJECT_NAME captured correctly"
 cd "$REPO_ROOT"
 
-log_test "Manifest captures all 6 variables"
+log_test "Manifest captures all 7 variables"
 test_dir=$(create_temp_git_repo "v1.0.0")
 cd "$test_dir"
 
@@ -172,6 +173,7 @@ PROJECT_NAME="test"
 LANGUAGES="python"
 CC_MODEL="opus"
 CC_EFFORT_LEVEL="medium"
+CC_PERMISSION_MODE="plan"
 CC_STATUSLINE="enhanced"
 SERENA_INITIAL_PROMPT="hello"
 
@@ -182,6 +184,7 @@ assert_equals "test" "$(jq -r '.variables.PROJECT_NAME' .github/template-state.j
 assert_equals "python" "$(jq -r '.variables.LANGUAGES' .github/template-state.json)" "LANGUAGES"
 assert_equals "opus" "$(jq -r '.variables.CC_MODEL' .github/template-state.json)" "CC_MODEL"
 assert_equals "medium" "$(jq -r '.variables.CC_EFFORT_LEVEL' .github/template-state.json)" "CC_EFFORT_LEVEL"
+assert_equals "plan" "$(jq -r '.variables.CC_PERMISSION_MODE' .github/template-state.json)" "CC_PERMISSION_MODE"
 assert_equals "enhanced" "$(jq -r '.variables.CC_STATUSLINE' .github/template-state.json)" "CC_STATUSLINE"
 assert_equals "hello" "$(jq -r '.variables.SERENA_INITIAL_PROMPT' .github/template-state.json)" "SERENA_INITIAL_PROMPT"
 cd "$REPO_ROOT"
@@ -359,6 +362,7 @@ PROJECT_NAME="schema-test"
 LANGUAGES="go"
 CC_MODEL="sonnet"
 CC_EFFORT_LEVEL="high"
+CC_PERMISSION_MODE="default"
 CC_STATUSLINE="enhanced"
 SERENA_INITIAL_PROMPT=""
 

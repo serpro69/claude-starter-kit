@@ -62,6 +62,12 @@
           "enum": ["low", "medium", "high", "default"],
           "examples": ["high", "medium", "low"]
         },
+        "CC_PERMISSION_MODE": {
+          "type": "string",
+          "description": "Claude Code permissions default mode. Substituted into .claude/settings.json (permissions.defaultMode field).",
+          "default": "default",
+          "examples": ["default", "plan", "bypassPermissions"]
+        },
         "CC_STATUSLINE": {
           "type": "string",
           "description": "Claude Code statusline style. 'enhanced' uses statusline_enhanced.sh (rich multi-line with rate limits, git, session timer). 'basic' uses statusline.sh (simple one-line: model + context %). Substituted into .claude/settings.json (statusLine.command field).",

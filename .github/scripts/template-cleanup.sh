@@ -12,6 +12,7 @@
 # Options:
 #   --model <model>           Claude Code model (default: default)
 #   --effort-level <level>    Claude Code effort level (default: high)
+#   --permission-mode <mode>  Claude Code permission mode (default: default)
 #   --languages <langs>       Programming languages for Serena (comma-separated, required)
 #   --serena-prompt <prompt>  Initial prompt for Serena semantic analysis
 #   --statusline <style>      Statusline style: enhanced (default) or basic
@@ -27,6 +28,7 @@ set -euo pipefail
 # The actual default is handled in load_env_vars()
 CC_MODEL="default"
 CC_EFFORT_LEVEL="high"
+CC_PERMISSION_MODE="default"
 SERENA_INITIAL_PROMPT=""
 CC_STATUSLINE="enhanced"
 NO_COMMIT=false
@@ -40,6 +42,7 @@ CI_MODE=false
 load_env_vars() {
   CC_MODEL="${CC_MODEL:-default}"
   CC_EFFORT_LEVEL="${CC_EFFORT_LEVEL:-high}"
+  CC_PERMISSION_MODE="${CC_PERMISSION_MODE:-default}"
   CC_STATUSLINE="${CC_STATUSLINE:-enhanced}"
   LANGUAGES="${LANGUAGES:-}"
   SERENA_INITIAL_PROMPT="${SERENA_INITIAL_PROMPT:-}"
@@ -116,6 +119,9 @@ Options:
                             Controls reasoning depth for responses.
                             Options: high, medium, low, default
                             'default' removes the setting so Claude Code uses its built-in default.
+  --permission-mode <mode>  Claude Code permissions default mode (default: default)
+                            Options: default, plan, bypassPermissions
+                            'default' keeps the standard permission prompts.
   --languages <langs>       Programming languages for Serena semantic analysis (required)
                             Comma-separated list, e.g.: python,typescript or just: python
                             Primary: python, typescript, java, go, rust, csharp, cpp, ruby
@@ -244,6 +250,17 @@ run_interactive() {
 
   echo ""
 
+  # Permission mode selection
+  echo -e "${YELLOW}Permission Mode Options:${NC}"
+  echo -e "  default:           Standard permission prompts (recommended)"
+  echo -e "  plan:              Plan mode - read-only by default"
+  echo -e "  bypassPermissions: Auto-approve all tool calls"
+  echo ""
+  prompt_select "Select permission mode" "default" CC_PERMISSION_MODE \
+    "default" "plan" "bypassPermissions"
+
+  echo ""
+
   # Statusline selection
   echo -e "${YELLOW}Statusline Options:${NC}"
   echo -e "  basic:    Simple one-line display (model + context %)"
@@ -320,6 +337,7 @@ show_config_summary() {
   echo -e "${CYAN}Configuration:${NC}"
   echo "  Claude Model:       $CC_MODEL"
   echo "  Effort Level:       $CC_EFFORT_LEVEL"
+  echo "  Permission Mode:    $CC_PERMISSION_MODE"
   echo "  Statusline:         $CC_STATUSLINE"
   echo "  Languages:          $LANGUAGES"
   if [[ -n "$SERENA_INITIAL_PROMPT" ]]; then
@@ -383,6 +401,7 @@ generate_manifest() {
     --arg LANGUAGES "$LANGUAGES" \
     --arg CC_MODEL "$CC_MODEL" \
     --arg CC_EFFORT_LEVEL "$CC_EFFORT_LEVEL" \
+    --arg CC_PERMISSION_MODE "$CC_PERMISSION_MODE" \
     --arg CC_STATUSLINE "$CC_STATUSLINE" \
     --arg SERENA_INITIAL_PROMPT "$SERENA_INITIAL_PROMPT" \
     '{
@@ -395,6 +414,7 @@ generate_manifest() {
         LANGUAGES: $LANGUAGES,
         CC_MODEL: $CC_MODEL,
         CC_EFFORT_LEVEL: $CC_EFFORT_LEVEL,
+        CC_PERMISSION_MODE: $CC_PERMISSION_MODE,
         CC_STATUSLINE: $CC_STATUSLINE,
         SERENA_INITIAL_PROMPT: $SERENA_INITIAL_PROMPT
       }
@@ -426,6 +446,9 @@ execute_cleanup() {
   else
     $SED -i "s/\"effortLevel\": \".*\"/\"effortLevel\": \"$CC_EFFORT_LEVEL\"/g" "$cc_settings_file"
   fi
+
+  # Claude Code permission mode - substitute value
+  $SED -i "s/\"defaultMode\": \".*\"/\"defaultMode\": \"$CC_PERMISSION_MODE\"/g" "$cc_settings_file"
 
   # Claude Code Statusline
   if [[ "$CC_STATUSLINE" == "basic" ]]; then
@@ -540,6 +563,10 @@ while [[ $# -gt 0 ]]; do
     ;;
   --effort-level)
     CC_EFFORT_LEVEL="$2"
+    shift 2
+    ;;
+  --permission-mode)
+    CC_PERMISSION_MODE="$2"
     shift 2
     ;;
   --languages)

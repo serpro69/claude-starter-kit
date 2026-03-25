@@ -413,6 +413,7 @@ backfill_manifest_variables() {
   local defaults=(
     "CC_STATUSLINE:enhanced"
     "CC_EFFORT_LEVEL:high"
+    "CC_PERMISSION_MODE:default"
   )
 
   local needs_update=false
@@ -782,7 +783,7 @@ escape_sed_replacement() {
 #   0 on success
 #
 # Substitutions applied:
-#   - Claude Code settings: CC_MODEL, CC_EFFORT_LEVEL
+#   - Claude Code settings: CC_MODEL, CC_EFFORT_LEVEL, CC_PERMISSION_MODE
 #   - Serena settings: PROJECT_NAME, LANGUAGES, SERENA_INITIAL_PROMPT
 #
 # Side effects:
@@ -799,12 +800,13 @@ apply_substitutions() {
   cp -rp "$template_dir"/* "$output_dir/"
 
   # Read all variables from manifest
-  local project_name languages cc_model cc_effort_level cc_statusline serena_prompt
+  local project_name languages cc_model cc_effort_level cc_permission_mode cc_statusline serena_prompt
 
   project_name=$(get_manifest_value '.variables.PROJECT_NAME')
   languages=$(get_manifest_value '.variables.LANGUAGES')
   cc_model=$(get_manifest_value '.variables.CC_MODEL')
   cc_effort_level=$(get_manifest_value '.variables.CC_EFFORT_LEVEL // "high"')
+  cc_permission_mode=$(get_manifest_value '.variables.CC_PERMISSION_MODE // "default"')
   cc_statusline=$(get_manifest_value '.variables.CC_STATUSLINE // "enhanced"')
   serena_prompt=$(get_manifest_value '.variables.SERENA_INITIAL_PROMPT')
 
@@ -827,6 +829,10 @@ apply_substitutions() {
       escaped_effort_level=$(escape_sed_replacement "$cc_effort_level")
       $SED -i "s/\"effortLevel\": \".*\"/\"effortLevel\": \"$escaped_effort_level\"/g" "$cc_settings_file"
     fi
+    # Permission mode - substitute value
+    local escaped_permission_mode
+    escaped_permission_mode=$(escape_sed_replacement "$cc_permission_mode")
+    $SED -i "s/\"defaultMode\": \".*\"/\"defaultMode\": \"$escaped_permission_mode\"/g" "$cc_settings_file"
     # Statusline - template defaults to enhanced (statusline2.sh); switch to basic if requested
     if [[ "$cc_statusline" == "basic" ]]; then
       $SED -i "s/statusline_enhanced\.sh/statusline.sh/g" "$cc_settings_file"
