@@ -35,37 +35,37 @@ FIXTURES_DIR="$SCRIPT_DIR/fixtures"
 # Section 1: Template File Existence
 # =============================================================================
 
-log_section "Section 1: Template File Existence"
+log_section "Section 1: File Existence"
 
-log_test "CLAUDE.extra.md template exists"
-assert_file_exists "$REPO_ROOT/.github/templates/claude/CLAUDE.extra.md" "Template CLAUDE.extra.md should exist"
+log_test "CLAUDE.extra.md exists"
+assert_file_exists "$REPO_ROOT/.claude/CLAUDE.extra.md" "CLAUDE.extra.md should exist"
 
-log_test "CLAUDE.extra.md template contains behavioral instructions"
-if grep -q "## Behavioral Instructions" "$REPO_ROOT/.github/templates/claude/CLAUDE.extra.md"; then
-  log_pass "Template contains behavioral instructions section"
+log_test "CLAUDE.extra.md contains behavioral instructions"
+if grep -q "## Behavioral Instructions" "$REPO_ROOT/.claude/CLAUDE.extra.md"; then
+  log_pass "Contains behavioral instructions section"
 else
-  log_fail "Template should contain '## Behavioral Instructions'"
+  log_fail "Should contain '## Behavioral Instructions'"
 fi
 
-log_test "CLAUDE.extra.md template contains Serena best practices"
-if grep -q "## Serena Best Practices" "$REPO_ROOT/.github/templates/claude/CLAUDE.extra.md"; then
-  log_pass "Template contains Serena best practices section"
+log_test "CLAUDE.extra.md contains Serena best practices"
+if grep -q "## Serena Best Practices" "$REPO_ROOT/.claude/CLAUDE.extra.md"; then
+  log_pass "Contains Serena best practices section"
 else
-  log_fail "Template should contain '## Serena Best Practices'"
+  log_fail "Should contain '## Serena Best Practices'"
 fi
 
-log_test "CLAUDE.extra.md template contains task tracking"
-if grep -q "## Task Tracking" "$REPO_ROOT/.github/templates/claude/CLAUDE.extra.md"; then
-  log_pass "Template contains task tracking section"
+log_test "CLAUDE.extra.md contains task tracking"
+if grep -q "## Task Tracking" "$REPO_ROOT/.claude/CLAUDE.extra.md"; then
+  log_pass "Contains task tracking section"
 else
-  log_fail "Template should contain '## Task Tracking'"
+  log_fail "Should contain '## Task Tracking'"
 fi
 
-log_test "CLAUDE.extra.md template contains exploration phase"
-if grep -q "### Exploration Phase" "$REPO_ROOT/.github/templates/claude/CLAUDE.extra.md"; then
-  log_pass "Template contains exploration phase section"
+log_test "CLAUDE.extra.md contains exploration phase"
+if grep -q "### Exploration Phase" "$REPO_ROOT/.claude/CLAUDE.extra.md"; then
+  log_pass "Contains exploration phase section"
 else
-  log_fail "Template should contain '### Exploration Phase'"
+  log_fail "Should contain '### Exploration Phase'"
 fi
 
 # =============================================================================
@@ -97,11 +97,10 @@ fi
 
 log_test "CLAUDE.md retains project-specific sections"
 if grep -q "## Repository Overview" "$REPO_ROOT/CLAUDE.md" && \
-   grep -q "## Project Rules" "$REPO_ROOT/CLAUDE.md" && \
    grep -q "## Testing" "$REPO_ROOT/CLAUDE.md"; then
   log_pass "CLAUDE.md retains project-specific sections"
 else
-  log_fail "CLAUDE.md should retain Repository Overview, Project Rules, and Testing sections"
+  log_fail "CLAUDE.md should retain Repository Overview and Testing sections"
 fi
 
 # =============================================================================

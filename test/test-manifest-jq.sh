@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/helpers.sh"
 
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-EXAMPLE_MANIFEST="$REPO_ROOT/.github/templates/template-state.example.json"
+EXAMPLE_MANIFEST="$REPO_ROOT/.github/template-state.example.json"
 SCHEMA_FILE="$REPO_ROOT/docs/template-sync/template-state-schema.json"
 FIXTURES_DIR="$SCRIPT_DIR/fixtures/manifests"
 

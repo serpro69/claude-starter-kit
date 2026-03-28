@@ -71,7 +71,7 @@ If `.claude/scripts/sync-workflow.sh` does not exist, fetch it first:
 
 ```bash
 mkdir -p .claude/scripts
-curl -fsSL "https://raw.githubusercontent.com/serpro69/claude-toolbox/master/.github/templates/claude/scripts/sync-workflow.sh" \
+curl -fsSL "https://raw.githubusercontent.com/serpro69/claude-toolbox/master/.claude/scripts/sync-workflow.sh" \
   -o .claude/scripts/sync-workflow.sh
 chmod +x .claude/scripts/sync-workflow.sh
 ```
