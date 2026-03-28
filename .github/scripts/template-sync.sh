@@ -721,27 +721,38 @@ fetch_upstream_templates() {
     fi
   fi
 
-  # Configure sparse-checkout to fetch template files and sync infrastructure
+  # Configure sparse-checkout to fetch config dirs and sync infrastructure
   if ! git sparse-checkout init --cone --quiet 2>/dev/null; then
     log_warn "Sparse-checkout init failed, continuing with full checkout"
   fi
-  if ! git sparse-checkout set .github/templates .github/workflows/template-sync.yml .github/scripts/template-sync.sh docs/update.sh klaude-plugin/.claude-plugin/plugin.json --quiet 2>/dev/null; then
-    log_warn "Sparse-checkout set failed, templates may not exist at this version"
+  if ! git sparse-checkout set .claude .serena .github/workflows/template-sync.yml .github/scripts/template-sync.sh docs/update.sh klaude-plugin/.claude-plugin/plugin.json --quiet 2>/dev/null; then
+    log_warn "Sparse-checkout set failed, config dirs may not exist at this version"
   fi
 
   cd - >/dev/null
 
-  # Verify templates directory exists
-  FETCHED_TEMPLATES_PATH="$work_dir/upstream/.github/templates"
-  if [[ ! -d "$FETCHED_TEMPLATES_PATH" ]]; then
-    log_error "Templates directory not found in upstream at version: $version"
-    log_error "Expected path: .github/templates"
-    log_error "The upstream repository may not have templates at this version,"
+  # Build a staging structure with claude/ and serena/ subdirs (without dot prefix)
+  # so the downstream substitution and comparison pipeline works unchanged.
+  FETCHED_TEMPLATES_PATH="$work_dir/fetched"
+  mkdir -p "$FETCHED_TEMPLATES_PATH"
+
+  local upstream_root="$work_dir/upstream"
+  if [[ -d "$upstream_root/.claude" ]]; then
+    cp -rp "$upstream_root/.claude" "$FETCHED_TEMPLATES_PATH/claude"
+  fi
+  if [[ -d "$upstream_root/.serena" ]]; then
+    cp -rp "$upstream_root/.serena" "$FETCHED_TEMPLATES_PATH/serena"
+  fi
+
+  if [[ ! -d "$FETCHED_TEMPLATES_PATH/claude" && ! -d "$FETCHED_TEMPLATES_PATH/serena" ]]; then
+    log_error "Config directories not found in upstream at version: $version"
+    log_error "Expected .claude/ and/or .serena/ in the upstream repository."
+    log_error "The upstream repository may not have these directories at this version,"
     log_error "or the repository structure has changed."
     exit 1
   fi
 
-  log_success "Fetched templates from $upstream @ $version"
+  log_success "Fetched config from $upstream @ $version"
 }
 
 # =============================================================================

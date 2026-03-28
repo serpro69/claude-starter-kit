@@ -414,7 +414,7 @@ execute_cleanup() {
   # Note: Templates now use actual working values instead of placeholders
 
   # Claude Code Settings — all JSON modifications in a single jq call
-  local cc_settings_file=".github/templates/claude/settings.json"
+  local cc_settings_file=".claude/settings.json"
   local upstream_repo="${UPSTREAM_REPO:-serpro69/claude-toolbox}"
   local statusline_script="statusline_enhanced.sh"
   if [[ "$CC_STATUSLINE" == "basic" ]]; then
@@ -440,7 +440,7 @@ execute_cleanup() {
     ' "$cc_settings_file" > "${cc_settings_file}.tmp" && mv "${cc_settings_file}.tmp" "$cc_settings_file"
 
   # Serena MCP Settings
-  local serena_settings_file=".github/templates/serena/project.yml"
+  local serena_settings_file=".serena/project.yml"
   # Project name - always substitute with repo name
   yq -i ".project_name = \"$name\"" "$serena_settings_file"
   # Languages - convert comma-separated string to YAML array via jq
@@ -452,19 +452,12 @@ execute_cleanup() {
     yq -i ".initial_prompt = \"$SERENA_INITIAL_PROMPT\"" "$serena_settings_file"
   fi
 
-  log_step "Removing existing configuration directories..."
-  rm -rf .claude .serena
-
-  log_step "Deploying templates to destination locations..."
-  cp -r .github/templates/claude ./.claude
-  cp -r .github/templates/serena ./.serena
   if [[ -f .github/scripts/bootstrap.sh ]]; then
     cp .github/scripts/bootstrap.sh .
     rm -f .github/scripts/bootstrap.sh
   fi
 
   log_step "Cleaning up .github/ (preserving sync infrastructure)..."
-  rm -rf .github/templates
   rm -f .github/scripts/template-cleanup.sh
   rm -f .github/workflows/template-cleanup.yml
 
@@ -599,9 +592,9 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   REPO_ROOT=$(git rev-parse --show-toplevel)
   cd "$REPO_ROOT"
 
-  # Check if templates directory exists
-  if [[ ! -d ".github/templates" ]]; then
-    log_error "Templates directory .github/templates not found"
+  # Check if config directories exist
+  if [[ ! -d ".claude" || ! -d ".serena" ]]; then
+    log_error "Config directories .claude/ and .serena/ not found"
     log_error "Are you sure this is a claude-toolbox based repository?"
     exit 1
   fi

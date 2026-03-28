@@ -16,10 +16,6 @@ Three integrated components:
 
 For API keys and MCP server setup, see the "MCP Server Configuration" section in `README.md`.
 
-## Project Rules
-
-- `.claude/` is a symlink to `.github/templates/claude/`
-
 ## Testing
 
 Tests for the template-sync feature are in `test/`. Run with:

@@ -159,7 +159,7 @@ See [Pal configuration docs](https://github.com/BeehiveInnovations/pal-mcp-serve
 - `SERENA_INITIAL_PROMPT` — initial prompt given to the LLM on project activation
 
 > [!TIP]
-> Take a look at serena [project.yaml](./.github/templates/serena/project.yml) configuration file for more details.
+> Take a look at serena [project.yaml](./.serena/project.yml) configuration file for more details.
 
 4. Clone your new repo and cd into it
 
@@ -405,7 +405,7 @@ klaude-plugin/                   # kk plugin (distributed via plugin system)
 
 .claude-plugin/marketplace.json  # Marketplace catalog
 
-.claude/                         # → symlink to .github/templates/claude/
+.claude/
 ├── CLAUDE.extra.md              # Always-loaded instructions
 ├── settings.json                # Permissions, env vars, marketplace/plugin config
 └── scripts/                     # statusline.sh, statusline_enhanced.sh, sync-workflow.sh

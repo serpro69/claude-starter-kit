@@ -138,49 +138,49 @@ fi
 # Section 6: Template is slimmed
 # =============================================================================
 
-log_section "Section 6: Template Slimmed Down"
+log_section "Section 6: Config Slimmed Down"
 
-log_test "Template no longer has skills directory"
-if [[ -d "$REPO_ROOT/.github/templates/claude/skills" ]]; then
-  log_fail "Template should not have skills/ directory (moved to plugin)"
+log_test ".claude/ does not have skills directory"
+if [[ -d "$REPO_ROOT/.claude/skills" ]]; then
+  log_fail ".claude/ should not have skills/ directory (moved to plugin)"
 else
-  log_pass "skills/ removed from template"
+  log_pass "skills/ not in .claude/"
 fi
 
-log_test "Template no longer has commands directory"
-if [[ -d "$REPO_ROOT/.github/templates/claude/commands" ]]; then
-  log_fail "Template should not have commands/ directory (moved to plugin)"
+log_test ".claude/ does not have commands directory"
+if [[ -d "$REPO_ROOT/.claude/commands" ]]; then
+  log_fail ".claude/ should not have commands/ directory (moved to plugin)"
 else
-  log_pass "commands/ removed from template"
+  log_pass "commands/ not in .claude/"
 fi
 
-log_test "Template no longer has validate-bash.sh"
-if [[ -f "$REPO_ROOT/.github/templates/claude/scripts/validate-bash.sh" ]]; then
-  log_fail "Template should not have validate-bash.sh (moved to plugin)"
+log_test ".claude/ does not have validate-bash.sh"
+if [[ -f "$REPO_ROOT/.claude/scripts/validate-bash.sh" ]]; then
+  log_fail ".claude/ should not have validate-bash.sh (moved to plugin)"
 else
-  log_pass "validate-bash.sh removed from template"
+  log_pass "validate-bash.sh not in .claude/"
 fi
 
-log_test "Template settings.json has no hooks section"
-settings_json=$(cat "$REPO_ROOT/.github/templates/claude/settings.json")
+log_test "settings.json has no hooks section"
+settings_json=$(cat "$REPO_ROOT/.claude/settings.json")
 if echo "$settings_json" | jq -e '.hooks' &>/dev/null; then
-  log_fail "Template settings.json should not have hooks section"
+  log_fail "settings.json should not have hooks section"
 else
-  log_pass "hooks section removed from template settings.json"
+  log_pass "hooks section removed from settings.json"
 fi
 
-log_test "Template settings.json has marketplace config"
+log_test "settings.json has marketplace config"
 if echo "$settings_json" | jq -e '.extraKnownMarketplaces' &>/dev/null; then
-  log_pass "Template settings.json has extraKnownMarketplaces"
+  log_pass "settings.json has extraKnownMarketplaces"
 else
-  log_fail "Template settings.json should have extraKnownMarketplaces"
+  log_fail "settings.json should have extraKnownMarketplaces"
 fi
 
-log_test "Template settings.json has enabledPlugins"
+log_test "settings.json has enabledPlugins"
 if echo "$settings_json" | jq -e '.enabledPlugins."kk@claude-toolbox"' &>/dev/null; then
-  log_pass "Template settings.json has kk@claude-toolbox enabled"
+  log_pass "settings.json has kk@claude-toolbox enabled"
 else
-  log_fail "Template settings.json should have kk@claude-toolbox in enabledPlugins"
+  log_fail "settings.json should have kk@claude-toolbox in enabledPlugins"
 fi
 
 # =============================================================================
