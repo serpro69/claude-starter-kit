@@ -37,15 +37,15 @@
 - [x] 3.3 Extend Step 3 (Report) — add conditional index of non-obvious patterns/conventions as `kk:project-conventions`
 
 ## Task 4: Integrate capy into solid-code-review
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1
 - **Docs:** [implementation.md#code-review](./implementation.md#code-review)
 
 ### Subtasks
-- [ ] 4.1 Add protocol file reference to `klaude-plugin/skills/solid-code-review/SKILL.md`
-- [ ] 4.2 Extend Step 1 (Preflight context) — add search of `kk:review-findings` for prior findings in the same area, and `kk:lang-idioms` for language best practices
-- [ ] 4.3 Add `capy_fetch_and_index` fallback in Step 1 — if `kk:lang-idioms` returns no results for detected language, optionally fetch a well-known idioms resource and label it `kk:lang-idioms`
-- [ ] 4.4 Insert index step after Step 7 (Self-check) — index P0/P1 recurring pattern findings as `kk:review-findings`
+- [x] 4.1 Add protocol file reference to `klaude-plugin/skills/solid-code-review/SKILL.md`
+- [x] 4.2 Extend Step 1 (Preflight context) — add search of `kk:review-findings` for prior findings in the same area, and `kk:lang-idioms` for language best practices
+- [x] 4.3 Add `capy_fetch_and_index` fallback in Step 1 — if `kk:lang-idioms` returns no results for detected language, optionally fetch a well-known idioms resource and label it `kk:lang-idioms`
+- [x] 4.4 Insert index step after Step 7 (Self-check) — index P0/P1 recurring pattern findings as `kk:review-findings`
 
 ## Task 5: Integrate capy into testing-process
 - **Status:** pending

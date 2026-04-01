@@ -7,6 +7,8 @@ description: |
 
 # SOLID Code Review
 
+For capy knowledge base conventions, see [capy-knowledge-protocol.md](../_shared/capy-knowledge-protocol.md).
+
 ## Overview
 
 Perform a structured review of the current git changes with focus on SOLID, architecture, removal candidates, and security risks. Default to review-only output unless the user asks to implement changes.
@@ -28,6 +30,7 @@ Perform a structured review of the current git changes with focus on SOLID, arch
 - **Re-read every changed file** using the Read tool before reviewing. Do NOT rely on file contents read earlier in the conversation — code may have changed since (e.g., fixes applied between reviews in the same session).
 - If needed, use `serena` mcp, `rg` or `grep` to find related modules, usages, and contracts.
 - Identify entry points, ownership boundaries, and critical paths (auth, payments, data writes, network).
+- **Capy search:** Search `kk:review-findings` for prior findings in the same files/modules. Search `kk:lang-idioms` for best practices in the detected language. If `kk:lang-idioms` returns no results for the detected language, optionally use `capy_fetch_and_index` to fetch a well-known idioms resource (e.g., Effective Go for `.go` files) and label it `kk:lang-idioms`.
 
 **Edge cases:**
 
@@ -97,6 +100,8 @@ Use `{lang}` below to refer to the detected reference directory.
 
 - For each finding, re-review to ensure it's valid
 - Assign confidence value
+
+**Capy index:** Index any P0/P1 findings that reveal recurring patterns (not one-off typos) as `kk:review-findings`.
 
 ### 8) Present results
 
