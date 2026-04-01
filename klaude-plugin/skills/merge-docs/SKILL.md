@@ -7,6 +7,8 @@ description: |
 
 # Merge Design Documents
 
+For capy knowledge base conventions, see [capy-knowledge-protocol.md](../_shared/capy-knowledge-protocol.md).
+
 **Goal: Produce a single, unified set of feature docs from two separate designs for the same feature.**
 
 ## When to Use

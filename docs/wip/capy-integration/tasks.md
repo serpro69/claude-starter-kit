@@ -87,14 +87,14 @@
 - [x] 8.2 Insert search step before writing docs — search `kk:arch-decisions` and `kk:project-conventions` for decisions that should be reflected in documentation
 
 ## Task 9: Integrate capy into merge-docs
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1
 - **Docs:** [implementation.md#merge](./implementation.md#merge)
 
 ### Subtasks
-- [ ] 9.1 Add protocol file reference to `klaude-plugin/skills/merge-docs/SKILL.md` (or `merge-process.md` if that's the workflow file)
-- [ ] 9.2 Insert search step before merging — search `kk:arch-decisions` for prior decisions relevant to competing approaches
-- [ ] 9.3 Insert index step after merge — conditionally index architectural conflict resolutions as `kk:arch-decisions`
+- [x] 9.1 Add protocol file reference to `klaude-plugin/skills/merge-docs/SKILL.md` (or `merge-process.md` if that's the workflow file)
+- [x] 9.2 Insert search step before merging — search `kk:arch-decisions` for prior decisions relevant to competing approaches
+- [x] 9.3 Insert index step after merge — conditionally index architectural conflict resolutions as `kk:arch-decisions`
 
 ## Task 10: Integrate capy into cove
 - **Status:** pending

@@ -28,6 +28,8 @@ Before you can judge which doc is more correct, you need to understand what we'r
 
 You cannot make good merge decisions without this grounding. Don't skip it. Make sure you have a very thorough understanding of both the existing state and the new feature.
 
+**Capy search:** Before merging, search `kk:arch-decisions` for prior decisions relevant to the competing approaches.
+
 **Step 2: Merge design docs**
 
 Read both design docs and categorize every section/decision into one of four buckets:
@@ -93,3 +95,5 @@ Present the user with a summary of the merged output:
 - Links to the three output files
 
 Ask the user to review and confirm, or flag anything that needs adjustment.
+
+**Capy index:** If the merge resolved a genuine architectural conflict, index the resolution rationale as `kk:arch-decisions`.
