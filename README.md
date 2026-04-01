@@ -28,6 +28,16 @@ Three servers, configured at user-level (`~/.claude.json`) to keep API keys out 
 | **[Context7](https://context7.com/)**                           | Up-to-date library documentation and code examples                                     |
 | **[Serena](https://github.com/oraios/serena)**                  | Semantic code analysis via LSP — symbol navigation, reference tracking, targeted reads |
 | **[Pal](https://github.com/BeehiveInnovations/pal-mcp-server)** | Multi-model AI integration — chat, debugging, code review, planning, security audit    |
+| **[Capy](https://github.com/serpro69/capy)**                    | Persistent knowledge base — cross-session project memory with FTS5 search              |
+
+### Knowledge Base
+
+The kk plugin's skills are **knowledge-aware** via [Capy](https://github.com/serpro69/capy). Skills search for relevant context before executing (architecture decisions, review findings, language idioms) and index valuable learnings after producing output. Knowledge persists across sessions per-project using an FTS5 full-text search index.
+
+**Installation:** `brew install serpro69/tap/capy` then run `capy setup` in your project directory.
+
+> [!NOTE]
+> Capy is optional. All skills work fully without it — search steps return nothing and index steps are skipped. The bootstrap script sets up capy automatically if the binary is on PATH.
 
 ### kk Plugin ([`klaude-plugin/`](./klaude-plugin/README.md))
 

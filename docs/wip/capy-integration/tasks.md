@@ -118,13 +118,13 @@
 - [x] 11.2 Test all three paths: capy present (runs setup), capy absent (prints warning), opt-out flag (skips silently)
 
 ## Task 12: README updates
-- **Status:** pending
+- **Status:** done
 - **Depends on:** —
 - **Docs:** [implementation.md#readme](./implementation.md#readme)
 
 ### Subtasks
-- [ ] 12.1 Add capy row to the MCP Servers table in `README.md`
-- [ ] 12.2 Add "Knowledge Base" section explaining what capy provides, how skills use it, and installation instructions
+- [x] 12.1 Add capy row to the MCP Servers table in `README.md`
+- [x] 12.2 Add "Knowledge Base" section explaining what capy provides, how skills use it, and installation instructions
 
 ## Task 13: Final verification
 - **Status:** pending
