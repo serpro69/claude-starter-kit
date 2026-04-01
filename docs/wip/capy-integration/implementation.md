@@ -137,8 +137,12 @@ Each skill modification follows the same pattern:
 
 #### cove (cove-process.md and cove-isolated.md) {#cove}
 
-- Insert search step during Step 3 (Independent Verification):
-  - Search `kk:` broadly (no specific source filter) for indexed knowledge relevant to the verification questions
+- **Standard mode (`cove-process.md`):**
+  - Insert search in Step 3 (Independent Verification): search `kk:` broadly as another tool source alongside WebSearch/context7
+  - Insert search in Step 4 (Reconciliation): search `kk:` broadly to adjudicate contradicted or inconclusive claims
+- **Isolated mode (`cove-isolated.md`):**
+  - Do NOT inject capy results into sub-agent prompts — this leaks the main agent's framing and compromises factored verification. Sub-agents may independently query capy as part of their own tool-first research (capy is project state, not context).
+  - Insert search in Step 4 (Reconciliation): same as standard mode — verification is complete, no isolation concern
 - No index step.
 
 ### 3. Bootstrap Integration {#bootstrap}

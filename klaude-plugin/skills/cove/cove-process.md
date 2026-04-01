@@ -113,6 +113,7 @@ This step implements the "Factor+Revise" pattern—systematically comparing each
    - Preserve confirmed claims
 
 4. **Document changes** - List what was corrected and why
+5. **Capy search:** For contradicted or inconclusive claims, search `kk:` broadly for project-specific facts that may help adjudicate
 
 ### If No Errors Found
 

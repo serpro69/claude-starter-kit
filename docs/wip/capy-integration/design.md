@@ -94,7 +94,9 @@ Every skill gets a **search phase** (at workflow start) and an **index phase** (
 
 ### cove
 
-- **Search:** During independent verification (Step 3), search `kk:` broadly for any indexed knowledge relevant to the verification questions.
+- **Search (standard mode — `cove-process.md`):** During Step 3 (Independent Verification), search `kk:` broadly as another tool source alongside WebSearch and context7.
+- **Search (isolated mode — `cove-isolated.md`):** Do NOT inject capy results into sub-agent prompts — curating and injecting results leaks the main agent's framing. Sub-agents may independently query capy as part of their own tool-first research (capy is project state, not context — blinding verifiers to project ground truth produces false negatives).
+- **Search (reconciliation — both modes):** During Step 4, search `kk:` broadly to help adjudicate contradicted or inconclusive claims.
 - **Index:** None — CoVe is a verification technique, it doesn't produce persistent learnings.
 
 ## Bootstrapping
