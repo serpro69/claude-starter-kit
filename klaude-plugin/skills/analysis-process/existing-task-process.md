@@ -1,5 +1,7 @@
 ### Workflow: Continue WIP Feature
 
+For capy knowledge base conventions, see [capy-knowledge-protocol.md](../_shared/capy-knowledge-protocol.md).
+
 1. **Find the feature** — Locate the feature directory in `/docs/wip/`. If multiple WIP features exist, ask the user which one to work on.
 
 2. **Review progress** — Read `tasks.md` to understand:
@@ -7,7 +9,7 @@
    - What dependencies exist between remaining tasks
    - Any notes logged on previous subtasks
 
-3. **Review context** — Read the linked `design.md` and `implementation.md` to understand the full picture. Also check any relevant contributing guidelines and documentation.
+3. **Review context** — Read the linked `design.md` and `implementation.md` to understand the full picture. Also check any relevant contributing guidelines and documentation. **Capy search:** Search `kk:arch-decisions` and `kk:project-conventions` for context relevant to the feature being resumed.
 
 4. **Assess readiness:**
    - **If tasks are well-documented and clear** → proceed to implement using the `implementation-process` skill.

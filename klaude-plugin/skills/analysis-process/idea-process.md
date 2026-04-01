@@ -1,5 +1,7 @@
 ### Workflow
 
+For capy knowledge base conventions, see [capy-knowledge-protocol.md](../_shared/capy-knowledge-protocol.md).
+
 Copy this checklist and check off items as you complete them:
 
 ```
@@ -19,6 +21,8 @@ To properly refine the idea into a fully-formed design you need to **understand 
 **Step 2: Check the documentation**
 
 In order to gain a better understanding of the project, **check the contributing guidelines and any relevant documentation**. For example, take a look at `CONTRIBUTING.md` and `docs` directory.
+
+**Capy search:** Before refining the idea, search `kk:arch-decisions` and `kk:project-conventions` for prior design context related to the feature area being discussed.
 
 **Step 3: Help refine the idea/feature**
 
@@ -56,6 +60,8 @@ But, of course, **DO NOT:**
 - **DO NOT add complete code examples**. The documentation should be a guideline that gives the developer all the information they may need when writing the actual code, not copy-paste code chunks.
 - **DO NOT add commit message templates** to tasks, that the developer should use when committing the changes.
 - **DO NOT add other small, generic details that do not bring value** and/or are not specifically relevant to this particular feature. For example, adding something like "to run tests, execute: 'go test ./...'" to a task does not bring value. Remember, the developer is experienced and skilled!
+
+**Capy index:** After documenting the design, index key architecture decisions and trade-offs as `kk:arch-decisions`. Only index non-obvious rationale — skip if the decisions are self-evident from the docs themselves.
 
 **Step 6: Create the task list**
 

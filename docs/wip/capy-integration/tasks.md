@@ -15,16 +15,16 @@
 - [x] 1.2 Verify the file is ~30-50 lines — lean and direct, no fluff
 
 ## Task 2: Integrate capy into analysis-process
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1
 - **Docs:** [implementation.md#analysis-idea](./implementation.md#analysis-idea), [implementation.md#analysis-existing](./implementation.md#analysis-existing)
 
 ### Subtasks
-- [ ] 2.1 Add protocol file reference to `klaude-plugin/skills/analysis-process/idea-process.md`
-- [ ] 2.2 Insert search step before Step 3 in `idea-process.md` — search `kk:arch-decisions` and `kk:project-conventions` for prior design context
-- [ ] 2.3 Insert index step after Step 5 in `idea-process.md` — index key architecture decisions as `kk:arch-decisions`
-- [ ] 2.4 Add protocol file reference to `klaude-plugin/skills/analysis-process/existing-task-process.md`
-- [ ] 2.5 Insert search step in `existing-task-process.md` during plan review — search `kk:arch-decisions` and `kk:project-conventions`
+- [x] 2.1 Add protocol file reference to `klaude-plugin/skills/analysis-process/idea-process.md`
+- [x] 2.2 Insert search step before Step 3 in `idea-process.md` — search `kk:arch-decisions` and `kk:project-conventions` for prior design context
+- [x] 2.3 Insert index step after Step 5 in `idea-process.md` — index key architecture decisions as `kk:arch-decisions`
+- [x] 2.4 Add protocol file reference to `klaude-plugin/skills/analysis-process/existing-task-process.md`
+- [x] 2.5 Insert search step in `existing-task-process.md` during plan review — search `kk:arch-decisions` and `kk:project-conventions`
 
 ## Task 3: Integrate capy into implementation-process
 - **Status:** pending
