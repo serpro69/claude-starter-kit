@@ -48,14 +48,14 @@
 - [x] 4.4 Insert index step after Step 7 (Self-check) — index P0/P1 recurring pattern findings as `kk:review-findings`
 
 ## Task 5: Integrate capy into testing-process
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1
 - **Docs:** [implementation.md#testing](./implementation.md#testing)
 
 ### Subtasks
-- [ ] 5.1 Add protocol file reference to `klaude-plugin/skills/testing-process/SKILL.md`
-- [ ] 5.2 Insert search step before test guidelines — search `kk:test-patterns` for project-specific approaches and known edge cases
-- [ ] 5.3 Insert index step at end — conditionally index novel testing approaches or tricky edge cases as `kk:test-patterns`
+- [x] 5.1 Add protocol file reference to `klaude-plugin/skills/testing-process/SKILL.md`
+- [x] 5.2 Insert search step before test guidelines — search `kk:test-patterns` for project-specific approaches and known edge cases
+- [x] 5.3 Insert index step at end — conditionally index novel testing approaches or tricky edge cases as `kk:test-patterns`
 
 ## Task 6: Integrate capy into development-guidelines
 - **Status:** pending
