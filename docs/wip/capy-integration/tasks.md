@@ -109,13 +109,13 @@
 - [x] 10.5 Insert search step during Step 4 (Reconciliation) in both files — broad `kk:` search to adjudicate contradictions
 
 ## Task 11: Bootstrap integration
-- **Status:** pending
+- **Status:** done
 - **Depends on:** —
 - **Docs:** [implementation.md#bootstrap](./implementation.md#bootstrap)
 
 ### Subtasks
-- [ ] 11.1 Modify `bootstrap.sh` — add capy setup step after plugin installation: check `SKIP_CAPY` env var / `--no-capy` flag for opt-out, check `command -v capy` for binary availability, run `capy setup` if found, print warning to stderr if not found
-- [ ] 11.2 Test all three paths: capy present (runs setup), capy absent (prints warning), opt-out flag (skips silently)
+- [x] 11.1 Modify `.github/scripts/bootstrap.sh` — add capy setup step after plugin installation: check `SKIP_CAPY` env var / `--no-capy` flag for opt-out, check `command -v capy` for binary availability, run `capy setup` if found, print warning to stderr if not found
+- [x] 11.2 Test all three paths: capy present (runs setup), capy absent (prints warning), opt-out flag (skips silently)
 
 ## Task 12: README updates
 - **Status:** pending

@@ -147,7 +147,7 @@ Each skill modification follows the same pattern:
 
 ### 3. Bootstrap Integration {#bootstrap}
 
-Modify `bootstrap.sh` to add a capy setup step:
+Modify `.github/scripts/bootstrap.sh` to add a capy setup step:
 
 - Check for `SKIP_CAPY` environment variable or `--no-capy` CLI flag — if set, skip entirely
 - Check if `capy` binary exists on PATH using `command -v capy`

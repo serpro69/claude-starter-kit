@@ -2,6 +2,14 @@
 
 set -e
 
+# Parse flags
+SKIP_CAPY="${SKIP_CAPY:-0}"
+for arg in "$@"; do
+  case "$arg" in
+    --no-capy) SKIP_CAPY=1 ;;
+  esac
+done
+
 cleanup() {
   rm -f "$0"
   git add "$0" || true
@@ -19,6 +27,15 @@ fi
 
 # Install the kk plugin from the claude-toolbox marketplace
 claude plugin install kk@claude-toolbox
+
+# Set up capy knowledge base (optional)
+if [ "$SKIP_CAPY" = "1" ]; then
+  : # skip silently
+elif command -v capy >/dev/null 2>&1; then
+  capy setup
+else
+  printf "⚠ capy not found on PATH — skipping knowledge base setup. Install: https://github.com/serpro69/capy\n" >&2
+fi
 
 printf "\n"
 printf "Done initializing claude-code; committing CLAUDE.md file to git and cleaning up bootstrap script...\n"
