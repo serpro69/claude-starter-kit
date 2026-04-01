@@ -2,6 +2,8 @@
 
 For capy knowledge base conventions, see [capy-knowledge-protocol.md](../_shared/capy-knowledge-protocol.md).
 
+**Capy restriction:** CoVe is a read-only verification tool. Do NOT call `capy_index` or `capy_fetch_and_index` during this workflow. Use `capy_search` only. If corrections reveal knowledge worth persisting, the calling agent handles indexing after CoVe completes.
+
 Copy this checklist and check off items as you complete them:
 
 ```
