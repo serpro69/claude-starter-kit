@@ -6,13 +6,13 @@
 > Created: 2026-04-01
 
 ## Task 1: Create the shared protocol file
-- **Status:** pending
+- **Status:** done
 - **Depends on:** —
 - **Docs:** [implementation.md#protocol](./implementation.md#protocol)
 
 ### Subtasks
-- [ ] 1.1 Create `klaude-plugin/skills/_shared/capy-knowledge-protocol.md` with: conditional preamble (skip if capy unavailable), source label taxonomy table (6 `kk:*` labels), search conventions (query specificity, source filtering, limit defaults, cold-start fallback), index conventions (non-obvious only, concise, one concept per call)
-- [ ] 1.2 Verify the file is ~30-50 lines — lean and direct, no fluff
+- [x] 1.1 Create `klaude-plugin/skills/_shared/capy-knowledge-protocol.md` with: conditional preamble (skip if capy unavailable), source label taxonomy table (6 `kk:*` labels), search conventions (query specificity, source filtering, limit defaults, cold-start fallback), index conventions (non-obvious only, concise, one concept per call)
+- [x] 1.2 Verify the file is ~30-50 lines — lean and direct, no fluff
 
 ## Task 2: Integrate capy into analysis-process
 - **Status:** pending
