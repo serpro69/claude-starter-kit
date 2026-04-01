@@ -78,13 +78,13 @@
 - [x] 7.3 Insert index step after presenting findings — index user-confirmed intentional deviations (`SPEC_DEV`, `EXTRA_IMPL`) as `kk:arch-decisions`
 
 ## Task 8: Integrate capy into documentation-process
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1
 - **Docs:** [implementation.md#docs](./implementation.md#docs)
 
 ### Subtasks
-- [ ] 8.1 Add protocol file reference to `klaude-plugin/skills/documentation-process/SKILL.md`
-- [ ] 8.2 Insert search step before writing docs — search `kk:arch-decisions` and `kk:project-conventions` for decisions that should be reflected in documentation
+- [x] 8.1 Add protocol file reference to `klaude-plugin/skills/documentation-process/SKILL.md`
+- [x] 8.2 Insert search step before writing docs — search `kk:arch-decisions` and `kk:project-conventions` for decisions that should be reflected in documentation
 
 ## Task 9: Integrate capy into merge-docs
 - **Status:** pending
