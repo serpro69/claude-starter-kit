@@ -7,6 +7,8 @@ description: |
 
 # Executing Plans
 
+For capy knowledge base conventions, see [capy-knowledge-protocol.md](../_shared/capy-knowledge-protocol.md).
+
 ## Overview
 
 Load plan, review critically, execute tasks in batches, report for review between batches.
@@ -19,9 +21,10 @@ Load plan, review critically, execute tasks in batches, report for review betwee
 
 1. Read the feature's `tasks.md` file to get the task list and current progress
 2. Read the linked `design.md` and `implementation.md` for full context
-3. Identify the next pending task (one whose dependencies are all done)
-4. Review critically — identify any questions or concerns about the plan
-5. If concerns: Raise them with your human partner before starting
+3. **Capy search:** Search `kk:arch-decisions`, `kk:project-conventions`, `kk:lang-idioms`, and `kk:review-findings` for context relevant to the next task
+4. Identify the next pending task (one whose dependencies are all done)
+5. Review critically — identify any questions or concerns about the plan
+6. If concerns: Raise them with your human partner before starting
 
 ### Step 2: Execute Sub-Task
 
@@ -39,6 +42,7 @@ Load plan, review critically, execute tasks in batches, report for review betwee
   - Run `pal` mcp code-review with gemini-3-pro
   - Consolidate the findings, present them back to the user
 - Based on user and code-review feedback: apply changes if needed and finalize the sub-task
+- **Capy index:** If a non-obvious pattern or convention was established during implementation, index it as `kk:project-conventions`
 - When completed, update `tasks.md`: set the task's status to `done`
 
 ### Step 4: Continue

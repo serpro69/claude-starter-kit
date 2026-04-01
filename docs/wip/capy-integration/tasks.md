@@ -27,14 +27,14 @@
 - [x] 2.5 Insert search step in `existing-task-process.md` during plan review — search `kk:arch-decisions` and `kk:project-conventions`
 
 ## Task 3: Integrate capy into implementation-process
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1
 - **Docs:** [implementation.md#implementation](./implementation.md#implementation)
 
 ### Subtasks
-- [ ] 3.1 Add protocol file reference to `klaude-plugin/skills/implementation-process/SKILL.md`
-- [ ] 3.2 Extend Step 1 (Load and Review Plan) — add search of `kk:arch-decisions`, `kk:project-conventions`, `kk:lang-idioms`, `kk:review-findings` for task-relevant context
-- [ ] 3.3 Extend Step 3 (Report) — add conditional index of non-obvious patterns/conventions as `kk:project-conventions`
+- [x] 3.1 Add protocol file reference to `klaude-plugin/skills/implementation-process/SKILL.md`
+- [x] 3.2 Extend Step 1 (Load and Review Plan) — add search of `kk:arch-decisions`, `kk:project-conventions`, `kk:lang-idioms`, `kk:review-findings` for task-relevant context
+- [x] 3.3 Extend Step 3 (Report) — add conditional index of non-obvious patterns/conventions as `kk:project-conventions`
 
 ## Task 4: Integrate capy into solid-code-review
 - **Status:** pending
