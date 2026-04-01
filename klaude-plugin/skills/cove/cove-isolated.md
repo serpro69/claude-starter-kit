@@ -56,7 +56,7 @@ Create 3-5 targeted questions designed to expose potential errors in the initial
 
 Each verification question is answered by a separate sub-agent that has ZERO context about the initial answer. This eliminates the risk of hallucination repetition that exists in standard mode.
 
-**Capy search:** Before spawning sub-agents, search `kk:` broadly for any indexed knowledge relevant to the verification questions. Include relevant findings in each sub-agent's prompt context.
+> **Note on capy:** Do NOT pre-load capy search results into sub-agent prompts — this would compromise isolation. Sub-agents discover facts independently using their own tools.
 
 ### Flag Parsing
 
