@@ -8,6 +8,7 @@
 !.github/**
 !.yamlfmt.yaml
 !.yamllint.yml
+!.mcp.json
 
 # Logs
 logs
@@ -24,3 +25,7 @@ logs
 !.claude
 !.claude-plugin
 !klaude-plugin/.claude-plugin
+.capy/**
+
+!.capy
+!.capy/knowledge.db

@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "capy": {
+      "args": [
+        "serve"
+      ],
+      "command": "/opt/homebrew/bin/capy"
+    }
+  }
+}

@@ -4,8 +4,94 @@
     "pr": ""
   },
   "effortLevel": "high",
+  "enabledMcpjsonServers": [],
+  "enabledPlugins": {
+    "kk@claude-toolbox": true
+  },
+  "env": {
+    "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "64000",
+    "CLAUDE_STATUSLINE_MODE": "dark",
+    "CLAUDE_STATUSLINE_THEME": "catppuccin",
+    "MAX_MCP_OUTPUT_TOKENS": "64000"
+  },
+  "extraKnownMarketplaces": {
+    "claude-toolbox": {
+      "source": {
+        "path": ".",
+        "source": "directory"
+      }
+    }
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "/opt/homebrew/bin/capy hook posttooluse",
+            "type": "command"
+          }
+        ],
+        "matcher": ""
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "command": "/opt/homebrew/bin/capy hook precompact",
+            "type": "command"
+          }
+        ],
+        "matcher": ""
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "/opt/homebrew/bin/capy hook pretooluse",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash|WebFetch|Read|Grep|Agent|Task|mcp__*capy*"
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "command": "/opt/homebrew/bin/capy hook sessionend",
+            "type": "command"
+          }
+        ],
+        "matcher": ""
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "/opt/homebrew/bin/capy hook sessionstart",
+            "type": "command"
+          }
+        ],
+        "matcher": ""
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "command": "/opt/homebrew/bin/capy hook userpromptsubmit",
+            "type": "command"
+          }
+        ],
+        "matcher": ""
+      }
+    ]
+  },
+  "model": "opus[1m]",
   "permissions": {
-    "defaultMode": "default",
     "allow": [
       "Bash(cat:*)",
       "Bash(chmod:*)",
@@ -28,6 +114,8 @@
       "mcp__pal__codereview",
       "WebSearch"
     ],
+    "ask": [],
+    "defaultMode": "default",
     "deny": [
       "Bash(rm:*)",
       "Read(./examples)",
@@ -52,30 +140,10 @@
       "Read(./**/node_modules/)",
       "Read(./**/venv/)",
       "Read(./**/__pycache__/)"
-    ],
-    "ask": []
+    ]
   },
-  "enabledMcpjsonServers": [],
-  "env": {
-    "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "64000",
-    "MAX_MCP_OUTPUT_TOKENS": "64000",
-    "CLAUDE_STATUSLINE_THEME": "catppuccin",
-    "CLAUDE_STATUSLINE_MODE": "dark"
-  },
-  "extraKnownMarketplaces": {
-    "claude-toolbox": {
-      "source": {
-        "source": "directory",
-        "path": "."
-      }
-    }
-  },
-  "enabledPlugins": {
-    "kk@claude-toolbox": true
-  },
-  "model": "opus[1m]",
   "statusLine": {
-    "type": "command",
-    "command": "bash $CLAUDE_PROJECT_DIR/.claude/scripts/statusline_enhanced.sh"
+    "command": "bash $CLAUDE_PROJECT_DIR/.claude/scripts/statusline_enhanced.sh",
+    "type": "command"
   }
 }
