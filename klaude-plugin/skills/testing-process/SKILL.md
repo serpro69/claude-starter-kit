@@ -7,11 +7,15 @@ description: |
 
 # Testing & Quality Assurance Process
 
+For capy knowledge base conventions, see [capy-knowledge-protocol.md](../_shared/capy-knowledge-protocol.md).
+
 ## Guidelines
 
 1. Always try to add tests for any new functionality, and make sure to cover all cases and code branches, according to requirements.
 2. Always try to add tests for any bug-fixes, if the discovered bug is not already covered by tests. If the bug was already covered by tests, fix the existing tests as needed.
 3. Always run all existing tests after you are done with a given implementation or bug-fix.
+
+**Capy search:** Before applying test guidelines, search `kk:test-patterns` for project-specific testing approaches and known edge cases.
 
 Use the following guidelines when working with tests:
 
@@ -23,3 +27,5 @@ Use the following guidelines when working with tests:
 - Property-based testing with %LANGUAGE% best practices and well-establised %LANGUAGE% testing tools
 - Propose end-to-end testing strategies if automated e2e testing is not feasible
 - Code coverage analysis and reporting
+
+**Capy index:** If a novel testing approach or tricky edge case was discovered during this session, index it as `kk:test-patterns`.
