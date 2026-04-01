@@ -58,14 +58,14 @@
 - [x] 5.3 Insert index step at end — conditionally index novel testing approaches or tricky edge cases as `kk:test-patterns`
 
 ## Task 6: Integrate capy into development-guidelines
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1
 - **Docs:** [implementation.md#dev-guidelines](./implementation.md#dev-guidelines)
 
 ### Subtasks
-- [ ] 6.1 Add protocol file reference to `klaude-plugin/skills/development-guidelines/SKILL.md`
-- [ ] 6.2 Insert search step before context7 consultation — search `kk:lang-idioms` and `kk:project-conventions` for previously indexed dependency knowledge
-- [ ] 6.3 Insert index step after resolving dependency question — index valuable best-practice nuggets as `kk:lang-idioms`
+- [x] 6.1 Add protocol file reference to `klaude-plugin/skills/development-guidelines/SKILL.md`
+- [x] 6.2 Insert search step before context7 consultation — search `kk:lang-idioms` and `kk:project-conventions` for previously indexed dependency knowledge
+- [x] 6.3 Insert index step after resolving dependency question — index valuable best-practice nuggets as `kk:lang-idioms`
 
 ## Task 7: Integrate capy into implementation-review
 - **Status:** pending
