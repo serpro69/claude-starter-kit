@@ -103,9 +103,10 @@
 
 ### Subtasks
 - [x] 10.1 Add protocol file reference to `klaude-plugin/skills/cove/cove-process.md`
-- [x] 10.2 Insert search step during Step 3 (Independent Verification) in `cove-process.md` — broad search on `kk:` for project-specific facts
+- [x] 10.2 Insert search step during Step 3 in `cove-process.md` — broad `kk:` search as tool source
 - [x] 10.3 Add protocol file reference to `klaude-plugin/skills/cove/cove-isolated.md`
-- [x] 10.4 Insert search step during Step 3 in `cove-isolated.md` — same broad search on `kk:`
+- [x] 10.4 Add capy isolation note in `cove-isolated.md` Step 3 — no prompt injection, sub-agents may query independently
+- [x] 10.5 Insert search step during Step 4 (Reconciliation) in both files — broad `kk:` search to adjudicate contradictions
 
 ## Task 11: Bootstrap integration
 - **Status:** pending

@@ -56,7 +56,7 @@ Create 3-5 targeted questions designed to expose potential errors in the initial
 
 Each verification question is answered by a separate sub-agent that has ZERO context about the initial answer. This eliminates the risk of hallucination repetition that exists in standard mode.
 
-> **Note on capy:** Do NOT pre-load capy search results into sub-agent prompts — this would compromise isolation. Sub-agents discover facts independently using their own tools.
+> **Capy and isolation:** Do NOT pre-load capy search results into sub-agent prompts — curating and injecting results leaks the main agent's framing. Sub-agents may independently query capy as part of their own tool-first research, just like WebSearch — they form their own queries without knowledge of the initial answer.
 
 ### Flag Parsing
 
@@ -164,6 +164,7 @@ This step implements the "Factor+Revise" pattern—systematically comparing each
    - Preserve confirmed claims
 
 4. **Document changes** - List what was corrected and why, with agent attribution
+5. **Capy search:** For contradicted or inconclusive claims, search `kk:` broadly for project-specific facts that may help adjudicate
 
 ### If No Errors Found
 
