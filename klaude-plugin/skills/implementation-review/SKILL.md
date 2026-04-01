@@ -7,6 +7,8 @@ description: |
 
 # Implementation Review
 
+For capy knowledge base conventions, see [capy-knowledge-protocol.md](../_shared/capy-knowledge-protocol.md).
+
 ## Overview
 
 Systematically compare implemented code against a feature's `design.md`, `implementation.md`, and `tasks.md` in `/docs/wip/[feature]/`. Works both mid-implementation (reviewing completed tasks only) and post-implementation (full feature review).
@@ -55,12 +57,12 @@ See [review-process.md](./review-process.md) for the detailed step-by-step proce
 
 **Phases:**
 
-1. Load feature documents
+1. Load feature documents. **Capy search:** Search `kk:arch-decisions` for design rationale that may explain intentional spec deviations. Search `kk:review-findings` for known patterns from prior reviews.
 2. Determine review scope (mid-implementation vs post-implementation)
 3. Per-task verification against spec
 4. Cross-cutting concern check
 5. Self-check and confidence assessment
-6. Present findings
+6. Present findings. **Capy index:** Index any `SPEC_DEV` or `EXTRA_IMPL` findings confirmed by the user as intentional as `kk:arch-decisions` — prevents the same deviation from being flagged again.
 
 ## Invocation
 
