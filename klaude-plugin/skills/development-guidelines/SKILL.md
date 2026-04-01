@@ -1,6 +1,7 @@
 ---
 name: development-guidelines
-description: Use when writing code to ensure you follow development best practices during development and implementation.
+description: |
+  Use when writing code to ensure you follow development best practices during development and implementation.
 ---
 
 # Development Guidelines

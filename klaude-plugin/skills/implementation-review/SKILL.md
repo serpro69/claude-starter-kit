@@ -1,6 +1,8 @@
 ---
 name: implementation-review
-description: Verify implemented code matches design and implementation documentation. Detects spec deviations, missing implementations, doc inconsistencies, and outdated docs. Use after implementing tasks or mid-way through a feature to ensure code and docs are in sync.
+description: |
+  Use after implementing tasks or mid-feature to verify code matches design docs and ensure they are in sync.
+  Detects spec deviations, missing implementations, doc inconsistencies, and outdated docs in design and implementation documentation.
 ---
 
 # Implementation Review

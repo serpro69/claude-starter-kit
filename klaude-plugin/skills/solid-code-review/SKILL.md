@@ -1,6 +1,8 @@
 ---
 name: solid-code-review
-description: "Code review of current git changes with an expert senior-engineer lens. Detects SOLID violations, security risks, and proposes actionable improvements. Use when performing code reviews."
+description: |
+  Code review of current git changes with an expert senior-engineer lens. Detects SOLID violations, security risks, and proposes actionable improvements.
+  Use when performing code reviews.
 ---
 
 # SOLID Code Review
