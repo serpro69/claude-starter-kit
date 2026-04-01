@@ -68,14 +68,14 @@
 - [x] 6.3 Insert index step after resolving dependency question — index valuable best-practice nuggets as `kk:lang-idioms`
 
 ## Task 7: Integrate capy into implementation-review
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1
 - **Docs:** [implementation.md#impl-review](./implementation.md#impl-review)
 
 ### Subtasks
-- [ ] 7.1 Add protocol file reference to `klaude-plugin/skills/implementation-review/SKILL.md`
-- [ ] 7.2 Extend Phase 1 (Load feature documents) — add search of `kk:arch-decisions` for intentional deviation rationale, and `kk:review-findings` for known patterns
-- [ ] 7.3 Insert index step after presenting findings — index user-confirmed intentional deviations (`SPEC_DEV`, `EXTRA_IMPL`) as `kk:arch-decisions`
+- [x] 7.1 Add protocol file reference to `klaude-plugin/skills/implementation-review/SKILL.md`
+- [x] 7.2 Extend Phase 1 (Load feature documents) — add search of `kk:arch-decisions` for intentional deviation rationale, and `kk:review-findings` for known patterns
+- [x] 7.3 Insert index step after presenting findings — index user-confirmed intentional deviations (`SPEC_DEV`, `EXTRA_IMPL`) as `kk:arch-decisions`
 
 ## Task 8: Integrate capy into documentation-process
 - **Status:** pending
