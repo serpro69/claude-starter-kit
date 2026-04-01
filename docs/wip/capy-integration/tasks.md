@@ -97,15 +97,15 @@
 - [x] 9.3 Insert index step after merge — conditionally index architectural conflict resolutions as `kk:arch-decisions`
 
 ## Task 10: Integrate capy into cove
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1
 - **Docs:** [implementation.md#cove](./implementation.md#cove)
 
 ### Subtasks
-- [ ] 10.1 Add protocol file reference to `klaude-plugin/skills/cove/cove-process.md`
-- [ ] 10.2 Insert search step during Step 3 (Independent Verification) in `cove-process.md` — broad search on `kk:` for project-specific facts
-- [ ] 10.3 Add protocol file reference to `klaude-plugin/skills/cove/cove-isolated.md`
-- [ ] 10.4 Insert search step during Step 3 in `cove-isolated.md` — same broad search on `kk:`
+- [x] 10.1 Add protocol file reference to `klaude-plugin/skills/cove/cove-process.md`
+- [x] 10.2 Insert search step during Step 3 (Independent Verification) in `cove-process.md` — broad search on `kk:` for project-specific facts
+- [x] 10.3 Add protocol file reference to `klaude-plugin/skills/cove/cove-isolated.md`
+- [x] 10.4 Insert search step during Step 3 in `cove-isolated.md` — same broad search on `kk:`
 
 ## Task 11: Bootstrap integration
 - **Status:** pending

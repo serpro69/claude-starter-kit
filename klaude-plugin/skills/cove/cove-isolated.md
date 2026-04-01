@@ -1,5 +1,7 @@
 ### Workflow
 
+For capy knowledge base conventions, see [capy-knowledge-protocol.md](../_shared/capy-knowledge-protocol.md).
+
 Copy this checklist and check off items as you complete them:
 
 ```
@@ -53,6 +55,8 @@ Create 3-5 targeted questions designed to expose potential errors in the initial
 **CRITICAL: This step uses true factored verification by spawning isolated sub-agents.**
 
 Each verification question is answered by a separate sub-agent that has ZERO context about the initial answer. This eliminates the risk of hallucination repetition that exists in standard mode.
+
+**Capy search:** Before spawning sub-agents, search `kk:` broadly for any indexed knowledge relevant to the verification questions. Include relevant findings in each sub-agent's prompt context.
 
 ### Flag Parsing
 

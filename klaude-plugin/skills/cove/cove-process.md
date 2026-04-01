@@ -1,5 +1,7 @@
 ### Workflow
 
+For capy knowledge base conventions, see [capy-knowledge-protocol.md](../_shared/capy-knowledge-protocol.md).
+
 Copy this checklist and check off items as you complete them:
 
 ```
@@ -58,7 +60,7 @@ For EACH verification question:
 
 1. **Mental reset** - Before answering, mentally "forget" the initial answer. Treat this as a brand new question from a user you've never interacted with.
 
-2. **Tool-first verification** - Prioritize external sources over your own knowledge:
+2. **Tool-first verification** - Prioritize external sources over your own knowledge. **Capy search:** Search `kk:` broadly for any indexed knowledge relevant to the verification questions.
    - Use `WebSearch` for facts, dates, statistics
    - Use `context7` for library/API documentation
    - Use `Read`/`Grep` for code verification
