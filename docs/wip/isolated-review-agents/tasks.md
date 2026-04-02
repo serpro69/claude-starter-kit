@@ -42,16 +42,16 @@
 - [x] 3.6 Define output format (structured findings with type, severity, confidence, description, evidence)
 
 ## Task 4: Isolated code review workflow
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1, Task 2
 - **Docs:** [implementation.md#task-4-isolated-code-review-workflow](./implementation.md#task-4-isolated-code-review-workflow)
 
 ### Subtasks
-- [ ] 4.1 Create `klaude-plugin/skills/solid-code-review/review-isolated.md` with checklist structure
-- [ ] 4.2 Write Step 1 (Prepare artifacts): git diff capture, spec context location, language detection, `listmodels` call to resolve most capable `pal` model
-- [ ] 4.3 Write Step 2 (Spawn reviewers): `code-reviewer` sub-agent + main agent calling `pal` codereview directly — both in a single message for parallel execution
-- [ ] 4.4 Write Step 3 (Reconcile): cross-reference findings, assign dispositions per reconciliation protocol
-- [ ] 4.5 Write Step 4 (Report): consolidated report using shared template, next-steps prompt to user
+- [x] 4.1 Create `klaude-plugin/skills/solid-code-review/review-isolated.md` with checklist structure
+- [x] 4.2 Write Step 1 (Prepare artifacts): git diff capture, spec context location, language detection, `listmodels` call to resolve most capable `pal` model
+- [x] 4.3 Write Step 2 (Spawn reviewers): `code-reviewer` sub-agent + main agent calling `pal` codereview directly — both in a single message for parallel execution
+- [x] 4.4 Write Step 3 (Reconcile): cross-reference findings, assign dispositions per reconciliation protocol
+- [x] 4.5 Write Step 4 (Report): consolidated report using shared template, next-steps prompt to user
 
 ## Task 5: Isolated spec conformance workflow
 - **Status:** pending
