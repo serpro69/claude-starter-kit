@@ -37,10 +37,9 @@ Load plan, review critically, execute tasks in batches, report for review betwee
 
 - Show what was implemented
 - Show verification output
-- Prompt user for code-review; if user responds 'yes':
-  - Use `kk:solid-code-review` skill for the given programming language
-  - Run `pal` mcp code-review with gemini-3-pro
-  - Consolidate the findings, present them back to the user
+- Prompt user for code-review (mention isolated mode as an option); if user responds 'yes':
+  - **Standard review** (default): Use `kk:solid-code-review` skill, then run `pal` mcp code-review, consolidate findings
+  - **Isolated review** (if user requests): Use `kk:solid-code-review:isolated` — this handles both sub-agent and pal codereview internally with independent reviewers and reconciliation. Do NOT run a separate `pal` codereview call, as it is already included in the isolated workflow
 - Based on user and code-review feedback: apply changes if needed and finalize the sub-task
 - **Capy index:** If a non-obvious pattern or convention was established during implementation, index it as `kk:project-conventions`
 - When completed, update `tasks.md`: set the task's status to `done`

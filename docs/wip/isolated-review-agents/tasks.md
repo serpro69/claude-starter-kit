@@ -76,14 +76,14 @@
 - [x] 6.3 Verify existing skill behavior is unchanged when invoked without `:isolated` suffix
 
 ## Task 7: Update implementation-process integration
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 4, Task 5, Task 6
 - **Docs:** [implementation.md#task-7-update-implementation-process-integration](./implementation.md#task-7-update-implementation-process-integration)
 
 ### Subtasks
-- [ ] 7.1 Update `klaude-plugin/skills/implementation-process/SKILL.md` Step 3 to mention isolated review as an option when prompting user for code review
-- [ ] 7.2 Add routing: if user requests isolated review, use `kk:solid-code-review:isolated` (which handles `pal` codereview internally) instead of separate calls
-- [ ] 7.3 Verify standard flow is unchanged when isolated mode is not requested
+- [x] 7.1 Update `klaude-plugin/skills/implementation-process/SKILL.md` Step 3 to mention isolated review as an option when prompting user for code review
+- [x] 7.2 Add routing: if user requests isolated review, use `kk:solid-code-review:isolated` (which handles `pal` codereview internally) instead of separate calls
+- [x] 7.3 Verify standard flow is unchanged when isolated mode is not requested
 
 ## Task 8: Final verification
 - **Status:** pending
