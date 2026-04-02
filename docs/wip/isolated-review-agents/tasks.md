@@ -6,15 +6,15 @@
 > Created: 2026-04-02
 
 ## Task 1: Shared review reconciliation protocol
-- **Status:** pending
+- **Status:** done
 - **Depends on:** —
 - **Docs:** [implementation.md#task-1-shared-review-reconciliation-protocol](./implementation.md#task-1-shared-review-reconciliation-protocol)
 
 ### Subtasks
-- [ ] 1.1 Create `klaude-plugin/skills/_shared/review-reconciliation-protocol.md` with disposition categories (Confirmed, Disputed — Intentional, Disputed — False Positive, Duplicate) and required evidence for each
-- [ ] 1.2 Add invariants section: no silent drops, no new findings from main agent, disputed findings still shown, agreement increases severity
-- [ ] 1.3 Add consolidated report template (parameterized for both code review and spec review finding formats)
-- [ ] 1.4 Add trust level guidance table for spec conformance finding types (MISSING_IMPL, AMBIGUOUS, SPEC_DEV, EXTRA_IMPL, DOC_INCON, OUTDATED_DOC)
+- [x] 1.1 Create `klaude-plugin/skills/_shared/review-reconciliation-protocol.md` with disposition categories (Confirmed, Disputed — Intentional, Disputed — False Positive, Duplicate) and required evidence for each
+- [x] 1.2 Add invariants section: no silent drops, no new findings from main agent, disputed findings still shown, agreement increases severity
+- [x] 1.3 Add consolidated report template (parameterized for both code review and spec review finding formats)
+- [x] 1.4 Add trust level guidance table for spec conformance finding types (MISSING_IMPL, AMBIGUOUS, SPEC_DEV, EXTRA_IMPL, DOC_INCON, OUTDATED_DOC)
 
 ## Task 2: Code reviewer agent definition
 - **Status:** pending
