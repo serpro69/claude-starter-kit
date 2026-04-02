@@ -17,16 +17,16 @@
 - [x] 1.4 Add trust level guidance table for spec conformance finding types (MISSING_IMPL, AMBIGUOUS, SPEC_DEV, EXTRA_IMPL, DOC_INCON, OUTDATED_DOC)
 
 ## Task 2: Code reviewer agent definition
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1
 - **Docs:** [implementation.md#task-2-code-reviewer-agent-definition](./implementation.md#task-2-code-reviewer-agent-definition)
 
 ### Subtasks
-- [ ] 2.1 Create `klaude-plugin/agents/` directory
-- [ ] 2.2 Create `klaude-plugin/agents/code-reviewer.md` with frontmatter (name, description)
-- [ ] 2.3 Write role statement, artifact contract (what is given vs excluded), and capy restriction (search only, no index)
-- [ ] 2.4 Define review workflow referencing `solid-code-review` steps (preflight, detect language, SOLID, removal, security, code quality, self-check)
-- [ ] 2.5 Define output format (P0-P3 findings with file:line, severity, confidence with reasoning, description, suggested fix)
+- [x] 2.1 Create `klaude-plugin/agents/` directory
+- [x] 2.2 Create `klaude-plugin/agents/code-reviewer.md` with frontmatter (name, description)
+- [x] 2.3 Write role statement, artifact contract (what is given vs excluded), and capy restriction (search only, no index)
+- [x] 2.4 Define review workflow referencing `solid-code-review` steps (preflight, detect language, SOLID, removal, security, code quality, self-check)
+- [x] 2.5 Define output format (P0-P3 findings with file:line, severity, confidence with reasoning, description, suggested fix)
 
 ## Task 3: Spec reviewer agent definition
 - **Status:** pending
