@@ -13,6 +13,22 @@ For capy knowledge base conventions, see [capy-knowledge-protocol.md](../_shared
 
 Perform a structured review of the current git changes with focus on SOLID, architecture, removal candidates, and security risks. Default to review-only output unless the user asks to implement changes.
 
+## Review Modes
+
+### Standard Mode (`/kk:solid-code-review`)
+
+Reviews code in the main conversation context. Fast, single-pass review using the workflow below.
+
+### Isolated Mode (`/kk:solid-code-review:isolated`)
+
+Delegates detection to independent reviewers that did not write the code, then reconciles their findings. Two parallel reviewers: a `code-reviewer` sub-agent and `pal codereview` (external model). Produces a consolidated report with dispositions and agreement indicators.
+
+- **Cost**: Higher (sub-agent + external model + reconciliation)
+- **Isolation**: True — reviewers have zero authorship bias or session context
+- **Best for**: When extra rigor is worth the cost (pre-merge, high-stakes changes)
+
+See [review-isolated.md](./review-isolated.md) for the isolated workflow.
+
 ## Severity Levels
 
 | Level  | Name     | Description                                                      | Action                             |
@@ -190,3 +206,17 @@ Please choose an option or provide specific instructions.
 ```
 
 **Important**: Do NOT implement any changes until user explicitly confirms. This is a review-first workflow.
+
+## Invocation
+
+Standard mode:
+
+```
+/kk:solid-code-review
+```
+
+Isolated mode with independent sub-agents:
+
+```
+/kk:solid-code-review:isolated
+```

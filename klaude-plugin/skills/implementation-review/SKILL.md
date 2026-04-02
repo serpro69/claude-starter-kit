@@ -15,6 +15,22 @@ Systematically compare implemented code against a feature's `design.md`, `implem
 
 Findings go in **both directions** — code that deviates from spec AND spec that is wrong or outdated given the code.
 
+## Review Modes
+
+### Standard Mode (`/kk:implementation-review`)
+
+Reviews spec conformance in the main conversation context. Single-pass review using the workflow below.
+
+### Isolated Mode (`/kk:implementation-review:isolated`)
+
+Delegates detection to an independent `spec-reviewer` sub-agent that did not write the code, then reconciles its findings with type-specific trust levels. Produces a consolidated report with dispositions and spec update suggestions.
+
+- **Cost**: Higher (sub-agent + reconciliation)
+- **Isolation**: True — reviewer has zero authorship bias or session context
+- **Best for**: When extra rigor is worth the cost (post-implementation, pre-merge)
+
+See [review-isolated.md](./review-isolated.md) for the isolated workflow.
+
 ## Finding Types
 
 Each finding is classified by type (what kind of mismatch) and severity (how urgent).
@@ -69,3 +85,9 @@ See [review-process.md](./review-process.md) for the detailed step-by-step proce
 ## Invocation
 
 Use the `/implementation-review [feature-name]` command, or invoke naturally when a user asks to verify implementation against docs.
+
+For isolated mode with an independent sub-agent:
+
+```
+/kk:implementation-review:isolated [feature-name]
+```

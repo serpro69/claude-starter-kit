@@ -66,14 +66,14 @@
 - [x] 5.5 Write Step 4 (Report): consolidated report, feed back into task workflow if within implementation-process
 
 ## Task 6: Update SKILL.md routing
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 4, Task 5
 - **Docs:** [implementation.md#task-6-update-skillmd-routing](./implementation.md#task-6-update-skillmd-routing)
 
 ### Subtasks
-- [ ] 6.1 Update `klaude-plugin/skills/solid-code-review/SKILL.md` to add `isolated` sub-skill entry pointing to `review-isolated.md` — reference `cove/SKILL.md` for routing syntax
-- [ ] 6.2 Update `klaude-plugin/skills/implementation-review/SKILL.md` to add `isolated` sub-skill entry pointing to `review-isolated.md`
-- [ ] 6.3 Verify existing skill behavior is unchanged when invoked without `:isolated` suffix
+- [x] 6.1 Update `klaude-plugin/skills/solid-code-review/SKILL.md` to add `isolated` sub-skill entry pointing to `review-isolated.md` — reference `cove/SKILL.md` for routing syntax
+- [x] 6.2 Update `klaude-plugin/skills/implementation-review/SKILL.md` to add `isolated` sub-skill entry pointing to `review-isolated.md`
+- [x] 6.3 Verify existing skill behavior is unchanged when invoked without `:isolated` suffix
 
 ## Task 7: Update implementation-process integration
 - **Status:** pending
