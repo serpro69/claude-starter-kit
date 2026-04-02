@@ -27,7 +27,7 @@
       {
         "hooks": [
           {
-            "command": "/opt/homebrew/bin/capy hook posttooluse",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/scripts/capy.sh hook posttooluse",
             "type": "command"
           }
         ],
@@ -38,7 +38,7 @@
       {
         "hooks": [
           {
-            "command": "/opt/homebrew/bin/capy hook precompact",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/scripts/capy.sh hook precompact",
             "type": "command"
           }
         ],
@@ -49,7 +49,7 @@
       {
         "hooks": [
           {
-            "command": "/opt/homebrew/bin/capy hook pretooluse",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/scripts/capy.sh hook pretooluse",
             "type": "command"
           }
         ],
@@ -60,7 +60,7 @@
       {
         "hooks": [
           {
-            "command": "/opt/homebrew/bin/capy hook sessionend",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/scripts/capy.sh hook sessionend",
             "type": "command"
           }
         ],
@@ -71,7 +71,7 @@
       {
         "hooks": [
           {
-            "command": "/opt/homebrew/bin/capy hook sessionstart",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/scripts/capy.sh hook sessionstart",
             "type": "command"
           }
         ],
@@ -82,7 +82,7 @@
       {
         "hooks": [
           {
-            "command": "/opt/homebrew/bin/capy hook userpromptsubmit",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/scripts/capy.sh hook userpromptsubmit",
             "type": "command"
           }
         ],
