@@ -49,7 +49,7 @@
 ### Subtasks
 - [ ] 4.1 Create `klaude-plugin/skills/solid-code-review/review-isolated.md` with checklist structure
 - [ ] 4.2 Write Step 1 (Prepare artifacts): git diff capture, spec context location, language detection
-- [ ] 4.3 Write Step 2 (Spawn reviewers): parallel spawn of `code-reviewer` agent and `pal` codereview — both in a single message
+- [ ] 4.3 Write Step 2 (Spawn reviewers): `code-reviewer` sub-agent + main agent calling `pal` codereview directly — both in a single message for parallel execution
 - [ ] 4.4 Write Step 3 (Reconcile): cross-reference findings, assign dispositions per reconciliation protocol
 - [ ] 4.5 Write Step 4 (Report): consolidated report using shared template, next-steps prompt to user
 

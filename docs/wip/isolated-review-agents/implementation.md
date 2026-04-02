@@ -73,6 +73,7 @@ The agent definition should include:
 - The agent needs access to Read, Grep, Glob, Bash (for git commands) tools to inspect the codebase
 - The agent should load language-specific checklists from the `solid-code-review/reference/{lang}/` directory based on the file extensions in the diff
 - The prompt that spawns this agent (from the isolated workflow) will inject the specific artifacts — the agent definition defines the contract, the workflow provides the payload
+- When in doubt, consult official documentation for guidance on creating sub-agents, supported frontmatter fields, and other details: https://code.claude.com/docs/en/sub-agents
 
 ## Task 3: Spec Reviewer Agent Definition
 
@@ -111,6 +112,7 @@ Create the agent definition for independent spec conformance review.
 - The review scope determination is important: if tasks.md shows some tasks as pending, the agent should only review completed tasks (same as existing behavior)
 - The agent needs to be able to read source files to compare against the spec — it needs Read, Grep, Glob, and Bash (for git) tool access
 - The prompt that spawns this agent injects the file paths for design.md, implementation.md, and tasks.md
+- When in doubt, consult official documentation for guidance on creating sub-agents, supported frontmatter fields, and other details: https://code.claude.com/docs/en/sub-agents
 
 ## Task 4: Isolated Code Review Workflow
 
@@ -132,28 +134,33 @@ Isolated Code Review Progress:
 
 #### Step 1: Prepare artifacts
 
-Gather the artifacts that will be passed to sub-agents:
+Gather the artifacts that will be passed to the sub-agent:
+
 - Run `git diff --stat` and `git diff` to capture the diff
 - Identify the spec context: if this review is happening within `implementation-process`, locate the relevant design.md section and task description from tasks.md. If standalone, check if the user provided context or if design docs exist in `/docs/wip/`.
 - Detect the primary language from file extensions in the diff (same logic as existing skill's step 2)
 
 #### Step 2: Spawn reviewers (parallel)
 
-Spawn two reviewers in a single message for parallel execution:
+Two reviewers run in parallel, launched in a single message:
 
 **Sub-agent A** — `code-reviewer` agent:
+
 - Prompt includes: the git diff, spec context (if available), path to language-specific checklists
 - Agent type: `kk:code-reviewer`
 
-**Sub-agent B** — `pal` codereview:
-- Call `pal` codereview MCP tool with the git diff
-- Model: gemini-3-pro (or as configured)
+**Main agent** — `pal` codereview:
 
-Both execute in parallel.
+- The main agent calls the `pal` codereview MCP tool directly with the git diff
+- Uses the top configured `pal` model (auto-selected)
+- `pal` is an external model with no conversation context — naturally isolated
+
+Both execute in parallel (sub-agent spawn + `pal` MCP call in the same message).
 
 #### Step 3: Reconcile findings
 
 Follow the shared reconciliation protocol (`_shared/review-reconciliation-protocol.md`):
+
 - Collect findings from both reviewers
 - Cross-reference: same issue from both reviewers → Duplicate (merge, note agreement, increase severity)
 - For each finding, assign disposition using reconciliation rules
@@ -162,6 +169,7 @@ Follow the shared reconciliation protocol (`_shared/review-reconciliation-protoc
 #### Step 4: Present consolidated report
 
 Present using the consolidated report template from the shared protocol. Include:
+
 - Reviewer attribution
 - Disposition for each finding
 - Agreement indicators
@@ -172,6 +180,7 @@ Then follow the same next-steps flow as existing skill: ask user how to proceed 
 ### Notes for implementer
 
 - The sub-agent prompt must include enough artifact content for the agent to work independently — it cannot ask follow-up questions
+- The main agent calls `pal` codereview directly (not from the sub-agent) — `pal` is an external model with no conversation context, so it's naturally isolated without needing a sub-agent wrapper
 - The `pal` codereview tool already produces structured output; map its format to P0-P3 for reconciliation
 - If spec context is not available (standalone review, not within implementation-process), that's fine — the code-reviewer agent works with or without spec context, same as the existing skill
 
@@ -201,6 +210,7 @@ Isolated Implementation Review Progress:
 #### Step 2: Spawn spec reviewer
 
 Spawn a single `spec-reviewer` sub-agent:
+
 - Prompt includes: paths to design.md, implementation.md, tasks.md
 - Prompt includes: review scope (which tasks to review)
 - Agent type: `kk:spec-reviewer`
@@ -210,6 +220,7 @@ Single agent, not parallel.
 #### Step 3: Reconcile findings
 
 Follow the shared reconciliation protocol with type-specific trust levels:
+
 - MISSING_IMPL, AMBIGUOUS, DOC_INCON, OUTDATED_DOC: High trust in sub-agent
 - SPEC_DEV, EXTRA_IMPL: Medium trust — main agent may have intentional-deviation context
 
@@ -234,6 +245,7 @@ Two files need routing updates to support the new variants.
 ### `klaude-plugin/skills/solid-code-review/SKILL.md`
 
 Add sub-skill routing similar to `cove/SKILL.md`. The SKILL.md should:
+
 - Keep existing description and frontmatter
 - Add an `isolated` sub-skill entry pointing to `review-isolated.md`
 - Document the invocation pattern: `/kk:solid-code-review` (standard) vs `/kk:solid-code-review:isolated` (isolated)
@@ -241,6 +253,7 @@ Add sub-skill routing similar to `cove/SKILL.md`. The SKILL.md should:
 ### `klaude-plugin/skills/implementation-review/SKILL.md`
 
 Same pattern:
+
 - Keep existing content
 - Add `isolated` sub-skill entry pointing to `review-isolated.md`
 - Document invocation pattern
@@ -259,6 +272,7 @@ Update Step 3 (Report) to support isolated review mode.
 ### Changes
 
 The current Step 3 flow is:
+
 1. Show what was implemented
 2. Show verification output
 3. Prompt user for code review
@@ -266,6 +280,7 @@ The current Step 3 flow is:
 5. Apply fixes, finalize
 
 The updated Step 3 adds a note that when the user requests isolated review:
+
 1. Show what was implemented
 2. Show verification output
 3. Prompt user for code review (mention isolated option)
@@ -282,6 +297,7 @@ The updated Step 3 adds a note that when the user requests isolated review:
 ## Task 8: Final Verification
 
 Verify all components work together:
+
 - Both agent definitions are valid and can be spawned
 - Both isolated workflows complete their full checklist
 - Reconciliation protocol is correctly applied

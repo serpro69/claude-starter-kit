@@ -25,14 +25,14 @@ The isolation boundary is **authorship and session context**, not knowledge. The
 
 ## Isolation Boundary
 
-| Given to sub-agent | Excluded from sub-agent |
-|---|---|
-| Git diff / source files | Conversation history |
-| Spec (design.md, implementation.md) | Implementation session debugging |
-| Task description from tasks.md | False starts and retries |
-| Documented design decisions and rationale | Alternatives considered but not taken |
-| Language-specific checklists | "I tried X but it didn't work" narratives |
-| Capy read access (search only) | Capy write access (no indexing) |
+| Given to sub-agent                        | Excluded from sub-agent                   |
+| ----------------------------------------- | ----------------------------------------- |
+| Git diff / source files                   | Conversation history                      |
+| Spec (design.md, implementation.md)       | Implementation session debugging          |
+| Task description from tasks.md            | False starts and retries                  |
+| Documented design decisions and rationale | Alternatives considered but not taken     |
+| Language-specific checklists              | "I tried X but it didn't work" narratives |
+| Capy read access (search only)            | Capy write access (no indexing)           |
 
 ## Architecture
 
@@ -54,12 +54,12 @@ The isolation boundary is **authorship and session context**, not knowledge. The
 
 Follows the `cove` / `cove:cove-isolated` convention:
 
-| Invocation | Behavior |
-|---|---|
-| `/kk:solid-code-review` | Existing behavior, unchanged |
-| `/kk:solid-code-review:isolated` | Spawns sub-agents, reconciles, consolidated report |
-| `/kk:implementation-review` | Existing behavior, unchanged |
-| `/kk:implementation-review:isolated` | Spawns sub-agent, reconciles, consolidated report |
+| Invocation                           | Behavior                                           |
+| ------------------------------------ | -------------------------------------------------- |
+| `/kk:solid-code-review`              | Existing behavior, unchanged                       |
+| `/kk:solid-code-review:isolated`     | Spawns sub-agents, reconciles, consolidated report |
+| `/kk:implementation-review`          | Existing behavior, unchanged                       |
+| `/kk:implementation-review:isolated` | Spawns sub-agent, reconciles, consolidated report  |
 
 ## Detailed Flows
 
@@ -72,7 +72,7 @@ Follows the `cove` / `cove:cove-isolated` convention:
 Two independent reviewers spawn simultaneously:
 
 - **Sub-agent A** (`code-reviewer` agent): Receives git diff, spec context (design.md section, task description, documented rationale), language-specific checklists. Has capy read access. Produces findings in P0-P3 format with confidence scores.
-- **Sub-agent B** (`pal` codereview with gemini): External model, naturally isolated. Receives git diff. Produces findings in its own format.
+- **Main agent** (runs `pal codereview` with the top available pal model): External model, naturally isolated. Receives git diff. Produces findings in its own format.
 
 Both run in parallel.
 
@@ -89,6 +89,7 @@ Rule: the main agent **cannot silently drop findings**. Every finding appears in
 #### Phase 3 — Consolidated Report
 
 Single report to user in existing `solid-code-review` format, extended with:
+
 - Reviewer attribution (which reviewer(s) flagged each issue)
 - Main agent disposition and reasoning
 - Agreement indicator (both reviewers, single reviewer, or main-agent-only finding)
@@ -100,6 +101,7 @@ Single report to user in existing `solid-code-review` format, extended with:
 #### Phase 1 — Isolated Spec Conformance Check
 
 A single `spec-reviewer` sub-agent spawns with:
+
 - Design docs (design.md, implementation.md)
 - tasks.md (to determine scope — which tasks are done)
 - Read/Grep access to source files
@@ -112,14 +114,14 @@ Follows the existing review-process steps (load docs, determine scope, per-task 
 
 Reconciliation with type-specific trust levels:
 
-| Finding Type | Main Agent Trust Level | Reasoning |
-|---|---|---|
-| MISSING_IMPL | High trust in sub-agent | "I forgot" is a real possibility for the implementer |
-| AMBIGUOUS | High trust in sub-agent | If the isolated reviewer found it ambiguous, that's a real signal |
-| SPEC_DEV | Medium trust | May be an intentional decision — main agent must state why |
-| EXTRA_IMPL | Medium trust | May be a legitimate discovery — main agent must state why |
-| DOC_INCON | High trust in sub-agent | Contradictions are objective |
-| OUTDATED_DOC | High trust in sub-agent | Staleness is objective |
+| Finding Type | Main Agent Trust Level  | Reasoning                                                         |
+| ------------ | ----------------------- | ----------------------------------------------------------------- |
+| MISSING_IMPL | High trust in sub-agent | "I forgot" is a real possibility for the implementer              |
+| AMBIGUOUS    | High trust in sub-agent | If the isolated reviewer found it ambiguous, that's a real signal |
+| SPEC_DEV     | Medium trust            | May be an intentional decision — main agent must state why        |
+| EXTRA_IMPL   | Medium trust            | May be a legitimate discovery — main agent must state why         |
+| DOC_INCON    | High trust in sub-agent | Contradictions are objective                                      |
+| OUTDATED_DOC | High trust in sub-agent | Staleness is objective                                            |
 
 For disputed SPEC_DEV and EXTRA_IMPL findings, the main agent suggests updating the spec to reflect the intentional deviation.
 
@@ -131,12 +133,12 @@ Defined in `_shared/review-reconciliation-protocol.md`, referenced by both isola
 
 ### Disposition Categories
 
-| Disposition | Meaning | Requirement |
-|---|---|---|
-| **Confirmed** | Finding is valid regardless of session context | None — finding stands |
-| **Disputed — Intentional** | Deviation was a deliberate decision during implementation | Must state the specific reason |
-| **Disputed — False Positive** | Finding is incorrect given broader context | Must cite specific evidence |
-| **Duplicate** | Same issue flagged by multiple reviewers | Merge findings, note agreement |
+| Disposition                   | Meaning                                                   | Requirement                    |
+| ----------------------------- | --------------------------------------------------------- | ------------------------------ |
+| **Confirmed**                 | Finding is valid regardless of session context            | None — finding stands          |
+| **Disputed — Intentional**    | Deviation was a deliberate decision during implementation | Must state the specific reason |
+| **Disputed — False Positive** | Finding is incorrect given broader context                | Must cite specific evidence    |
+| **Duplicate**                 | Same issue flagged by multiple reviewers                  | Merge findings, note agreement |
 
 ### Invariants
 
@@ -178,11 +180,11 @@ Defined in `_shared/review-reconciliation-protocol.md`, referenced by both isola
 
 ## Reconciliation Summary
 
-| # | Finding | Reviewers | Disposition | Action |
-|---|---------|-----------|-------------|--------|
-| 1 | [title] | A, B | Confirmed | Fix |
-| 2 | [title] | A | Disputed — Intentional | User decides |
-| 3 | [title] | A, B | Duplicate (merged) | Fix |
+| #   | Finding | Reviewers | Disposition            | Action       |
+| --- | ------- | --------- | ---------------------- | ------------ |
+| 1   | [title] | A, B      | Confirmed              | Fix          |
+| 2   | [title] | A         | Disputed — Intentional | User decides |
+| 3   | [title] | A, B      | Duplicate (merged)     | Fix          |
 
 ## Reviewer Disagreements
 
