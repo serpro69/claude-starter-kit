@@ -27,7 +27,7 @@
       {
         "hooks": [
           {
-            "command": "/opt/homebrew/bin/capy hook posttooluse",
+            "command": "bash -c \"for p in $(which capy 2>/dev/null) $HOME/.local/bin/capy /opt/homebrew/bin/capy /usr /local/bin/capy capy; do [ -x \"$p\" ] && exec \"$p\" hook posttooluse && break; done; echo 'capy not found' >&2; exit 1\"",
             "type": "command"
           }
         ],
@@ -38,7 +38,7 @@
       {
         "hooks": [
           {
-            "command": "/opt/homebrew/bin/capy hook precompact",
+            "command": "bash -c \"for p in $(which capy 2>/dev/null) $HOME/.local/bin/capy /opt/homebrew/bin/capy /usr /local/bin/capy capy; do [ -x \"$p\" ] && exec \"$p\" hook precompact && break; done; echo 'capy not found' >&2; exit 1\"",
             "type": "command"
           }
         ],
@@ -49,7 +49,7 @@
       {
         "hooks": [
           {
-            "command": "/opt/homebrew/bin/capy hook pretooluse",
+            "command": "bash -c \"for p in $(which capy 2>/dev/null) $HOME/.local/bin/capy /opt/homebrew/bin/capy /usr /local/bin/capy capy; do [ -x \"$p\" ] && exec \"$p\" hook pretooluse && break; done; echo 'capy not found' >&2; exit 1\"",
             "type": "command"
           }
         ],
@@ -60,7 +60,7 @@
       {
         "hooks": [
           {
-            "command": "/opt/homebrew/bin/capy hook sessionend",
+            "command": "bash -c \"for p in $(which capy 2>/dev/null) $HOME/.local/bin/capy /opt/homebrew/bin/capy /usr /local/bin/capy capy; do [ -x \"$p\" ] && exec \"$p\" hook sessionend && break; done; echo 'capy not found' >&2; exit 1\"",
             "type": "command"
           }
         ],
@@ -71,7 +71,7 @@
       {
         "hooks": [
           {
-            "command": "/opt/homebrew/bin/capy hook sessionstart",
+            "command": "bash -c \"for p in $(which capy 2>/dev/null) $HOME/.local/bin/capy /opt/homebrew/bin/capy /usr /local/bin/capy capy; do [ -x \"$p\" ] && exec \"$p\" hook sessionstart && break; done; echo 'capy not found' >&2; exit 1\"",
             "type": "command"
           }
         ],
@@ -82,7 +82,7 @@
       {
         "hooks": [
           {
-            "command": "/opt/homebrew/bin/capy hook userpromptsubmit",
+            "command": "bash -c \"for p in $(which capy 2>/dev/null) $HOME/.local/bin/capy /opt/homebrew/bin/capy /usr /local/bin/capy capy; do [ -x \"$p\" ] && exec \"$p\" hook userpromptsubmit && break; done; echo 'capy not found' >&2; exit 1\"",
             "type": "command"
           }
         ],
