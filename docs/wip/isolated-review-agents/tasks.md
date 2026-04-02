@@ -29,17 +29,17 @@
 - [x] 2.5 Define output format (P0-P3 findings with file:line, severity, confidence with reasoning, description, suggested fix)
 
 ## Task 3: Spec reviewer agent definition
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1
 - **Docs:** [implementation.md#task-3-spec-reviewer-agent-definition](./implementation.md#task-3-spec-reviewer-agent-definition)
 
 ### Subtasks
-- [ ] 3.1 Create `klaude-plugin/agents/spec-reviewer.md` with frontmatter (name, description)
-- [ ] 3.2 Write role statement, artifact contract (what is given vs excluded), and capy restriction
-- [ ] 3.3 Include finding type taxonomy (MISSING_IMPL, EXTRA_IMPL, SPEC_DEV, DOC_INCON, OUTDATED_DOC, AMBIGUOUS) with descriptions and examples
-- [ ] 3.4 Include severity levels (P0-P3 adapted for spec conformance) and confidence scale (1-10 with mandatory reasoning)
-- [ ] 3.5 Define review workflow referencing `implementation-review` review-process steps (load docs, determine scope, per-task verification, cross-cutting, self-check)
-- [ ] 3.6 Define output format (structured findings with type, severity, confidence, description, evidence)
+- [x] 3.1 Create `klaude-plugin/agents/spec-reviewer.md` with frontmatter (name, description)
+- [x] 3.2 Write role statement, artifact contract (what is given vs excluded), and capy restriction
+- [x] 3.3 Include finding type taxonomy (MISSING_IMPL, EXTRA_IMPL, SPEC_DEV, DOC_INCON, OUTDATED_DOC, AMBIGUOUS) with descriptions and examples
+- [x] 3.4 Include severity levels (P0-P3 adapted for spec conformance) and confidence scale (1-10 with mandatory reasoning)
+- [x] 3.5 Define review workflow referencing `implementation-review` review-process steps (load docs, determine scope, per-task verification, cross-cutting, self-check)
+- [x] 3.6 Define output format (structured findings with type, severity, confidence, description, evidence)
 
 ## Task 4: Isolated code review workflow
 - **Status:** pending
