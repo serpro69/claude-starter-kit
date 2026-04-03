@@ -3,19 +3,19 @@
 > Design: [./design-v2.md](./design-v2.md)
 > Implementation: [./implementation-v2.md](./implementation-v2.md)
 > Previous tasks: [./tasks.md](./tasks.md) (v1 — all tasks done except Task 8)
-> Status: pending
+> Status: in-progress
 > Created: 2026-04-03
 >
 > **Context:** v1 Tasks 1-7 are complete. This task list covers only the delta work from the v2 design review. Agent definitions (v1 Tasks 2-3) are unaffected and not listed here.
 
 ## Task 1: Delete shared reconciliation protocol
-- **Status:** pending
+- **Status:** done
 - **Depends on:** —
 - **Docs:** [implementation-v2.md#task-1-delete-shared-reconciliation-protocol](./implementation-v2.md#task-1-delete-shared-reconciliation-protocol)
 
 ### Subtasks
-- [ ] 1.1 Search the repo for references to `review-reconciliation-protocol` to confirm only the two `review-isolated.md` files reference it (they'll be rewritten in Tasks 2-3)
-- [ ] 1.2 Delete `klaude-plugin/skills/_shared/review-reconciliation-protocol.md`
+- [x] 1.1 Search the repo for references to `review-reconciliation-protocol` to confirm only the two `review-isolated.md` files reference it (they'll be rewritten in Tasks 2-3)
+- [x] 1.2 Delete `klaude-plugin/skills/_shared/review-reconciliation-protocol.md`
 
 ## Task 2: Rework isolated code review workflow
 - **Status:** pending
