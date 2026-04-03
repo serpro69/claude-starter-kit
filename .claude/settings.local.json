@@ -1,17 +1,99 @@
 {
-  "permissions": {
-    "allow": [
-      "mcp__capy__capy_stats",
-      "mcp__capy__capy_fetch_and_index",
-      "mcp__capy__capy_search",
-      "mcp__capy__capy_batch_execute",
-      "mcp__capy__capy_execute_file",
-      "mcp__capy__capy_execute",
-      "mcp__capy__capy_index",
-      "mcp__pal__listmodels"
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/scripts/capy.sh hook posttooluse",
+            "type": "command"
+          }
+        ],
+        "matcher": ""
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/scripts/capy.sh hook precompact",
+            "type": "command"
+          }
+        ],
+        "matcher": ""
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/scripts/capy.sh hook pretooluse",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash|WebFetch|Read|Grep|Agent|Task|mcp__*capy*"
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/scripts/capy.sh hook sessionend",
+            "type": "command"
+          }
+        ],
+        "matcher": ""
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/scripts/capy.sh hook sessionstart",
+            "type": "command"
+          }
+        ],
+        "matcher": ""
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/scripts/capy.sh hook userpromptsubmit",
+            "type": "command"
+          }
+        ],
+        "matcher": ""
+      }
     ]
   },
-  "enabledMcpjsonServers": [
-    "capy"
-  ]
+  "enabledMcpjsonServers": ["capy"],
+  "env": {
+    "CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY": "1",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+    "CLAUDE_CODE_NO_FLICKER": "1"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(mkdir:*)",
+      "Bash(sort:*)",
+      "mcp__capy__*",
+      "mcp__context7__*",
+      "mcp__serena__*",
+      "mcp__pal__chat",
+      "mcp__pal__codereview",
+      "mcp__pal__listmodels",
+      "WebSearch"
+    ],
+    "ask": [],
+    "defaultMode": "default",
+    "deny": []
+  }
 }
