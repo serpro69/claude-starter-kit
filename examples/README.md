@@ -10,3 +10,11 @@ Below are some examples of the actual claude-code workflows that were executed u
 > After completing the design, I usually ask claude to run a code-review with pal to use gemini-2.5-pro model to proof-read the created documents before proceeding with implementation itself.
 
 See full chat transcription in [analysis-process-example.md](./analysis-process-example.md).
+
+## Code Review
+
+> Post-implementation code review
+
+### Isolated Mode
+
+See full chat transcription in [./isolated-solid-code-review-example.md](./isolated-solid-code-review-example.md)
