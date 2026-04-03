@@ -52,14 +52,14 @@
 - [x] 4.2 Update isolated mode section in `klaude-plugin/skills/implementation-review/SKILL.md` — change to annotation model wording, mention type-specific annotation guidance, mention error handling
 
 ## Task 5: Add session-level isolated review flag to implementation-process
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 4
 - **Docs:** [implementation-v2.md#task-5-add-session-level-isolated-review-flag-to-implementation-process](./implementation-v2.md#task-5-add-session-level-isolated-review-flag-to-implementation-process)
 
 ### Subtasks
-- [ ] 5.1 Add a note in the preamble/Step 0 of `klaude-plugin/skills/implementation-process/SKILL.md` that the user can request isolated review mode for the entire session (via invocation flag or `review-mode: isolated` in tasks.md metadata)
-- [ ] 5.2 Update Step 3 to check the session-level flag: if set, automatically use isolated variants without per-checkpoint prompting; if not set, existing behavior unchanged
-- [ ] 5.3 Add per-checkpoint override note: user can say "use standard review for this one" to override the session flag
+- [x] 5.1 Add a note in the preamble/Step 0 of `klaude-plugin/skills/implementation-process/SKILL.md` that the user can request isolated review mode for the entire session (via invocation flag or `review-mode: isolated` in tasks.md metadata)
+- [x] 5.2 Update Step 3 to check the session-level flag: if set, automatically use isolated variants without per-checkpoint prompting; if not set, existing behavior unchanged
+- [x] 5.3 Add per-checkpoint override note: user can say "use standard review for this one" to override the session flag
 
 ## Task 6: Final verification
 - **Status:** pending
