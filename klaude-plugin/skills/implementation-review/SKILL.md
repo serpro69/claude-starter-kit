@@ -23,10 +23,11 @@ Reviews spec conformance in the main conversation context. Single-pass review us
 
 ### Isolated Mode (`/kk:implementation-review:isolated`)
 
-Delegates detection to an independent `spec-reviewer` sub-agent that did not write the code, then reconciles its findings with type-specific trust levels. Produces a consolidated report with dispositions and spec update suggestions.
+Delegates detection to an independent `spec-reviewer` sub-agent that did not write the code, then annotates its findings with type-specific author context. Low-relevance types (MISSING_IMPL, DOC_INCON, OUTDATED_DOC, AMBIGUOUS) get brief annotations; high-relevance types (SPEC_DEV, EXTRA_IMPL) get detailed annotations with spec update suggestions.
 
-- **Cost**: Higher (sub-agent + reconciliation)
+- **Cost**: Higher (sub-agent + annotation)
 - **Isolation**: True — reviewer has zero authorship bias or session context
+- **Degradation**: If sub-agent fails, suggests standard mode fallback
 - **Best for**: When extra rigor is worth the cost (post-implementation, pre-merge)
 
 See [review-isolated.md](./review-isolated.md) for the isolated workflow.

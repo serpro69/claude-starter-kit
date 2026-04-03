@@ -21,10 +21,11 @@ Reviews code in the main conversation context. Fast, single-pass review using th
 
 ### Isolated Mode (`/kk:solid-code-review:isolated`)
 
-Delegates detection to independent reviewers that did not write the code, then reconciles their findings. Two parallel reviewers: a `code-reviewer` sub-agent and `pal codereview` (external model). Produces a consolidated report with dispositions and agreement indicators.
+Delegates detection to independent reviewers that did not write the code, then annotates their findings with author context. Two parallel reviewers: a `code-reviewer` sub-agent and `pal codereview` (external model in native format). Produces a report organized by agreement level with corroborated findings highlighted.
 
-- **Cost**: Higher (sub-agent + external model + reconciliation)
+- **Cost**: Higher (sub-agent + external model + annotation)
 - **Isolation**: True — reviewers have zero authorship bias or session context
+- **Degradation**: Graceful — if one reviewer fails, proceeds with the other; if both fail, suggests standard mode fallback
 - **Best for**: When extra rigor is worth the cost (pre-merge, high-stakes changes)
 
 See [review-isolated.md](./review-isolated.md) for the isolated workflow.

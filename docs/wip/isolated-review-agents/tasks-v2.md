@@ -43,13 +43,13 @@
 - [x] 3.5 Add author-sourced findings support, tagged distinctly
 
 ## Task 4: Update SKILL.md descriptions
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 2, Task 3
 - **Docs:** [implementation-v2.md#task-4-update-skillmd-descriptions](./implementation-v2.md#task-4-update-skillmd-descriptions)
 
 ### Subtasks
-- [ ] 4.1 Update isolated mode section in `klaude-plugin/skills/solid-code-review/SKILL.md` — change "reconciles findings" wording to "annotates with context", mention native pal format, mention graceful degradation on failure
-- [ ] 4.2 Update isolated mode section in `klaude-plugin/skills/implementation-review/SKILL.md` — change to annotation model wording, mention type-specific annotation guidance, mention error handling
+- [x] 4.1 Update isolated mode section in `klaude-plugin/skills/solid-code-review/SKILL.md` — change "reconciles findings" wording to "annotates with context", mention native pal format, mention graceful degradation on failure
+- [x] 4.2 Update isolated mode section in `klaude-plugin/skills/implementation-review/SKILL.md` — change to annotation model wording, mention type-specific annotation guidance, mention error handling
 
 ## Task 5: Add session-level isolated review flag to implementation-process
 - **Status:** pending
