@@ -5,6 +5,9 @@
       "mcp__capy__capy_fetch_and_index",
       "mcp__capy__capy_search",
       "mcp__capy__capy_batch_execute",
+      "mcp__capy__capy_execute_file",
+      "mcp__capy__capy_execute",
+      "mcp__capy__capy_index",
       "mcp__pal__listmodels"
     ]
   },
