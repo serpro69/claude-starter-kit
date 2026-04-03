@@ -31,16 +31,16 @@
 - [x] 2.6 Remove pal-to-P0-P3 format mapping — pal output stays in native format
 
 ## Task 3: Rework isolated spec conformance workflow
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1
 - **Docs:** [implementation-v2.md#task-3-rework-isolated-spec-conformance-workflow](./implementation-v2.md#task-3-rework-isolated-spec-conformance-workflow)
 
 ### Subtasks
-- [ ] 3.1 Update Step 2 in `klaude-plugin/skills/implementation-review/review-isolated.md` to add error handling: sub-agent timeout/failure (abort with fallback suggestion), malformed output (best-effort parse then failure)
-- [ ] 3.2 Replace Step 3 ("Reconcile") with "Annotate" — remove disposition logic and trust level table, replace with type-specific annotation guidance: low-relevance types (MISSING_IMPL, DOC_INCON, OUTDATED_DOC, AMBIGUOUS) get brief annotations; high-relevance types (SPEC_DEV, EXTRA_IMPL) get detailed annotations with spec update suggestions
-- [ ] 3.3 Replace Step 4 ("Report") with simplified presentation organized by finding type. Remove reconciliation summary table. Use spec review report template from design-v2.md
-- [ ] 3.4 Remove all references to the shared reconciliation protocol — annotation logic is now inline
-- [ ] 3.5 Add author-sourced findings support, tagged distinctly
+- [x] 3.1 Update Step 2 in `klaude-plugin/skills/implementation-review/review-isolated.md` to add error handling: sub-agent timeout/failure (abort with fallback suggestion), malformed output (best-effort parse then failure)
+- [x] 3.2 Replace Step 3 ("Reconcile") with "Annotate" — remove disposition logic and trust level table, replace with type-specific annotation guidance: low-relevance types (MISSING_IMPL, DOC_INCON, OUTDATED_DOC, AMBIGUOUS) get brief annotations; high-relevance types (SPEC_DEV, EXTRA_IMPL) get detailed annotations with spec update suggestions
+- [x] 3.3 Replace Step 4 ("Report") with simplified presentation organized by finding type. Remove reconciliation summary table. Use spec review report template from design-v2.md
+- [x] 3.4 Remove all references to the shared reconciliation protocol — annotation logic is now inline
+- [x] 3.5 Add author-sourced findings support, tagged distinctly
 
 ## Task 4: Update SKILL.md descriptions
 - **Status:** pending
