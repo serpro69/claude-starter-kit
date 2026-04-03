@@ -15,6 +15,14 @@ Load plan, review critically, execute tasks in batches, report for review betwee
 
 **Core principle:** Batch execution with checkpoints for architect review.
 
+### Review Mode
+
+By default, review checkpoints use standard mode. The user can request **isolated review mode** for the entire session:
+- When invoking the skill: "use isolated review" or "isolated mode"
+- In `tasks.md` metadata: a `review-mode: isolated` field in the header
+
+When set, all review checkpoints automatically use isolated variants (`kk:solid-code-review:isolated`, `kk:implementation-review:isolated`) without per-checkpoint prompting. The user can override at any checkpoint ("use standard review for this one").
+
 ## The Process
 
 ### Step 1: Load and Review Plan
@@ -37,9 +45,10 @@ Load plan, review critically, execute tasks in batches, report for review betwee
 
 - Show what was implemented
 - Show verification output
-- Prompt user for code-review (mention isolated mode as an option); if user responds 'yes':
+- **If session-level isolated review is set**: automatically use `kk:solid-code-review:isolated` — this handles both sub-agent and pal codereview internally with independent reviewers. Do NOT run a separate `pal` codereview call, as it is already included in the isolated workflow. The user can say "use standard review for this one" to override.
+- **Otherwise**: prompt user for code-review (mention isolated mode as an option); if user responds 'yes':
   - **Standard review** (default): Use `kk:solid-code-review` skill, then run `pal` mcp code-review, consolidate findings
-  - **Isolated review** (if user requests): Use `kk:solid-code-review:isolated` — this handles both sub-agent and pal codereview internally with independent reviewers and reconciliation. Do NOT run a separate `pal` codereview call, as it is already included in the isolated workflow
+  - **Isolated review** (if user requests): Use `kk:solid-code-review:isolated` — same as above
 - Based on user and code-review feedback: apply changes if needed and finalize the sub-task
 - **Capy index:** If a non-obvious pattern or convention was established during implementation, index it as `kk:project-conventions`
 - When completed, update `tasks.md`: set the task's status to `done`
