@@ -1,7 +1,6 @@
 ### Workflow
 
 For capy knowledge base conventions, see [capy-knowledge-protocol.md](../_shared/capy-knowledge-protocol.md).
-For reconciliation rules, see [review-reconciliation-protocol.md](../_shared/review-reconciliation-protocol.md).
 
 Copy this checklist and check off items as you complete them:
 
@@ -9,8 +8,8 @@ Copy this checklist and check off items as you complete them:
 Isolated Implementation Review Progress:
 - [ ] Step 1: Prepare artifacts
 - [ ] Step 2: Spawn spec reviewer
-- [ ] Step 3: Reconcile findings
-- [ ] Step 4: Present consolidated report
+- [ ] Step 3: Annotate findings
+- [ ] Step 4: Present report
 ```
 
 ---
@@ -83,70 +82,100 @@ Read the documents yourself using the Read tool. Produce your findings in the ou
 
 This is a single sub-agent, not parallel. Wait for it to complete before proceeding.
 
+### Error handling
+
+- **Sub-agent timeout or failure**: Abort isolated mode. Suggest fallback to `/kk:implementation-review` (standard mode).
+- **Malformed output**: Attempt best-effort parsing. If completely unparseable, treat as failure and abort with the fallback suggestion above.
+
 ---
 
-## Step 3: Reconcile Findings
+## Step 3: Annotate Findings
 
-Follow the [review-reconciliation-protocol.md](../_shared/review-reconciliation-protocol.md) strictly, applying **type-specific trust levels** for spec conformance findings.
+The main agent annotates findings using type-specific guidance — providing context, not judgment. Do NOT assign dispositions (Confirmed, Disputed, etc.). The user is the final arbiter.
 
-### 3a) Collect findings
+### 3a) Parse findings
 
 Parse the `spec-reviewer` sub-agent's structured output (finding type, severity, confidence, spec-vs-code evidence).
 
-### 3b) Apply type-specific trust levels
+### 3b) Apply type-specific annotation guidance
 
-For each finding, the trust level depends on the finding type:
+Each finding type has different relevance for author context annotations:
 
-| Finding Type | Trust Level | Default disposition |
-|---|---|---|
-| `MISSING_IMPL` | **High trust** | Default to **Confirmed** unless you can point to the specific code that implements it |
-| `AMBIGUOUS` | **High trust** | Default to **Confirmed** — the spec needs clarification even if you know what was intended |
-| `DOC_INCON` | **High trust** | Default to **Confirmed** unless the cited sections do not actually contradict |
-| `OUTDATED_DOC` | **High trust** | Default to **Confirmed** unless the doc already reflects current state |
-| `SPEC_DEV` | **Medium trust** | Evaluate against session context. If intentional, use **Disputed — Intentional** and recommend a spec update |
-| `EXTRA_IMPL` | **Medium trust** | Evaluate against session context. If intentional, use **Disputed — Intentional** and recommend a spec update |
+**Low author-context-relevance types** (MISSING_IMPL, DOC_INCON, OUTDATED_DOC, AMBIGUOUS):
+- These are objective or spec-clarity issues. The main agent's session context is less relevant.
+- Keep annotations **brief**: point to implementing code if it exists, confirm/deny inconsistencies, clarify intent if known.
 
-### 3c) Assign dispositions
+**High author-context-relevance types** (SPEC_DEV, EXTRA_IMPL):
+- These may be intentional deviations. The main agent's session context IS relevant.
+- Annotations should **explain the decision** and suggest a spec update if the deviation was deliberate.
 
-For every finding, assign exactly one disposition:
+For each finding:
+- Add a clearly-labeled **"Author context"** annotation where the main agent's session context is relevant.
+- Leave findings as-is when the annotation would not add useful information.
+- Annotations are context, not judgments. "I chose X because Y" is correct. "This finding is invalid" is **not**.
 
-| Disposition | When to use |
-|---|---|
-| **Confirmed** | Finding is valid — code or docs need to change |
-| **Disputed — Intentional** | Deviation was deliberate. You MUST state the specific reason AND recommend updating the spec to document it |
-| **Disputed — False Positive** | Finding is incorrect. You MUST cite specific evidence |
+### 3c) Author-sourced findings
 
-**Invariants** — these are non-negotiable:
-- Every finding MUST appear in the report with a disposition
-- You MUST NOT add new findings
-- Disputed findings still appear — the user decides
+If the close re-reading during annotation triggers new observations, add them:
 
-### 3d) Spec update suggestions
-
-For any `SPEC_DEV` or `EXTRA_IMPL` finding with disposition **Disputed — Intentional**: draft a concrete suggestion for updating the spec (which doc, which section, what to change). The goal is to keep spec and code in sync even when the deviation is correct.
+- Tag as **"author-sourced"** — clearly distinct from sub-agent findings.
+- The user knows these come from the author and can weight accordingly.
 
 ---
 
-## Step 4: Present Consolidated Report
+## Step 4: Present Report
 
-Use the consolidated report template from [review-reconciliation-protocol.md](../_shared/review-reconciliation-protocol.md), adapted for spec conformance findings.
+Use this report template, organized by finding type:
 
-### Report content
+```markdown
+## Spec Conformance Review (Isolated Mode)
 
-- **Reviewers**: `spec-reviewer (sub-agent)`
-- **Feature**: feature name and directory
-- **Review scope**: mid-implementation or post-implementation, with task list
-- **Overall assessment**: CONFORMANT / DEVIATIONS_FOUND / MAJOR_GAPS
-- **Findings**: grouped by effective severity (P0-P3), each with:
-  - Finding type (`MISSING_IMPL`, `SPEC_DEV`, etc.)
-  - Location (file:line vs doc:section)
-  - Disposition and reasoning (if Disputed)
-  - Confidence (1-10) with reasoning
-  - "Spec says" vs "Code does" evidence
-  - Spec update suggestion (if applicable)
-- **Reconciliation summary table**: all findings with type, severity, disposition, and action
-- **Doc issues**: `DOC_INCON` and `OUTDATED_DOC` findings requiring spec updates
-- **Ambiguities**: `AMBIGUOUS` findings requiring spec clarification
+**Reviewer**: spec-reviewer (Claude sub-agent)
+**Scope**: [tasks reviewed]
+
+---
+
+### Findings by Type
+
+#### MISSING_IMPL
+- **[description]** — P[0-3]
+  - Evidence: [spec reference vs implementation state]
+  - Author context: [optional brief annotation]
+
+#### SPEC_DEV
+- **[description]** — P[0-3]
+  - Evidence: [spec says X, implementation does Y]
+  - Author context: [explain decision, suggest spec update if intentional]
+
+#### EXTRA_IMPL
+- **[description]** — P[0-3]
+  - Evidence: [implementation has X, spec does not document it]
+  - Author context: [explain why added, suggest spec update if intentional]
+
+#### DOC_INCON
+- **[description]** — P[0-3]
+  - Evidence: [section A says X, section B says Y]
+  - Author context: [optional brief annotation]
+
+#### OUTDATED_DOC
+- **[description]** — P[0-3]
+  - Evidence: [doc says X, current state is Y]
+  - Author context: [optional — note what changed and when]
+
+#### AMBIGUOUS
+- **[description]** — P[0-3]
+  - Evidence: [ambiguous spec language]
+  - Author context: [optional — clarify intent if known]
+
+### Author-Sourced Findings
+
+- **[description]** ⟨author-sourced⟩
+  - [description]
+```
+
+**Section rules:**
+- Omit any finding type section that has no findings.
+- Each finding shows: type, severity, the finding, evidence, and author context annotation where relevant.
 
 ### Integration with implementation-process
 
@@ -164,12 +193,12 @@ If invoked standalone, present the report and ask the user how to proceed:
 
 ## Next Steps
 
-I found X findings (P0: ..., P1: ..., P2: ..., P3: ...).
+I found X findings (MISSING_IMPL: ..., SPEC_DEV: ..., DOC_INCON: ..., etc.).
 
 **How would you like to proceed?**
 
-1. **Fix all** — I'll address all confirmed findings (code fixes + doc updates)
-2. **Fix P0/P1 only** — Address critical and high priority issues
+1. **Fix all** — I'll address all findings (code fixes + doc updates)
+2. **Fix high severity only** — Address P0/P1 issues
 3. **Fix specific items** — Tell me which findings to address
 4. **Update docs only** — Apply spec update suggestions without code changes
 5. **No changes** — Review complete, no changes needed
