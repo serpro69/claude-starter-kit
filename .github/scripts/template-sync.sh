@@ -739,6 +739,8 @@ fetch_upstream_templates() {
   local upstream_root="$work_dir/upstream"
   if [[ -d "$upstream_root/.claude" ]]; then
     cp -rp "$upstream_root/.claude" "$FETCHED_TEMPLATES_PATH/claude"
+    # settings.local.json is per-repo and must never be synced downstream
+    rm -f "$FETCHED_TEMPLATES_PATH/claude/settings.local.json"
   fi
   if [[ -d "$upstream_root/.serena" ]]; then
     cp -rp "$upstream_root/.serena" "$FETCHED_TEMPLATES_PATH/serena"
