@@ -23,6 +23,7 @@ Skills are invoked as `/skill-name` (no namespace prefix — annotated with `(kk
 | **development-guidelines** | During implementation. Enforces best practices like using latest deps and context7 for docs.                                                                             |
 | **solid-code-review**      | Code review with a senior-engineer lens. Checks SOLID principles, security, code quality. Includes language-specific checklists for Go, Java, JS/TS, Kotlin, and Python. |
 | **implementation-review**  | Verify implemented code matches design/implementation docs. Detects spec deviations, missing implementations, and outdated docs.                                         |
+| **design-review**          | Pre-implementation review gate. Evaluates design docs for completeness, internal consistency, and technical soundness before code is written.                             |
 | **merge-docs**             | Semantically compare and merge two competing design docs for the same feature into one unified document.                                                                 |
 | **cove**                   | Chain-of-Verification prompting. Two modes: standard (prompt-based) and isolated (sub-agent). For high-stakes accuracy and fact-checking.                                |
 
@@ -39,7 +40,7 @@ analysis-process → implementation-process → testing-process → documentatio
 3. **testing-process** — verify and validate
 4. **documentation-process** — update docs
 
-Use **solid-code-review** and **implementation-review** at any point for quality gates.
+Use **design-review** before implementation, and **solid-code-review** and **implementation-review** during/after implementation as quality gates.
 
 ## Commands
 
@@ -50,6 +51,8 @@ Use **solid-code-review** and **implementation-review** at any point for quality
 | CoVe (isolated) | `/kk:cove:cove-isolated [--explore] [--haiku] [question]` | CoVe with true sub-agent isolation |
 | Implementation Review | `/kk:implementation-review:implementation-review [feature]` | Verify code matches design/implementation docs |
 | Implementation Review (isolated) | `/kk:implementation-review:isolated [feature]` | Spec conformance review with independent sub-agent |
+| Design Review | `/kk:design-review [feature] [scope]` | Review design docs for quality and technical soundness |
+| Design Review (isolated) | `/kk:design-review:isolated [feature] [scope]` | Design review with independent sub-agents |
 | Migrate from Task Master | `/kk:migrate-from-taskmaster:migrate` | One-time migration from Task Master MCP |
 | Sync Workflow | `/kk:sync-workflow:sync-workflow [version]` | Update template-sync from upstream |
 

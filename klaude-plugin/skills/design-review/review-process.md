@@ -73,8 +73,6 @@ For each finding:
 4. Assign confidence score (1-10) with explicit reasoning
 5. Drop findings that don't survive the self-check
 
-**Capy index:** Index any P0/P1 findings that reveal recurring design patterns (not one-off issues) as `kk:review-findings`.
-
 ### 6) Present Findings
 
 #### Output format
@@ -125,7 +123,7 @@ For each finding:
 
 Use `(none)` under severity sections with no findings.
 
-**Capy index:** Index any confirmed `TECH_RISK` findings that reveal non-obvious architectural constraints as `kk:arch-decisions`.
+**Capy index:** Index any confirmed `TECH_RISK` findings that reveal non-obvious architectural constraints as `kk:arch-decisions`. Index confirmed P0/P1 findings that reveal recurring design patterns (not one-off issues) as `kk:review-findings`.
 
 #### Next steps
 

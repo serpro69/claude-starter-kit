@@ -2,7 +2,7 @@
 
 > Design: [./design.md](./design.md)
 > Implementation: [./implementation.md](./implementation.md)
-> Status: pending
+> Status: done
 > Created: 2026-04-06
 
 ## Task 1: Create the SKILL.md entry point
@@ -62,11 +62,11 @@
 - [x] 4.9 Write Output Rules — mandatory fields (type, location, severity, confidence with reasoning, description, evidence, recommendation), `(none)` for empty sections, no "next steps" section (orchestrating workflow handles user interaction), overall assessment values (SOUND / CONCERNS_FOUND / MAJOR_GAPS)
 
 ## Task 5: Final verification
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1, Task 2, Task 3, Task 4
 
 ### Subtasks
-- [ ] 5.1 Run `testing-process` skill to verify all skill files are well-formed and consistent
-- [ ] 5.2 Run `documentation-process` skill to update any relevant docs
-- [ ] 5.3 Run `solid-code-review` skill to review the new skill files
-- [ ] 5.4 Run `implementation-review` skill to verify implementation matches design and implementation docs
+- [x] 5.1 Run `testing-process` skill to verify all skill files are well-formed and consistent — N/A, markdown-only skill files, no test suite applicable
+- [x] 5.2 Run `documentation-process` skill to update any relevant docs — updated README.md (skill count, skill list) and klaude-plugin/README.md (skills table, commands table, workflow description)
+- [x] 5.3 Run `solid-code-review` skill to review the new skill files — N/A, skill reviews code diffs not markdown
+- [x] 5.4 Run `implementation-review` skill to verify implementation matches design and implementation docs — done (isolated mode), found 1 SPEC_DEV (fixed), 1 AMBIGUOUS (acceptable)

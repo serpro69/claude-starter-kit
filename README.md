@@ -45,9 +45,9 @@ The kk plugin's skills are **knowledge-aware** via [Capy](https://github.com/ser
 
 ### kk Plugin ([`klaude-plugin/`](./klaude-plugin/README.md))
 
-The **kk** plugin contains all development workflow functionality — 9 skills, 4 commands, and hooks — distributed via the Claude Code plugin system. Skills are invoked as `/skill-name`, commands as `/kk:dir:command`.
+The **kk** plugin contains all development workflow functionality — 10 skills, 4 commands, and hooks — distributed via the Claude Code plugin system. Skills are invoked as `/skill-name`, commands as `/kk:dir:command`.
 
-Includes: **analysis-process**, **implementation-process**, **testing-process**, **documentation-process**, **development-guidelines**, **solid-code-review**, **implementation-review**, **merge-docs**, **cove** (Chain-of-Verification). Plus commands for CoVe, implementation review, Task Master migration, and sync workflow updates. See the [plugin README](./klaude-plugin/README.md) for full details.
+Includes: **analysis-process**, **implementation-process**, **testing-process**, **documentation-process**, **development-guidelines**, **solid-code-review**, **implementation-review**, **design-review**, **merge-docs**, **cove** (Chain-of-Verification). Plus commands for CoVe, implementation review, design review, Task Master migration, and sync workflow updates. See the [plugin README](./klaude-plugin/README.md) for full details.
 
 ### Other Configuration
 
@@ -418,7 +418,7 @@ for test in test/test-*.sh; do $test; done
 ```
 klaude-plugin/                   # kk plugin (distributed via plugin system)
 ├── .claude-plugin/plugin.json   # Plugin manifest
-├── skills/                      # 9 development workflow skills
+├── skills/                      # 10 development workflow skills
 ├── commands/                    # 4 slash commands
 ├── hooks/hooks.json             # Bash validation hook config
 └── scripts/validate-bash.sh     # Hook script
