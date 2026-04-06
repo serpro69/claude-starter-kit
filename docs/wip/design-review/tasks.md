@@ -6,18 +6,18 @@
 > Created: 2026-04-06
 
 ## Task 1: Create the SKILL.md entry point
-- **Status:** pending
+- **Status:** done
 - **Depends on:** —
 - **Docs:** [implementation.md#skillmd--skill-entry-point](./implementation.md#skillmd--skill-entry-point)
 
 ### Subtasks
-- [ ] 1.1 Create `klaude-plugin/skills/design-review/SKILL.md` with frontmatter (`name: design-review`, description) following the pattern of `solid-code-review/SKILL.md`
-- [ ] 1.2 Add Overview section — one paragraph describing purpose as pre-implementation review gate
-- [ ] 1.3 Add Review Modes section — standard and isolated, with brief descriptions and links to `review-process.md` and `review-isolated.md`
-- [ ] 1.4 Add Finding Types table — the 6-type taxonomy (INCOMPLETE, INCONSISTENT, TECH_RISK, MISSING, AMBIGUOUS, STRUCTURE) from design.md
-- [ ] 1.5 Add Severity Levels table — P0-P3 adapted for design review
-- [ ] 1.6 Add Workflow section — phase list with link to `review-process.md`
-- [ ] 1.7 Add Invocation section — command examples for both modes with scope argument explanation and examples
+- [x] 1.1 Create `klaude-plugin/skills/design-review/SKILL.md` with frontmatter (`name: design-review`, description) following the pattern of `solid-code-review/SKILL.md`
+- [x] 1.2 Add Overview section — one paragraph describing purpose as pre-implementation review gate
+- [x] 1.3 Add Review Modes section — standard and isolated, with brief descriptions and links to `review-process.md` and `review-isolated.md`
+- [x] 1.4 Add Finding Types table — the 6-type taxonomy (INCOMPLETE, INCONSISTENT, TECH_RISK, MISSING, AMBIGUOUS, STRUCTURE) from design.md
+- [x] 1.5 Add Severity Levels table — P0-P3 adapted for design review
+- [x] 1.6 Add Workflow section — phase list with link to `review-process.md`
+- [x] 1.7 Add Invocation section — command examples for both modes with scope argument explanation and examples
 
 ## Task 2: Create the standard mode workflow
 - **Status:** pending
