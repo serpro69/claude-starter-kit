@@ -20,18 +20,18 @@
 - [x] 1.7 Add Invocation section — command examples for both modes with scope argument explanation and examples
 
 ## Task 2: Create the standard mode workflow
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1
 - **Docs:** [implementation.md#review-processmd--standard-mode-workflow](./implementation.md#review-processmd--standard-mode-workflow)
 
 ### Subtasks
-- [ ] 2.1 Create `klaude-plugin/skills/design-review/review-process.md` with the capy knowledge base convention reference and progress checklist
-- [ ] 2.2 Implement Step 1 (Load documents) — argument parsing with disambiguation rule (check `/docs/wip/` for feature name first, then scope keyword), scope resolution logic (none/design/implementation/tasks/all — note `tasks` = only tasks.md), feature directory lookup, graceful handling of missing docs
-- [ ] 2.3 Implement Step 2 (Capy search) — search `kk:arch-decisions` and `kk:review-findings` for prior context
-- [ ] 2.4 Implement Step 3 (Document quality review) — completeness, clarity, internal consistency, cross-document consistency, convention adherence, subtask quality checks
-- [ ] 2.5 Implement Step 4 (Technical soundness review) — viability, edge cases, trade-offs, scalability, testing strategy, migration/rollback, codebase cross-reference
-- [ ] 2.6 Implement Step 5 (Self-check and confidence assessment) — re-read, question assumptions, assign confidence, drop unsubstantiated findings
-- [ ] 2.7 Implement Step 6 (Present findings) — output format template with overall assessment (SOUND/CONCERNS_FOUND/MAJOR_GAPS) and Evidence field, `(none)` for empty severity sections, next-steps prompt, capy index for confirmed TECH_RISK as `kk:arch-decisions` and confirmed P0/P1 patterns as `kk:review-findings`
+- [x] 2.1 Create `klaude-plugin/skills/design-review/review-process.md` with the capy knowledge base convention reference and progress checklist
+- [x] 2.2 Implement Step 1 (Load documents) — argument parsing with disambiguation rule (check `/docs/wip/` for feature name first, then scope keyword), scope resolution logic (none/design/implementation/tasks/all — note `tasks` = only tasks.md), feature directory lookup, graceful handling of missing docs
+- [x] 2.3 Implement Step 2 (Capy search) — search `kk:arch-decisions` and `kk:review-findings` for prior context
+- [x] 2.4 Implement Step 3 (Document quality review) — completeness, clarity, internal consistency, cross-document consistency, convention adherence, subtask quality checks
+- [x] 2.5 Implement Step 4 (Technical soundness review) — viability, edge cases, trade-offs, scalability, testing strategy, migration/rollback, codebase cross-reference
+- [x] 2.6 Implement Step 5 (Self-check and confidence assessment) — re-read, question assumptions, assign confidence, drop unsubstantiated findings
+- [x] 2.7 Implement Step 6 (Present findings) — output format template with overall assessment (SOUND/CONCERNS_FOUND/MAJOR_GAPS) and Evidence field, `(none)` for empty severity sections, next-steps prompt, capy index for confirmed TECH_RISK as `kk:arch-decisions` and confirmed P0/P1 patterns as `kk:review-findings`
 
 ## Task 3: Create the isolated mode workflow
 - **Status:** pending
