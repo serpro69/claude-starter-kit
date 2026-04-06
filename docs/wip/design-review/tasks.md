@@ -46,20 +46,20 @@
 - [x] 3.5 Implement Step 4 (Present report) — report template organized by agreement level (corroborated/design-reviewer/pal/author-sourced) with full field set in corroborated findings (type, severity, confidence, description, evidence, recommendation), section omission rules, next-steps prompt
 
 ## Task 4: Create the design-reviewer sub-agent
-- **Status:** pending
+- **Status:** done
 - **Depends on:** —
 - **Docs:** [implementation.md#design-reviewer-agent-definition](./implementation.md#design-reviewer-agent-definition)
 
 ### Subtasks
-- [ ] 4.1 Create `klaude-plugin/agents/design-reviewer.md` with frontmatter (`name: design-reviewer`, description, tools allowlist: Read, Grep, Glob, capy_search)
-- [ ] 4.2 Write identity section — independent reviewer, no authorship attachment, zero session context
-- [ ] 4.3 Write "What You Receive" and "What You Do NOT Have" sections following `code-reviewer.md` pattern
-- [ ] 4.4 Write Tool Access section — restricted allowlist, usage guidance for Read/Grep/Glob/capy_search
-- [ ] 4.5 Write Finding Type Taxonomy table — 6-type taxonomy with codes, descriptions, examples
-- [ ] 4.6 Write Severity Levels and Confidence Levels tables
-- [ ] 4.7 Write Review Workflow — 7 steps: read docs, capy search, quality pass, soundness pass, cross-doc consistency, self-check, output findings
-- [ ] 4.8 Write Output Format contract — structured markdown with P0-P3 grouping, finding type code, doc:section reference, confidence with reasoning, description, evidence, recommendation
-- [ ] 4.9 Write Output Rules — mandatory fields (type, location, severity, confidence with reasoning, description, evidence, recommendation), `(none)` for empty sections, no "next steps" section (orchestrating workflow handles user interaction), overall assessment values (SOUND / CONCERNS_FOUND / MAJOR_GAPS)
+- [x] 4.1 Create `klaude-plugin/agents/design-reviewer.md` with frontmatter (`name: design-reviewer`, description, tools allowlist: Read, Grep, Glob, capy_search)
+- [x] 4.2 Write identity section — independent reviewer, no authorship attachment, zero session context
+- [x] 4.3 Write "What You Receive" and "What You Do NOT Have" sections following `code-reviewer.md` pattern
+- [x] 4.4 Write Tool Access section — restricted allowlist, usage guidance for Read/Grep/Glob/capy_search
+- [x] 4.5 Write Finding Type Taxonomy table — 6-type taxonomy with codes, descriptions, examples
+- [x] 4.6 Write Severity Levels and Confidence Levels tables
+- [x] 4.7 Write Review Workflow — 7 steps: read docs, capy search, quality pass, soundness pass, cross-doc consistency, self-check, output findings
+- [x] 4.8 Write Output Format contract — structured markdown with P0-P3 grouping, finding type code, doc:section reference, confidence with reasoning, description, evidence, recommendation
+- [x] 4.9 Write Output Rules — mandatory fields (type, location, severity, confidence with reasoning, description, evidence, recommendation), `(none)` for empty sections, no "next steps" section (orchestrating workflow handles user interaction), overall assessment values (SOUND / CONCERNS_FOUND / MAJOR_GAPS)
 
 ## Task 5: Final verification
 - **Status:** pending
