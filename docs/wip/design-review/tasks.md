@@ -26,12 +26,12 @@
 
 ### Subtasks
 - [ ] 2.1 Create `klaude-plugin/skills/design-review/review-process.md` with the capy knowledge base convention reference and progress checklist
-- [ ] 2.2 Implement Step 1 (Load documents) — argument parsing, scope resolution logic (none/design/implementation/tasks/all), feature directory lookup, graceful handling of missing docs
+- [ ] 2.2 Implement Step 1 (Load documents) — argument parsing with disambiguation rule (check `/docs/wip/` for feature name first, then scope keyword), scope resolution logic (none/design/implementation/tasks/all — note `tasks` = only tasks.md), feature directory lookup, graceful handling of missing docs
 - [ ] 2.3 Implement Step 2 (Capy search) — search `kk:arch-decisions` and `kk:review-findings` for prior context
 - [ ] 2.4 Implement Step 3 (Document quality review) — completeness, clarity, internal consistency, cross-document consistency, convention adherence, subtask quality checks
 - [ ] 2.5 Implement Step 4 (Technical soundness review) — viability, edge cases, trade-offs, scalability, testing strategy, migration/rollback, codebase cross-reference
 - [ ] 2.6 Implement Step 5 (Self-check and confidence assessment) — re-read, question assumptions, assign confidence, drop unsubstantiated findings
-- [ ] 2.7 Implement Step 6 (Present findings) — output format template, next-steps prompt, capy index instruction for confirmed TECH_RISK findings
+- [ ] 2.7 Implement Step 6 (Present findings) — output format template with overall assessment (SOUND/CONCERNS_FOUND/MAJOR_GAPS) and Evidence field, `(none)` for empty severity sections, next-steps prompt, capy index for confirmed TECH_RISK as `kk:arch-decisions` and confirmed P0/P1 patterns as `kk:review-findings`
 
 ## Task 3: Create the isolated mode workflow
 - **Status:** pending
@@ -40,10 +40,10 @@
 
 ### Subtasks
 - [ ] 3.1 Create `klaude-plugin/skills/design-review/review-isolated.md` with the capy knowledge base convention reference and progress checklist
-- [ ] 3.2 Implement Step 1 (Prepare artifacts) — read documents, resolve pal model via `listmodels`, prepare document content for pal
+- [ ] 3.2 Implement Step 1 (Prepare artifacts) — read documents, resolve pal model via `listmodels`, prepare document content for pal with explicit framing instruction ("this is a design document, not source code")
 - [ ] 3.3 Implement Step 2 (Spawn reviewers) — sub-agent prompt template for `design-reviewer` (with document paths and scope), `pal codereview` call with document contents, parallel execution requirement, error handling (one fails, both fail, malformed output)
-- [ ] 3.4 Implement Step 3 (Annotate findings) — duplicate merging with "corroborated" tagging, author context annotations, author-sourced findings, optional pal follow-up
-- [ ] 3.5 Implement Step 4 (Present report) — report template organized by agreement level (corroborated/design-reviewer/pal/author-sourced), section omission rules, next-steps prompt
+- [ ] 3.4 Implement Step 3 (Annotate findings) — duplicate merging with "corroborated" tagging (handle pal's lack of mapped severity — describe implied urgency in prose, do not map to P0-P3), author context annotations, author-sourced findings, optional pal follow-up
+- [ ] 3.5 Implement Step 4 (Present report) — report template organized by agreement level (corroborated/design-reviewer/pal/author-sourced) with full field set in corroborated findings (type, severity, confidence, description, evidence, recommendation), section omission rules, next-steps prompt
 
 ## Task 4: Create the design-reviewer sub-agent
 - **Status:** pending
@@ -59,7 +59,7 @@
 - [ ] 4.6 Write Severity Levels and Confidence Levels tables
 - [ ] 4.7 Write Review Workflow — 7 steps: read docs, capy search, quality pass, soundness pass, cross-doc consistency, self-check, output findings
 - [ ] 4.8 Write Output Format contract — structured markdown with P0-P3 grouping, finding type code, doc:section reference, confidence with reasoning, description, evidence, recommendation
-- [ ] 4.9 Write Output Rules — mandatory fields, `(none)` for empty sections, no "next steps" section, overall assessment values (SOUND / CONCERNS_FOUND / MAJOR_GAPS)
+- [ ] 4.9 Write Output Rules — mandatory fields (type, location, severity, confidence with reasoning, description, evidence, recommendation), `(none)` for empty sections, no "next steps" section (orchestrating workflow handles user interaction), overall assessment values (SOUND / CONCERNS_FOUND / MAJOR_GAPS)
 
 ## Task 5: Final verification
 - **Status:** pending

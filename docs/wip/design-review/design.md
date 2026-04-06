@@ -21,8 +21,8 @@ Default scope is `design.md` + `implementation.md` from `/docs/wip/[feature]/`. 
 | _(none)_ | `design.md` + `implementation.md` (default) |
 | `design` | `design.md` only |
 | `implementation` | `implementation.md` only |
-| `tasks` | `design.md` + `implementation.md` + `tasks.md` |
-| `all` | `design.md` + `implementation.md` + `tasks.md` (explicit alias) |
+| `tasks` | `tasks.md` only |
+| `all` | `design.md` + `implementation.md` + `tasks.md` |
 
 If a requested doc is missing, inform the user and proceed with what's available (unlike `implementation-review` which stops — reviewing a single doc is a valid use case here).
 
@@ -112,4 +112,4 @@ A new dedicated sub-agent (separate from `code-reviewer` and `spec-reviewer`) pu
 6. Self-check and confidence assessment
 7. Output structured findings
 
-**Output contract**: Structured markdown with findings grouped by P0-P3, each with finding type code, description, evidence (doc section reference), confidence with reasoning, and recommendation. No "next steps" section — the annotation phase handles that.
+**Output contract**: Structured markdown with findings grouped by P0-P3, each with finding type code, section reference, confidence with reasoning, description, evidence, and recommendation. Overall assessment is one of: SOUND, CONCERNS_FOUND, or MAJOR_GAPS. Use `(none)` under empty severity sections. The agent omits a "next steps" section — the orchestrating workflow (standard mode or isolated mode annotation phase) handles user interaction.

@@ -65,8 +65,9 @@ Design Review Progress:
   - No scope arg → `design.md` + `implementation.md`
   - `design` → `design.md` only
   - `implementation` → `implementation.md` only
-  - `tasks` → `design.md` + `implementation.md` + `tasks.md`
+  - `tasks` → `tasks.md` only
   - `all` → `design.md` + `implementation.md` + `tasks.md`
+- Argument disambiguation: if the first argument matches a directory in `/docs/wip/`, treat it as the feature name. If it matches a scope keyword (`design`, `implementation`, `tasks`, `all`) and no such feature directory exists, treat it as the scope and prompt the user for the feature name.
 - Locate `/docs/wip/[feature-name]/` directory
 - If feature name not provided or ambiguous, list `/docs/wip/` contents and ask user
 - If a requested doc is missing, inform the user and proceed with available docs (do NOT stop)
@@ -117,6 +118,7 @@ For each finding:
 ## Design Review: [Feature Name]
 
 **Scope:** [docs reviewed]
+**Overall assessment:** [SOUND / CONCERNS_FOUND / MAJOR_GAPS]
 **Documents:**
 - Design: [path] (if in scope)
 - Implementation: [path] (if in scope)
@@ -134,6 +136,7 @@ For each finding:
   - **Section:** [doc:section reference]
   - **Confidence:** N/10 — [reasoning]
   - **Description:** [what the issue is]
+  - **Evidence:** [specific doc text or cross-reference supporting the finding]
   - **Recommendation:** [what to do]
 
 ### P1 - High
@@ -155,7 +158,7 @@ For each finding:
 [List sections/aspects that passed review — confirms what was checked.]
 ```
 
-Omit severity sections with no findings.
+Use `(none)` under severity sections with no findings.
 
 #### Next Steps
 
@@ -179,7 +182,7 @@ Please choose an option or provide specific instructions.
 
 Do NOT update any documents until the user explicitly confirms.
 
-**Capy index:** Index any confirmed `TECH_RISK` findings that reveal non-obvious architectural constraints as `kk:arch-decisions`.
+**Capy index:** Index any confirmed `TECH_RISK` findings that reveal non-obvious architectural constraints as `kk:arch-decisions`. Index confirmed P0/P1 findings that reveal recurring design patterns (not one-off issues) as `kk:review-findings`.
 
 ---
 
@@ -212,6 +215,8 @@ Call `pal` `listmodels` to get available models. Select the most capable model (
 #### 1c) Prepare document content for pal
 
 Since `pal codereview` cannot read files itself, prepare the document contents as a single text block to pass as input. Include clear headers separating each document.
+
+**Important:** `pal codereview` is optimized for source code and diffs. When passing design documents, wrap the content with an explicit framing instruction: "The following is a design document (markdown), not source code. Review it for technical soundness, completeness, internal consistency, and whether it provides sufficient detail for implementation." This prevents the model from applying code-specific heuristics to prose.
 
 ### Step 2: Spawn Reviewers (Parallel)
 
@@ -272,7 +277,7 @@ The main agent annotates — providing context, not judgment. Do NOT assign disp
 
 Compare findings from both reviewers by document section and issue description:
 - When both flag the same logical issue: merge, tag as **"corroborated"**
-- If severity disagrees, show both assessments side by side
+- Severity stays as the design-reviewer assessed it. If pal's native output implies a different level of urgency, note both perspectives side by side. Do NOT map pal's output to P0-P3 — describe the implied urgency in prose.
 - If only one reviewer flagged an issue, keep as-is with reviewer attribution
 
 #### 3b) Author context annotations
@@ -307,8 +312,12 @@ If a pal finding is ambiguous, the main agent MAY use pal's follow-up capability
 ### Corroborated Findings
 (Both reviewers flagged — highest signal)
 
-- **[doc:section]** Brief title {corroborated}
-  - design-reviewer: [severity] — [description]
+- **[doc:section]** Brief title ⟨corroborated⟩
+  - Type: [finding_type] | Severity: P[0-3] | Confidence: [N]/10 — [reasoning]
+  - **Description:** [description]
+  - **Evidence:** [doc references]
+  - **Recommendation:** [recommendation]
+  - design-reviewer: [description in structured format]
   - pal: [description in native format]
   - Author context: [optional annotation]
 
@@ -316,8 +325,10 @@ If a pal finding is ambiguous, the main agent MAY use pal's follow-up capability
 (design-reviewer sub-agent only — P0-P3 format)
 
 - **[doc:section]** Brief title
-  - Type: [finding_type] | Severity: P[0-3] | Confidence: [N]/10
-  - [description and recommendation]
+  - Type: [finding_type] | Severity: P[0-3] | Confidence: [N]/10 — [reasoning]
+  - **Description:** [description]
+  - **Evidence:** [doc references]
+  - **Recommendation:** [recommendation]
   - Author context: [optional annotation]
 
 ### External Review Findings
@@ -400,4 +411,4 @@ Follow the pattern of `code-reviewer.md` and `spec-reviewer.md`:
    - Findings grouped by P0-P3, each with: finding type code, doc:section reference, confidence with reasoning, description, evidence, recommendation
    - "Areas Not Covered" section for anything not verifiable
    - No "next steps" section
-10. **Output Rules** — every finding must include type, location, severity, confidence with reasoning, description, and recommendation. Use `(none)` under empty severity sections.
+10. **Output Rules** — every finding must include type, location, severity, confidence with reasoning, description, evidence, and recommendation. Use `(none)` under empty severity sections. The agent omits a "next steps" section because the orchestrating workflow (standard mode or isolated mode annotation phase) handles user interaction.
