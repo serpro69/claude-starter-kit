@@ -88,21 +88,19 @@ Read the documents yourself using the Read tool. Produce your findings in the ou
 
 ### Reviewer B — `pal codereview`
 
-Call the `pal` `codereview` MCP tool with:
-- The document contents prepared in Step 1c as input
-- The most capable model resolved in Step 1b
+Follow the invocation protocol in [pal-codereview-invocation.md](../_shared/pal-codereview-invocation.md).
 
-`pal` is an external model with no conversation context — naturally isolated. Its output stays in **native format** — do NOT map it to the skill's finding types or severity levels.
+For the `step` parameter in step 1, use the document contents prepared in Step 1c. For the `model` parameter, use the model resolved in Step 1b. Set `focus_on` to `"technical soundness, completeness, internal consistency, edge cases, failure modes"`.
 
 ### Parallel execution
 
-Both the Agent tool call (Reviewer A) and the `pal codereview` MCP call (Reviewer B) MUST appear in the same message to execute in parallel. Do NOT wait for one to finish before starting the other.
+Issue the pal step 1 call and the Agent tool call (Reviewer A) in the **same message** so they execute in parallel. When both return, make the pal step 2 continuation call using the `continuation_id` from step 1.
 
 ### Error handling
 
 Handle reviewer failures inline as they occur:
 
-- **`pal` failure** (listmodels returns no models, or codereview fails): Note the failure, proceed to Step 3 with design-reviewer findings only.
+- **`pal` failure** (listmodels returns no models, or codereview step 1/2 fails): Note the failure, proceed to Step 3 with design-reviewer findings only.
 - **`design-reviewer` sub-agent failure** (timeout or error): Note the failure, proceed to Step 3 with pal findings only. Suggest `/kk:design-review` (standard mode) as supplement.
 - **Both reviewers fail**: Abort isolated mode. Display message suggesting fallback to `/kk:design-review` (standard mode). Do not proceed to Step 3.
 - **Malformed output**: Attempt best-effort parsing. If completely unparseable, treat as a failure and apply the rules above.

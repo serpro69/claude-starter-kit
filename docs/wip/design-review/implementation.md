@@ -252,15 +252,11 @@ Read the documents yourself using the Read tool. Produce your findings in the ou
 
 #### Reviewer B — `pal codereview`
 
-Call the `pal` `codereview` MCP tool with:
-- The document contents prepared in Step 1c as input
-- The most capable model resolved in Step 1b
-
-`pal` is an external model with no conversation context — naturally isolated. Its output stays in **native format** — do NOT map it to the skill's finding types or severity levels.
+Follow the invocation protocol in `_shared/pal-codereview-invocation.md` (skill runtime path). For the `step` parameter in step 1, use the document contents prepared in Step 1c. For the `model` parameter, use the model resolved in Step 1b. Set `focus_on` to `"technical soundness, completeness, internal consistency, edge cases, failure modes"`.
 
 #### Parallel execution
 
-Both the Agent tool call (Reviewer A) and the `pal codereview` MCP call (Reviewer B) MUST appear in the same message.
+Issue the pal step 1 call and the Agent tool call (Reviewer A) in the **same message** so they execute in parallel. When both return, make the pal step 2 continuation call using the `continuation_id` from step 1.
 
 #### Error handling
 

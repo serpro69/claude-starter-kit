@@ -99,21 +99,19 @@ Produce your findings in the output format specified in your agent definition.
 
 ### Reviewer B — `pal` codereview
 
-Call the `pal` `codereview` MCP tool directly with:
-- The git diff as input
-- The most capable model resolved in Step 1d
+Follow the invocation protocol in [pal-codereview-invocation.md](../_shared/pal-codereview-invocation.md).
 
-`pal` is an external model with no conversation context — naturally isolated without needing a sub-agent wrapper. Its output stays in **native format** — do NOT map it to P0-P3 severity levels.
+For the `step` parameter in step 1, use the git diff prepared in Step 1c. For the `model` parameter, use the model resolved in Step 1d.
 
 ### Parallel execution
 
-Both the Agent tool call (Reviewer A) and the `pal` `codereview` MCP call (Reviewer B) MUST appear in the same message to execute in parallel. Do NOT wait for one to finish before starting the other.
+Issue the pal step 1 call and the Agent tool call (Reviewer A) in the **same message** so they execute in parallel. When both return, make the pal step 2 continuation call using the `continuation_id` from step 1.
 
 ### Error handling
 
 Handle reviewer failures inline as they occur:
 
-- **`pal` failure** (listmodels returns no models, or codereview fails): Note the failure, proceed to Step 3 with code-reviewer findings only.
+- **`pal` failure** (listmodels returns no models, or codereview step 1/2 fails): Note the failure, proceed to Step 3 with code-reviewer findings only.
 - **`code-reviewer` sub-agent failure** (timeout or error): Note the failure, proceed to Step 3 with pal findings only. Suggest `/kk:solid-code-review` (standard mode) as supplement.
 - **Both reviewers fail**: Abort isolated mode. Display message suggesting fallback to `/kk:solid-code-review` (standard mode). Do not proceed to Step 3.
 - **Malformed output**: Attempt best-effort parsing. If completely unparseable, treat as a failure and apply the rules above.
