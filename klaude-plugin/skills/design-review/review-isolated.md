@@ -136,6 +136,10 @@ If the close re-reading during annotation triggers new observations, add them:
 
 If a pal finding is ambiguous or unclear, the main agent MAY use pal's follow-up interaction capability to clarify before presenting to the user.
 
+### 3e) Capy index
+
+**Capy index:** Index any confirmed `TECH_RISK` findings that reveal non-obvious architectural constraints as `kk:arch-decisions`. Index confirmed P0/P1 findings that reveal recurring design patterns (not one-off issues) as `kk:review-findings`. This applies to findings from any source — corroborated, single-reviewer, or author-sourced.
+
 ---
 
 ## Step 4: Present Report

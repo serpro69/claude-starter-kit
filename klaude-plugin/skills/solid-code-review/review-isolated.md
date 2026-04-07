@@ -147,6 +147,10 @@ If the close re-reading during annotation triggers new observations, add them:
 
 If a pal finding is ambiguous or unclear, the main agent MAY use pal's follow-up interaction capability to clarify before presenting to the user.
 
+### 3e) Capy index
+
+**Capy index:** Index any P0/P1 findings that reveal recurring patterns (not one-off typos) as `kk:review-findings`. This applies to findings from any source — corroborated, single-reviewer, or author-sourced.
+
 ---
 
 ## Step 4: Present Report

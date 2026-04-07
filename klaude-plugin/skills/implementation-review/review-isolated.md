@@ -119,6 +119,10 @@ If the close re-reading during annotation triggers new observations, add them:
 - Tag as **"author-sourced"** — clearly distinct from sub-agent findings.
 - The user knows these come from the author and can weight accordingly.
 
+### 3d) Capy index
+
+**Capy index:** Index any `SPEC_DEV` or `EXTRA_IMPL` findings confirmed by the user as intentional as `kk:arch-decisions` — prevents the same deviation from being flagged again. This applies to findings from any source — sub-agent or author-sourced.
+
 ---
 
 ## Step 4: Present Report
