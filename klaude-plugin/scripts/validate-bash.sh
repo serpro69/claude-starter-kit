@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# PreToolUse hook for Bash commands — validates against forbidden patterns.
+# Returns structured JSON output per https://code.claude.com/docs/en/hooks-guide#structured-json-output
+
 # Read JSON input from stdin
 INPUT=$(cat)
 
@@ -30,8 +33,9 @@ FORBIDDEN_PATTERNS=(
 # Check if command contains any forbidden patterns
 for pattern in "${FORBIDDEN_PATTERNS[@]}"; do
   if echo "$COMMAND" | grep -qE "$pattern"; then
-    echo "ERROR: Access to '$pattern' is blocked by security policy" >&2
-    exit 2 # Exit code 2 = blocking error
+    jq -n --arg reason "Access to '$pattern' is blocked by security policy" \
+      '{hookSpecificOutput: {hookEventName: "PreToolUse", permissionDecision: "deny", permissionDecisionReason: $reason}}'
+    exit 0
   fi
 done
 
