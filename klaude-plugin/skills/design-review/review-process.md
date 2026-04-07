@@ -122,7 +122,7 @@ For each finding:
 
 Use `(none)` under severity sections with no findings.
 
-**Capy index:** Index any confirmed `TECH_RISK` findings that reveal non-obvious architectural constraints as `kk:arch-decisions`. Index confirmed P0/P1 findings that reveal recurring design patterns (not one-off issues) as `kk:review-findings`.
+**Capy index:** Index any confirmed `TECH_RISK` findings that reveal non-obvious architectural constraints as `kk:arch-decisions`. Index confirmed P0/P1 findings that suggest a systemic or structural design pattern (not isolated one-off issues) as `kk:review-findings`. Index on first encounter — recurrence detection happens on the search side in future reviews.
 
 #### Next steps
 

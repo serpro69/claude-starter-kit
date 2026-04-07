@@ -93,7 +93,7 @@ Use `{lang}` below to refer to the detected reference directory.
 - For each finding, re-review to ensure it's valid
 - Assign confidence value
 
-**Capy index:** Index any P0/P1 findings that reveal recurring patterns (not one-off typos) as `kk:review-findings`.
+**Capy index:** Index any P0/P1 findings that suggest a systemic or structural pattern (not isolated typos or one-off mistakes) as `kk:review-findings`. Index on first encounter — recurrence detection happens on the search side in future reviews.
 
 ### 8) Present results
 
