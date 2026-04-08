@@ -11,6 +11,16 @@ Below are some examples of the actual claude-code workflows that were executed u
 
 See full chat transcription in [analysis-process-example.md](./analysis-process-example.md).
 
+### Benchmarks
+
+TODO
+
+## Design Review
+
+### Benchmarks
+
+Skill benchmarks are available in [benchmarks/design-review-benchmark.md](./benchmarks/design-review-benchmark.md)
+
 ## Code Review
 
 > Post-implementation code review
@@ -18,3 +28,7 @@ See full chat transcription in [analysis-process-example.md](./analysis-process-
 ### Isolated Mode
 
 See full chat transcription in [./isolated-solid-code-review-example.md](./isolated-solid-code-review-example.md)
+
+### Benchmarks
+
+TODO
