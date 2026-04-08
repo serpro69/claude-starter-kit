@@ -8,7 +8,7 @@ claude-toolbox is a collection of "tools" for all your Claude Code workflows —
 
 ## Why claude-toolbox?
 
-Claude Code is powerful on its own, but it doesn't know your development workflow. claude-toolbox gives it two things:
+Claude Code is powerful on its own, but it doesn't know your development workflow. This project started as a way for me to streamline claude configurations across all my projects without needing to copy-paste things. With time, patterns and re-curring prompts evolved into skills and agents. Currently, claude-toolbox gives you two things:
 
 **A minimal, opinionated Claude Code configuration** — sensible permission baselines, a rich statusline, Serena LSP integration, MCP server wiring, and sync infrastructure to keep it all up to date across your projects. Think of it as a dotfiles repo for Claude Code.
 
