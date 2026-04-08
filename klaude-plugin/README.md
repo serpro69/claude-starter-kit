@@ -2,6 +2,8 @@
 
 A development workflow plugin for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) that gives your AI assistant a structured pipeline — from idea through design, implementation, code review, testing, to documentation. Part of the [claude-toolbox](https://github.com/serpro69/claude-toolbox) project.
 
+Why `kk`? I have `jj` and `kk` mappings in nvim to go back to normal mode, and it seemed like a low-conflict/easy-to-type option for a plugin-prefixed skill names. We can also pretend it's an acronym for "klaude kode", if you need a better reason for the plugin naming.
+
 ## Installation
 
 The plugin is installed automatically when using the claude-toolbox template. To install manually:

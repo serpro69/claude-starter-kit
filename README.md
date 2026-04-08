@@ -147,8 +147,8 @@ See [Pal configuration docs](https://github.com/BeehiveInnovations/pal-mcp-serve
    - `SERENA_INITIAL_PROMPT` — initial prompt given to the LLM on project activation
    - Other inputs are optional with sensible defaults.
 
-   > [!TIP]
-   > Take a look at serena [project.yaml](./.serena/project.yml) configuration file for more details.
+> [!TIP]
+> Take a look at serena [project.yaml](./.serena/project.yml) configuration file for more details.
 
    **Option B: Run locally**
 
