@@ -316,7 +316,7 @@ Repos created from this template can pull configuration updates via the **Templa
 > - **`.claude/settings.json`** — upstream-managed defaults, synced from this template (permissions baseline, env vars, model, plugins, statusline)
 > - **`.claude/settings.local.json`** — your per-repo overrides, never synced (hooks, MCP server enables, additional permissions, personal preferences)
 >
-> Don't edit `settings.json` directly — your customizations go in `settings.local.json`. "Don't ask again" permission grants land there automatically.
+> You can edit `settings.json` directly if you like, they will be intelligently merged with this repo's settings, but the general advice is to place your customizations in `settings.local.json`. As an added bonus, "Don't ask again" grant prompts in claude-code sessions land in local settings automatically (as of v2.1.92).
 
 ### Prerequisites
 
