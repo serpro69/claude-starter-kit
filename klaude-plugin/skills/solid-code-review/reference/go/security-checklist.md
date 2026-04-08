@@ -1,5 +1,17 @@
 # Security and Reliability Checklist
 
+## Contents
+- Input/Output Safety (XSS, injection, SSRF, path traversal)
+- AuthN/AuthZ
+- JWT & Token Security
+- Secrets and PII
+- Supply Chain & Dependencies
+- CORS & Headers
+- Runtime Risks (unbounded ops, goroutine leaks, resource exhaustion)
+- Cryptography
+- Race Conditions (shared state, TOCTOU, database concurrency, distributed)
+- Data Integrity
+
 ## Input/Output Safety
 
 - **XSS**: Unsafe HTML injection, using `text/template` instead of `html/template`, bypassing auto-escaping via `template.HTML()`, raw string interpolation in HTTP responses

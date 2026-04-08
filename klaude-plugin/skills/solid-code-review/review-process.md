@@ -13,6 +13,8 @@ Code Review Progress:
 - [ ] Step 7: Self-check and confidence assessment
 - [ ] Step 8: Index findings
 - [ ] Step 9: Present results
+- [ ] Step 10: Next steps confirmation
+- [ ] Step 11: Verify outputs
 ```
 
 ---
@@ -91,8 +93,17 @@ Use `{lang}` below to refer to the detected reference directory.
 
 ### 7) Self-check and confidence assessment
 
-- For each finding, re-review to ensure it's valid
-- Assign confidence value
+This is the critical verification step. For **each finding** from Steps 3–6:
+
+1. Re-read the relevant code and surrounding context independently
+2. Ask: **"Could I be misreading the code?"** — trace execution paths, check for runtime behavior, configuration, or framework conventions that might make this correct
+3. Ask: **"Is this a real issue or a style preference?"** — distinguish between bugs/risks and subjective choices that don't affect correctness or security
+4. Ask: **"What's the actual impact?"** — verify that the severity matches the real-world consequence, not just the theoretical violation
+5. Assign final confidence score (1–100%) with **explicit reasoning** documenting:
+   - What was verified
+   - What evidence supports the finding
+   - What uncertainty remains
+6. Downgrade or **remove** findings that don't survive the self-check
 
 ### 8) Index findings
 
@@ -188,3 +199,13 @@ Please choose an option or provide specific instructions.
 ```
 
 **Important**: Do NOT implement any changes until user explicitly confirms. This is a review-first workflow.
+
+### 11) Verify outputs
+
+Before declaring the review complete, check each item in the **Required Outputs** section of SKILL.md:
+
+- [ ] Review report presented to user
+- [ ] P0/P1 systemic findings indexed as `kk:review-findings` (or explicitly noted "No findings to index")
+- [ ] Next steps confirmation from user
+
+If any item is unchecked, go back and complete it before proceeding.

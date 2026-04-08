@@ -1,5 +1,10 @@
 # Code Quality Checklist
 
+## Contents
+- Error Handling (anti-patterns, best practices, questions)
+- Performance & Caching (CPU, database/IO, caching, memory)
+- Boundary Conditions (nil handling, empty collections, numeric, string)
+
 ## Error Handling
 
 ### Anti-patterns to Flag

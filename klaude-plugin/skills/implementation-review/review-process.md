@@ -11,6 +11,7 @@ Implementation Review Progress:
 - [ ] Step 5: Self-check and confidence assessment
 - [ ] Step 6: Present findings
 - [ ] Step 7: Index confirmed deviations
+- [ ] Step 8: Verify outputs
 ```
 
 **Step 1: Load feature documents**
@@ -165,3 +166,13 @@ After the user responds to the next steps prompt, index any `SPEC_DEV` or `EXTRA
 - For each confirmed intentional deviation: call `capy_index` with source `kk:arch-decisions` and a concise summary of the decision and rationale.
 - If the user confirms no deviations as intentional, or there are no `SPEC_DEV`/`EXTRA_IMPL` findings, explicitly note "No deviations to index" and move on.
 - This step is mandatory — do not skip it even if all findings are rejected.
+
+**Step 8: Verify outputs**
+
+Before declaring the review complete, check each item in the **Required Outputs** section of SKILL.md:
+
+- [ ] Review report presented to user
+- [ ] User-confirmed intentional `SPEC_DEV`/`EXTRA_IMPL` findings indexed as `kk:arch-decisions` (or explicitly noted "No deviations to index")
+- [ ] Next steps confirmation from user
+
+If any item is unchecked, go back and complete it before proceeding.
