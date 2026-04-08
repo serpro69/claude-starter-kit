@@ -9,7 +9,17 @@ Isolated Implementation Review Progress:
 - [ ] Step 3: Annotate findings
 - [ ] Step 4: Present report
 - [ ] Step 5: Index confirmed deviations
+- [ ] Step 6: Verify outputs
 ```
+
+## Contents
+
+- **Step 1: Prepare Artifacts** — 1a) Locate feature directory, 1b) Verify docs exist, 1c) Determine review scope, 1d) Prepare sub-agent context
+- **Step 2: Spawn Spec Reviewer** — Sub-agent prompt template, error handling
+- **Step 3: Annotate Findings** — 3a) Parse findings, 3b) Type-specific annotation guidance, 3c) Author-sourced findings
+- **Step 4: Present Report** — Report template, integration with implementation-process, standalone mode
+- **Step 5: Index Confirmed Deviations**
+- **Step 6: Verify Outputs**
 
 ---
 
@@ -216,3 +226,15 @@ After the user responds to the next steps prompt, index any `SPEC_DEV` or `EXTRA
 - For each confirmed intentional deviation: call `capy_index` with source `kk:arch-decisions` and a concise summary of the decision and rationale.
 - If the user confirms no deviations as intentional, or there are no `SPEC_DEV`/`EXTRA_IMPL` findings, explicitly note "No deviations to index" and move on.
 - This step is mandatory — do not skip it even if all findings are rejected.
+
+---
+
+## Step 6: Verify Outputs
+
+Before declaring the review complete, check each item in the **Required Outputs** section of SKILL.md:
+
+- [ ] Review report presented to user
+- [ ] User-confirmed intentional `SPEC_DEV`/`EXTRA_IMPL` findings indexed as `kk:arch-decisions` (or explicitly noted "No deviations to index")
+- [ ] Next steps confirmation from user
+
+If any item is unchecked, go back and complete it before proceeding.

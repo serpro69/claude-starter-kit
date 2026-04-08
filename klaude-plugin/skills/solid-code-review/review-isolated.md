@@ -9,7 +9,17 @@ Isolated Code Review Progress:
 - [ ] Step 3: Annotate findings
 - [ ] Step 4: Index findings
 - [ ] Step 5: Present report
+- [ ] Step 6: Verify outputs
 ```
+
+## Contents
+
+- **Step 1: Prepare Artifacts** — 1a) Capture diff, 1b) Locate spec context, 1c) Detect language, 1d) Resolve pal model, 1e) Curate rejected approaches
+- **Step 2: Spawn Reviewers** — Reviewer A (code-reviewer sub-agent), Reviewer B (pal codereview), error handling
+- **Step 3: Annotate Findings** — 3a) Duplicate merging, 3b) Author context, 3c) Author-sourced findings, 3d) pal follow-up
+- **Step 4: Index Findings**
+- **Step 5: Present Report** — Report template, next steps
+- **Step 6: Verify Outputs**
 
 ---
 
@@ -226,3 +236,15 @@ Please choose an option or provide specific instructions.
 ```
 
 **Important**: Do NOT implement any changes until the user explicitly confirms. This is a review-first workflow.
+
+---
+
+## Step 6: Verify Outputs
+
+Before declaring the review complete, check each item in the **Required Outputs** section of SKILL.md:
+
+- [ ] Review report presented to user
+- [ ] P0/P1 systemic findings indexed as `kk:review-findings` (or explicitly noted "No findings to index")
+- [ ] Next steps confirmation from user
+
+If any item is unchecked, go back and complete it before proceeding.

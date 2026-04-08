@@ -1,5 +1,17 @@
 # Security and Reliability Checklist
 
+## Contents
+- Input/Output Safety (XSS, injection, SSRF, path traversal, unsafe deserialization)
+- AuthN/AuthZ
+- JWT & Token Security
+- Secrets and PII
+- Supply Chain & Dependencies
+- CORS & Headers
+- Runtime Risks (unbounded ops, thread pool exhaustion, resource exhaustion)
+- Cryptography
+- Race Conditions (shared state, TOCTOU, database concurrency, distributed)
+- Data Integrity
+
 ## Input/Output Safety
 
 - **XSS**: Unsafe HTML injection, unescaped output in JSP/Thymeleaf templates, raw string interpolation in HTTP responses

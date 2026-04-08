@@ -67,9 +67,15 @@ When set, all review checkpoints automatically use isolated variants (`kk:solid-
 - Based on user and code-review feedback: apply changes if needed and finalize the sub-task
 - When completed, update `tasks.md`: set the task's status to `done`
 
-**After finalizing the sub-task**, check the Required Outputs checklist above. In particular:
-- If a non-obvious pattern or convention was established during implementation, index it as `kk:project-conventions`. If none, note "No new conventions to index" and move on.
-- Review indexing (`kk:review-findings`) is handled by `solid-code-review` — do NOT duplicate it here.
+**After finalizing the sub-task**, verify all items in the **Required Outputs** section above before moving to Step 4:
+
+- [ ] Implementation matches plan
+- [ ] Verification/tests pass
+- [ ] Code review completed (review skill owns its own `kk:review-findings` indexing)
+- [ ] New project conventions indexed as `kk:project-conventions` (or noted "No new conventions to index")
+- [ ] `tasks.md` updated to `done`
+
+If any item is unchecked, go back and complete it. Do NOT proceed to the next task with incomplete outputs.
 
 ### Step 4: Continue
 
