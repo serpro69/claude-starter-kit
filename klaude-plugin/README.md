@@ -32,15 +32,19 @@ Skills are invoked as `/skill-name` (no namespace prefix — annotated with `(kk
 The skills are designed to work together in a pipeline:
 
 ```
-analysis-process → implementation-process → testing-process → documentation-process
+analysis-process → design-review → implementation-process → solid-code-review → testing-process → documentation-process
 ```
 
 1. **analysis-process** — design docs + implementation plan + task list
-2. **implementation-process** — execute tasks with review checkpoints
-3. **testing-process** — verify and validate
-4. **documentation-process** — update docs
+2. **design-review** — evaluate design docs for completeness and technical soundness before writing code
+3. **implementation-process** — execute tasks with review checkpoints
+4. **solid-code-review** — review code for SOLID violations, security risks, and quality issues
+5. **testing-process** — verify and validate
+6. **documentation-process** — update docs
 
-Use **design-review** before implementation, and **solid-code-review** and **implementation-review** during/after implementation as quality gates.
+**During implementation**, **development-guidelines** enforces best practices (latest deps, context7 for docs). **implementation-review** verifies code matches design/spec and detects deviations — use during or after implementation.
+
+**Utilities**: **merge-docs** reconciles competing design docs into one unified document. **cove** (Chain-of-Verification) adds self-verification for high-stakes accuracy at any stage.
 
 ## Commands
 
