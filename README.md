@@ -6,80 +6,55 @@ claude-toolbox is a collection of "tools" for all your Claude Code workflows —
 
 <img width="3440" height="521" alt="image" src="https://github.com/user-attachments/assets/27ef7269-0153-47c0-b07d-ed6a9504a176" />
 
-## About
+## Why claude-toolbox?
 
-This is a template repository and plugin system that gives you a ready-to-use Claude Code development environment. It ships with MCP servers, a **kk** plugin (skills, commands, hooks), themed statuslines — all configured and wired together.
+Claude Code is powerful on its own, but it doesn't know your development workflow. claude-toolbox gives it a structured pipeline — from idea through design, implementation, code review, testing, to documentation — with persistent knowledge that carries across sessions.
 
-The repo serves dual purposes:
-1. **Template repository** — create new repos from this template to get project-specific configuration (settings, instructions, Serena config, statusline, sync infrastructure)
-2. **Plugin marketplace** — install the `kk` plugin via the Claude Code plugin system to get skills, commands, and hooks
+```
+/analysis-process → /design-review → /implementation-process → /solid-code-review → /testing-process → /documentation-process
+```
 
-> [!NOTE]
-> We focus on collaborative development. Claude Code settings are split between two project-scoped files:
-> - **`.claude/settings.json`** — upstream-managed defaults, synced to all downstream repos (permissions baseline, env vars, model, plugins, statusline)
-> - **`.claude/settings.local.json`** — per-repo overrides, never synced (hooks, MCP server enables, additional permissions, personal preferences)
->
-> "Don't ask again" permission grants land in `settings.local.json` automatically.
+Out of the box you get:
 
-## What's Included
+- **10 workflow skills** — a complete development pipeline invoked as `/skill-name`
+- **Multi-model code review** — independent reviewers using sub-agents and external models (Gemini, etc.)
+- **Semantic code analysis** — LSP-powered symbol navigation and reference tracking via Serena
+- **Persistent knowledge base** — findings, decisions, and conventions that survive across sessions via Capy
+- **Up-to-date library docs** — always-current documentation lookup via Context7
+- **Battle-tested configuration** — permissions, statusline themes, hooks, sensible defaults
 
-### MCP Servers
+## Choose Your Path
 
-Three servers, configured at user-level (`~/.claude.json`) to keep API keys out of the repo:
+**Starting a new project?** Use the template — you get everything pre-configured: MCP servers, plugin, Serena, statusline, sync infrastructure.
+→ [Template Setup](#template-setup)
 
-| Server                                                          | Purpose                                                                                |
-| --------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| **[Context7](https://context7.com/)**                           | Up-to-date library documentation and code examples                                     |
-| **[Serena](https://github.com/oraios/serena)**                  | Semantic code analysis via LSP — symbol navigation, reference tracking, targeted reads |
-| **[Pal](https://github.com/BeehiveInnovations/pal-mcp-server)** | Multi-model AI integration — chat, debugging, code review, planning, security audit    |
-| **[Capy](https://github.com/serpro69/capy)**                    | Persistent knowledge base — cross-session project memory with FTS5 search              |
-
-### Knowledge Base
-
-The kk plugin's skills are **knowledge-aware** via [Capy](https://github.com/serpro69/capy). Skills search for relevant context before executing (architecture decisions, review findings, language idioms) and index valuable learnings after producing output. Knowledge persists across sessions per-project using an FTS5 full-text search index.
-
-**Installation:** `brew install serpro69/tap/capy` then run `capy setup` in your project directory.
-
-> [!NOTE]
-> Capy is optional. All skills work fully without it — search steps return nothing and index steps are skipped. The bootstrap script sets up capy automatically if the binary is on PATH.
-
-### kk Plugin ([`klaude-plugin/`](./klaude-plugin/README.md))
-
-The **kk** plugin contains all development workflow functionality — 10 skills, 4 commands, and hooks — distributed via the Claude Code plugin system. Skills are invoked as `/skill-name`, commands as `/kk:dir:command`.
-
-Includes: **analysis-process**, **implementation-process**, **testing-process**, **documentation-process**, **development-guidelines**, **solid-code-review**, **implementation-review**, **design-review**, **merge-docs**, **cove** (Chain-of-Verification). Plus commands for CoVe, implementation review, design review, Task Master migration, and sync workflow updates. See the [plugin README](./klaude-plugin/README.md) for full details.
-
-### Other Configuration
-
-- **Permission allowlist/denylist** (`.claude/settings.json`) — baseline permissions: auto-approves safe bash commands and WebSearch while blocking dangerous patterns. Per-repo MCP tool permissions go in `settings.local.json`.
-- **Status line** (`.claude/scripts/statusline_enhanced.sh`) — rich statusline with model, context %, git branch, session duration, thinking mode, and rate limits. Themes: set `CLAUDE_STATUSLINE_THEME` to `darcula`, `nord`, or `catppuccin`, and `CLAUDE_STATUSLINE_MODE` to `dark` (default) or `light` to match your terminal background
-- **Serena config** (`.serena/project.yml`) — language detection, gitignore integration, encoding settings
-
-### Template Infrastructure
-
-- **template-cleanup** workflow — one-click GitHub Action to initialize a new repo from this template
-- **template-sync** workflow — pull upstream configuration updates into your project via PR
-- **Sync exclusions** — prevent specific files from being re-added during sync
-- **Test suite** — 157 tests across 5 suites covering the plugin structure, sync/cleanup infrastructure
+**Adding to an existing project?** Install just the kk plugin — all 10 skills, commands, and hooks in one command.
+→ [Plugin-Only Setup](#plugin-only-setup)
 
 ## Requirements
 
-### Tools
-
-- [npm](https://www.npmjs.com/package/npm)
-- [uv](https://docs.astral.sh/uv/)
-- [jq](https://jqlang.github.io/jq/) — required for template-cleanup
+- **[Claude Code](https://docs.anthropic.com/en/docs/claude-code)** — the AI coding assistant this toolbox extends
+- **[npm](https://www.npmjs.com/package/npm)** — used by some MCP server installations
+- **[uv](https://docs.astral.sh/uv/)** — Python package runner for Serena and Pal MCP servers
+- **[jq](https://jqlang.github.io/jq/)** — JSON processor, required for template-cleanup
 
 ### API Keys
 
-- [Context7](https://context7.com/) API key
-- Gemini API key for [Pal](https://github.com/BeehiveInnovations/pal-mcp-server) (or [any other provider](https://github.com/BeehiveInnovations/pal-mcp-server/blob/main/docs/getting-started.md))
+- [Context7](https://context7.com/) API key — for library documentation lookups
+- Gemini API key for [Pal](https://github.com/BeehiveInnovations/pal-mcp-server) (or [any other provider](https://github.com/BeehiveInnovations/pal-mcp-server/blob/main/docs/getting-started.md)) — for multi-model code review
 
 ### MCP Server Configuration
 
 > [!NOTE]
 > MCP servers must be configured in `~/.claude.json` (not in the repo) to keep API keys safe.
 > These configs are generic enough to reuse across all your projects.
+
+You don't need all servers to get started. Add them incrementally:
+
+1. **Serena** (no API key needed) — semantic code analysis via LSP. Works immediately after setup.
+2. **Context7** (needs API key) — up-to-date library documentation and code examples.
+3. **Pal** (needs API key) — multi-model AI integration for code review, debugging, planning, and security audit.
+4. **Capy** (optional, auto-configured by bootstrap) — persistent knowledge base across sessions. Install with `brew install serpro69/tap/capy`.
 
 <details>
 <summary>Example <code>mcpServers</code> configuration</summary>
@@ -158,26 +133,36 @@ See [Pal configuration docs](https://github.com/BeehiveInnovations/pal-mcp-serve
 > You also may want to look into your `env` settings for the given mcp server, especially the `PATH` variable, and make sure you're not adding anything custom that may not be avaiable in the image.
 > This may cause the mcp server to fail to connect.
 
-## Quick Start
+## Template Setup
 
 1. [Create a new project from this template](https://github.com/new?template_name=claude-toolbox&template_owner=serpro69) using the **Use this template** button.
 
-2. A scaffold repo will appear in your GitHub account.
+2. Initialize the template — choose one method:
 
-3. Run the **template-cleanup** workflow from your new repo's Actions tab. Provide inputs:
+   **Option A: GitHub Actions** (recommended)
 
-**Serena:**
+   Go to your new repo's **Actions** tab → **Template Cleanup** → **Run workflow**. Provide:
+   - `LANGUAGES` (required) — programming languages, comma-separated (e.g., `python`, `python,typescript`).
+     See [supported languages](https://github.com/oraios/serena?tab=readme-ov-file#programming-language-support--semantic-analysis-capabilities).
+   - `SERENA_INITIAL_PROMPT` — initial prompt given to the LLM on project activation
+   - Other inputs are optional with sensible defaults.
 
-- `LANGUAGES` (required) — programming languages, comma-separated (e.g., `python`, `python,typescript`).
-  See [supported languages](https://github.com/oraios/serena?tab=readme-ov-file#programming-language-support--semantic-analysis-capabilities).
-- `SERENA_INITIAL_PROMPT` — initial prompt given to the LLM on project activation
+   > [!TIP]
+   > Take a look at serena [project.yaml](./.serena/project.yml) configuration file for more details.
 
-> [!TIP]
-> Take a look at serena [project.yaml](./.serena/project.yml) configuration file for more details.
+   **Option B: Run locally**
 
-4. Clone your new repo and cd into it
+   ```bash
+   ./.github/scripts/template-cleanup.sh
+   ```
 
-   Run `claude /mcp`, you should see the mcp servers configured and active:
+   Interactive mode walks you through each option. Run with `--help` for all flags, or pass them directly:
+
+   ```bash
+   ./.github/scripts/template-cleanup.sh --languages python,typescript -y
+   ```
+
+3. Clone your repo (if using Option A) and verify MCP servers:
 
    ```
    > /mcp
@@ -192,13 +177,138 @@ See [Pal configuration docs](https://github.com/BeehiveInnovations/pal-mcp-serve
 
    The kk plugin (skills, commands, hooks) is available via the claude-toolbox marketplace configured in `.claude/settings.json`.
 
-5. Update the `README.md` with your project description, then run `chmod +x bootstrap.sh && ./bootstrap.sh` to finalize initialization (installs the kk plugin).
+4. Finalize initialization:
 
-6. Profit
+   ```bash
+   chmod +x .github/scripts/bootstrap.sh && ./.github/scripts/bootstrap.sh
+   ```
+
+   This installs the kk plugin, wires up the Capy knowledge base (if installed), and commits the configuration.
+
+5. **Recommended:** Run `/config` in Claude Code and disable **Auto-compact**. This prevents Claude from compacting context mid-task, which degrades quality significantly. See [Recommended Settings](#recommended-settings) for the full config.
+
+6. [Try it out!](#try-it)
+
+## Plugin-Only Setup
+
+Already have a project? Install just the kk plugin to get all skills, commands, and hooks:
+
+```
+/plugin install kk@claude-toolbox
+```
+
+That's it. All 10 skills are now available as `/skill-name` (annotated with `(kk)` in the slash command menu). See the [kk plugin documentation](./klaude-plugin/README.md) for details.
+
+> [!TIP]
+> For the full experience (MCP servers, statusline, Serena config), see [MCP Server Configuration](#mcp-server-configuration) above and add the configs you want to `~/.claude.json`.
+
+## Try It
+
+After setup, try the core workflow:
+
+1. **Start with an idea.** Type `/analysis-process` and describe a feature you want to build. Claude will ask you refinement questions one at a time, then produce design docs and a task list in `docs/wip/`.
+
+2. **Review the design.** Run `/design-review your-feature` to catch gaps before writing code.
+
+3. **Build it.** Type `/implementation-process` — Claude executes the task list with code review checkpoints between batches.
+
+4. **Review the code.** `/solid-code-review` checks for SOLID violations, security risks, and quality issues. Use `/solid-code-review:isolated` for independent sub-agent reviewers with zero authorship bias.
+
+This is the core loop. See the [kk plugin README](./klaude-plugin/README.md) for all available skills and the full workflow pipeline.
+
+## What's Included
+
+### MCP Servers
+
+Four servers provide complementary capabilities:
+
+| Server                                                          | Purpose                                                                                |
+| --------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| **[Context7](https://context7.com/)**                           | Up-to-date library documentation and code examples                                     |
+| **[Serena](https://github.com/oraios/serena)**                  | Semantic code analysis via LSP — symbol navigation, reference tracking, targeted reads |
+| **[Pal](https://github.com/BeehiveInnovations/pal-mcp-server)** | Multi-model AI integration — chat, debugging, code review, planning, security audit    |
+| **[Capy](https://github.com/serpro69/capy)**                    | Persistent knowledge base — cross-session project memory with FTS5 search              |
+
+### Knowledge Base (Capy)
+
+Skills are **knowledge-aware** via [Capy](https://github.com/serpro69/capy). They search for relevant context before executing (architecture decisions, review findings, language idioms) and index valuable learnings after producing output. Knowledge persists across sessions per-project using an FTS5 full-text search index.
+
+Without Capy, each session starts fresh — all skills still work, they just don't carry learnings forward. Install when you want cross-session memory.
+
+**Installation:** `brew install serpro69/tap/capy` then run `capy setup` in your project directory. The bootstrap script sets up Capy automatically if the binary is on PATH.
+
+### kk Plugin ([`klaude-plugin/`](./klaude-plugin/README.md))
+
+The **kk** plugin contains all development workflow functionality — 10 skills, 4 commands, and hooks — distributed via the Claude Code plugin system. Skills are invoked as `/skill-name`, commands as `/kk:dir:command`.
+
+Includes: **analysis-process**, **implementation-process**, **testing-process**, **documentation-process**, **development-guidelines**, **solid-code-review**, **implementation-review**, **design-review**, **merge-docs**, **cove** (Chain-of-Verification). Plus commands for CoVe, implementation review, design review, Task Master migration, and sync workflow updates. See the [plugin README](./klaude-plugin/README.md) for full details.
+
+### Configuration
+
+- **Permission allowlist/denylist** (`.claude/settings.json`) — baseline permissions: auto-approves safe bash commands and WebSearch while blocking dangerous patterns. Per-repo MCP tool permissions go in `settings.local.json`.
+- **Status line** (`.claude/scripts/statusline_enhanced.sh`) — rich statusline with model, context %, git branch, session duration, thinking mode, and rate limits. Themes: set `CLAUDE_STATUSLINE_THEME` to `darcula`, `nord`, or `catppuccin`, and `CLAUDE_STATUSLINE_MODE` to `dark` (default) or `light` to match your terminal background
+- **Serena config** (`.serena/project.yml`) — language detection, gitignore integration, encoding settings
+
+### Template Infrastructure
+
+- **template-cleanup** — GitHub Action or local CLI script to initialize a new repo from this template
+- **template-sync** workflow — pull upstream configuration updates into your project via PR
+- **Sync exclusions** — prevent specific files from being re-added during sync
+- **Test suite** — 157 tests across 5 suites covering the plugin structure, sync/cleanup infrastructure
+
+## Recommended Settings
+
+> [!TIP]
+> Configure via `claude /config`. The config file is usually at `~/.claude.json`.
+
+This is my current config, tweaked for best results. **I can't recommend enough disabling auto-compact** — I've seen many a time claude starting to compact conversations in the middle of a task, which produces very poor results for the remaining work it does after compacting.
+
+<details>
+<summary>Full <code>/config</code> settings</summary>
+
+```
+
+> /config
+────────────────────────────────────────────────────────────
+ Configure Claude Code preferences
+
+    Auto-compact                              false
+    Show tips                                 true
+    Reduce motion                             false
+    Thinking mode                             true
+    Prompt suggestions                        true
+    Rewind code (checkpoints)                 true
+    Verbose output                            false
+    Terminal progress bar                     true
+    Default permission mode                   Default
+    Respect .gitignore in file picker         true
+    Auto-update channel                       latest
+    Theme                                     Dark mode
+    Notifications                             Auto
+    Output style                              default
+    Language                                  Default (English)
+    Editor mode                               vim
+    Show code diff footer                     true
+    Show PR status footer                     true
+    Model                                     opus
+    Auto-connect to IDE (external terminal)   false
+    Claude in Chrome enabled by default       false
+```
+
+</details>
 
 ## Receiving Template Updates
 
 Repos created from this template can pull configuration updates via the **Template Sync** workflow.
+
+### How Configuration Works
+
+> [!NOTE]
+> Claude Code settings are split between two project-scoped files:
+> - **`.claude/settings.json`** — upstream-managed defaults, synced from this template (permissions baseline, env vars, model, plugins, statusline)
+> - **`.claude/settings.local.json`** — your per-repo overrides, never synced (hooks, MCP server enables, additional permissions, personal preferences)
+>
+> Don't edit `settings.json` directly — your customizations go in `settings.local.json`. "Don't ask again" permission grants land there automatically.
 
 ### Prerequisites
 
@@ -339,53 +449,6 @@ If your repo was created before the sync feature (or even if your repo wasn't cr
 ```
 
 Then copy `.github/workflows/template-sync.yml` and `.github/scripts/template-sync.sh` from the [template repository](https://github.com/serpro69/claude-toolbox).
-
-### Post-Init Settings
-
-The following tweaks are not mandatory, but will more often than not improve your experience with CC
-
-#### Claude Code Configuration
-
-> [!TIP]
-> The following config parameters can be easily configured via `claude /config` command.
->
-> The config file can also be modified manually and is usually found at `~/.claude.json`
-
-<details>
-<summary>Recommended <code>/config</code> settings</summary>
-
-This is my current config, you may want to tweak it to your needs. **I can't recommend enough disabling auto-compact** feature and controlling the context window manually. I've seen many a time claude starting to compact conversations in the middle of a task, which produces very poor results for the remaining work it does after compacting.
-
-```
-
-> /config
-────────────────────────────────────────────────────────────
- Configure Claude Code preferences
-
-    Auto-compact                              false
-    Show tips                                 true
-    Reduce motion                             false
-    Thinking mode                             true
-    Prompt suggestions                        true
-    Rewind code (checkpoints)                 true
-    Verbose output                            false
-    Terminal progress bar                     true
-    Default permission mode                   Default
-    Respect .gitignore in file picker         true
-    Auto-update channel                       latest
-    Theme                                     Dark mode
-    Notifications                             Auto
-    Output style                              default
-    Language                                  Default (English)
-    Editor mode                               vim
-    Show code diff footer                     true
-    Show PR status footer                     true
-    Model                                     opus
-    Auto-connect to IDE (external terminal)   false
-    Claude in Chrome enabled by default       false
-```
-
-</details>
 
 ## Development
 

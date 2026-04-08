@@ -1,6 +1,6 @@
 # kk — Claude Code Plugin
 
-Development workflow skills, commands, and hooks from [claude-toolbox](https://github.com/serpro69/claude-toolbox).
+A development workflow plugin for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) that gives your AI assistant a structured pipeline — from idea through design, implementation, code review, testing, to documentation. Part of the [claude-toolbox](https://github.com/serpro69/claude-toolbox) project.
 
 ## Installation
 
@@ -10,22 +10,22 @@ The plugin is installed automatically when using the claude-toolbox template. To
 /plugin install kk@claude-toolbox
 ```
 
+All skills appear as `/skill-name` in the slash command menu (annotated with `(kk)`). No additional configuration needed.
+
 ## Skills
 
-Skills are invoked as `/skill-name` (no namespace prefix — annotated with `(kk)` in the menu):
-
-| Skill                      | When to use                                                                                                                                                              |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **analysis-process**       | Pre-implementation. Turns ideas/specs into design docs, implementation plans, and task lists.                                                                            |
-| **implementation-process** | Execute an implementation plan with batched steps and architect review checkpoints.                                                                                      |
-| **testing-process**        | After writing code. Guidelines for test coverage — table-driven tests, mocking, integration, benchmarks.                                                                 |
-| **documentation-process**  | Post-implementation. Updates ARCHITECTURE.md, TESTING.md, and records ADRs.                                                                                              |
-| **development-guidelines** | During implementation. Enforces best practices like using latest deps and context7 for docs.                                                                             |
-| **solid-code-review**      | Code review with a senior-engineer lens. Checks SOLID principles, security, code quality. Includes language-specific checklists for Go, Java, JS/TS, Kotlin, and Python. |
-| **implementation-review**  | Verify implemented code matches design/implementation docs. Detects spec deviations, missing implementations, and outdated docs.                                         |
-| **design-review**          | Pre-implementation review gate. Evaluates design docs for completeness, internal consistency, and technical soundness before code is written.                             |
-| **merge-docs**             | Semantically compare and merge two competing design docs for the same feature into one unified document.                                                                 |
-| **cove**                   | Chain-of-Verification prompting. Two modes: standard (prompt-based) and isolated (sub-agent). For high-stakes accuracy and fact-checking.                                |
+| Skill                      | What it does                                                                                                                                                                    |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **analysis-process**       | Turns an idea into design docs, an implementation plan, and a task list in `docs/wip/`. Asks refinement questions, then documents everything a developer needs to start coding. |
+| **implementation-process** | Executes a task list from `docs/wip/` with batched steps and code review checkpoints between batches. Updates task status as it goes.                                           |
+| **testing-process**        | Generates tests following project conventions: table-driven, integration, mocking, property-based. Runs the full suite and reports coverage.                                    |
+| **documentation-process**  | Updates ARCHITECTURE.md, TESTING.md, and records ADRs for non-obvious decisions made during implementation.                                                                     |
+| **development-guidelines** | Enforces best practices during coding: latest deps, context7 for library docs, known project conventions from the knowledge base.                                               |
+| **solid-code-review**      | Reviews git changes for SOLID violations, security risks, and code quality. Language-specific checklists for Go, Java, JS/TS, Kotlin, and Python. Standard and isolated modes.  |
+| **implementation-review**  | Compares implemented code against design/implementation docs. Finds spec deviations, missing implementations, and outdated docs — in both directions.                           |
+| **design-review**          | Pre-implementation review gate. Evaluates design docs for completeness, internal consistency, and technical soundness before code is written.                                    |
+| **merge-docs**             | Merges two competing design docs for the same feature into one unified document, resolving conflicts and preserving the best of both.                                           |
+| **cove**                   | Chain-of-Verification: makes Claude fact-check its own answers. Standard mode (prompt-based) or isolated mode (independent sub-agents). For high-stakes accuracy.               |
 
 ### Development Workflow
 
