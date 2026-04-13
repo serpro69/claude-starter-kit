@@ -10,6 +10,13 @@ description: |
 
 Read capy knowledge base conventions at [shared-capy-knowledge-protocol.md](shared-capy-knowledge-protocol.md).
 
+## Assumptions & Fail-Loud
+
+1. **State assumptions explicitly.** If uncertain, ask. Don't guess silently.
+2. **Surface ambiguity.** If the request has multiple reasonable interpretations, present them and let the user choose — don't pick one silently.
+3. **Fail loud.** Flag errors explicitly. No softening, no silent corrections, no swallowed exceptions, no assertions you quietly relax to make a test pass.
+4. **Pre-existing dead code is not yours to delete.** If you notice unrelated dead code, mention it — don't remove it. Only remove orphans (imports, variables, helpers) that *your* changes made unused.
+
 ## Working with Dependencies
 
 1. Always try to use latest versions for dependencies.
