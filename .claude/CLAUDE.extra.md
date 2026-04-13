@@ -19,6 +19,15 @@ Always explore on your own to gain complete understanding. Only delegate to expl
      and then re-reads all the files on its own...
      resulting in double token consumption -->
 
+### Assumptions & Fail-Loud
+
+When writing or modifying code:
+
+- **State assumptions explicitly.** If uncertain, ask. Don't guess silently.
+- **Surface ambiguity.** If the request has multiple reasonable interpretations, present them and let the user choose — don't pick one silently.
+- **Fail loud.** Flag errors explicitly. No softening, no silent corrections, no swallowed exceptions, no assertions you quietly relax to make a test pass.
+- **Pre-existing dead code is not yours to delete.** If you notice unrelated dead code, mention it — don't remove it. Only remove orphans (imports, variables, helpers) that *your* changes made unused.
+
 ## Serena Best Practices
 
 Serena provides semantic code analysis — use it efficiently:

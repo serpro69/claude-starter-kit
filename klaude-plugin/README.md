@@ -22,7 +22,7 @@ All skills appear as `/skill-name` in the slash command menu (annotated with `(k
 | **implementation-process** | Executes a task list from `docs/wip/` with batched steps and code review checkpoints between batches. Updates task status as it goes.                                           |
 | **testing-process**        | Generates tests following project conventions: table-driven, integration, mocking, property-based. Runs the full suite and reports coverage.                                    |
 | **documentation-process**  | Updates ARCHITECTURE.md, TESTING.md, and records ADRs for non-obvious decisions made during implementation.                                                                     |
-| **development-guidelines** | Enforces best practices during coding: latest deps, context7 for library docs, known project conventions from the knowledge base.                                               |
+| **dependency-handling**    | Fires before calling a library/SDK/API or adding a dependency. Forces a capy/context7 lookup instead of guessing signatures or behavior.                                         |
 | **solid-code-review**      | Reviews git changes for SOLID violations, security risks, and code quality. Language-specific checklists for Go, Java, JS/TS, Kotlin, and Python. Standard and isolated modes.  |
 | **implementation-review**  | Compares implemented code against design/implementation docs. Finds spec deviations, missing implementations, and outdated docs — in both directions.                           |
 | **design-review**          | Pre-implementation review gate. Evaluates design docs for completeness, internal consistency, and technical soundness before code is written.                                    |
@@ -44,7 +44,7 @@ analysis-process → design-review → implementation-process → solid-code-rev
 5. **testing-process** — verify and validate
 6. **documentation-process** — update docs
 
-**During implementation**, **development-guidelines** enforces best practices (latest deps, context7 for docs). **implementation-review** verifies code matches design/spec and detects deviations — use during or after implementation.
+**During implementation**, **dependency-handling** is pulled in whenever you touch an external library, SDK, or API — it routes you through capy/context7 instead of letting you guess. **implementation-review** verifies code matches design/spec and detects deviations — use during or after implementation.
 
 **Utilities**: **merge-docs** reconciles competing design docs into one unified document. **cove** (Chain-of-Verification) adds self-verification for high-stakes accuracy at any stage.
 

@@ -54,7 +54,8 @@ When set, all review checkpoints automatically use isolated variants (`kk:solid-
 1. Update `tasks.md`: set the task's status to `in-progress`
 2. Follow the plan exactly
 3. Check off subtasks (`- [x]`) in `tasks.md` as you complete them
-4. Run verifications as specified; use `testing-process` skill
+4. **Whenever the sub-task touches an external library, SDK, framework, or API** — new import, version bump, unfamiliar call — apply the `dependency-handling` skill BEFORE writing the call. Do not guess signatures or config; look them up via capy/context7 per that skill's rules.
+5. Run verifications as specified; use `testing-process` skill
 
 ### Step 3: Report
 

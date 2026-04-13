@@ -34,6 +34,8 @@ Don't forget: only one question per message!
 
 Once you believe you understand what we're trying to achieve, stop and **describe the whole design** to me, **in sections of 200-300 words at a time**, **asking after each section whether it looks right so far**.
 
+**If the design recommends a specific library, SDK, framework, or API** — especially one not already in use in this project — apply the `dependency-handling` skill BEFORE committing to that recommendation. Verifying behavior against context7 at design time prevents proposing something that doesn't actually work the way you assumed.
+
 **Step 5: Document the design**
 
 Document in .md files the entire design and write a comprehensive implementation plan.
