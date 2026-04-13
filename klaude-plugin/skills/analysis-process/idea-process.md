@@ -52,6 +52,7 @@ When creating documentation, follow this approach:
 - Assume the developer who is going to implement the feature is an experienced and highly-skilled %LANGUAGE% developer, but has zero context for our codebase, and knows almost nothing about our problem domain. Basically - a first-time contributor with a lot of programming experience in %LANGUAGE%.
 - **Document everything the developer may need to know**: which files to touch for each task, code structure to be aware of, testing approaches, any potential docs they might need to check. Give them the whole plan as bite-sized tasks.
 - **Make sure the plan is unambiguous, detailed and comprehensive** so the developer can adhere to DRY, YAGNI, TDD, atomic/self-contained commits principles when following this plan.
+- **Pair each step with an explicit verification.** Every implementation step should name *how the developer will know it worked* — a specific test to run, a command whose output to check, or an observable behavior. Use the form `Step → verify: <check>`. Steps without a verification are a smell: either the step is too vague, or the work isn't really done when the step is.
 
 But, of course, **DO NOT:**
 

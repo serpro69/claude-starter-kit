@@ -88,6 +88,7 @@ After all tasks complete and verified:
 
 - Use `testing-process` skill to verify and validate functionality
 - Use `documentation-process` skill to create or update any relevant docs
+- **Reflect:** briefly note where the implementation diverged from the plan, what turned out harder or simpler than expected, and any surprises that future work in this area should know about. Keep it short — a paragraph, not an essay. Index non-obvious learnings as `kk:project-conventions` or `kk:arch-decisions` if they weren't already captured during per-task cycles.
 - Update the feature status in `tasks.md` header to `done`
 
 ## When to Stop and Ask for Help
