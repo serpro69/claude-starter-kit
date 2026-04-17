@@ -1,0 +1,1719 @@
+           Claude Code v2.1.112
+ ▐▛███▜▌   Opus 4.7 (1M context) · Claude Team
+▝▜█████▛▘  ~/Projects/personal/claude-toolbox
+  ▘▘ ▝▝    Welcome to Opus 4.7 xhigh! · /effort to tune speed vs. intellige…
+
+❯ /effort high                                                                  
+  ⎿  Set effort level to high: Comprehensive implementation with extensive
+     testing and documentation
+
+❯ /effort max                                                                   
+  ⎿  Set effort level to max (this session only): Maximum capability with
+     deepest reasoning
+
+❯ Let's explore and plan how to implement                                       
+  https://github.com/serpro69/claude-toolbox/issues/64 , but also not just      
+  reviewing, the entire flow supported by this plugin, from design to           
+  implementation to review specifically for kubernetes.                         
+                                                                                
+  Here are some things I found that may be useful to use as references, borrow  
+  ideas, or even copy-paste verbatim from:                                      
+  -                                                                             
+  https://github.com/mrgoonie/claudekit-skills/tree/main/.claude/skills/devops  
+  - https://github.com/sickn33/antigravity-awesome-skills/blob/main/plugins/ant 
+  igravity-awesome-skills/skills/kubernetes-architect/SKILL.md                  
+  - https://github.com/sickn33/antigravity-awesome-skills/blob/main/plugins/ant 
+  igravity-awesome-skills/skills/kubernetes-deployment/SKILL.md                 
+  - https://github.com/davila7/claude-code-templates/blob/main/cli-tool/compone 
+  nts/agents/devops-infrastructure/kubernetes-specialist.md                     
+  - https://github.com/davila7/claude-code-templates/blob/main/cli-tool/compone 
+  nts/skills/development/kubernetes-architect/SKILL.md                          
+  - https://github.com/GoogleCloudPlatform/gke-mcp/tree/main/skills             
+  - https://github.com/GoogleCloudPlatform/gke-mcp/blob/main/pkg/prompts        
+  - ... feel free to search github for other popular repos that have            
+  kubernetes-related skills and prompts                                         
+                                                                                
+  After you've completed the research and extracted the useful bits and pieces, 
+   let's do a formal kk:design to document the feature.                         
+
+● I'll tackle this in three phases: (1) understand current plugin flow + issue
+  #64, (2) research the K8s references, (3) synthesize findings and invoke
+  kk:design. Let me load the capy tools first.
+
+● Setting up tasks to track this multi-phase work.
+
+● Starting research. Task 1 first — inspect current plugin flow + issue #64,
+  while kicking off reference fetches in parallel.
+
+  Called capy 8 times (ctrl+o to expand)
+
+● Issue #64 is title-only: "Enhance review-code skill with support for k8s"
+  (label: enhancement, skill). User wants broader scope — entire flow for K8s.
+  Current plugin flow: design → review-design → implement (with per-task
+  review-code + test + document) → review-spec. Now need to fetch raw SKILL
+  bodies + more context.
+
+  Called capy 7 times (ctrl+o to expand)
+
+  Called capy (ctrl+o to expand)
+
+● Research is complete. Presenting synthesis, then handing off to kk:design
+  which will drive the Q&A.
+
+  Research summary
+
+  Issue #64 (title-only): "Enhance review-code skill with support for k8s" —
+  labeled enhancement + skill. Your message expands this to cover the whole flow
+   for K8s.
+
+  Current flow (design → review-design → implement w/per-task
+  review-code+test+document → review-spec):
+  - review-code has a per-language reference system: reference/{go,java,js_ts,ko
+  tlin,python}/{security,solid,code-quality,removal-plan}-checklist.md, gated by
+   file-extension detection. This is the natural extension point for K8s — but
+  K8s isn't a language, so detection must also trigger on content heuristics
+  (apiVersion:/kind: in YAML, Chart.yaml, kustomization.yaml, ArgoCD/Flux CRs).
+  - design, test, document all use %LANGUAGE% placeholders — a K8s "profile"
+  concept fits the same mold.
+  - Review skills share _shared/review-scope-protocol.md,
+  capy-knowledge-protocol.md, pal-codereview-invocation.md — K8s rules should 
+  also be shared across review-code/review-spec/test/design via a new
+  _shared/k8s-profile.md.
+
+  Useful bits from references (what to borrow vs skip):
+
+  Source: GKE MCP skills (17 narrow skills: app-onboarding, productionize,
+    reliability, multi-tenancy, workload-security, cost, etc.)
+  Borrow: Workflow structure per concern; Production Readiness Assessment
+    categories (A–H: onboarding, scalability, observability, reliability,
+    security, DR, edge, cost); cross-skill delegation pattern
+  Skip: GKE-specific tooling; cluster-creator/lifecycle (scope creep); GCP-only
+    details
+  ────────────────────────────────────────
+  Source: antigravity kubernetes-deployment
+  Borrow: 7-phase workflow
+    (Container→Manifests→Helm→Mesh→Security→Observability→Deploy) as a design 
+    checklist
+  Skip: "Copy-paste prompts" and skill-as-router pattern
+  ────────────────────────────────────────
+  Source: antigravity/davila7 kubernetes-architect
+  Borrow: Capability taxonomy (GitOps, progressive delivery, IaC, multi-cluster,
+
+    service mesh) to seed design questions
+  Skip: Narrative prose; agent-style persona framing (not a fit for our skill
+    style)
+  ────────────────────────────────────────
+  Source: davila7 kubernetes-specialist (agent)
+  Borrow: Scenario examples in frontmatter; explicit tool list
+  Skip: Huge monolithic agent — our plugin prefers small skills
+  ────────────────────────────────────────
+  Source: claudekit devops
+  Borrow: Split-reference pattern
+    (kubernetes-{basics,kubectl,helm,security,workflows,troubleshooting}.md) —
+    mirrors our reference/{lang}/ layout
+  Skip: Multi-cloud scope (Cloudflare/GCP/etc.)
+
+  Proposed scope (to be confirmed in kk:design Q&A):
+  1. review-code: new reference/k8s/ (security, reliability, quality, helm,
+  gitops checklists); detection rule via YAML content, not just extension.
+  2. Shared _shared/k8s-profile.md (symlinked into each consuming skill) so
+  design, test, document, implement, review-spec can all reference the same K8s
+  concern taxonomy.
+  3. design: inject K8s design questions (cluster topology, GitOps choice,
+  secrets, multi-tenancy, observability) when the idea touches K8s.
+  4. test: add K8s validation commands (kubeconform, kube-score, helm lint,
+  kubectl --dry-run=server, policy engines).
+  5. review-spec: note that for K8s, "implementation" is declarative YAML, not
+  imperative code.
+  6. dependency-handling: treat K8s API versions, Helm chart versions, CRD
+  versions as versioned deps (context7 → k8s docs, helm docs).
+
+  Out of scope (unless you say otherwise): new standalone skills (k8s-architect,
+   k8s-deployment), cloud-provider-specific tooling (GKE/EKS/AKS), service-mesh
+  deep dives.
+
+  Now invoking kk:design to turn this into a formal design doc via iterative
+  Q&A.
+● Skill(kk:design)
+  ⎿  Successfully loaded skill
+
+  Read 1 file, called capy 2 times (ctrl+o to expand)
+
+● Following the idea-process.md workflow. Steps 1–2 done during research. No
+  CONTRIBUTING.md, no prior kk:arch-decisions on K8s or review-code language
+  profiles. One relevant arch constraint found: symlinks may break in 
+  remote-install scenarios (OpenCode/Bun cache) — worth remembering when we
+  design the shared K8s profile location.
+
+  Now Step 3 — refining the idea with one question at a time.
+
+  ---
+  Question 1 of N — Scope
+
+  Issue #64 narrowly says "enhance review-code with k8s". You said "the entire
+  flow... from design to implementation to review specifically for kubernetes."
+  Those are different sizes of feature, and the design doc, implementation plan,
+   and task granularity all hinge on which we commit to. Pick one:
+
+  - A. Narrow — review-code only. New reference/k8s/ profile + detection
+  heuristic. Ships issue #64 verbatim. ~1 week of work, 1 PR.
+  - B. Broad, single design. One design doc covers all affected skills
+  (review-code, design, implement, test, document, review-spec,
+  dependency-handling, plus a new shared _shared/k8s-profile.md). One task list,
+   shipped as one large feature.
+  - C. Broad, phased design. Same scope as B, but the tasks.md is structured in
+  phases (P1 = review-code + shared K8s profile; P2 =
+  design/implement/test/document extensions; P3 = review-spec +
+  dependency-handling tweaks) so each phase ships & merges independently. Phase
+  1 alone already closes issue #64.
+
+  My recommendation: C. Reasoning: (1) it honors your "whole flow" intent while
+  (2) letting you ship #64 without waiting for the long tail, (3) phase 1
+  validates the K8s-profile abstraction before we replicate it across 5 more
+  skills — if the abstraction is wrong, we only reshape one skill, not six, and
+  (4) the phased tasks.md is easy to pause/re-prioritize if something more
+  urgent comes up mid-flight.
+
+  Which do you want — A, B, or C?
+
+✻ Worked for 4m 17s
+
+※ recap: Goal: design Kubernetes support across the plugin flow (issue #64 expanded). Currently in kk:design Q&A, awaiting your scope choice. Next: answer A (narrow), B (broad single), or C (broad phased — recommended). (disable recaps in /config)
+
+❯ C                                                                             
+
+● ---
+  Question 2 of N — Detection trigger
+
+  Now we need to decide how review-code activates the K8s profile on a given
+  diff. This matters because it sets the false-positive rate (YAML is
+  everywhere) and affects how the same detection logic is reused by test,
+  document, and implement.
+
+  - A. Content signature only. Read YAML files, match on top-level apiVersion: +
+   kind: (manifests), apiVersion: v2 in Chart.yaml (Helm), or filename
+  kustomization.yaml (Kustomize). Accurate; slower (opens every YAML).
+  - B. Path heuristic only. Files under conventional dirs: k8s/, manifests/,
+  charts/, kustomize/, deploy/. Fast; brittle (depends on project convention).
+  - C. Combined, content as authority. Path heuristic as a fast pre-filter,
+  content signature as the deciding check, filename fallback
+  (kustomization.yaml, Chart.yaml). Most robust; slightly more code to
+  implement.
+  - D. Explicit opt-in only. User passes a flag or adds profile: k8s to
+  tasks.md. No automatic detection. Zero false positives; forgetful by default.
+
+  My recommendation: C. Reasoning: (1) path heuristics are cheap, so using them
+  as a pre-filter makes the common case free; (2) content signature prevents
+  false positives on non-K8s YAML (CI configs, app configs, OpenAPI specs) and
+  false negatives on non-conventional layouts (deploy/overlays/prod/); (3)
+  kustomization.yaml has no apiVersion/kind at the root and must be caught by
+  filename, so the "filename fallback" isn't optional. D is too friction-heavy
+  given your stated intent is a frictionless flow.
+
+  A side question bundled in: Dockerfile — coupled to K8s in practice. Include
+  in K8s profile, or defer to a future "container" profile? My default is defer
+  (Dockerfile review is its own thing; conflating widens scope). Shout if you
+  disagree.
+
+  Which detection strategy — A, B, C, or D?
+
+✻ Sautéed for 56s
+
+❯ Agree on both counts - C and defer dockerfile                                 
+
+● ---
+  Question 3 of N — K8s profile vs existing language abstraction
+
+  review-code currently detects a "primary language" from file extensions and
+  loads reference/{lang}/. Other skills (test, document, design) use a
+  %LANGUAGE% placeholder in prose. K8s isn't a programming language — so how
+  should the two concepts relate?
+
+  - A. K8s replaces the language when detected. Extensionally: add kubernetes as
+   another row in the language table, mutually exclusive with go/python/etc.
+  Simplest. Wrong for cloud-native repos (Go service + K8s manifests in same
+  diff → only one profile loads).
+  - B. K8s is additive. Loaded alongside any detected language. A Go + K8s diff
+  loads both reference/go/ and reference/k8s/. Reuses the existing "mixed
+  languages" rule (which already says "Load references from each relevant
+  directory"). In pure-K8s diffs (no code), language detection returns nothing
+  and K8s becomes the sole profile. %LANGUAGE% placeholder untouched; we add an
+  additional "if K8s detected, also consult shared-k8s-profile.md" clause where
+  it matters.
+  - C. New orthogonal "profile" axis. Introduce a dedicated profiles: [] concept
+   across all skills, parallel to language. Cleanest semantically. Larger
+  refactor (every skill's frontmatter, every reference loader, every piece of
+  %LANGUAGE% prose) — likely doesn't fit inside phased scope C.
+
+  My recommendation: B. Reasoning:
+  1. Matches how cloud-native projects actually look — app code and manifests
+  live together; a review should flag both a Go race condition and a missing
+  PDB.
+  2. The existing "mixed languages: load references from each relevant
+  directory" rule is already additive — K8s just becomes one more entry. No new
+  concept to teach.
+  3. Phase 1 becomes trivially small: add reference/k8s/ + one detection rule +
+  one line in the mixed-reference paragraph.
+  4. If we ever need richer semantics (profile metadata, per-profile severity
+  weighting, profile composition), that's C, and it can be introduced later
+  without breaking B — B is a forward-compatible subset.
+  5. Keeps %LANGUAGE% placeholder prose intact — in pure-K8s diffs, %LANGUAGE%
+  resolves to "none/kubernetes" gracefully by falling back to the profile's own
+  guidance.
+
+  Which — A, B, or C?
+
+✻ Cooked for 49s
+
+※ recap: Goal: design K8s support across the plugin flow (phased, full-flow). Next action: answer Question 3 — whether K8s profile is additive to language detection (B, recommended), replaces it (A), or becomes a new orthogonal axis (C). (disable recaps in /config)
+
+❯ B                                                                             
+
+● ---
+  Question 4 of N — Artifact scope for the K8s profile
+
+  Now: what K8s artifacts does the shipped profile actually cover? This bounds
+  the size of reference/k8s/ and the content of the shared K8s profile block.
+
+  - A. Manifests only. Vanilla core resources:
+  Deployment/StatefulSet/DaemonSet/Job/CronJob, Service/Ingress,
+  ConfigMap/Secret, RBAC, NetworkPolicy, HPA/PDB, probes, resource
+  requests/limits, SecurityContext. No Helm, Kustomize, GitOps.
+  - B. A + Helm + Kustomize. Adds Helm chart hygiene (Chart.yaml metadata,
+  values.yaml schema, templates/ correctness, pinned dependencies) and Kustomize
+   (base/overlay structure, patch targets, generator options).
+  - C. B + GitOps. Adds ArgoCD Application/ApplicationSet + Flux
+  Kustomization/HelmRelease (sync policy, self-heal, drift detection,
+  repo/path).
+  - D. C + service mesh + observability + policy engines. Istio/Linkerd/Gateway
+  API + ServiceMonitor/PrometheusRule + Kyverno/OPA/Gatekeeper policies.
+
+  My recommendation: B (with the option to fold in GitOps as a small C-extension
+   later if your stack uses it). Reasoning:
+  1. Helm and Kustomize are nearly universal in real K8s repos — omitting them
+  leaves an obvious gap for the "I pasted a Helm chart, review it" use case.
+  2. Most GitOps rules reduce to "does the synced manifest pass A?" — duplicated
+   signal. And ArgoCD vs Flux divergence adds noise. Ship a thin GitOps addendum
+   later, once you know which you're standardizing on.
+  3. Service mesh / observability / policy engines are org- and stack-specific.
+  They belong in per-project kk:project-conventions capy entries, not in a
+  plugin's shipped checklist — otherwise the reference/k8s/ dir becomes a
+  sprawling lowest-common-denominator mess that's wrong for everyone.
+  4. MVP that's actually complete > sprawling MVP with obvious gaps. B is the
+  smallest scope that doesn't feel amateur.
+
+  Which — A, B, C, or D?
+
+✻ Cogitated for 1m 10s
+
+❯ Let's circle back to q3 for a moment. Let's say we also want to add support   
+  for terraform (not in this design, but say as the next feature). Would you    
+  still recommend B?                                                            
+
+● Good probe. Honest answer: with one addition coming that's fine; with a queue 
+  of additions coming, I'd refine B into what I'll call B'.
+
+  The word "language" in the current detection table is already a loose fit for
+  K8s (YAML + tooling, not a programming language). One non-language = a small
+  stretch, tolerable. Two non-languages (K8s + Terraform) = the label is
+  actively misleading, and future-you will hate it when adding Ansible,
+  Dockerfiles, or whatever comes fifth.
+
+  B' = additive, same mechanism, honest rename.
+  - The detection table's header/concept becomes "profile" (or "artifact type")
+  instead of "language". Rows are equal citizens: .go → go/, .py → python/, YAML
+   w/ apiVersion+kind → k8s/, .tf → terraform/, ...
+  - The "Mixed languages: load references from each relevant directory" rule
+  becomes "Multiple profiles: load each relevant directory". Behavior is
+  identical; naming is accurate.
+  - %LANGUAGE% placeholder in test/document/design prose stays as-is for now —
+  it genuinely means "programming language" in those sentences, and
+  K8s/Terraform guidance is added as additional conditional blocks, not by
+  overloading %LANGUAGE%.
+  - Still forward-compatible with C (two-axis) if we ever need to treat
+  programming-language profiles differently from IaC profiles (e.g., different
+  severity weighting). We just don't need to pay that cost yet.
+
+  vs C (orthogonal axis): C would force every skill's frontmatter/prose to grow
+  a parallel profiles: [] dimension. That's real refactor cost, justified only
+  if we want behavioral divergence between the axes. We don't.
+
+  Updated recommendation: B' — start with B's mechanism for P1 (so issue #64
+  closes on the smallest possible change), but land the rename as part of P1's
+  review-code edits since we're editing that detection table anyway. That sets
+  the correct foundation for Terraform (and others) without a separate
+  naming-refactor PR later.
+
+  Cost to P1: tiny. Relabel "Detect primary language" → "Detect primary
+  profile(s)" in review-code/review-process.md and review-isolated.md, rename
+  the table header column, update the accompanying paragraph. No behavior
+  change, no other skill touched.
+
+  Does B' land for you? If yes, I'll record it as the decision and go back to Q4
+   (artifact scope).
+
+✻ Brewed for 55s
+
+❯ B' is good. But language as a placeholder still works. For example, in LSP    
+  context, everything is a language, whether it's programming language, or pure 
+   yaml, or ansible.yaml or kuberenets manifest. Also, let's include some kind  
+  of documentation (maybe a detailed ADR?) for B vs C now, and future           
+  forward-compatibility/improvement direction, if the need ever arises.         
+
+● Good point — I overcorrected. LSP precedent is real: yaml, dockerfile, hcl,
+  even kubernetes (via yaml-language-server schema overlays) all exist as
+  language IDs in editor tooling. Calling this detection axis "language" is
+  defensible, not misleading. Reverting to B as originally framed — no rename.
+  Keep the Detect primary language step, keep %LANGUAGE%, just add K8s as
+  another row with a richer detection rule (content signature + filename + path)
+   rather than bare extensions. Only table schema tweak: the existing
+  "Extensions" column becomes "Detection rule" to accommodate
+  non-extension-based matches cleanly. No churn beyond that.
+
+  Thanks for the pushback — that's exactly the kind of thing that makes the spec
+   better.
+
+  ADR proposal
+
+  You asked for detailed documentation of the B-vs-C decision with a
+  forward-compat path. I'll make it a standalone ADR file rather than burying it
+   in design.md, since this is a cross-cutting architectural decision that
+  outlives this feature.
+
+  Content outline (Michael Nygard template):
+  1. Title: "Profile/language detection remains a single additive axis (B)
+  rather than an orthogonal axis (C)"
+  2. Status: Accepted (date)
+  3. Context: K8s is the first non-programming-language artifact type the plugin
+   supports. Terraform, Dockerfile, Ansible, Bash are plausible future
+  additions. Need to decide whether these share the same detection axis as
+  Go/Python/etc. or live on a parallel one.
+  4. Decision: B — single additive "language" axis. All detectable artifact
+  types (programming languages + IaC DSLs + config schemas) are rows in the same
+   detection table. Matching a file contributes that row's reference directory
+  to the reviewer's loaded set. Multiple matches → multiple directories loaded.
+  LSP precedent: editor tooling already treats YAML/Dockerfile/HCL as
+  "languages".
+  5. Alternatives considered:
+    - A (mutually exclusive, K8s replaces language) — rejected: breaks
+  cloud-native repos where app code + manifests coexist.
+    - C (orthogonal axis: language × profiles) — rejected for now: larger
+  refactor; no behavioral divergence justifies the cost today.
+  6. Consequences:
+    - Positive: minimal change, forward-compatible, matches LSP mental model,
+  one consistent loading rule.
+    - Negative: the word "language" is a slight stretch for some entries (K8s is
+   a schema overlay on YAML, not a language proper); tolerable with the LSP
+  framing.
+    - Neutral: reference directories don't move under any future migration.
+  7. Forward-compatibility / migration path to C: if behavioral divergence ever
+  becomes necessary (e.g., different severity weighting for IaC vs app code,
+  different reviewer agents, different %LANGUAGE% prose treatment), the
+  migration is: (a) introduce a kind: metadata field in each reference
+  directory's index (programming-language | iac | config-schema); (b) add a
+  profiles: array alongside language: in skill frontmatter; (c) gradually split
+  prose where the two should diverge; (d) no file moves required — directories
+  stay where they are. Migration is a refactor, not a rewrite.
+
+  One sub-question: where does it live?
+  - Feature-local (docs/wip/k8s-support/adr/0001-profile-detection-model.md) —
+  moves with the feature to docs/done/ when shipped. Less invasive; no new
+  top-level convention.
+  - Top-level (docs/adr/0001-profile-detection-model.md) — standard ADR
+  location; discoverable independent of the originating feature; introduces a
+  new top-level dir.
+
+  My recommendation: top-level docs/adr/. Reason: this decision affects the
+  plugin's entire skill architecture, not just the K8s feature. Burying it under
+   docs/done/k8s-support/adr/ when you ship makes it hard to find when the
+  Terraform designer comes along in 3 months. New top-level dir is one-time cost
+   for long-term discoverability.
+
+  Which location — feature-local or top-level?
+
+  (And once we settle this, I'll re-ask Q4 — you didn't answer it before
+  circling back.)
+
+✻ Crunched for 1m 5s
+
+❯ docs/adr                                                                      
+
+● Recorded: top-level docs/adr/0001-profile-detection-model.md.
+
+  ---
+  Re-asking Q4 — Artifact scope for the K8s profile (you haven't picked yet):
+
+  - A. Manifests only — core resources (Deployment/StatefulSet/Service/Ingress/C
+  onfigMap/Secret/RBAC/NetworkPolicy/HPA/PDB/probes/resources/SecurityContext).
+  - B. A + Helm + Kustomize — adds chart hygiene (Chart.yaml, values.yaml,
+  templates/, pinned deps) and Kustomize (base/overlay, patches, generators).
+  - C. B + GitOps — adds ArgoCD Application/ApplicationSet + Flux
+  Kustomization/HelmRelease (sync policy, self-heal, drift detection).
+  - D. C + service mesh + observability + policy engines — Istio/Linkerd/Gateway
+   API + ServiceMonitor/PrometheusRule + Kyverno/OPA.
+
+  My recommendation stands: B. Helm and Kustomize are nearly universal and
+  omitting them leaves an obvious gap; GitOps rules mostly reduce to "does the
+  synced manifest pass A?" and the ArgoCD-vs-Flux split adds noise;
+  mesh/obs/policy are org-specific and belong in per-project
+  kk:project-conventions, not a shipped generic checklist.
+
+  Which — A, B, C, or D?
+
+❯ B                                                                             
+
+● ---
+  Question 5 of N — Where does the shared K8s prose live?
+
+  Context: review-code uses per-language reference/k8s/ checklists
+  (self-contained). But phases 2–3 need K8s-aware behavior in design, test,
+  document, implement, review-spec — same concern list, different framing. That
+  content needs to live somewhere.
+
+  - A. Per-skill duplication. Each consuming skill copies the K8s block inline.
+  Simplest to wire up, worst to maintain — divergence is inevitable.
+  - B. Shared file with per-skill symlinks. Follows the existing _shared/
+  pattern in CLAUDE.md: klaude-plugin/skills/_shared/k8s-profile.md is
+  authoritative; each consuming skill gets shared-k8s-profile.md →
+  ../_shared/k8s-profile.md. Local markdown links resolve; one source of truth.
+  - C. Shared file, no symlinks, explicit relative paths. Put it at the same
+  location but consumers reference ../_shared/k8s-profile.md directly in their
+  prose. Avoids symlinks but breaks the bundled-copy property (links won't
+  resolve when a skill is copied/extracted in isolation).
+  - D. Promote to its own skill (kubernetes-profile). Package K8s guidance as a
+  callable skill other skills invoke. Cleaner boundaries. But it has no
+  standalone workflow — it's reference content, not a process — so this is
+  machinery in search of a problem.
+
+  My recommendation: B. It's the documented convention (CLAUDE.md spells out the
+   rationale: local link resolution, visible shared- prefix, and only symlinks
+  where actually consumed). The OpenCode Bun-cache symlink risk noted earlier is
+   owned by the OpenCode feature, not this one; we shouldn't diverge from the
+  repo convention on its behalf. Agents (in klaude-plugin/agents/) that need the
+   K8s profile will reference it by repo-relative path per CLAUDE.md, which is
+  unchanged.
+
+  Sub-question bundled: the review-code/reference/k8s/ checklists (for the
+  reviewer's granular use) and _shared/k8s-profile.md (for other skills'
+  prose-level awareness) serve different consumers. I'd keep them separate — the
+   shared file is a concise pointer ("when K8s is in the detected profiles,
+  additionally consider: security hardening, probes/PDB, RBAC, secrets,
+  Helm/Kustomize hygiene — see reference/k8s/ for the reviewer-depth
+  checklists"), not a duplicate of the reviewer content. OK with that split?
+
+  Which — A, B, C, or D?
+✻ Sautéed for 45s
+
+❯ Kind of agree on both recommendation and sub-question. But let's think a bit  
+  more. Same question - adding ansible, terraform, anything else in the future. 
+   Or, say even augmenting implement with go-specific patterns and              
+  recommendations.                                                              
+
+● Good probe. You've spotted the real limit: B-as-stated is a point solution,
+  not a scalable pattern. Two distinct scaling axes fail under B:
+
+  Axis 1 — more profiles. _shared/k8s-profile.md + _shared/terraform-profile.md
+  + _shared/ansible-profile.md + _shared/dockerfile-profile.md makes _shared/ a
+  dumping ground that mixes two kinds of things: mechanism
+  (capy-knowledge-protocol, review-scope-protocol, pal-codereview-invocation)
+  and content (profile knowledge). Symlink count per consuming skill grows
+  linearly with profile count.
+
+  Axis 2 — (skill × profile) content. Your example — "augmenting implement with
+  Go-specific patterns" — is a per-(skill, profile) file. Flat _shared/ can't
+  express this cleanly. You'd end up with _shared/go-patterns-for-implement.md,
+  _shared/k8s-patterns-for-design.md, etc. — that's a 2D matrix flattened into a
+   1D directory. Ugly.
+
+  The cleaner long-term architecture: profile-first layout.
+
+  klaude-plugin/
+    profiles/
+      k8s/
+        DETECTION.md              # how to detect, authoritative
+        overview.md               # concise pointer (what currently would be
+  _shared/k8s-profile.md)
+        review/                   # reviewer-depth checklists (currently
+  review-code/reference/k8s/)
+          security-checklist.md
+          reliability-checklist.md
+          quality-checklist.md
+          helm-checklist.md
+          kustomize-checklist.md
+          removal-plan.md
+        design/                   # K8s-aware design prompts, when needed
+        test/                     # validator commands (kubeconform, helm lint,
+  ...)
+        implement/                # per-task gotchas
+        document/                 # what to capture in docs
+      terraform/
+        DETECTION.md
+        ...
+      go/                         # existing review-code/reference/go/ migrates
+  here → review/
+      python/
+      ...
+    skills/
+      review-code/
+        ...                       # loses reference/{lang}/, reads from
+  profiles/{name}/review/
+
+  Every profile is self-contained, self-describing, and composable. Adding
+  Terraform = one new profiles/terraform/ dir that follows the template. No
+  symlinks. (skill × profile) content is natural:
+  profiles/go/implement/patterns.md.
+
+  But. Migrating to this in P1 is scope creep — it also means shuffling the
+  existing review-code/reference/{go,python,java,js_ts,kotlin}/ dirs into
+  profiles/{name}/review/, which touches skills orthogonal to issue #64.
+
+  Recommendation: F (hybrid).
+  1. P1 ships B as originally framed — _shared/k8s-profile.md + symlinks,
+  review-code/reference/k8s/. Minimal diff, closes #64 cleanly.
+  2. Write ADR 0002 (profile-content-organization.md) — separate from 0001
+  (detection axis). Document: current flat layout, profile-first target
+  architecture, trigger conditions for migration (e.g., "when adding profile #3,
+   or when first (skill × profile) file lands, migrate to profile-first").
+  3. Migration is mechanical. Content doesn't change, only paths. git mv 
+  klaude-plugin/skills/_shared/k8s-profile.md 
+  klaude-plugin/profiles/k8s/overview.md, git mv 
+  klaude-plugin/skills/review-code/reference/k8s/ 
+  klaude-plugin/profiles/k8s/review/, update references. Low-risk refactor when
+  the time comes.
+
+  Why F over "just do profile-first in P1":
+  - P1's job is closing #64, not redesigning the plugin's top-level directory.
+  Bundling architectural refactors with feature PRs is how features stall.
+  - We don't yet have 2 concrete profile consumers — we have K8s in hand and
+  Terraform as a hypothetical. ADR-document the target now (so future Terraform
+  work doesn't fork in a different direction) but don't pay the migration cost
+  speculatively.
+  - If profile-first turns out subtly wrong once we try to write the K8s
+  content, B gives us a cheap pivot. Profile-first in P1 bakes it in harder.
+
+  Two ADRs now:
+  - docs/adr/0001-profile-detection-model.md — single additive axis (B from Q3)
+  - docs/adr/0002-profile-content-organization.md — flat _shared/ for P1,
+  profile-first as migration target
+
+  OK with F, or do you want to do profile-first in P1 as a foundational
+  investment despite the scope stretch?
+
+✻ Churned for 1m 15s
+
+❯ But why are we talking in P1 context only? Won't we implement (and hence      
+  document) all phases as part of this design/implementation? Even if they're   
+  independent (which is good).                                                  
+
+● You're right — I was wrong to scope this to P1. Rereading Q1 C: "same scope as
+   B, but tasks.md is structured in phases... all phases ship within this 
+  feature's lifecycle." I anchored on "P1 closes issue #64" and forgot phases
+  2–3 are equally part of this design doc.
+
+  If we're designing all 3 phases together, and P2 already produces 4+ pieces of
+   (skill × profile) content (design × k8s, test × k8s, implement × k8s,
+  document × k8s), then flat _shared/ is strained before P2 even lands.
+  Deferring the profile-first migration to "some future time" would mean
+  migrating between P1 and P2 of the same feature — that's self-inflicted churn.
+   The honest answer is: profile-first is the correct architecture for this 
+  feature, not a future migration target.
+
+  Revised recommendation: H
+
+  Profile-first architecture adopted in-feature, applied across all phases, with
+   a prep task to migrate existing language dirs.
+
+  klaude-plugin/
+    profiles/
+      k8s/
+        DETECTION.md
+        overview.md
+        review/        # reviewer-depth: security, reliability, quality, helm,
+  kustomize, removal-plan
+        design/        # design-time prompts (P2)
+        test/          # validator commands (P2)
+        implement/     # per-task K8s gotchas (P2)
+        document/      # doc rubric for K8s artifacts (P2)
+      go/              # migrated from review-code/reference/go/
+        review/
+      python/
+      java/
+      js_ts/
+      kotlin/
+    skills/
+      review-code/
+        ...            # loses reference/, loads from profiles/{name}/review/
+
+  Revised phasing
+
+  - P0 (prep refactor): Introduce profiles/ top-level. Migrate
+  review-code/reference/{go,java,js_ts,kotlin,python}/ →
+  profiles/{name}/review/. Update review-code prose (SKILL.md,
+  review-process.md, review-isolated.md) to reference new paths. Update
+  test/test-plugin-structure.sh with EXPECTED_PROFILES. No behavior change, pure
+   refactor. Verifiable: existing tests pass; a dry-run review finds the same
+  reference files.
+  - P1: Add profiles/k8s/ with overview.md, DETECTION.md, and review/ checklists
+   (security, reliability, quality, helm, kustomize, removal-plan). Extend
+  review-code's detection rule with the K8s content-signature trigger. Closes 
+  issue #64.
+  - P2: Add profiles/k8s/{design,test,implement,document}/. Update those 4
+  skills to conditionally load profile content when K8s is in the detected
+  profile set. Update agents where needed.
+  - P3: review-spec K8s-awareness polish + dependency-handling tweaks for Helm
+  chart versions / K8s API versions / CRD versions.
+
+  ADR reconsidered
+
+  Since the architecture is adopted in-feature (not deferred), ADR 0002 changes
+  tone from "future migration target" to "chosen architecture, with rejected
+  alternative (flat _shared/)":
+  - 0001 (profile-detection-model.md) — single additive axis, decision still B.
+  - 0002 (profile-content-organization.md) — decision: profile-first;
+  alternatives rejected: flat _shared/ (mixes mechanism with content, symlink
+  proliferation, can't express skill × profile cleanly), per-skill duplication.
+  Migration path documented for completeness (in case a future decision reverses
+   this).
+
+  Cost of H vs F
+
+  - P0 adds ~1 atomic commit (mechanical migration). Small, testable,
+  reversible.
+  - Every downstream skill prose change is cleaner (paths line up, no
+  bifurcation).
+  - P2 lands 4 files under profiles/k8s/{design,test,implement,document}/
+  naturally instead of cramming into
+  _shared/k8s-{design,test,implement,document}.md.
+  - Slightly bigger diff to issue #64's closing PR (P0+P1 merge together, since
+  P0 is not valuable standalone), but no scope creep into new behavior.
+
+  OK with H? Or do you see a reason to stick with F's "defer" or explore an I/J
+  variant?
+
+✻ Churned for 57s
+
+❯ Agree with H                                                                  
+
+● ---
+  Question 6 of N — File structure inside profiles/{name}/review/
+
+  We inherited this structure from review-code/reference/{lang}/:
+  - security-checklist.md
+  - solid-checklist.md ← programming-language concept
+  - code-quality-checklist.md ← "code" is awkward for YAML/HCL
+  - removal-plan.md
+
+  For K8s (and future Terraform), "SOLID" is a stretch and "code-quality"
+  doesn't fit. Plus K8s needs Helm/Kustomize-specific content that doesn't map
+  onto those 4 boxes. Options:
+
+  - A. Strict filename parallelism. All profiles use the exact same 4 filenames.
+   K8s stretches solid-checklist.md to mean "architecture/composition"
+  (SRP-per-resource, config injection via env/CM, Kustomize-overlay composition,
+   etc.). Helm/Kustomize content folds awkwardly into code-quality-checklist.md.
+   Workflow completely unchanged. Semantically ugly.
+  - B. Category-aligned rename + per-profile extras. Rename the two universal
+  ones: code-quality-checklist.md → quality-checklist.md (drops "code-" since
+  quality applies to YAML/HCL too); solid-checklist.md →
+  architecture-checklist.md (keeps "this is where composition concerns go", each
+   profile fills with domain-appropriate rules — SOLID for programming
+  languages, K8s composition rules for K8s). Profile-specific extras live as
+  additional *.md in review/ (profiles/k8s/review/helm-checklist.md,
+  profiles/k8s/review/kustomize-checklist.md). Workflow reads the standard 4 +
+  any extras.
+  - C. Fully free-form. No naming convention. Each profile has whatever files it
+   needs. Workflow enumerates all *.md under review/. Maximum flexibility; loses
+   useful cross-profile consistency (reviewer can't rely on "every profile has
+  security guidance at a known path").
+
+  My recommendation: B. Reasoning:
+  1. code-quality → quality is a trivial rename that fixes a semantic mismatch
+  once and for all. Affects 5 existing files under the programming-language
+  profiles, mechanical.
+  2. solid-checklist → architecture-checklist keeps the slot (every profile has
+  some kind of composition/architecture concern), but lets each profile fill it
+  with domain-appropriate content. SOLID stays as the content for programming
+  languages — the filename just stops lying.
+  3. Profile-specific extras (Helm, Kustomize, and future things like
+  Terraform-state-hygiene) are handled naturally by "anything else in review/" —
+   workflow iterates them in a final step.
+  4. Cross-profile consistency preserved: reviewers always know where
+  security/architecture/quality/removal live. Per-profile flexibility
+  accommodated by the extras convention.
+  5. C's free-form is tempting but removes the "checklist per category"
+  scaffolding that the workflow currently uses as its step sequence — bigger
+  workflow change for small gain.
+
+  Cost to P0: rename 2 files × 5 existing language dirs = 10 git mvs. Plus 3-4
+  prose updates in review-code/{SKILL.md,review-process.md,review-isolated.md}
+  pointing to new filenames. Still a single mechanical commit.
+
+  Which — A, B, or C?
+
+✻ Crunched for 1m 0s
+
+※ recap: Designing K8s support across the plugin flow (issue #64). Mid-Q&A in kk:design; awaiting your answer to Q6 on whether to rename checklist files to drop programming-language bias (A/B/C, recommendation B). (disable recaps in /config)
+
+❯ what if we have an profiles/{name}/review/index.md that is the only reference 
+   from the skills, which includes a short TOC with the actual references and   
+  their brief descriptions, then reviewer or implementer can decide which       
+  references are actually worth checking based on the task and                  
+  code-under-{review,implementation,design,...}                                 
+
+● That's a better design than any of A/B/C. Calling it D. Let me be direct:
+  you're right, this is what we should do.
+
+  Why it's better:
+  1. Context efficiency. A Deployment-only diff doesn't need to load
+  helm-checklist.md or kustomize-checklist.md. The index says what exists; the
+  reviewer/implementer loads only what matches the task.
+  2. Natural extension. Add a new checklist = add the file + one index line.
+  Skill prose never changes.
+  3. Self-describing profile. The index is both a TOC and a triage guide.
+  Contributors adding profiles follow a clear template.
+  4. Cleaner abstraction. Workflow stops encoding filenames like
+  security-checklist.md as hardcoded step names. It says "load profile indexes;
+  select checklists per their guidance". That abstraction holds for any profile,
+   any number of checklists.
+  5. Matches how skilled reviewers actually work. You don't mechanically run
+  every checklist — you pick the ones relevant to the change.
+
+  One risk to mitigate — selection bias. A purely reviewer-discretion model
+  invites "skipped the security checklist because the diff looked innocuous,
+  missed a secret leak". Fix: the index distinguishes always-load from
+  conditional entries. Universal concerns (security, quality) stay mandatory
+  when the profile is active; specialized ones (Helm, Kustomize, reliability for
+   non-workload diffs) are conditional with stated triggers.
+
+  Sketch of profiles/k8s/review/index.md:
+
+  # Kubernetes review checklists
+
+  ## Always load (when K8s profile is active)
+  - [security-checklist.md](security-checklist.md) — RBAC, NetworkPolicy, Pod
+  Security, secrets, image provenance.
+  - [architecture-checklist.md](architecture-checklist.md) — resource separation
+   of concerns, config injection, avoid hardcoded cluster assumptions.
+  - [quality-checklist.md](quality-checklist.md) — labels/selectors, immutable
+  tags, resource requests+limits, probes correctness.
+  - [removal-plan.md](removal-plan.md) — template for staged
+  resource/CRD/namespace removal.
+
+  ## Conditional
+  - [reliability-checklist.md](reliability-checklist.md) — **Load if:**
+  Deployment/StatefulSet/DaemonSet/Job/CronJob in diff. PDB, probe semantics,
+  graceful shutdown, anti-affinity, topology spread.
+  - [helm-checklist.md](helm-checklist.md) — **Load if:** `Chart.yaml`,
+  `values*.yaml`, or `templates/` in diff. Chart metadata, values schema,
+  template correctness, pinned deps.
+  - [kustomize-checklist.md](kustomize-checklist.md) — **Load if:**
+  `kustomization.yaml`, bases/, overlays/, patches in diff. Overlay structure,
+  patch targets, generator options.
+
+  Generalize the pattern: the same index.md convention applies to every profile
+  sub-dir — profiles/{name}/{review,design,test,implement,document}/index.md.
+  Skills load only the index of the relevant phase; index routes. Uniform across
+   phases, uniform across profiles.
+
+  Cost vs B:
+  - Bigger workflow restructure in
+  review-code/{review-process,review-isolated}.md: existing "Step 3 SOLID / Step
+   4 Removal / Step 5 Security / Step 6 Quality" collapses into "Step 3: For
+  each detected profile, load review/index.md; select checklists per always-load
+   + diff-content triggers; run each". One-time change, applies to all profiles
+  forever after.
+  - Per-profile author cost: write one index.md (~20 lines) on top of the
+  checklists. Minimal.
+  - Long-term extension cost: near zero. Adding a new checklist to a profile
+  doesn't touch any skill.
+
+  Integration with ADR: 0002 gets richer — "profile-first layout with
+  index-driven content loading" is the architectural decision, with the
+  rationale above.
+
+  Applies retroactively to programming-language profiles too. P0's migration of
+  review-code/reference/{go,java,...}/ to profiles/{name}/review/ also generates
+   an index.md per profile. Go's index lists security-checklist.md,
+  solid-checklist.md (retained — SOLID is appropriate content for Go),
+  quality-checklist.md, removal-plan.md — all as always-load. Filename rename
+  (solid stays for Go, filename is whatever content actually goes in there)
+  becomes per-profile rather than global. Existing behavior preserved, new
+  flexibility gained.
+
+  So adopting D: answers Q6 fully (no rename needed universally; each profile
+  picks filenames that fit its content, and the index reconciles); strengthens
+  Q5's profile-first architecture; adds one workflow-restructure task to P0.
+
+  Confirmed as D, or any concerns I should address before we move on?
+
+✻ Cogitated for 1m 13s
+
+❯ looks good, proceed to next                                                   
+
+● ---
+  Question 7 of N — K8s validation tooling in the test skill
+
+  P2 adds profiles/k8s/test/ with K8s-aware test guidance. The validator
+  ecosystem is large (kubeconform, kube-score, kube-linter, helm lint, kustomize
+   build, conftest/OPA, kyverno test, trivy config, checkov, kics, server-side
+  dry-run, popeye, kubesec, polaris, datree, ...). We need a position on which
+  tools we mandate vs merely catalog.
+
+  - A. Mandate a minimum toolchain. K8s content requires: kubeconform (offline
+  schema validation) + helm lint (if Helm in diff) + kustomize build (if
+  Kustomize in diff). Additional tools listed as a menu. Opinionated on the
+  floor, flexible above.
+  - B. Pure menu. No mandates. profiles/k8s/test/index.md catalogs tools by
+  category with one-line pros/cons; project picks. Skill's role is to prompt
+  ("have you run schema validation? policy checks?"). Validator choice is the
+  team's.
+  - C. Minimum + policy hook. A's minimum, plus a convention: if the project
+  declares a policy toolchain (presence of .conftest/, policies/*.rego,
+  kyverno-policies/, gator-*.yaml, etc.), the K8s test guidance includes running
+   it; if not, skipped. Policy tool not mandated — just auto-honored when the
+  project signals it has one.
+
+  My recommendation: C. Reasoning:
+  1. A's floor is table stakes. kubeconform + helm lint + kustomize build are
+  offline, fast, broadly-accepted-as-minimum. Not shipping a floor makes test
+  for K8s vague ("consider validation") when it should be concrete ("run these;
+  they must pass").
+  2. B is too hands-off. Leaves every project to re-derive what "K8s testing"
+  even means. Opinionated plugin > neutral reference library, for this plugin's
+  tone.
+  3. Policy tools are project-specific. Mandating conftest everywhere is wrong
+  (half of projects don't use it); silence is also wrong (the other half do, and
+   the skill should notice). Auto-detect via project markers splits the
+  difference without asking every user to configure.
+  4. Cluster-dependent tools (server-side dry-run, popeye) stay out of the
+  minimum — they require a live cluster, which isn't always available in the
+  dev/CI loop. Mentioned as optional "if you have a staging cluster".
+  5. Security scanners (trivy config, checkov, kics) go in the menu, not the
+  floor — they're valuable but overlap heavily; forcing one is opinionated in
+  the wrong way.
+
+  Clarification on what "mandate" means here: the plugin doesn't wrap or execute
+   these tools. profiles/k8s/test/index.md lists them as required check
+  categories with suggested commands; the human or implementing agent runs them;
+   failure of a mandated check counts as a test failure per the test skill's
+  guidelines. Plugin just spells out the contract.
+
+  Implementation note (not a question, just flagging): P2 will need presence
+  checks with install hints — if kubeconform isn't on PATH, the skill surfaces
+  an install suggestion rather than silently skipping. Standard practice;
+  handled at implementation time.
+
+  Which — A, B, or C?
+
+✻ Churned for 56s
+
+❯ Agree with C                                                                  
+
+● ---
+  Question 8 of N — Integration with dependency-handling
+
+  dependency-handling currently fires on "library, SDK, framework, or external
+  API — look up before guessing". K8s work has several things that look like
+  dependencies but aren't traditional libraries:
+  - K8s API versions (apps/v1, networking.k8s.io/v1, policy/v1) —
+  deprecated/removed per minor release
+  - Third-party CRDs (cert-manager, ArgoCD, Istio — independently versioned
+  APIs)
+  - Helm chart versions (pinned dependencies: in Chart.yaml)
+  - kubectl/helm/kustomize CLI versions — behavior drifts
+  - Container image tags — arguably dependencies
+
+  Options:
+
+  - A. No integration. dependency-handling stays programming-language-scoped.
+  K8s versioning concerns live inside profiles/k8s/{design,implement,review}/
+  directly.
+  - B. Extend dependency-handling to explicitly cover K8s dep categories. When
+  K8s profile is active, skill rules apply to K8s API versions, CRDs, Helm
+  charts, container images — each with specific context7/capy lookup targets in
+  the skill prose itself.
+  - C. Middle ground. Widen dependency-handling's trigger clause to explicitly
+  include "IaC/config artifacts with external versioning (K8s API versions, Helm
+   charts, container images, Terraform providers, etc.)", but defer the specific
+   lookup procedures per profile to profiles/{name}/overview.md. Core rule
+  ("look up before guessing") stays universal; per-domain how-to lives with the
+  domain.
+
+  My recommendation: C. Reasoning:
+  1. The core principle is universal. "Don't guess, look up" applies to K8s API
+  versions exactly as it applies to a Go library signature. Separate integration
+   (A) creates a gap where someone writes apiVersion: extensions/v1beta1 and the
+   skill doesn't trigger because it wasn't "a library call".
+  2. B bloats the skill. Every new profile (Terraform providers, Ansible
+  collections, etc.) would force another enumeration in dependency-handling. C
+  keeps the skill domain-agnostic; each profile owns its own lookup recipes.
+  3. Reading the current trigger clause carefully: TRIGGER when: … calling a 
+  library, SDK, framework, or external API; unsure how a third-party function 
+  behaves — K8s API versions and CRDs are already arguably "external APIs". C
+  makes this explicit (closes an ambiguity) without overreaching.
+  4. Context7 coverage is relevant here. K8s docs are in context7; Helm chart
+  repos typically aren't. The skill's "context7 second, web search last" cascade
+   still applies — per-profile content can note which cascade step actually
+  yields signal for which dep type.
+
+  Concrete change: one-sentence widening in dependency-handling/SKILL.md's
+  trigger clause. Plus profiles/k8s/overview.md gets a "Looking up K8s
+  dependencies" paragraph naming the cascade targets for each dep category (API
+  versions → context7 k8s.io docs or kubectl explain; CRDs → operator's docs;
+  Helm charts → chart repo; images → registry).
+
+  Which — A, B, or C?
+
+✻ Baked for 45s
+
+❯ Agree with C                                                                  
+
+● ---
+  Question 9 of N — tasks.md structure for phase independence
+
+  You've chosen phased shipping (Q1:C) and profile-first architecture (Q5:H)
+  means P0 lands a new top-level directory (profiles/) — that's an architectural
+   change that needs CLAUDE.md updates and the ADRs to land with P0, not at the
+  end of the feature. Similarly P1 closes issue #64 and should be verifiable on
+  its own.
+
+  Options for the tasks.md structure:
+
+  - A. Flat task list with phase tags. Tasks numbered 1..N with Phase: 
+  P0/P1/P2/P3 metadata on each. Single Final verification task at the end.
+  Simpler file; doesn't enforce phase-boundary shipping (the verification is
+  only at the very end — P0 could "ship" with no verification record).
+  - B. Phase-grouped with per-phase verification. ## Phase 0: Refactor to 
+  profile-first, ## Phase 1: K8s profile — review-code, etc. Each phase ends
+  with its own verification task (test + document + review-code + review-spec).
+  Feature-level "done" = all phases done + a brief top-level summary task. More
+  structure; matches phase-independent shipping.
+  - C. Multi-file tasks (tasks.md + tasks-p0.md + tasks-p1.md etc.). Most
+  granular. But implement skill reads one tasks.md; multi-file complicates it.
+
+  My recommendation: B. Reasoning:
+  1. implement skill already uses H2-per-task; nesting under H2 phase headers
+  with H3 tasks is a light structural tweak, not a skill change. implement's
+  "Step 1: identify next pending task" still works (just skip over phase H2
+  headers).
+  2. Per-phase verification is the only honest way to say "P0 merged cleanly" vs
+   "P1 merged cleanly" — without it, the record of what was verified when gets
+  lost in the final pass.
+  3. Artifacts that must land with a specific phase (CLAUDE.md convention docs
+  and ADRs 0001/0002 land with P0; profiles/k8s/review/ content lands with P1)
+  become sub-tasks of the correct phase, not floating in a shared pool.
+  4. C adds file-coordination burden without buying us more than B already
+  provides.
+
+  Under B, per-phase verification looks like:
+  - P0 verification: test-plugin-structure.sh passes with EXPECTED_PROFILES
+  populated; review-code dry-run still loads correct references (no behavior
+  change); CLAUDE.md includes the profiles/ convention; ADRs 0001+0002
+  committed.
+  - P1 verification: test, document, review-code on the K8s reference content +
+  detection rule, review-spec vs design.md's P1 section. Issue #64 can be
+  closed.
+  - P2 verification: same for each of the 4 skills extended.
+  - P3 verification: same for review-spec + dependency-handling.
+  - Feature-level closer: one short task that promotes
+  docs/wip/kubernetes-support/ → docs/done/, updates any status metadata.
+
+  Also: feature directory name — proposing docs/wip/kubernetes-support/ (full
+  name, more discoverable than k8s-support). Branch name stays k8s_support for
+  continuity. Fine?
+
+  Which structure — A, B, or C? And OK with the directory name?
+
+✻ Crunched for 54s
+
+❯ Agree with B and dir name. But, do not make ADR-writing part of the P0 tasks! 
+   Write the ADRs yourself, now, as part of documenting the designs, while you  
+  have all the context and decisions available.                                 
+
+● Recorded: ADRs are design-phase artifacts, I'll author them now alongside
+  design.md. P0 task list references the ADRs as prerequisites but doesn't
+  produce them.
+
+  Q&A is closed on the major decisions. Moving to Step 4 of the idea-process: 
+  describing the whole design in 200–300 word sections. I'll pause after each
+  for your read. 8 sections total.
+
+  ---
+  Section 1/8 — Architecture overview
+
+  Three concepts underpin this feature:
+
+  1. Profile-first layout. A new top-level directory klaude-plugin/profiles/
+  peers with skills/. Each profile (k8s, go, python, …) is a self-contained
+  bundle owning its detection rule, per-phase content, and index routers.
+  Programming-language profiles migrate in from review-code/reference/{lang}/ as
+   part of P0 — the architecture is uniform across "all profiles" from day one,
+  no bifurcation.
+  2. Additive detection on the single "language" axis. The existing "Detect
+  primary language" step in review-code stays conceptually unchanged, just
+  renamed schematically to "Detect profiles" (ADR 0001 explains the term-of-art;
+   we retain "language" in prose where it fits). Multiple profiles can match a
+  diff simultaneously — a Go service with K8s manifests loads both
+  profiles/go/review/ and profiles/k8s/review/, with findings merged. K8s
+  detection uses combined signals (path + filename + content signature), not
+  bare extensions.
+  3. Index-driven content loading. Every profile sub-dir (review/, design/,
+  test/, implement/, document/) contains an index.md that lists available
+  checklists with always-load vs conditional triggers and one-line descriptions.
+   Skills and agents reference only the index; they select what to actually load
+   based on the task and diff. This collapses the review-code workflow's
+  hardcoded "Step 3 SOLID / Step 4 Removal / Step 5 Security / Step 6 Quality"
+  into a generic "Load each detected profile's review/index.md; apply its
+  routing". Same abstraction extends to design, test, implement, document.
+
+  Why these three together: profile-first gives the right home for multi-axis
+  scaling; single detection axis keeps the abstraction simple and LSP-aligned;
+  index-driven loading makes the abstraction open-ended (add a checklist = add a
+   file + an index line, no skill touched). Each is forward-compatible with a
+  more complex future (two-axis profiles, structured metadata) without painting
+  us in.
+
+  Look right so far? Ready for Section 2 (detection mechanics) when you're good
+  with this.
+
+✻ Baked for 1m 3s
+
+❯ yes                                                                           
+
+● Section 2/8 — Detection mechanics
+
+  Detection lives in profiles/{name}/DETECTION.md — one file per profile
+  describing its trigger rule. This keeps the detection authority in the profile
+   itself (so adding a new profile = no skill-side edits) and makes it
+  inspectable without chasing the skill workflow.
+
+  For the K8s profile, the rule combines three signals, with content as the 
+  authority:
+
+  1. Fast path — path heuristic. If any file in the diff lives under k8s/,
+  manifests/, charts/, kustomize/, deploy/ (case-insensitive) — mark candidate.
+  This is a fast pre-filter, not a decision.
+  2. Filename triggers (authoritative). Chart.yaml → Helm. values*.yaml adjacent
+   to a Chart.yaml → Helm values. kustomization.yaml → Kustomize. These
+  filenames are unambiguous — they are K8s artifacts by definition.
+  3. Content signature (authoritative). For any .yaml/.yml file not already
+  caught by #2, read the first ~20 lines: presence of top-level apiVersion: AND
+  kind: → K8s manifest. This correctly catches non-conventional layouts
+  (deploy/overlays/prod/*.yaml) and correctly skips non-K8s YAML (CI configs,
+  OpenAPI specs, app configs).
+
+  Workflow integration — review-code's preflight step:
+  - Runs detection for every profile by iterating profiles/*/DETECTION.md.
+  - Produces a set of active profiles (possibly empty).
+  - No match → falls back to generic review guidance (existing "No match"
+  behavior retained).
+  - Multiple matches → all profiles' review/index.md are loaded; findings are
+  scoped by the profile that triggered each checklist.
+
+  Dockerfile deferred. If a Dockerfile is the only K8s-adjacent artifact in the
+  diff and no other K8s signals fire, the K8s profile does not activate. A
+  future "container" profile can handle Dockerfiles independently.
+
+  Detection output is structured — not just a boolean. It's a list of {profile: 
+  "k8s", triggered_by: ["path: manifests/", "content: apps/v1 Deployment"], 
+  files: [...]} records. Downstream skills reuse this structure when they need
+  to scope their own behavior (e.g., test running helm lint only for the files
+  triggered by Helm signals).
+
+  Look right? Ready for Section 3 (file structure) when you confirm.
+
+❯ yes                                                                           
+
+● Section 3/8 — File structure
+
+  Per-profile layout (uniform across k8s, go, python, terraform, …):
+
+  klaude-plugin/profiles/{name}/
+    DETECTION.md       # Section 2's rule
+    overview.md        # What this profile covers, when it activates, dependency
+   lookup targets
+    review/
+      index.md         # Router: always-load entries, conditional entries,
+  one-line descriptions
+      security-checklist.md
+      architecture-checklist.md    # SOLID for code profiles; composition for
+  IaC profiles
+      quality-checklist.md
+      removal-plan.md
+      <profile-specific>.md        # e.g., helm-checklist.md,
+  kustomize-checklist.md
+    design/
+      index.md
+      <phase-specific content>
+    test/
+      index.md
+      <phase-specific content>
+    implement/
+      index.md
+      <phase-specific content>
+    document/
+      index.md
+      <phase-specific content>
+
+  For K8s (P1 + P2 combined), concretely:
+
+  - profiles/k8s/review/ (P1): security-checklist.md, architecture-checklist.md,
+   quality-checklist.md, reliability-checklist.md, helm-checklist.md,
+  kustomize-checklist.md, removal-plan.md — plus index.md routing them.
+  - profiles/k8s/design/ (P2): K8s-aware design prompts (cluster topology
+  questions, GitOps choice, secrets strategy, multi-tenancy, observability).
+  - profiles/k8s/test/ (P2): validator catalog (kubeconform, helm lint,
+  kustomize build as floor; kube-score, kube-linter, trivy config, conftest,
+  kyverno in menu; project-policy auto-detect hook).
+  - profiles/k8s/implement/ (P2): per-task K8s gotchas (API version pinning,
+  image tag immutability, probe vs readiness distinction).
+  - profiles/k8s/document/ (P2): rubric for what to capture (RBAC decisions,
+  rollback procedures, resource baselines).
+
+  For migrated programming-language profiles (P0):
+
+  Existing content moves with minimal shape change. Example: profiles/go/review/
+   gets security-checklist.md, solid-checklist.md (retained — SOLID is the
+  appropriate content for Go), code-quality-checklist.md (retained — "code"
+  still fits here), removal-plan.md, plus a new index.md listing them as
+  always-load. No rename forced on programming-language profiles; each profile
+  names its files to fit its content. Cross-profile consistency comes from the
+  categories (each profile has some security content, some architecture content,
+   etc.), not filename uniformity.
+
+  Rationale for per-profile naming freedom: Q6 discussion showed strict filename
+   parallelism stretches either SOLID (for K8s) or "code-quality" (for IaC).
+  Index-driven loading decouples skill prose from filenames, so naming can
+  follow content. The index.md is the contract; filenames are implementation
+  detail.
+
+  Look right? Ready for Section 4 (review-code P0+P1 changes)?
+❯ yes                                                                           
+
+● Section 4/8 — review-code P0 + P1 changes
+
+  P0 — prep refactor (behavior-preserving):
+
+  - Migrate content: git mv 
+  klaude-plugin/skills/review-code/reference/{go,python,java,js_ts,kotlin}/ 
+  klaude-plugin/profiles/{name}/review/. For each migrated profile, author a new
+   profiles/{name}/review/index.md listing existing files as always-load entries
+   with one-line descriptions. No file content changes; same checklists, new
+  home.
+  - Author detection files: profiles/{name}/DETECTION.md per
+  programming-language profile. Detection content = existing
+  extension-to-language table, split one-per-file (e.g.,
+  profiles/go/DETECTION.md says "Files with .go extension"). Equivalent
+  behavior, relocated source-of-truth.
+  - Restructure review-code/review-process.md workflow: steps 3–6 (SOLID /
+  Removal / Security / Quality, each hardcoded to a filename) collapse into:
+  Step 3 — Load profile indexes. For each detected profile from preflight, read
+  profiles/{name}/review/index.md. Resolve always-load entries + any conditional
+   entries whose triggers match the diff. Step 4 — Apply loaded checklists. Run
+  each resolved checklist against the diff, emit findings grouped by (profile,
+  checklist). Everything downstream (self-check, indexing, output formatting) is
+   unchanged.
+  - Restructure review-code/review-isolated.md symmetrically — the sub-agent
+  prompt receives the list of loaded checklists (not a hardcoded category
+  sequence).
+  - Update code-reviewer agent prompt (klaude-plugin/agents/code-reviewer.md) to
+   consume the loaded-checklists list rather than iterating named categories.
+  - Update test/test-plugin-structure.sh with a new EXPECTED_PROFILES assertion:
+   each expected profile dir exists, each contains DETECTION.md, overview.md,
+  review/index.md, and the index.md's referenced checklist files actually exist.
+
+  P1 — add K8s profile:
+
+  - Create profiles/k8s/ with DETECTION.md (Section 2's rule), overview.md,
+  review/index.md + 7 checklist files.
+  - No further review-code skill prose changes — index-driven loading absorbs
+  the new profile transparently.
+  - EXPECTED_PROFILES in the test suite gets one more entry.
+  - Issue #64 can be closed.
+
+  What stays untouched: review-code's SOLID/security/quality taxonomy as
+  categories (they still appear in output grouping, just not as hardcoded
+  workflow steps); the finding format; severity levels; pal-codereview
+  integration; standard-vs-isolated mode distinction.
+
+  Look right? Ready for Section 5 (P2 — design/test/implement/document changes)?
+
+❯ yes                                                                           
+
+● Section 5/8 — P2: design / test / implement / document extensions
+
+  Foundational addition — shared detection protocol:
+
+  Create klaude-plugin/skills/_shared/profile-detection.md — one authoritative
+  procedure for "given a diff or workspace, produce the list of active profiles
+  by iterating profiles/*/DETECTION.md and applying each rule". Consumed by
+  review-code, test, implement, design, document, review-spec via the existing
+  symlink pattern. Extracts duplicated detection logic that would otherwise
+  replicate across skills. Appropriate for _shared/ because it's mechanism, not
+  content (distinct from profile content which lives in profiles/).
+
+  Per-skill conditional blocks (all follow the same pattern):
+
+  - design: In idea-process.md Step 3 (refine the idea) and Step 5 (document
+  design), add: "Run profile detection on the feature's anticipated surface 
+  area. For each active profile, read profiles/{name}/design/index.md and let it
+   inform the question bank and design sections." K8s's design/index.md points
+  to prompts for cluster topology, GitOps tool choice, secrets strategy,
+  multi-tenancy, observability, rollback posture.
+  - test: In SKILL.md's guidelines, add: "After language-specific test patterns,
+   for each active profile run profiles/{name}/test/index.md." K8s's
+  test/index.md lists the mandated floor (kubeconform, helm lint if Helm,
+  kustomize build if Kustomize), the menu (kube-score, kube-linter, trivy
+  config, etc.), and the policy-hook auto-detect (Q7:C).
+  - implement: In implement/SKILL.md Step 2 (execute sub-task), add: "When the 
+  sub-task touches a file matching an active profile's detection rule, load 
+  profiles/{name}/implement/index.md for per-task gotchas before writing." K8s's
+   implement/index.md covers API-version pinning (per ADR 0001's
+  dependency-handling widening — Q8:C), probe-correctness pitfalls, image-tag
+  immutability, resource-limits-before-shipping.
+  - document: In SKILL.md's guidelines, add: "For each active profile, consult 
+  profiles/{name}/document/index.md for the doc rubric." K8s's covers: RBAC
+  decision rationale, rollback runbook, resource-baseline documentation,
+  cluster-compat matrix if spanning versions.
+
+  %LANGUAGE% placeholder: stays. Resolves to the detected programming language
+  when present; prose adds the "plus, consult profile-specific guidance" clause
+  additively, never replacing the language-specific prose. For pure-IaC repos
+  (no programming language detected), %LANGUAGE% resolves to whatever the
+  dominant profile surfaces as its natural tongue (K8s → "Kubernetes", Terraform
+   → "Terraform"). Minor prose tweak; no skill refactor.
+
+  Look right? Ready for Section 6 (P3: review-spec + dependency-handling)?
+
+❯ yes                                                                           
+
+● Section 6/8 — P3: review-spec + dependency-handling
+
+  review-spec K8s-awareness (small but important):
+
+  The existing review-spec workflow compares design/implementation docs against
+  the implemented code, flagging deviations, missing implementations, doc
+  inconsistencies. For K8s, "implemented code" is declarative YAML, not
+  imperative logic — so the shape of deviation findings changes:
+
+  - Missing implementations look like "design says the service should have a
+  PodDisruptionBudget with minAvailable=1, but no PDB manifest exists".
+  - Spec deviations look like "design says image pull policy is IfNotPresent,
+  but the Deployment has Always".
+  - Doc inconsistencies look like "design says the app listens on 8080, but
+  Service targetPort is 8443".
+
+  The finding taxonomy (missing_impl, spec_dev, doc_incon, extra_impl) stays.
+  The only skill change: review-spec/SKILL.md and review-spec/review-process.md
+  pick up the shared profile-detection.md protocol and, when K8s is active,
+  include a clause pointing the reviewer at profiles/k8s/review-spec/index.md
+  (new directory slot — small content: "K8s spec-vs-impl requires comparing
+  declared desired state against the checked-in YAML, not just looking for code;
+   absence is a finding").
+
+  dependency-handling widening (Q8:C):
+
+  Single-sentence change to the trigger clause in dependency-handling/SKILL.md:
+
+  ▎ current: "TRIGGER when: adding or upgrading a dependency; calling a library,
+  ▎  SDK, framework, or external API; unsure how a third-party function 
+  ▎ behaves…"
+  ▎
+  ▎ revised: "TRIGGER when: adding or upgrading a dependency; calling a library,
+  ▎  SDK, framework, or external API; declaring an IaC/config artifact with 
+  ▎ external versioning (K8s API versions, third-party CRDs, Helm chart 
+  ▎ dependencies, container image tags, Terraform providers, Ansible 
+  ▎ collections, etc.); unsure how a third-party function behaves…"
+
+  The specific lookup targets per dependency category (K8s API → context7 k8s.io
+   docs or kubectl explain; CRDs → operator docs; Helm → chart repo README;
+  images → registry metadata) live in profiles/k8s/overview.md's "Looking up K8s
+   dependencies" section.
+
+  What stays untouched: dependency-handling's
+  capy-first/context7-second/web-last cascade; %LANGUAGE% placeholder; existing
+  programming-language lookup procedures; the skill's integration with design
+  and implement.
+
+  Look right? Ready for Section 7 (tests, CLAUDE.md, ADRs)?
+
+❯ Yes, but note that descriptions have 250 char cutoff (that's why you're       
+  seeing ... at the end, and not the full thing). So need something concrete    
+  within 250 chars, as that's the only thing agents see before they read the    
+  entire skill.                                                                 
+
+● Good catch — I'll correct Section 6's widening and flag the 250-char
+  discipline generally.
+
+  Section 6 correction — dependency-handling description widening
+
+  Skill descriptions are what agents see before deciding to open the full
+  SKILL.md — they must fit in 250 chars. My earlier draft "declaring an
+  IaC/config artifact with external versioning (K8s API versions, third-party
+  CRDs, Helm chart dependencies, container image tags, Terraform providers,
+  Ansible collections, etc.)" would push the total to ~500 chars and truncate
+  mid-sentence, hiding the "Use BEFORE writing the call" instruction. That's
+  worse than the current state.
+
+  Actually, the current description is already ~313 chars and likely truncating 
+  today. We should tighten it while we're in there.
+
+  Revised description draft (223 chars):
+
+  TRIGGER when: adding or upgrading any dependency — library, SDK, framework,
+  API, IaC API version (K8s/Terraform/Helm), CRD, or container image. Use BEFORE
+   writing the call. Forces context7/capy lookup instead of guessing.
+
+  That fits under 250, covers both programming-language and IaC dep types in one
+   compact list, preserves the "Use BEFORE writing the call" instruction, and
+  drops the second-sentence redundancy ("Forces a context7/capy lookup instead
+  of guessing" was already implicit in the first sentence's intent). The full
+  lookup rules, context7-first cascade, and per-domain procedures live in
+  SKILL.md body — unchanged in spirit, just not duplicated in the descriptor.
+
+  Generalized constraint to capture in Section 7
+
+  The 250-char limit is a Claude Code platform constraint, not a style
+  preference. It's not documented in CLAUDE.md today and is easy to violate by
+  accident (the current dependency-handling description already does). Section 7
+   will include a CLAUDE.md addition under "Skill & Command Naming Conventions"
+  (new subsection: Skill description budget): 250-char total for the description
+   frontmatter field; lead with trigger keywords since truncation happens at the
+   end; detailed rules and cascades belong in the body.
+
+  Audit of other skills we're touching in this feature:
+  - design, implement, test, document, review-code, review-spec — no description
+   changes (our additions are behavior, not new triggers).
+  - dependency-handling — description rewritten as above.
+
+  No other skill touched by K8s work needs its description changed.
+
+  Ready for Section 7 (tests, CLAUDE.md, ADRs) with the 250-char convention
+  addition folded in?
+
+✻ Baked for 1m 1s
+
+❯ yes                                                                           
+
+● Section 7/8 — Tests, CLAUDE.md, ADRs
+
+  test/test-plugin-structure.sh additions:
+
+  - New EXPECTED_PROFILES array — for P0 it contains the 5 migrated language
+  profiles (go python java js_ts kotlin); P1 appends k8s. Subsequent
+  phases/features append new profiles without modifying the existing entries.
+  - Per-profile assertions: profiles/<name>/DETECTION.md,
+  profiles/<name>/overview.md, profiles/<name>/review/index.md exist. Every
+  checklist filename referenced by review/index.md actually exists on disk
+  (catches stale indexes). P2 adds the same check for design/, test/,
+  implement/, document/ index.md files when the profile declares those phases
+  (not every profile must populate every phase — e.g., programming languages may
+   never need document/).
+
+  CLAUDE.md additions (P0):
+
+  - New top-level section: "Profile Conventions." Documents: profiles/<name>/
+  layout; DETECTION.md is authoritative for triggering; overview.md is
+  human-readable summary + dependency-lookup targets; per-phase subdirs contain
+  index.md + content files; index.md distinguishes always-load from conditional
+  entries with one-line descriptions. Naming: lowercase, underscores allowed
+  only where filename-safe (preserving js_ts). Adding a new profile = copy
+  existing profile as template, customize DETECTION.md and content, append to
+  EXPECTED_PROFILES.
+  - New subsection under "Skill & Command Naming Conventions": "Skill 
+  description budget." 250-char limit for the description frontmatter field
+  (platform constraint). Lead with trigger keywords, not prose, because
+  truncation happens at the tail. Detailed rules, cascades, and examples belong
+  in the body.
+  - New subsection: "ADR location." Architecture decisions spanning more than
+  one feature live at docs/adr/NNNN-slug.md using Michael Nygard's template
+  (Context / Decision / Alternatives / Consequences / Migration Path). Existing
+  per-feature design docs keep living in docs/wip/<feature>/; ADRs are
+  cross-cutting.
+
+  ADRs authored in the design phase (this session):
+
+  - docs/adr/0001-profile-detection-model.md — "Profile/language detection
+  remains a single additive axis." Records B (Q3) with A and C as rejected
+  alternatives; notes the LSP precedent for "language" as umbrella term;
+  documents forward-compat migration path to C if behavioral divergence ever
+  becomes necessary.
+  - docs/adr/0002-profile-content-organization.md — "Profile-first layout with
+  index-driven content loading." Records H + D (Q5 + Q6); alternatives rejected:
+   flat _shared/ (mixes mechanism with content, symlink proliferation);
+  per-skill duplication; strict filename parallelism (Q6:A). Notes the rename
+  decoupling that index-driven loading enabled.
+
+  README.md: one-paragraph mention of profiles/ as a peer to skills/, commands/,
+   agents/, hooks/ in the plugin layout section. Minor.
+
+  Look right? Ready for Section 8 (phase breakdown + final verification
+  criteria)?
+
+✻ Worked for 35s
+
+❯ looks good, but I don't think you mentioned symlinking profiles in any of the 
+   sections, or did I miss it?                                                  
+
+● You caught an omission. I waved "via the existing symlink pattern" in Section
+  5 without spelling it out, and there are actually two different mechanisms at
+  play that need distinct treatment. Let me correct both.
+
+  Correction — symlinking in this feature
+
+  Two kinds of cross-skill reference exist in the plugin, each with different 
+  rules:
+
+  1. Shared mechanism files (klaude-plugin/skills/_shared/*.md). Documented
+  CLAUDE.md convention: authoritative file in _shared/, per-consuming-skill
+  symlink at <skill>/shared-<name>.md → ../_shared/<name>.md. Both ends stay
+  inside skills/, so the target path ../_shared/<name>.md resolves even when the
+   skill is bundled/copied. This is what the existing capy-knowledge-protocol,
+  review-scope-protocol, pal-codereview-invocation already use.
+
+  New shared mechanism file for this feature:
+  klaude-plugin/skills/_shared/profile-detection.md. Consumers: review-code,
+  review-spec, design, implement, test, document. That's 6 symlinks, one per
+  consuming skill:
+
+  skills/review-code/shared-profile-detection.md  →
+  ../_shared/profile-detection.md
+  skills/review-spec/shared-profile-detection.md  →
+  ../_shared/profile-detection.md
+  skills/design/shared-profile-detection.md       →
+  ../_shared/profile-detection.md
+  skills/implement/shared-profile-detection.md    →
+  ../_shared/profile-detection.md
+  skills/test/shared-profile-detection.md         →
+  ../_shared/profile-detection.md
+  skills/document/shared-profile-detection.md     →
+  ../_shared/profile-detection.md
+
+  Per CLAUDE.md's rule "only symlink into skills that actually reference the
+  file — don't blanket-symlink", we create these exactly for skills consuming
+  profile detection.
+
+  2. Profile content (klaude-plugin/profiles/<name>/...). Deliberately NOT
+  symlinked into consuming skills. Reason: profiles/ is a sibling of skills/,
+  and ADR 0001 (kk:arch-decisions) records that relative symlinks pointing
+  outside the package directory break under OpenCode's Bun-cache install. A
+  symlink skills/review-code/profiles → ../../profiles would hit exactly that
+  failure mode.
+
+  Instead, skills reference profile content by plugin-root-relative path:
+  ${CLAUDE_PLUGIN_ROOT}/profiles/<name>/.... The Claude Code harness injects
+  CLAUDE_PLUGIN_ROOT; the runtime agent resolves the path. No symlink needed, no
+   Bun-cache fragility inherited. Agents (in klaude-plugin/agents/, which per
+  CLAUDE.md already can't use the per-skill symlink pattern) reference profiles
+  the same way.
+
+  Sections that need the fix
+
+  - Section 5 (P2 additions): explicitly enumerate the 6 symlinks for
+  shared-profile-detection.md.
+  - Section 7 (CLAUDE.md additions): the new "Profile Conventions" section
+  documents that profiles are referenced by ${CLAUDE_PLUGIN_ROOT}/profiles/...,
+  not symlinked. The existing "Shared instructions" subsection stays unchanged
+  and keeps owning the _shared/ symlink pattern.
+  - P0 tasks (appearing in Section 8): include a sub-task for creating the 6
+  symlinks. ADR 0002's "Rejected alternatives" section gains a note about this
+  dual-pattern — why _shared/ uses symlinks but profiles/ doesn't, so future
+  contributors don't second-guess the asymmetry.
+  - test/test-plugin-structure.sh: assert shared-profile-detection.md exists as
+  a symlink in each of the 6 consuming skill directories, resolving to
+  _shared/profile-detection.md.
+
+  OK with both corrections? Ready for Section 8 (phase breakdown), or anything
+  else to surface first?
+
+✻ Sautéed for 57s
+
+❯ yes                                                                           
+
+● Section 8/8 — Phase breakdown + verification criteria
+
+  P0 — Profile-first refactor (no behavior change). ~6 tasks.
+  1. Introduce profiles/ top-level; migrate 5 programming-language profiles
+  (go/python/java/js_ts/kotlin) — each gets DETECTION.md, overview.md,
+  review/index.md + the existing 4 checklists relocated.
+  2. Author _shared/profile-detection.md + 6 consumer symlinks (review-code,
+  review-spec, design, implement, test, document).
+  3. Restructure review-code workflow for index-driven loading: SKILL.md,
+  review-process.md, review-isolated.md, code-reviewer agent prompt.
+  4. Update test/test-plugin-structure.sh: add EXPECTED_PROFILES, per-profile
+  assertions, symlink assertions.
+  5. Update CLAUDE.md (Profile Conventions, Skill description budget, ADR
+  location) + README.md (one-paragraph profiles/ mention).
+  6. P0 verification: structure test passes; dry-run review-code on a Go-only
+  diff produces equivalent findings to pre-migration; no broken markdown links;
+  review-code + review-spec on P0's own changes; test + document the phase.
+
+  P1 — K8s profile for review-code. ~4 tasks. Closes #64.
+  1. Author profiles/k8s/DETECTION.md + overview.md.
+  2. Author profiles/k8s/review/ — 7 checklists (security, architecture,
+  quality, reliability, helm, kustomize, removal-plan) + index.md routing them
+  (always-load: security/architecture/quality/removal; conditional:
+  reliability/helm/kustomize with triggers).
+  3. Append k8s to EXPECTED_PROFILES; per-file existence assertions.
+  4. P1 verification: structure test passes; /kk:review-code on a synthetic K8s
+  diff detects the k8s profile, loads expected checklists per triggers, emits
+  well-formed findings; non-K8s diff path still works (regression check);
+  review-code + review-spec + test + document on P1's changes.
+
+  P2 — Extend design/implement/test/document. ~5 tasks.
+  One task per extended skill (add profile-aware clause + author the
+  corresponding profiles/k8s/<phase>/index.md + content files). Per-skill smoke
+  test against a K8s scenario. Plus P2 verification covering all four.
+
+  P3 — review-spec + dependency-handling. ~3 tasks.
+  1. Extend review-spec for K8s spec-vs-impl semantics (declarative YAML as
+  "implementation") + profiles/k8s/review-spec/ if needed.
+  2. Rewrite dependency-handling/SKILL.md description (≤250 chars, IaC-widened)
+  + body additions; extend relevant prose in overview.md files for profiles with
+   external versioning.
+  3. P3 verification: description-length assertion; IaC trigger scenarios
+  exercise the skill; integration smoke test of the full flow on a synthetic K8s
+   feature (design → implement → review-* → test → document).
+
+  Feature close — 1 task. Move docs/wip/kubernetes-support/ →
+  docs/done/kubernetes-support/; update any status metadata. Branch-level merge
+  remains a human action (CLAUDE.md: no commits/pushes unsolicited).
+
+  Phase independence: each phase's verification task is self-contained; each
+  phase's output is reviewable and mergeable standalone. P1 alone closes #64; P2
+   and P3 are additive quality-of-life.
+
+  ---
+  End of design description. Look right overall? If yes, I move to Step 5
+  (document the design): author
+  docs/wip/kubernetes-support/{design.md,implementation.md},
+  docs/adr/000{1,2}-*.md, and Step 6: docs/wip/kubernetes-support/tasks.md
+  (phase-grouped per Q9:B). Flag anything to adjust before I start writing.
+
+✻ Churned for 1m 7s
+
+❯ Proceed. But also document one more adr for 'profiles are referenced by       
+  ${CLAUDE_PLUGIN_ROOT}/profiles/...' . This adr may actually also serve as a   
+  prototype for removing symlinks altogether in the future since we haven't     
+  thought of this option when we introduced symlinks.                           
+
+● Proceeding. ADR 0003 accepted as framed — it doubles as a prototype ADR for
+  future symlink removal. Setting up the write-out now.
+
+  Ran 1 bash command (ctrl+o to expand)
+● Write(docs/adr/0001-profile-detection-model.md)
+  ⎿  Wrote 76 lines to docs/adr/0001-profile-detection-model.md
+       1 # ADR 0001 — Profile/language detection remains a single additiv
+       2 
+       4 - **Date:** 2026-04-17
+         wip/kubernetes-support/design.md)
+          [ADR 0003](0003-plugin-root-referenced-content.md)
+       7 
+       9 
+         ary language" from file extensions and loaded per-language refer
+         eference sets: `.go` → `reference/go/`, `.py` → `reference/pytho
+         NGUAGE%` placeholder in t
+     … +137 lines (ctrl+o to expand)
+
+● Write(docs/adr/0002-profile-content-organization.md)
+  ⎿  Wrote 107 lines to docs/adr/0002-profile-content-organization.md
+       1 # ADR 0002 — Profile-first layout with index-driven content load
+       2 
+       4 - **Date:** 2026-04-17
+         wip/kubernetes-support/design.md)
+          0003](0003-plugin-root-referenced-content.md)
+       7 
+       9 
+         produces a set of active profiles for the current task. Skills n
+         nsume: review-code loads checklists; `design` loads idea-refinem
+         per-task gotchas; `document` load
+     … +200 lines (ctrl+o to expand)
+
+● Write(docs/adr/0003-plugin-root-referenced-content.md)
+  ⎿  Wrote 125 lines to docs/adr/0003-plugin-root-referenced-content.md
+       1 # ADR 0003 — Profile content referenced via `${CLAUDE_PLUGIN_ROO
+       2 
+       4 - **Date:** 2026-04-17
+       5 - **Originated in:** [docs/wip/kubernetes-support/design.md](../
+       6 - **Related:** [ADR 0001](0001-profile-detection-model.md), [ADR
+       7 
+       9 
+      10 [ADR 0002](0002-profile-content-organization.md) introduces `kla
+         to `klaude-plugin/skills/`. Profile content is consumed by multi
+          `test`, `document`) and by their sub-agents.
+     … +232 lines (ctrl+o to expand)
+
+● Write(docs/wip/kubernetes-support/design.md)
+  ⎿  Wrote 371 lines to docs/wip/kubernetes-support/design.md
+      1 # Kubernetes support — design
+      3 - **Feature:** kubernetes-support
+      4 - **Status:** in-design
+      5 - **Branch:** `k8s_support`
+         for k8s](https://github.com/serpro69/claude-toolbox/issues/64) (
+        narrow) — expanded to the whole plugin flow per the originating d
+      7 - **Implementation plan:** [implementation.md](implementation.md)
+      8 - **Task list:** [tasks.md](tasks.md)
+      9 - **ADRs:** [0001](../../adr/0001-profile-detection-model.md), [0
+        ./adr/0003-plugin-root-referenced-content.md)
+     … +725 lines (ctrl+o to expand)
+
+● Write(docs/wip/kubernetes-support/implementation.md)
+  ⎿  Wrote 321 lines to docs/wip/kubernetes-support/implementation.md
+      1 # Kubernetes support — implementation plan
+      2 
+      3 - **Feature:** kubernetes-support
+      4 - **Design:** [design.md](design.md)
+      5 - **Tasks:** [tasks.md](tasks.md)
+      7 - **Branch:** `k8s_support`
+      8 
+      9 This document is a step-by-step guide for implementing the design
+        . Each step is paired with an explicit verification. Tasks in [ta
+        sks.md](tasks.md) reference the corresponding steps here.
+     … +618 lines (ctrl+o to expand)
+● Write(docs/wip/kubernetes-support/tasks.md)
+  ⎿  Wrote 330 lines to docs/wip/kubernetes-support/tasks.md
+      1 # Tasks — kubernetes-support
+      3 - **Feature status:** pending
+      4 - **Design:** [design.md](design.md)
+      6 - **Branch:** `k8s_support`
+      7 - **Closes:** [issue #64](https://github.com/serpro69/claude-tool
+      8 - **ADRs:** [0001 — Profile detection model](../../adr/0001-profi
+        le-detection-model.md), [0002 — Profile content organization](../
+         referenced content](../../adr/0003-plugin-root-referenced-conten
+        t.md)
+        ay override per `implement` skill guidance.
+     … +589 lines (ctrl+o to expand)
+
+  Called capy 4 times (ctrl+o to expand)
+
+  Listed 1 directory (ctrl+o to expand)
+
+● Design documentation complete. 6 files authored:
+
+  - docs/adr/0001-profile-detection-model.md — single additive detection axis,
+  "language" retained per LSP precedent, forward-path to two-axis C documented.
+  - docs/adr/0002-profile-content-organization.md — profile-first layout +
+  index-driven content loading; rejected alternatives (flat _shared/, strict
+  parallelism, free-form, duplication); forward direction.
+  - docs/adr/0003-plugin-root-referenced-content.md —
+  ${CLAUDE_PLUGIN_ROOT}/profiles/... references; inside-vs-outside-tree symlink
+  asymmetry explained; doubles as prototype for future _shared/ symlink removal
+  with rollout criteria.
+  - docs/wip/kubernetes-support/design.md — 371 lines; full architecture,
+  detection mechanics, file structure, per-skill integration, conventions, phase
+   overview.
+  - docs/wip/kubernetes-support/implementation.md — 321 lines; step-by-step plan
+   with explicit verify clauses per step.
+  - docs/wip/kubernetes-support/tasks.md — 330 lines; 19 tasks grouped into P0
+  (7), P1 (3), P2 (5), P3 (3), feature close (1), with per-phase verification
+  tasks.
+
+  4 architecture insights indexed to kk:arch-decisions: LSP-umbrella rationale,
+  index-driven decoupling, inside/outside-tree symlink asymmetry,
+  ${CLAUDE_PLUGIN_ROOT} migration candidate.
+
+  Next step: run /kk:review-design kubernetes-support all (standard or isolated
+  mode) to get independent review before starting implementation. Want me to
+  kick that off?
+
+✻ Cooked for 15m 14s
