@@ -40,13 +40,12 @@ If any are missing, inform the user and stop.
 
 ### 1c) Determine review scope
 
-Read `tasks.md` to classify each task:
-- **Done**: task is completed and should be reviewed
-- **Pending/In-progress**: task is not yet complete and should be skipped
+Build the Task Scope artifact following [shared-review-scope-protocol.md](../_shared/review-scope-protocol.md). Read `tasks.md`, classify each task by its status field, and derive the review mode:
 
-Determine the review mode:
-- **Mid-implementation**: some tasks are pending — review only completed tasks
-- **Post-implementation**: all tasks are done — review everything
+- **Mid-implementation**: some tasks are `pending`/`in-progress` — review only completed tasks
+- **Post-implementation**: all tasks are `done` — review everything
+
+The resulting scope block is inlined into the sub-agent prompt in Step 2.
 
 ### 1d) Prepare sub-agent context
 

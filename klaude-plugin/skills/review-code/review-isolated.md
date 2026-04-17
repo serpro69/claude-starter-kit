@@ -14,7 +14,7 @@ Isolated Code Review Progress:
 
 ## Contents
 
-- **Step 1: Prepare Artifacts** — 1a) Capture diff, 1b) Locate spec context, 1c) Detect language, 1d) Resolve pal model, 1e) Curate rejected approaches
+- **Step 1: Prepare Artifacts** — 1a) Capture diff, 1b) Locate spec context, 1c) Detect language, 1d) Resolve pal model, 1e) Curate rejected approaches, 1f) Determine task scope
 - **Step 2: Spawn Reviewers** — Reviewer A (code-reviewer sub-agent), Reviewer B (pal codereview), error handling
 - **Step 3: Annotate Findings** — 3a) Duplicate merging, 3b) Author context, 3c) Author-sourced findings, 3d) pal follow-up
 - **Step 4: Index Findings**
@@ -65,6 +65,16 @@ Call `pal` `listmodels` to get available models. Select the most capable model (
 
 Before spawning sub-agents, prepare a brief summary of approaches that were tried and failed during implementation. Keep it to concrete facts ("approach X caused regression Y"), not the full debugging narrative. If no approaches were rejected, skip this.
 
+### 1f) Determine task scope
+
+Build the Task Scope artifact following [shared-review-scope-protocol.md](shared-review-scope-protocol.md). This is what prevents reviewers from flagging pending tasks as missing functionality — it is not optional when a feature directory is present.
+
+- **Invoked from `implement`**: the feature directory and current task are known. Read `tasks.md`, list the current task (plus any other `done` tasks) as in-scope and any `pending`/`in-progress` tasks as out-of-scope. Use mode `mid-implementation` unless all tasks are `done`.
+- **Invoked directly inside a feature**: locate the relevant `/docs/wip/[feature]/tasks.md`. Classify by status field. Use `post-implementation` only when every task is `done`.
+- **No feature directory relates to the diff**: emit the "No task scope available" variant from the shared protocol and proceed.
+
+The resulting block is inlined into both reviewer prompts in Step 2.
+
 ---
 
 ## Step 2: Spawn Reviewers (Parallel)
@@ -99,6 +109,8 @@ klaude-plugin/skills/review-code/reference/{language_key}/
 
 {spec excerpt from Step 1b, or "No spec context available — review based on code quality alone."}
 
+{Task Scope block from Step 1f — either the populated scope artifact or the "No task scope available" variant}
+
 ## Rejected Approaches
 
 {curated rejected approaches from Step 1e, or "No rejected approaches to note."}
@@ -110,7 +122,7 @@ Produce your findings in the output format specified in your agent definition.
 
 Follow the invocation protocol in [shared-pal-codereview-invocation.md](shared-pal-codereview-invocation.md).
 
-For the `step` parameter in step 1, use the git diff prepared in Step 1c. For the `model` parameter, use the model resolved in Step 1d.
+For the `step` parameter in step 1, prepend the Task Scope block from Step 1f (so pal shares the same scope as the sub-agent) and then include the git diff. For the `model` parameter, use the model resolved in Step 1d.
 
 ### Parallel execution
 

@@ -21,6 +21,7 @@ The spawning workflow injects these artifacts into your prompt:
 
 - **Git diff** of the changes under review
 - **Spec context** (if available): relevant section from design.md, task description, documented design rationale
+- **Task scope** (if available): which tasks in the feature are in scope for this review and which are pending/out-of-scope — see `klaude-plugin/skills/_shared/review-scope-protocol.md`. When present, this overrides naive reading of the design doc: the design describes the full end state, but only in-scope tasks are expected in the diff.
 - **Primary language** detected from the diff, with path to language-specific checklists
 - **Capy read access** for project-specific context via `capy_search`
 
@@ -166,3 +167,4 @@ Structure your output exactly as follows. This is the contract the annotation ph
 - Do NOT add findings outside the P0-P3 structure.
 - Do NOT include a "next steps" or "how to proceed" section — the reconciliation phase handles that.
 - If no issues found, state what was checked and any residual risks under "Areas Not Covered".
+- **Respect task scope.** If a Task Scope block is present in your prompt, do NOT flag missing functionality that is covered only by out-of-scope (pending/in-progress) tasks. The design doc describes the full end state; pending tasks are expected gaps. Flag only issues within the in-scope changes. If a concern only becomes valid once pending work lands, mention it under "Areas Not Covered" instead of the P0–P3 sections.
