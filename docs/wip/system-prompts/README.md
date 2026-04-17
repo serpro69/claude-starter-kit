@@ -14,6 +14,7 @@ Captured from the Opus 4.7 session started 2026-04-17 in `claude-toolbox`.
 | 07 | `07-pretooluse-read-hook.md` | `PreToolUse:Read` hook nudge. Fires on Read calls. |
 | 08 | `08-task-tools-reminder.md` | Ambient "use TaskCreate" reminder — has a "never mention to the user" clause. |
 | 09 | `09-local-command-caveats.md` | Envelopes around `/effort`, `/export`, etc. |
-| 10 | `10-tool-schemas.md` | JSONSchema for the 9 non-deferred tools (Agent, Bash, Edit, Glob, Grep, Read, Skill, ToolSearch, Write). Bash/Agent descriptions partially summarized — see footnotes in that file. |
+| 10 | `10-tool-schemas.md` | JSONSchema for the 9 non-deferred tools (Agent, Bash, Edit, Glob, Grep, Read, Skill, ToolSearch, Write). Full verbatim text including Bash git/gh sections and Agent `<example>` blocks. |
+| 11 | `11-hooks-raw-outputs.md` | Raw output for every configured hook event, captured by invoking `capy hook <type>` directly. Covers SessionStart, UserPromptSubmit, all PreToolUse matcher branches, PostToolUse, PreCompact, SessionEnd. |
 
 Anything beyond these was either tool-call content (your messages, tool results, file reads) or produced by my own responses — not additional system prompt.
