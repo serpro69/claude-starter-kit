@@ -15,7 +15,7 @@
 ## Task 1 — Migrate programming-language profiles to `profiles/`
 
 - **Phase:** P0
-- **Status:** in-progress
+- **Status:** done
 - **Depends on:** —
 - **Links:** [implementation.md §Step 0.1](implementation.md#step-01--create-the-profiles-top-level-and-migrate-programming-language-checklists), [design.md §Migrated programming-language profiles](design.md#migrated-programming-language-profiles)
 
@@ -36,21 +36,21 @@ Subtasks:
 ## Task 2 — Author the shared profile-detection procedure
 
 - **Phase:** P0
-- **Status:** pending
+- **Status:** in-progress
 - **Depends on:** Task 1
 - **Links:** [implementation.md §Step 0.2](implementation.md#step-02--author-the-shared-profile-detection-procedure), [design.md §Shared mechanisms](design.md#shared-mechanisms)
 
 Subtasks:
 
-- [ ] Create `klaude-plugin/skills/_shared/profile-detection.md`.
-- [ ] Document the purpose: single source of truth for detection; prevents interpretation drift across the six consuming skills.
-- [ ] **Document the per-consumer input model** per [design.md §Shared mechanisms](design.md#shared-mechanisms): `review-code` → diff; `review-spec` → diff or feature-directory file list; `test` → diff or feature files; `implement` → sub-task's target files + diff-so-far; `design` → user-declared signal or keyword inference from idea prose (interaction pattern spelled out); `document` → feature-directory file list.
-- [ ] Document the detection algorithm: iterate `klaude-plugin/profiles/*/DETECTION.md`; evaluate per-profile signals in cost order (path → filename → content); apply authority rule (filename or content activates; path alone does not); bounded content inspection ~16 KB per file; multi-doc YAML inspected per `---`-separated block.
-- [ ] Document the two-dimensional framing: signals ordered by evaluation cost (cheapest first) but authority differs (content/filename > path; path alone insufficient). Both dimensions named explicitly.
-- [ ] Document the `${CLAUDE_PLUGIN_ROOT}` unset-check protocol: verify the variable is set and non-empty before emitting results; if unset, fail loudly with an actionable error and return empty-set so consumers fall back to generic guidance.
-- [ ] **Authoring note — the shared file is inside the plugin tree.** When `profile-detection.md` prose references the variable BY NAME (documenting / explaining it), use the bare form `$CLAUDE_PLUGIN_ROOT` (no braces) — verified 2026-04-18 to survive harness substitution (see [ADR 0003 §Verification](../../adr/0003-plugin-root-referenced-content.md)). When the prose uses the variable as a PATH that must resolve at runtime, use the brace form `${CLAUDE_PLUGIN_ROOT}/...`. Both conventions coexist in the same file.
-- [ ] Document the output shape: list of records `{profile, triggered_by, files}` where `triggered_by` names the signal type that fired (e.g., `"filename: Chart.yaml"`, `"content: apiVersion+kind in block 2"`).
-- [ ] Verify: file exists; ~120–200 lines; readable by a contributor with no project context (pass it to a colleague or another Claude session for a sanity read).
+- [x] Create `klaude-plugin/skills/_shared/profile-detection.md`.
+- [x] Document the purpose: single source of truth for detection; prevents interpretation drift across the six consuming skills.
+- [x] **Document the per-consumer input model** per [design.md §Shared mechanisms](design.md#shared-mechanisms): `review-code` → diff; `review-spec` → diff or feature-directory file list; `test` → diff or feature files; `implement` → sub-task's target files + diff-so-far; `design` → user-declared signal or keyword inference from idea prose (interaction pattern spelled out); `document` → feature-directory file list.
+- [x] Document the detection algorithm: iterate `klaude-plugin/profiles/*/DETECTION.md`; evaluate per-profile signals in cost order (path → filename → content); apply authority rule (filename or content activates; path alone does not); bounded content inspection ~16 KB per file; multi-doc YAML inspected per `---`-separated block.
+- [x] Document the two-dimensional framing: signals ordered by evaluation cost (cheapest first) but authority differs (content/filename > path; path alone insufficient). Both dimensions named explicitly.
+- [x] Document the `${CLAUDE_PLUGIN_ROOT}` unset-check protocol: verify the variable is set and non-empty before emitting results; if unset, fail loudly with an actionable error and return empty-set so consumers fall back to generic guidance.
+- [x] **Authoring note — the shared file is inside the plugin tree.** When `profile-detection.md` prose references the variable BY NAME (documenting / explaining it), use the bare form `$CLAUDE_PLUGIN_ROOT` (no braces) — verified 2026-04-18 to survive harness substitution (see [ADR 0003 §Verification](../../adr/0003-plugin-root-referenced-content.md)). When the prose uses the variable as a PATH that must resolve at runtime, use the brace form `${CLAUDE_PLUGIN_ROOT}/...`. Both conventions coexist in the same file.
+- [x] Document the output shape: list of records `{profile, triggered_by, files}` where `triggered_by` names the signal type that fired (e.g., `"filename: Chart.yaml"`, `"content: apiVersion+kind in block 2"`).
+- [x] Verify: file exists; ~120–200 lines; readable by a contributor with no project context (pass it to a colleague or another Claude session for a sanity read).
 
 ## Task 3 — Create the six consumer symlinks for `shared-profile-detection.md`
 
