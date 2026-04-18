@@ -43,11 +43,13 @@ If any auto-trigger token matches, surface a single confirmation prompt:
 "This appears to be a Kubernetes feature. Activate the Kubernetes profile for
 this design session?" — let the user confirm yes/no.
 
-If no auto-trigger matches but the idea is **ambiguous** (names infrastructure,
-deployment, runtime, or platform concerns without naming a specific technology;
-or includes overloaded tokens like `cluster`, `namespace`, `pod` that collide
-with non-K8s meanings), ask explicitly: "Does this feature involve Kubernetes,
-Terraform, or other IaC artifacts? If yes, which?"
+If no auto-trigger matches but the idea is **ambiguous** — names infrastructure,
+deployment, runtime, or platform concerns without naming a specific technology
+(e.g., _"add a caching layer for the service"_, _"build a CI pipeline"_,
+_"deploy to production"_); or includes overloaded tokens like `cluster`,
+`namespace`, `pod` that collide with non-K8s meanings — ask explicitly:
+"Does this feature involve Kubernetes, Terraform, or other IaC artifacts?
+If yes, which?"
 
 The narrow auto-trigger set avoids noisy false positives from tokens that
 overload across domains. Confirmation is required — the design skill never
@@ -60,13 +62,16 @@ the same record shape produced by file-based detection (see §Output shape).
 
 1. **Iterate profiles.** For each `${CLAUDE_PLUGIN_ROOT}/profiles/*/DETECTION.md`:
    load the declared `## Path signals`, `## Filename signals`, and `## Content
-   signals`.
+signals`.
 2. **Evaluate in cost order.** For each input file, check signals in this
    order: path → filename → content. Cheapest first.
 3. **Apply the authority rule.** A file activates the profile only if a
    **filename signal** OR **content signal** matches. A path-only match does
    NOT activate. Paths are a pre-filter that promotes files to "candidates";
-   authoritative activation requires filename or content confirmation.
+   authoritative activation requires filename or content confirmation. A file
+   that matches NO path signal is still evaluated against filename and content
+   signals — path pre-filtering is a cost hint, not a gate. (Otherwise a
+   `Chart.yaml` at a non-standard path would be missed.)
 4. **Bound content inspection.** Read at most ~16 KB per file when evaluating
    content signals. Multi-document YAML is inspected per `---`-separated block
    — a file may have five blocks, and only the third need match for the file
@@ -84,6 +89,9 @@ in your mental model:
   content inspection opens the file.
 - **Authority** (most authoritative first): filename ≈ content > path. A
   filename or content match activates the profile; a path-only match does not.
+  Filename and content are equally authoritative, but filename resolves first
+  at runtime — a filename match short-circuits content inspection for that
+  file.
 
 Evaluating cheapest-first optimizes work. Applying authority correctly prevents
 false positives from incidental path matches — a stray `manifests/` directory
@@ -138,7 +146,10 @@ A list of records, one per matched profile:
 Field semantics:
 
 - `profile` — the directory name under `profiles/` (e.g., `go`, `python`, `k8s`).
-  Used downstream to resolve `profiles/<profile>/<phase>/index.md`.
+  Used downstream to resolve `profiles/<profile>/<phase>/index.md`, where
+  `<phase>` is the profile phase subdirectory the calling skill consumes —
+  `review/` for `review-code`, else the skill name (`design/`, `implement/`,
+  `test/`, `document/`, `review-spec/`).
 - `triggered_by` — which signal type fired and the specific value that matched.
   For debugging and for explaining detection to the user; never used as the key
   for profile lookup.
@@ -152,7 +163,7 @@ generic guidance, identical to today's "no language detected" path.
 ### Authoring convention (for editors of this file)
 
 This file lives at `klaude-plugin/skills/_shared/profile-detection.md` — INSIDE
-the plugin tree — and is therefore subject to `${CLAUDE_PLUGIN_ROOT}`
+the plugin tree — and is therefore subject to `&#36;{CLAUDE_PLUGIN_ROOT}`
 substitution when an agent reads it (verified 2026-04-18; see
 [ADR 0003 §Verification](../../../docs/adr/0003-plugin-root-referenced-content.md)).
 
@@ -163,7 +174,7 @@ The rule is simple but easy to trip over:
   bare form. Alternative: the HTML entity `&#36;{CLAUDE_PLUGIN_ROOT}` when the
   brace shape must appear in rendered output.
 - When prose **uses the variable as a path** that must resolve at runtime
-  (e.g., `${CLAUDE_PLUGIN_ROOT}/profiles/*/DETECTION.md`), use the brace form —
+  (e.g., `&#36;{CLAUDE_PLUGIN_ROOT}/profiles/*/DETECTION.md`), use the brace form —
   that IS the intended substitution.
 
 Both conventions coexist in the same file. The path references in §Algorithm

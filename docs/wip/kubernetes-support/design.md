@@ -449,6 +449,32 @@ These are small decisions intentionally left for the implementer to resolve duri
 - **Exact trigger-condition wording** inside `profiles/k8s/review/index.md` for conditional entries (e.g., how to name "Helm context detected"). Prose form is chosen by the author; structured triggers are a future refinement (see [ADR 0002](../../adr/0002-profile-content-organization.md), "Forward direction").
 - **Whether to add an opportunistic description-length assertion** to `test/test-plugin-structure.sh` for `dependency-handling`'s description or leave the 250-character budget as informal convention. Either is acceptable for P3 close.
 
+## Amendments (post-review deferrals)
+
+These items were flagged by reviews against in-feature commits but are intentionally deferred — they require changes beyond the current feature's scope and can be picked up once the current design is fully implemented.
+
+**Follow-up entry point:** [tasks.md Task 20 — Design amendments follow-up](tasks.md#task-20--design-amendments-follow-up-post-feature-handoff). That task is a handoff pointer; a future contributor starts there when an amendment's "When to apply" conditions are met.
+
+### A1 — Generify the `design` auto-trigger set across profiles
+
+**Flagged by:** isolated review of P0 Task 2 (commit `a22a63c`, 2026-04-18) — both `code-reviewer` sub-agent and `pal codereview` (gemini-3-pro-preview) independently identified this as a drift surface.
+
+**Current state.** `klaude-plugin/skills/_shared/profile-detection.md` §The `design` interaction pattern hard-codes the Kubernetes auto-trigger token set (`Kubernetes`, `K8s`, `Helm chart`, `kubectl`, `kustomize`, `manifest.yaml`, `Deployment resource`, `StatefulSet`, `DaemonSet`, `CronJob`) and the confirmation prompt (`"This appears to be a Kubernetes feature. Activate the Kubernetes profile for this design session?"`). Task 11 prescribes the same literal token list for `klaude-plugin/skills/design/idea-process.md`. Two files, one literal list, K8s-specific prompt.
+
+**Architectural concern.** The shared procedure exists to prevent drift across six consumers. Placing profile-specific content (token list + hard-coded display name in the prompt) inside a cross-profile shared file re-creates the exact drift surface the file was designed to eliminate. Adding a second IaC profile (Terraform, Ansible, Dockerfile) requires editing both the shared file and `design/idea-process.md`.
+
+**Proposed refactor.**
+1. Extend `profiles/<name>/DETECTION.md` (or a sibling file — the slot is an authoring detail) with an optional `## Design signals` section: the profile declares its own high-precision auto-trigger tokens plus a `display_name` metadata value.
+2. Rewrite the shared procedure's §The `design` interaction pattern to iterate each profile's `## Design signals` section, build the union of triggers, and parameterize the confirmation prompt: `"This appears to be a {profile.display_name} feature. Activate the {profile.name} profile for this design session?"`.
+3. Rewrite `skills/design/idea-process.md` Step 3 to consume the same iteration — no K8s literals in skill prose.
+4. Update this `design.md` and `implementation.md` Step 0.2 to reflect the generic framing; the K8s-specific tokens move to `profiles/k8s/DETECTION.md` under the new section.
+
+**Why it's deferred.** The current spec (this design.md §Shared mechanisms and implementation.md §Step 0.2) prescribes the literal K8s tokens live in the shared file. Flipping to a profile-driven model is a spec deviation, not a task-level fix. Doing it mid-feature would ripple through Task 2, Task 11, and multiple spec sections.
+
+**When to apply.** After all four phases (P0–P3) have landed and the plugin is shipping with the K8s profile. Earlier is acceptable if a second IaC profile (Terraform, Ansible, Dockerfile) gets proposed — the refactor is cheaper before the duplication pattern hardens across two or more profiles. Track as a follow-up issue referencing this amendment section.
+
+**Out of scope for kubernetes-support.** Yes.
+
 ## References
 
 - [ADR 0001 — Profile/language detection remains a single additive axis](../../adr/0001-profile-detection-model.md)
