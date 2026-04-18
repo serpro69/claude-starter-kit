@@ -15,23 +15,23 @@
 ## Task 1 — Migrate programming-language profiles to `profiles/`
 
 - **Phase:** P0
-- **Status:** pending
+- **Status:** in-progress
 - **Depends on:** —
 - **Links:** [implementation.md §Step 0.1](implementation.md#step-01--create-the-profiles-top-level-and-migrate-programming-language-checklists), [design.md §Migrated programming-language profiles](design.md#migrated-programming-language-profiles)
 
 Subtasks:
 
-- [ ] Create the top-level directory `klaude-plugin/profiles/`.
-- [ ] For each language in (`go`, `python`, `java`, `js_ts`, `kotlin`): create `klaude-plugin/profiles/<lang>/review/` and `git mv` the four files from `klaude-plugin/skills/review-code/reference/<lang>/` into it. Preserve git history.
-- [ ] Author `klaude-plugin/profiles/<lang>/DETECTION.md` per migrated profile using the mandatory three-section schema: `## Path signals` (empty — language detection is extension-based), `## Filename signals` (empty), `## Content signals` (the file-extension rule for that language). All three headings must be present even when empty.
-- [ ] Author `klaude-plugin/profiles/<lang>/overview.md` per migrated profile — one-page summary: what the profile covers, when it activates, "Looking up dependencies" cascade targets.
-- [ ] Author `klaude-plugin/profiles/<lang>/review/index.md` per migrated profile — lists the four migrated files under "Always load" with one-line descriptions; no conditional entries.
-- [ ] Remove each emptied `klaude-plugin/skills/review-code/reference/<lang>/` directory.
-- [ ] Remove the now-empty `klaude-plugin/skills/review-code/reference/` directory.
-- [ ] **Audit `template-sync.sh` for downstream migration impact.** Check whether `run_plugin_migration`'s `dirs_to_remove` (or equivalent) needs an entry for `klaude-plugin/skills/review-code/reference/` to clean up downstream projects migrating from older template versions. Document the decision (add entry OR note "no action needed" in the PR description or as a comment in `template-sync.sh`). CLAUDE.md's "don't touch historical entries" directive protects pre-v0.5.0 paths but does not forbid adding new entries for new migrations.
-- [ ] Verify: `ls klaude-plugin/profiles/` shows the five languages; `ls klaude-plugin/skills/review-code/reference/` returns ENOENT; `git log --follow` on a migrated file shows continuous history.
-- [ ] Verify: for each of (`go`, `python`, `java`, `js_ts`, `kotlin`): `test -f klaude-plugin/profiles/<lang>/review/index.md` succeeds (explicitly named so the task's verify step catches missing index files before Task 5's structure test does).
-- [ ] Verify: for each migrated profile, `grep -c '^## Path signals\|^## Filename signals\|^## Content signals' klaude-plugin/profiles/<lang>/DETECTION.md` returns 3 (all three required headings present).
+- [x] Create the top-level directory `klaude-plugin/profiles/`.
+- [x] For each language in (`go`, `python`, `java`, `js_ts`, `kotlin`): create `klaude-plugin/profiles/<lang>/review/` and `git mv` the four files from `klaude-plugin/skills/review-code/reference/<lang>/` into it. Preserve git history.
+- [x] Author `klaude-plugin/profiles/<lang>/DETECTION.md` per migrated profile using the mandatory three-section schema: `## Path signals` (empty — language detection is extension-based), `## Filename signals` (empty), `## Content signals` (the file-extension rule for that language). All three headings must be present even when empty.
+- [x] Author `klaude-plugin/profiles/<lang>/overview.md` per migrated profile — one-page summary: what the profile covers, when it activates, "Looking up dependencies" cascade targets.
+- [x] Author `klaude-plugin/profiles/<lang>/review/index.md` per migrated profile — lists the four migrated files under "Always load" with one-line descriptions; no conditional entries.
+- [x] Remove each emptied `klaude-plugin/skills/review-code/reference/<lang>/` directory.
+- [x] Remove the now-empty `klaude-plugin/skills/review-code/reference/` directory.
+- [x] **Audit `template-sync.sh` for downstream migration impact.** Decision: **no action needed.** `run_plugin_migration`'s `dirs_to_remove` targets `.claude/skills/*` paths owned by pre-v0.5.0 downstream projects (paths copied out by template-sync before the Claude Code plugin marketplace took over). The removed path `klaude-plugin/skills/review-code/reference/` lives inside the plugin tree itself and is distributed via the marketplace; downstream consumers receive the migration automatically on the next plugin update without any template-sync intervention. Documented in the PR description.
+- [x] Verify: `ls klaude-plugin/profiles/` shows the five languages; `ls klaude-plugin/skills/review-code/reference/` returns ENOENT; `git log --follow` on a migrated file shows continuous history. (First two confirmed now; `--follow` is observable only post-commit, but history is preserved by `git mv`.)
+- [x] Verify: for each of (`go`, `python`, `java`, `js_ts`, `kotlin`): `test -f klaude-plugin/profiles/<lang>/review/index.md` succeeds (explicitly named so the task's verify step catches missing index files before Task 5's structure test does).
+- [x] Verify: for each migrated profile, `grep -c '^## Path signals\|^## Filename signals\|^## Content signals' klaude-plugin/profiles/<lang>/DETECTION.md` returns 3 (all three required headings present).
 
 ## Task 2 — Author the shared profile-detection procedure
 
