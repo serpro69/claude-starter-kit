@@ -1,0 +1,116 @@
+Plugin Root Substitution Probe — Session 2
+Date: 2026-04-18
+Skill: kk:plugin-root-probe
+On-disk SKILL.md: /Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0/skills/plugin-root-probe/SKILL.md
+
+===========================================================
+RAW PROBES AS RECEIVED IN CONTEXT (post-harness substitution)
+===========================================================
+
+- PROBE_A_BARE_DOLLAR: $CLAUDE_PLUGIN_ROOT
+- PROBE_B_PLAIN_BRACE_PROSE: /Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0
+- PROBE_C_INLINE_BACKTICK: `/Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0`
+- PROBE_D_BACKSLASH_ESCAPE: \/Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0
+- PROBE_E_DOUBLE_BACKSLASH: \\/Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0
+- PROBE_F_HTML_COMMENT: <!-- /Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0 -->
+- PROBE_G_ENTITY_DOLLAR: &#36;{CLAUDE_PLUGIN_ROOT}
+
+PROBE_H_INDENTED_CODE (4-space indent):
+    /Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0
+
+PROBE_I_BLOCKQUOTE:
+> /Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0
+
+PROBE_J_FENCED_PLAIN (```):
+/Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0
+
+PROBE_K_FENCED_BASH (```bash):
+/Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0
+
+PROBE_L_FENCED_MARKDOWN (```markdown):
+/Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0
+
+PROBE_M_FENCED_WITH_PROSE (```):
+The plugin root variable is named /Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0 and should be documented as-is.
+
+PROBE_N_TILDE_FENCE (~~~):
+/Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0
+
+===========================================================
+ON-DISK SOURCE LINES (Read tool, from SKILL.md)
+===========================================================
+
+L23: - PROBE_A_BARE_DOLLAR: $CLAUDE_PLUGIN_ROOT
+L24: - PROBE_B_PLAIN_BRACE_PROSE: ${CLAUDE_PLUGIN_ROOT}
+L25: - PROBE_C_INLINE_BACKTICK: `${CLAUDE_PLUGIN_ROOT}`
+L29: - PROBE_D_BACKSLASH_ESCAPE: \${CLAUDE_PLUGIN_ROOT}
+L30: - PROBE_E_DOUBLE_BACKSLASH: \\${CLAUDE_PLUGIN_ROOT}
+L31: - PROBE_F_HTML_COMMENT: <!-- ${CLAUDE_PLUGIN_ROOT} -->
+L32: - PROBE_G_ENTITY_DOLLAR: &#36;{CLAUDE_PLUGIN_ROOT}
+L38:     ${CLAUDE_PLUGIN_ROOT}            (indented code)
+L42: > ${CLAUDE_PLUGIN_ROOT}                (blockquote)
+L47: ${CLAUDE_PLUGIN_ROOT}                  (plain fence)
+L53: ${CLAUDE_PLUGIN_ROOT}                  (bash fence)
+L59: ${CLAUDE_PLUGIN_ROOT}                  (markdown fence)
+L65: The plugin root variable is named ${CLAUDE_PLUGIN_ROOT} and should be documented as-is.
+L71: ${CLAUDE_PLUGIN_ROOT}                  (tilde fence)
+
+===========================================================
+COMPARISON TABLE
+===========================================================
+
+| Probe                 | On disk                          | Received in context                        | Substituted? |
+|-----------------------|----------------------------------|--------------------------------------------|--------------|
+| A_BARE_DOLLAR         | $CLAUDE_PLUGIN_ROOT              | $CLAUDE_PLUGIN_ROOT                        | NO           |
+| B_PLAIN_BRACE_PROSE   | ${CLAUDE_PLUGIN_ROOT}            | /Users/.../0.9.0                           | YES          |
+| C_INLINE_BACKTICK     | `${CLAUDE_PLUGIN_ROOT}`          | `/Users/.../0.9.0`                         | YES          |
+| D_BACKSLASH_ESCAPE    | \${CLAUDE_PLUGIN_ROOT}           | \/Users/.../0.9.0                          | YES          |
+| E_DOUBLE_BACKSLASH    | \\${CLAUDE_PLUGIN_ROOT}          | \\/Users/.../0.9.0                         | YES          |
+| F_HTML_COMMENT        | <!-- ${CLAUDE_PLUGIN_ROOT} -->   | <!-- /Users/.../0.9.0 -->                  | YES          |
+| G_ENTITY_DOLLAR       | &#36;{CLAUDE_PLUGIN_ROOT}        | &#36;{CLAUDE_PLUGIN_ROOT}                  | NO           |
+| H_INDENTED_CODE       | (indent)${CLAUDE_PLUGIN_ROOT}    | (indent)/Users/.../0.9.0                   | YES          |
+| I_BLOCKQUOTE          | > ${CLAUDE_PLUGIN_ROOT}          | > /Users/.../0.9.0                         | YES          |
+| J_FENCED_PLAIN        | ${CLAUDE_PLUGIN_ROOT}            | /Users/.../0.9.0                           | YES          |
+| K_FENCED_BASH         | ${CLAUDE_PLUGIN_ROOT}            | /Users/.../0.9.0                           | YES          |
+| L_FENCED_MARKDOWN     | ${CLAUDE_PLUGIN_ROOT}            | /Users/.../0.9.0                           | YES          |
+| M_FENCED_WITH_PROSE   | ...${CLAUDE_PLUGIN_ROOT}...      | .../Users/.../0.9.0...                     | YES          |
+| N_TILDE_FENCE         | ${CLAUDE_PLUGIN_ROOT}            | /Users/.../0.9.0                           | YES          |
+
+===========================================================
+FINDINGS
+===========================================================
+
+Substitution is triggered specifically by the ${...} brace syntax applied to
+CLAUDE_PLUGIN_ROOT, regardless of markdown container.
+
+Forms that DO NOT prevent substitution (all still substituted):
+  - inline code backticks
+  - fenced code blocks (plain, bash, markdown, tilde)
+  - indented code blocks (4-space)
+  - blockquotes
+  - HTML comments
+  - backslash / double-backslash escapes before the dollar
+
+Forms that DO survive unsubstituted:
+  - PROBE_A: bare $CLAUDE_PLUGIN_ROOT (no braces at all)
+  - PROBE_G: HTML entity for the dollar: &#36;{CLAUDE_PLUGIN_ROOT}
+
+Conclusion: the harness is matching the literal string "${CLAUDE_PLUGIN_ROOT}"
+(with the dollar-brace-name-brace shape) and doing a text replacement. It is
+NOT aware of markdown block types, so putting the variable inside code fences
+does not protect it. Breaking the $->{ adjacency (via bare form, or by turning
+the $ into &#36;) is the only thing that escapes substitution.
+
+===========================================================
+RECOMMENDATION
+===========================================================
+
+For CLAUDE.md / ADR / SKILL prose that needs to reference the variable
+literally, use: bare $CLAUDE_PLUGIN_ROOT (no braces).
+
+It is the simplest form that survives unsubstituted in every container tested
+(prose, inline backticks, code fences, blockquotes, indented code, HTML
+comments). If you MUST keep brace syntax for shell-correctness reasons, use
+&#36;{CLAUDE_PLUGIN_ROOT} in prose — but note this is a markdown entity and
+will render as ${CLAUDE_PLUGIN_ROOT} to human readers only after markdown
+rendering; inside raw-text contexts (code fences) it stays as &#36;.

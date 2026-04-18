@@ -78,7 +78,7 @@ Required sections (each may be empty if the profile has no signals of that kind)
 
 - **`## Path signals`** — path globs that promote a file to a candidate. Path signals are a *fast pre-filter* only; they do not activate the profile on their own.
 - **`## Filename signals`** — literal filenames or filename globs that are *authoritative*: any matching file activates the profile regardless of path.
-- **`## Content signals`** — content-inspection rules (anchors, regexes, presence-of-keys) that are *authoritative* for files not already resolved by filename signals. Inspection is bounded (first N KB or first document block) and explicitly describes multi-document handling where relevant.
+- **`## Content signals`** — content-inspection rules (anchors, regexes, presence-of-keys) that are *authoritative* for files not already resolved by filename signals. Inspection is bounded to the first N KB per file (each profile declares N in its `DETECTION.md`); within that bound, multi-document YAML is handled per `---`-separated block. Profiles whose content rule is naturally per-block describe that handling explicitly.
 
 The two-dimensional framing: signals are **ordered by evaluation cost** (path → filename → content; cheapest first), but **authority follows a different order** (filename > content > path; path alone is insufficient). A file not caught by filename or content signals, regardless of any path hit, does not activate the profile.
 
@@ -134,6 +134,8 @@ klaude-plugin/profiles/<name>/
 ```
 
 Not every profile populates every phase subdirectory. A programming-language profile may only ever need `review/`; an IaC profile like Kubernetes populates all six. The plugin structure test (`test/test-plugin-structure.sh`) asserts the *presence* of each directory and file a profile declares — not that every profile populates every slot.
+
+**Phase-subdirectory contents.** A phase subdirectory contains only its `index.md` and the checklist/content files the index references. Human-facing documentation (authoring notes, READMEs) lives at the profile root — typically inside `overview.md`, or as a sibling file next to it — never inside a phase subdirectory. This keeps the bidirectional index invariant (§Test suite updates) sharp: an unreferenced `.md` inside a phase dir is always a bug, never a README.
 
 ### The Kubernetes profile, concretely
 
@@ -232,11 +234,12 @@ The `_shared/` symlink stays inside `skills/`. A symlink from `skills/<skill>/sh
 
 ### `${CLAUDE_PLUGIN_ROOT}` — empirically verified
 
-The design's reliance on `${CLAUDE_PLUGIN_ROOT}` substitution in SKILL.md prose was verified on 2026-04-17 against Claude Code v2.1.112 / `kk` plugin v0.9.0. Full results in [ADR 0003 §Verification](../../adr/0003-plugin-root-referenced-content.md). Key constraints consumers must observe:
+The design's reliance on `${CLAUDE_PLUGIN_ROOT}` substitution in SKILL.md prose was verified on 2026-04-17 (initial) and extended on 2026-04-18 (markdown-container sweep) against Claude Code v2.1.112 / `kk` plugin v0.9.0. Full results in [ADR 0003 §Verification](../../adr/0003-plugin-root-referenced-content.md). Key constraints consumers must observe:
 
-- **Brace form required.** Use `${CLAUDE_PLUGIN_ROOT}` exclusively. Bare `$CLAUDE_PLUGIN_ROOT` is NOT substituted.
-- **Substitution leaks into inline code spans.** Backtick-quoting does not protect the variable name from expansion. When CLAUDE.md or other docs need to reference the variable literally, use alternative quoting (fenced block or escape).
-- **Sub-agents receive substituted paths.** Task/Agent tool spawns inherit the already-resolved content; no re-substitution needed in sub-agent prompts.
+- **Functional use: brace form required.** For path references that are *meant* to be resolved at runtime, use `${CLAUDE_PLUGIN_ROOT}/...`. Bare `$CLAUDE_PLUGIN_ROOT` is NOT substituted by the harness.
+- **Substitution is markdown-container-unaware.** The harness applies a literal text replacement on the token `${CLAUDE_PLUGIN_ROOT}` before any agent reads the content. It happens in inline backticks, fenced code blocks (plain / bash / markdown / tilde), indented code blocks, blockquotes, HTML comments, and even after backslash escape (`\` is preserved but the variable still expands). **No markdown container escapes substitution.**
+- **Literal-reference authoring rule.** When prose under the plugin tree (SKILL.md, agent files, profile content under `klaude-plugin/`) needs to reference the variable *by name* (documenting or explaining it, not using it as a path), use one of the two surviving forms: **bare `$CLAUDE_PLUGIN_ROOT`** (simplest) or **`&#36;{CLAUDE_PLUGIN_ROOT}`** (HTML entity for `$`; useful when the brace shape must appear in rendered output). CLAUDE.md, ADRs, and other project-root files are NOT subject to substitution — they can use the brace form freely.
+- **Sub-agents receive substituted paths.** Sub-agent context behaves identically to the main context; substitution happens once in the harness pre-processing step regardless of which agent reads the content.
 
 ## Skill integration
 
@@ -263,9 +266,9 @@ Touched files:
 
 The `design` skill runs before any implementation exists — there is no diff to inspect. Profile detection in this phase uses the user-declared / keyword-inference input model defined in [Shared mechanisms](#shared-mechanisms):
 
-1. At Step 3 (refine the idea), the skill checks the initial idea prose for Kubernetes-shaped keywords (`Kubernetes`, `K8s`, `Helm`, `chart`, `manifest`, `Deployment`, `Pod`, `cluster`, `namespace`, etc.).
-2. If any keyword matches, the skill surfaces a single confirmation question: "This appears to be a Kubernetes feature. Activate the Kubernetes profile for this design session?" The user answers yes/no.
-3. If no keyword matches but the feature could reasonably involve Kubernetes (ambiguous idea), the skill asks explicitly: "Does this feature involve Kubernetes, Terraform, or other IaC artifacts? If yes, which?"
+1. At Step 3 (refine the idea), the skill checks the initial idea prose against a **high-precision auto-trigger set**: `Kubernetes`, `K8s`, `Helm chart`, `kubectl`, `kustomize`, `manifest.yaml`, `Deployment resource`, `StatefulSet`, `DaemonSet`, `CronJob`. These tokens are unambiguous — a match surfaces the confirmation prompt without a second check.
+2. If any auto-trigger token matches, the skill surfaces a single confirmation question: "This appears to be a Kubernetes feature. Activate the Kubernetes profile for this design session?" The user answers yes/no.
+3. If no auto-trigger matches but the idea is **ambiguous** — names infrastructure, deployment, runtime, or platform concerns without naming a specific technology (e.g., "add a caching layer for the service", "build a CI pipeline", "deploy to production", or bare-word collisions with non-K8s meanings like `cluster` / `namespace` / `pod`) — the skill asks explicitly: "Does this feature involve Kubernetes, Terraform, or other IaC artifacts? If yes, which?" The narrow auto-trigger set and explicit ambiguity path together avoid noisy false positives from tokens that overload across domains.
 4. On user confirmation, the Kubernetes profile is active for the rest of the design session. The skill loads `${CLAUDE_PLUGIN_ROOT}/profiles/k8s/design/index.md` and consults its content (question bank, required design sections) during Step 3 refinement and Step 5 design documentation.
 
 When the profile is active, the design skill asks questions from the K8s question bank (cluster topology, GitOps tool choice, secrets strategy, multi-tenancy, observability posture, rollback strategy) and ensures the resulting `design.md` includes the required K8s-shaped sections (cluster-compat matrix, resource budget, reliability posture, security posture, failure-mode narrative).
@@ -290,7 +293,7 @@ Touched files:
 
 ### `test` — P2 validator guidance with policy-hook auto-detection
 
-The `test` skill's K8s content mandates a minimum validator floor, catalogs additional tools as a menu, and auto-honors project-local policy toolchains when markers are present. See decisions Q7:C in the design Q&A.
+The `test` skill's K8s content mandates a minimum validator floor, catalogs additional tools as a menu, and auto-honors project-local policy toolchains when markers are present. (Rationale: the floor/menu split keeps offline-runnable, non-opinionated tools mandatory while leaving stack-specific or cluster-dependent tools as opt-in; see `.sessions/design-session.txt` question Q7 for the full trade-off discussion.)
 
 **Binary presence is a first-class protocol step.** Before running any validator, the skill checks that the required binary is on `PATH`. If missing, the skill must NOT attempt blind execution — shell errors are a bad user experience. Instead: surface an install hint (per-tool, e.g., `kubeconform: install via 'brew install kubeconform' or 'go install github.com/yannh/kubeconform/cmd/kubeconform@latest'`) and either (a) fall back to descriptive guidance that names what the validator would have checked, or (b) mark the check as skipped in the test report with a clear "binary not installed" note. The protocol applies to floor, menu, and policy tools alike.
 
@@ -343,11 +346,11 @@ Touched files:
 - `klaude-plugin/skills/review-spec/SKILL.md` — prose gains a clause: "When profile detection finds an IaC profile active (e.g., K8s, Terraform), treat the declarative artifacts as the implementation; absence of a specified resource is a `missing_impl` finding, not a `doc_incon`."
 - `klaude-plugin/skills/review-spec/review-process.md` and `klaude-plugin/skills/review-spec/review-isolated.md` — parallel clause where the finding taxonomy is described.
 - `klaude-plugin/skills/review-spec/shared-profile-detection.md` — symlink (created in P0).
-- `klaude-plugin/profiles/k8s/review-spec/index.md` (new, if the Kubernetes-specific semantics warrant dedicated content) *or* inlined into `review-spec` prose if one paragraph suffices. The implementation plan defers the choice until writing.
+- `klaude-plugin/profiles/k8s/review-spec/index.md` (new) — **create** when the K8s-specific spec-review guidance comprises **two or more distinct checklists** OR includes **any conditional trigger** (diff-property-dependent loading). Otherwise **inline** a single paragraph into `review-spec/SKILL.md`, `review-process.md`, and `review-isolated.md`. The implementation plan defers the choice until writing so the threshold can be applied to the actual drafted content.
 
 ### `dependency-handling` — P3 trigger widening
 
-The skill's description frontmatter and body widen to acknowledge IaC/config artifacts with external versioning. See Q8:C in the design Q&A.
+The skill's description frontmatter and body widen to acknowledge IaC/config artifacts with external versioning. (Rationale: IaC API versions, CRDs, Helm charts, and container images are all dependencies with external versioning that benefit from the same "lookup BEFORE writing" discipline the skill already enforces for libraries and SDKs; see `.sessions/design-session.txt` question Q8 for the scope decision.)
 
 Touched files:
 - `klaude-plugin/skills/dependency-handling/SKILL.md` — description frontmatter rewritten to fit in ≤250 characters (see §[Skill description budget](#skill-description-budget)) while including IaC-dep categories. Body gains a short paragraph pointing to per-profile `overview.md` for domain-specific lookup targets (Kubernetes API versions → context7 k8s.io docs or `kubectl explain`; CRDs → operator docs; Helm charts → chart repo README; container images → registry metadata).
@@ -442,7 +445,7 @@ Move `docs/wip/kubernetes-support/` → `docs/done/kubernetes-support/`. Update 
 
 These are small decisions intentionally left for the implementer to resolve during P1–P3:
 
-- **Whether `profiles/k8s/review-spec/` warrants its own directory**, or a single paragraph inline in `review-spec/SKILL.md` suffices. The trade-off depends on how much K8s-specific spec-vs-impl guidance crystallizes during P3 content authoring.
+- **Whether `profiles/k8s/review-spec/` warrants its own directory**, or a single paragraph inline in the three `review-spec` skill files suffices. Apply the threshold rule from §`review-spec` — P3: create the directory when the guidance comprises ≥2 distinct checklists OR any conditional trigger; inline otherwise.
 - **Exact trigger-condition wording** inside `profiles/k8s/review/index.md` for conditional entries (e.g., how to name "Helm context detected"). Prose form is chosen by the author; structured triggers are a future refinement (see [ADR 0002](../../adr/0002-profile-content-organization.md), "Forward direction").
 - **Whether to add an opportunistic description-length assertion** to `test/test-plugin-structure.sh` for `dependency-handling`'s description or leave the 250-character budget as informal convention. Either is acceptable for P3 close.
 

@@ -1,0 +1,112 @@
+## Design Review: kubernetes-support
+
+**Scope:** design.md + implementation.md (default)
+**Overall assessment:** SOUND (minor concerns)
+**Documents:**
+
+- Design: docs/wip/kubernetes-support/design.md
+- Implementation: docs/wip/kubernetes-support/implementation.md
+- Supporting: ADRs 0001/0002/0003, .sessions/design-session.txt, .sessions/probe-session.txt
+
+**Summary:** 8 findings — 0 critical, 0 high, 4 medium, 4 low
+
+The corroborated P1 cluster from the prior review (${CLAUDE_PLUGIN_ROOT} verification; test-suite task ordering; presence-conditional assertions; Helm templates/ gap) is fully resolved. Remaining findings are localized edge cases and convention nits.
+
+---
+
+## Findings
+
+### P0 - Critical
+
+(none)
+
+### P1 - High
+
+(none)
+
+### P2 - Medium
+
+- **[AMBIGUOUS]** Bidirectional index invariant excludes only `index.md` — a `README.md`, `NOTES.md`, or any future human-facing doc inside a phase subdirectory will fail the reverse-invariant assertion.
+  - **Section:** design.md §Test suite updates "every `.md` file inside a profile's phase subdirectory (excluding `index.md` itself) is referenced by that subdirectory's `index.md`"; implementation.md §Step 0.5; tasks.md Task 5.
+  - **Confidence:** 7/10 — low-probability today (no README/NOTES files currently exist under any phase dir), but the test blocks a reasonable future convention with no escape hatch.
+  - **Description:** The rule is absolute. There is no allowlist, no "non-index convention doc" escape, and no test-side exclusion. A contributor who adds `profiles/k8s/review/README.md` to document how reviewers should apply the checklists must either register it in `index.md` (wrong — it's not a checklist) or delete it.
+  - **Evidence:** design.md §Test suite updates "Bidirectional index invariant" bullet; Task 5's reverse-invariant subtask.
+  - **Recommendation:** Either (a) document that phase subdirectories contain ONLY `index.md` + checklist files and no human-facing docs, OR (b) broaden the exclusion to a small allowlist (`index.md`, `README.md`), OR (c) change the rule to "every `.md` linked from `index.md` exists, AND every `.md` not listed as `<allowlisted>` is referenced." Pick one and state it in design.md.
+
+- **[AMBIGUOUS]** The 16 KB content-inspection bound is undefined: per file or per `---`-separated document block?
+  - **Section:** design.md §Detection mechanics (content signals); implementation.md §Step 1.1 "Inspection is bounded to the first ~16 KB per file".
+  - **Confidence:** 6/10 — implementation.md says "per file" but the design prose says "first N KB or first document block" without disambiguating.
+  - **Description:** Two readings: (a) stop reading at 16 KB total from the top of the file (implementation.md's literal); (b) scan 16 KB per document block up to some total. A file with a 20 KB header comment then a clean `apiVersion:`/`kind:` at byte 20001 — under (a), the file is wrongly classified as non-K8s; under (b) it's caught. Real-world large `values.yaml` + generated CRDs make this non-hypothetical for adjacent rules.
+  - **Evidence:** implementation.md Step 1.1 bullet; design.md §Signal model "Inspection is bounded (first N KB or first document block)".
+  - **Recommendation:** Pick one framing and state it once. "16 KB per file" is simpler and cheaper; document the trade-off (large-header false negatives are tolerated because filename/path signals act as a safety net for any file genuinely K8s-related — Chart.yaml/kustomization.yaml/templates-under-Chart are authoritative independently).
+
+- **[INCOMPLETE]** P3 Step 3.1 deferred-decision criterion (create `profiles/k8s/review-spec/` vs inline into the three skill files) is not documented.
+  - **Section:** design.md §review-spec — P3; implementation.md §Step 3.1; tasks.md Task 16; Task 18 verification handles either outcome.
+  - **Confidence:** 7/10 — verification exists for both branches, but the *decision rule* for implementers is absent. An implementer at Task 16 cannot tell which branch to pick.
+  - **Description:** The verification task (Task 18) checks "whichever branch was taken". But Task 16's author has no guidance about *when* to create a directory vs inline. Does the volume/distinctness of the K8s spec-review guidance drive the choice? The number of distinct checklists? The existence of non-trivial conditional triggers?
+  - **Evidence:** design.md §review-spec — P3 prose; implementation.md §Step 3.1.
+  - **Recommendation:** Add one sentence to design.md §review-spec: "Create `profiles/k8s/review-spec/` when the IaC guidance includes ≥2 distinct checklists OR any conditional trigger; inline a single short clause into `review-spec`'s three skill files when the K8s delta is a single paragraph of guidance."
+
+- **[TECH_RISK]** CLAUDE.md "Profile Conventions" section documents the `${CLAUDE_PLUGIN_ROOT}` variable by name; the ADR 0003 Verification section acknowledges that inline backtick spans do NOT protect the literal against substitution, and fenced-code-block escape is **untested**.
+  - **Section:** ADR 0003 §Verification bullet "Substitution inside inline code spans — DOES happen... fenced code blocks may offer escape (untested)"; design.md §CLAUDE.md additions (which will render literal `${CLAUDE_PLUGIN_ROOT}` references).
+  - **Confidence:** 8/10 — the ADR explicitly labels fenced-block escape as "untested"; CLAUDE.md is a consumed surface (skills resolve prose); the text references the variable literally in convention documentation.
+  - **Description:** If the harness substitutes `${CLAUDE_PLUGIN_ROOT}` even inside fenced code blocks, CLAUDE.md's Profile Conventions text will render as `/absolute/plugin/path` in every place it tries to document the variable, making the convention docs incomprehensible. Task 18 mentions this as a spot-check ("used alternative quoting (fenced code blocks or escapes) where documenting the variable literally") — but no task *verifies* the fenced-block escape works before P0 lands.
+  - **Evidence:** ADR 0003 §Verification; Task 18 final subtask.
+  - **Recommendation:** Add a one-shot probe to Step 0.V (or a dedicated sub-task under Task 7) that inserts a literal-reference test in a throwaway `.md` and confirms fenced-code-block or backslash-escape preserves the literal text. If neither works, CLAUDE.md will need to describe the variable as "the plugin-root environment variable (see ADR 0003)" without naming it verbatim.
+
+### P3 - Low
+
+- **[AMBIGUOUS]** `design` skill keyword list for K8s detection includes tokens that collide with non-K8s contexts.
+  - **Section:** design.md §design — P2 "Kubernetes, K8s, Helm, chart, manifest, Deployment, Pod, cluster, namespace".
+  - **Confidence:** 5/10 — mitigated by user-confirmation step, but noisy confirmations degrade the skill's UX.
+  - **Description:** "cluster" (compute scheduling, database clusters), "namespace" (C++/Rust/XML), "Pod" (CocoaPods, iOS). An idea mentioning "database cluster sharding" will trigger the K8s-profile confirmation prompt. Not wrong — just noisy.
+  - **Recommendation:** Narrow the trigger set to high-precision tokens (`Kubernetes`, `K8s`, `Helm chart`, `manifest.yaml`, `Deployment resource`, multi-word combos). Keep the "explicit ask when ambiguous" path as the fallback.
+
+- **[STRUCTURE]** design.md §test references "design Q&A Q7:C" — a citation into `.sessions/design-session.txt`, which is a working artifact, not a committed spec.
+  - **Section:** design.md §test — P2 "See decisions Q7:C in the design Q&A".
+  - **Confidence:** 6/10 — the design-session file IS committed alongside design.md in `.sessions/`, but the citation format suggests a persistent authoritative source; future readers of design.md alone won't know where "Q7:C" lives.
+  - **Recommendation:** Either inline the Q7:C rationale directly into design.md (preferred — design.md becomes self-sufficient), or link explicitly to `.sessions/design-session.txt` with an anchor/line reference.
+
+- **[STRUCTURE]** Description-length assertion is introduced in P3 (Task 17) but enforces a general plugin convention, not a P3-specific requirement.
+  - **Section:** tasks.md Task 17; design.md §Skill description budget.
+  - **Confidence:** 5/10 — functionally correct (the only description that changes lives in P3), but philosophically the assertion belongs with the other structure-test assertions in Task 5 (P0).
+  - **Description:** Moving the assertion to Task 5 means it runs against all current skills from P0 onward, catching any pre-existing or future description that exceeds 250. Under the current plan, P0-P2 could land a description >250 and the structure test wouldn't flag it until P3.
+  - **Recommendation:** Optional — move the `description:`-length check to Task 5 alongside the other presence-conditional assertions. Covers the convention more consistently.
+
+- **[AMBIGUOUS]** `design` skill's "ambiguous idea" path (ask explicitly if no keyword matched but K8s could be relevant) has no definition of "ambiguous".
+  - **Section:** design.md §design — P2 step 3.
+  - **Confidence:** 5/10 — agent-judgment call; likely fine in practice.
+  - **Recommendation:** Either drop the "ambiguous" case (rely solely on keyword-or-miss) or give one sentence of guidance ("ask explicitly when the idea names infrastructure, deployment, or runtime concerns without naming a specific platform").
+
+---
+
+## Clean Areas
+
+- **${CLAUDE_PLUGIN_ROOT} verification.** Empirical probe-session confirmed brace-form substitution, mid-sentence, sub-agent delivery. ADR 0003 updated with authoritative spec citation. Prior review's P1 on this is fully closed.
+- **Test-suite coordination.** EXPECTED_PROFILES append moved to Task 9; presence-conditional assertions replace hardcoded per-phase enumeration; P2 tasks no longer edit the test file. The shared-write-contention finding from the prior review is closed.
+- **DETECTION.md schema.** Three-section structured schema (`## Path signals`, `## Filename signals`, `## Content signals`) is mandatory and asserted by the structure test. Cross-consumer drift risk is mitigated.
+- **Two-dimensional signal framing.** Cost-ordered evaluation with authority-ordered activation is documented explicitly in design.md §Signal model and Task 2 subtasks.
+- **Helm template detection.** `.yaml`/`.yml`/`.tpl` under `templates/` with ancestor `Chart.yaml` is authoritative. The standalone-templates bypass found in the prior review is closed.
+- **Kustomize variants.** `kustomization.yaml`, `kustomization.yml`, and `Kustomization` all listed.
+- **Binary presence protocol.** First-class step with install hints; applies to floor, menu, and policy tools.
+- **Bidirectional index invariant.** Forward (stale index) and reverse (orphan file) directions both enforced.
+- **Predicate-form conditional triggers.** Index conditional entries use concrete diff properties (`kind:` values, filename strings) rather than vague prose. Good/bad examples documented in design.md.
+- **Phasing.** P0 (behavior-preserving refactor) → P1 (K8s review content, closes #64) → P2 (four skill extensions, parallelizable) → P3 (review-spec + dependency-handling) → feature close. Each phase merges independently.
+- **ADRs.** Three ADRs (0001, 0002, 0003) follow Nygard template; rejected alternatives concrete; forward-compatibility paths documented.
+- **Dogfooding.** Each phase's verification runs review-code, review-spec, test, document against its own diff.
+- **Description budget provenance.** 250-char figure cited with Claude Code v2.1.112 / OpenCode 1024 comparison / 2026-04-17 observation date.
+- **Cross-reference discipline.** P3 verification explicitly checks `overview.md` ↔ `dependency-handling` anchor resolution.
+
+---
+
+## Next Steps
+
+I found 8 findings (P0: 0, P1: 0, P2: 4, P3: 4).
+
+**How would you like to proceed?**
+
+1. **Update docs** — Revise the design docs to address all findings
+2. **Update medium severity only** — Address the 4 P2 findings; defer the P3s
+3. **Discuss specific items** — Talk through particular findings
+4. **Proceed to implementation** — Findings are acceptable, move forward
+5. **No changes** — Review complete, no action needed

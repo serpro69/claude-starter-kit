@@ -43,7 +43,28 @@ Results:
 - **Mid-sentence substitution** (`The plugin root is ${CLAUDE_PLUGIN_ROOT}.`) — substituted. **Works.**
 - **Sub-agent delivery** — a sub-agent spawned via the Task/Agent tool received the same already-substituted content as the top-level agent. **Works across agent boundaries.**
 - **Bare `$CLAUDE_PLUGIN_ROOT` (no braces)** — NOT substituted; stays literal. **Brace form is required.**
-- **Substitution inside inline code spans** (backticks) — DOES happen. Documentation that needs to reference the variable name literally (e.g., CLAUDE.md convention text) cannot rely on inline backticks to protect it; fenced code blocks may offer escape (untested).
+- **Substitution inside inline code spans** (backticks) — DOES happen. Documentation that needs to reference the variable name literally cannot rely on inline backticks to protect it.
+
+**Follow-up verification on 2026-04-18** (same environment; full results in `docs/wip/kubernetes-support/.sessions/probe-session-2.txt` and `probe-session-2-subagent.txt`) tested 14 markdown containers across both main-conversation and sub-agent contexts. Result: substitution is a pre-rendering text replacement matching the literal token `${CLAUDE_PLUGIN_ROOT}`, **unaware of any markdown container**. The following ALL substitute:
+
+- inline backticks (`` ` ``)
+- fenced code blocks (plain ```, ```bash, ```markdown, `~~~` tilde)
+- indented code blocks (4-space)
+- blockquotes (`>`)
+- HTML comments (`<!-- ... -->`)
+- backslash escape (`\${CLAUDE_PLUGIN_ROOT}` — the `\` is preserved, but the variable still expands)
+- double backslash (same — both `\\` preserved, variable expands)
+
+Only two forms survive unsubstituted:
+
+- **Bare `$CLAUDE_PLUGIN_ROOT` (no braces)** — simplest form.
+- **`&#36;{CLAUDE_PLUGIN_ROOT}` (HTML entity for `$`)** — useful when the brace form must appear in rendered output for readers.
+
+Sub-agent context behaves identically to the main context; the substitution happens once in the harness pre-processing step, before any agent reads the content.
+
+**Authoring rule for plugin-tree prose** (SKILL.md, agent files, profile content under `klaude-plugin/`): when the variable name must appear literally (e.g., documentation or convention text *about* the variable, as opposed to using it as a path), use bare `$CLAUDE_PLUGIN_ROOT` or `&#36;{CLAUDE_PLUGIN_ROOT}`. Functional uses (`${CLAUDE_PLUGIN_ROOT}/profiles/...` paths that are *meant* to be resolved at runtime) continue to use the brace form.
+
+CLAUDE.md and `docs/adr/*.md` live outside the plugin tree; they are not subject to substitution and can use the brace form in any container.
 
 Authoritative spec: [`code.claude.com/docs/en/plugins-reference`](https://code.claude.com/docs/en/plugins-reference) — "`${CLAUDE_PLUGIN_ROOT}` and `${CLAUDE_PLUGIN_DATA}` are substituted inline anywhere they appear in skill content, agent content, hook commands, and MCP or LSP server configs."
 
@@ -121,11 +142,12 @@ A secondary, non-binding aim of this ADR is to document that the `${CLAUDE_PLUGI
 
 ### Rollout approach
 
-**Phase 1 — Mechanism validation (complete as of 2026-04-17).** See §Verification. Three of the four open questions in the original rollout plan are answered:
+**Phase 1 — Mechanism validation (complete as of 2026-04-18).** See §Verification. All open questions from the original rollout plan are answered:
 
 - Variable resolves correctly in SKILL.md prose on the tested Claude Code version. ✅
 - Sub-agents receive substituted paths. ✅
 - Brace form is required; bare form is not substituted. ⚠️ (new constraint, documented)
+- Markdown-container awareness: the harness is NOT container-aware — substitution happens in every markdown container tested (fenced blocks, indented code, blockquotes, HTML comments, backslash escape). Literal-reference escape forms: bare `$CLAUDE_PLUGIN_ROOT` or `&#36;{CLAUDE_PLUGIN_ROOT}`. ✅
 
 One question remains open and is deferred to real-world usage:
 
@@ -133,8 +155,8 @@ One question remains open and is deferred to real-world usage:
 
 **Phase 2 — Real-world observation (pending).** Profiles ship with the mechanism; watch for issues across Claude Code releases, on OpenCode, and in contributor feedback:
 - Cross-version stability of the substitution spec.
-- Subtle failure modes (e.g., substitution in fenced code blocks, which the verification did not cover).
 - Contributor confusion about where to use the variable vs a relative path.
+- Cases where the HTML-entity escape renders unexpectedly in non-HTML markdown contexts.
 
 **Phase 3 — Decision point (future ADR).** If no friction after one or more releases, propose a follow-up ADR to deprecate `_shared/` symlinks. Migration is O(N) where N = number of existing symlinks (~18 today). Mechanical:
 

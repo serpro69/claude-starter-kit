@@ -1,0 +1,149 @@
+PROBE SESSION 2 — SUB-AGENT CONTEXT
+Date: 2026-04-18
+Skill: kk:plugin-root-probe
+Invocation context: skill fired inside a sub-agent (via Skill tool from main conversation)
+CLAUDE_PLUGIN_ROOT resolved value: /Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0
+
+================================================================================
+ON-DISK SOURCE (verbatim from SKILL.md lines 22-73)
+================================================================================
+
+- PROBE_A_BARE_DOLLAR: $CLAUDE_PLUGIN_ROOT
+- PROBE_B_PLAIN_BRACE_PROSE: ${CLAUDE_PLUGIN_ROOT}
+- PROBE_C_INLINE_BACKTICK: `${CLAUDE_PLUGIN_ROOT}`
+- PROBE_D_BACKSLASH_ESCAPE: \${CLAUDE_PLUGIN_ROOT}
+- PROBE_E_DOUBLE_BACKSLASH: \\${CLAUDE_PLUGIN_ROOT}
+- PROBE_F_HTML_COMMENT: <!-- ${CLAUDE_PLUGIN_ROOT} -->
+- PROBE_G_ENTITY_DOLLAR: &#36;{CLAUDE_PLUGIN_ROOT}
+
+PROBE_H_INDENTED_CODE (4-space indent):
+    ${CLAUDE_PLUGIN_ROOT}
+
+PROBE_I_BLOCKQUOTE:
+> ${CLAUDE_PLUGIN_ROOT}
+
+PROBE_J_FENCED_PLAIN:
+```
+${CLAUDE_PLUGIN_ROOT}
+```
+
+PROBE_K_FENCED_BASH:
+```bash
+${CLAUDE_PLUGIN_ROOT}
+```
+
+PROBE_L_FENCED_MARKDOWN:
+```markdown
+${CLAUDE_PLUGIN_ROOT}
+```
+
+PROBE_M_FENCED_WITH_PROSE:
+```
+The plugin root variable is named ${CLAUDE_PLUGIN_ROOT} and should be documented as-is.
+```
+
+PROBE_N_TILDE_FENCE:
+~~~
+${CLAUDE_PLUGIN_ROOT}
+~~~
+
+================================================================================
+RECEIVED IN CONTEXT (verbatim from skill output as delivered to sub-agent)
+================================================================================
+
+- PROBE_A_BARE_DOLLAR: $CLAUDE_PLUGIN_ROOT
+- PROBE_B_PLAIN_BRACE_PROSE: /Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0
+- PROBE_C_INLINE_BACKTICK: `/Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0`
+- PROBE_D_BACKSLASH_ESCAPE: \/Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0
+- PROBE_E_DOUBLE_BACKSLASH: \\/Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0
+- PROBE_F_HTML_COMMENT: <!-- /Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0 -->
+- PROBE_G_ENTITY_DOLLAR: &#36;{CLAUDE_PLUGIN_ROOT}
+
+PROBE_H_INDENTED_CODE (4-space indent):
+    /Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0
+
+PROBE_I_BLOCKQUOTE:
+> /Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0
+
+PROBE_J_FENCED_PLAIN:
+```
+/Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0
+```
+
+PROBE_K_FENCED_BASH:
+```bash
+/Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0
+```
+
+PROBE_L_FENCED_MARKDOWN:
+```markdown
+/Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0
+```
+
+PROBE_M_FENCED_WITH_PROSE:
+```
+The plugin root variable is named /Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0 and should be documented as-is.
+```
+
+PROBE_N_TILDE_FENCE:
+~~~
+/Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0
+~~~
+
+================================================================================
+COMPARISON TABLE
+================================================================================
+
+| Probe | On disk | Received in context | Substituted? |
+|---|---|---|---|
+| A — BARE_DOLLAR | $CLAUDE_PLUGIN_ROOT | $CLAUDE_PLUGIN_ROOT | NO |
+| B — PLAIN_BRACE_PROSE | ${CLAUDE_PLUGIN_ROOT} | /Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0 | YES |
+| C — INLINE_BACKTICK | `${CLAUDE_PLUGIN_ROOT}` | `/Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0` | YES |
+| D — BACKSLASH_ESCAPE | \${CLAUDE_PLUGIN_ROOT} | \/Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0 | YES (backslash kept, var expanded) |
+| E — DOUBLE_BACKSLASH | \\${CLAUDE_PLUGIN_ROOT} | \\/Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0 | YES (both backslashes kept, var expanded) |
+| F — HTML_COMMENT | <!-- ${CLAUDE_PLUGIN_ROOT} --> | <!-- /Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0 --> | YES |
+| G — ENTITY_DOLLAR | &#36;{CLAUDE_PLUGIN_ROOT} | &#36;{CLAUDE_PLUGIN_ROOT} | NO |
+| H — INDENTED_CODE | ${CLAUDE_PLUGIN_ROOT} | /Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0 | YES |
+| I — BLOCKQUOTE | > ${CLAUDE_PLUGIN_ROOT} | > /Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0 | YES |
+| J — FENCED_PLAIN | ${CLAUDE_PLUGIN_ROOT} | /Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0 | YES |
+| K — FENCED_BASH | ${CLAUDE_PLUGIN_ROOT} | /Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0 | YES |
+| L — FENCED_MARKDOWN | ${CLAUDE_PLUGIN_ROOT} | /Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0 | YES |
+| M — FENCED_WITH_PROSE | ...named ${CLAUDE_PLUGIN_ROOT} and... | ...named /Users/sergio/.claude/.../0.9.0 and... | YES |
+| N — TILDE_FENCE | ${CLAUDE_PLUGIN_ROOT} | /Users/sergio/.claude/plugins/cache/claude-toolbox/kk/0.9.0 | YES |
+
+================================================================================
+WINNING FORMS (survived unsubstituted)
+================================================================================
+
+1. PROBE_A — $CLAUDE_PLUGIN_ROOT  (bare dollar, no braces)
+2. PROBE_G — &#36;{CLAUDE_PLUGIN_ROOT}  (HTML entity for the dollar sign)
+
+All other forms — inline backtick, backslash escape, double backslash, HTML
+comment, indented code block, blockquote, fenced plain/bash/markdown/tilde,
+and fenced-with-prose — were ALL substituted.
+
+RECOMMENDATION:
+For CLAUDE.md / ADR / SKILL prose that needs to reference the variable
+literally, use: $CLAUDE_PLUGIN_ROOT  (bare dollar, no braces — simplest
+surviving form). Use &#36;{CLAUDE_PLUGIN_ROOT} only when the braces are
+required for disambiguation.
+
+================================================================================
+DELTA VS MAIN-SESSION RESULT (probe-session-1)
+================================================================================
+
+NO DELTA. Sub-agent substitution behavior is IDENTICAL to main-conversation
+substitution behavior:
+
+- Same two survivors: $CLAUDE_PLUGIN_ROOT (PROBE_A) and &#36;{CLAUDE_PLUGIN_ROOT} (PROBE_G)
+- Same 12 losers: B, C, D, E, F, H, I, J, K, L, M, N all substituted
+- Notable: PROBE_D backslash escape — the backslash is preserved in the output
+  but the variable is still expanded. This means \$ does NOT escape the
+  substitution; it just leaves a literal backslash prepended to the resolved path.
+- Notable: PROBE_E double backslash — same pattern, both backslashes kept but
+  variable still expanded.
+
+CONCLUSION: The Claude Code harness performs $CLAUDE_PLUGIN_ROOT substitution
+before the skill content reaches the model, regardless of whether the model is
+the main conversation agent or a sub-agent. The substitution is a pre-processing
+step applied uniformly. Only forms that avoid the ${...} token entirely survive.
