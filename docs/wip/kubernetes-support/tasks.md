@@ -93,18 +93,18 @@ Subtasks:
 ## Task 5 — Update `test/test-plugin-structure.sh`
 
 - **Phase:** P0
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1, Task 2, Task 3
 - **Links:** [implementation.md §Step 0.5](implementation.md#step-05--update-the-plugin-structure-test), [design.md §Test suite updates](design.md#test-suite-updates)
 
 Subtasks:
 
-- [ ] Add `EXPECTED_PROFILES=("go" "java" "js_ts" "kotlin" "python")` — k8s is appended in Task 9 (after k8s files exist), NOT here.
-- [ ] **Presence-conditional per-profile assertions.** For every profile in `EXPECTED_PROFILES`: assert `profiles/<name>/DETECTION.md` and `overview.md` exist. Assert `DETECTION.md` contains the three required section headings (`## Path signals`, `## Filename signals`, `## Content signals`). For each phase subdirectory name in (`review`, `design`, `test`, `implement`, `document`, `review-spec`): IF `profiles/<name>/<phase>/` exists, THEN assert `<phase>/index.md` exists. A profile that does not populate a phase does NOT require an assertion for that phase.
-- [ ] **Bidirectional index invariant.** For every `<phase>/index.md` that exists: (forward) every markdown link resolves to a file on disk; (reverse) every `.md` file in the directory — excluding `index.md` itself — is referenced by at least one markdown link in the index.
-- [ ] Symlink assertions: each of the six `shared-profile-detection.md` paths under consuming skills is a symlink and resolves to `klaude-plugin/skills/_shared/profile-detection.md`.
-- [ ] Retain existing `EXPECTED_SKILLS` and `EXPECTED_COMMANDS` assertions unchanged.
-- [ ] Verify: `bash test/test-plugin-structure.sh` exits 0. Run three targeted break-and-restore experiments per [implementation.md §Step 0.5](implementation.md#step-05--update-the-plugin-structure-test) — each must fail with an actionable message: (1) remove a file referenced by an index (forward); (2) `touch` an orphan `.md` file inside a phase subdirectory (reverse); (3) remove a required section heading from a `DETECTION.md`. Restore after each.
+- [x] Add `EXPECTED_PROFILES=("go" "java" "js_ts" "kotlin" "python")` — k8s is appended in Task 9 (after k8s files exist), NOT here.
+- [x] **Presence-conditional per-profile assertions.** For every profile in `EXPECTED_PROFILES`: assert `profiles/<name>/DETECTION.md` and `overview.md` exist. Assert `DETECTION.md` contains the three required section headings (`## Path signals`, `## Filename signals`, `## Content signals`). For each phase subdirectory name in (`review-code`, `design`, `test`, `implement`, `document`, `review-spec`): IF `profiles/<name>/<phase>/` exists, THEN assert `<phase>/index.md` exists. A profile that does not populate a phase does NOT require an assertion for that phase. (Phase name corrected from `review` → `review-code` to match design.md §File structure and on-disk layout; the `review` token was a typo in the original task wording.)
+- [x] **Bidirectional index invariant.** For every `<phase>/index.md` that exists: (forward) every markdown link resolves to a file on disk; (reverse) every `.md` file in the directory — excluding `index.md` itself — is referenced by at least one markdown link in the index.
+- [x] Symlink assertions: each of the six `shared-profile-detection.md` paths under consuming skills is a symlink and resolves to `klaude-plugin/skills/_shared/profile-detection.md`.
+- [x] Retain existing `EXPECTED_SKILLS` and `EXPECTED_COMMANDS` assertions unchanged.
+- [x] Verify: `bash test/test-plugin-structure.sh` exits 0 (31 test cases, 109 assertions). Break-and-restore experiments all produced actionable failures: (1) forward — renamed `profiles/go/review-code/security-checklist.md` → failure named the missing file and index path; (2) reverse — `touch profiles/go/review-code/__orphan.md` → failure named the orphan and phase; (3) heading — removed `## Content signals` from `profiles/go/DETECTION.md` → failure named the missing heading and profile. All state restored.
 
 ## Task 6 — Update `CLAUDE.md` and `README.md`
 

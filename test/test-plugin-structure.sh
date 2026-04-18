@@ -211,6 +211,139 @@ else
 fi
 
 # =============================================================================
+# Section 8: Profiles
+# =============================================================================
+
+log_section "Section 8: Profiles"
+
+EXPECTED_PROFILES=(go java js_ts kotlin python)
+PHASE_SUBDIRS=(review-code design test implement document review-spec)
+REQUIRED_DETECTION_HEADINGS=("Path signals" "Filename signals" "Content signals")
+
+log_test "All profile directories exist"
+for profile in "${EXPECTED_PROFILES[@]}"; do
+  if [[ -d "$REPO_ROOT/klaude-plugin/profiles/$profile" ]]; then
+    log_pass "Profile exists: $profile"
+  else
+    log_fail "Profile missing: $profile"
+  fi
+done
+
+log_test "Each profile has DETECTION.md and overview.md"
+for profile in "${EXPECTED_PROFILES[@]}"; do
+  assert_file_exists "$REPO_ROOT/klaude-plugin/profiles/$profile/DETECTION.md" "DETECTION.md for $profile"
+  assert_file_exists "$REPO_ROOT/klaude-plugin/profiles/$profile/overview.md" "overview.md for $profile"
+done
+
+log_test "Each DETECTION.md has the three required section headings"
+for profile in "${EXPECTED_PROFILES[@]}"; do
+  detection_file="$REPO_ROOT/klaude-plugin/profiles/$profile/DETECTION.md"
+  if [[ ! -f "$detection_file" ]]; then
+    log_fail "DETECTION.md missing for $profile — cannot check headings"
+    continue
+  fi
+  for heading in "${REQUIRED_DETECTION_HEADINGS[@]}"; do
+    if grep -q "^## ${heading}\$" "$detection_file"; then
+      log_pass "DETECTION.md ($profile) has heading: ## $heading"
+    else
+      log_fail "DETECTION.md ($profile) missing heading: ## $heading"
+    fi
+  done
+done
+
+log_test "Presence-conditional: each existing phase subdirectory has index.md"
+for profile in "${EXPECTED_PROFILES[@]}"; do
+  for phase in "${PHASE_SUBDIRS[@]}"; do
+    phase_dir="$REPO_ROOT/klaude-plugin/profiles/$profile/$phase"
+    if [[ -d "$phase_dir" ]]; then
+      assert_file_exists "$phase_dir/index.md" "index.md for $profile/$phase"
+    fi
+  done
+done
+
+log_test "Bidirectional index invariant: forward (all index references resolve)"
+for profile in "${EXPECTED_PROFILES[@]}"; do
+  for phase in "${PHASE_SUBDIRS[@]}"; do
+    index_file="$REPO_ROOT/klaude-plugin/profiles/$profile/$phase/index.md"
+    [[ -f "$index_file" ]] || continue
+    # Extract markdown link targets ending in .md (basename form — flat phase dirs)
+    referenced=()
+    while IFS= read -r link; do
+      [[ -z "$link" ]] && continue
+      referenced+=("$(basename "$link")")
+    done < <(grep -oE '\]\([^) ]+\.md\)' "$index_file" | sed -E 's/^\]\((.*)\)$/\1/')
+    all_resolve=true
+    for ref in "${referenced[@]}"; do
+      if [[ ! -f "$REPO_ROOT/klaude-plugin/profiles/$profile/$phase/$ref" ]]; then
+        log_fail "Forward invariant broken: $profile/$phase/index.md references missing file: $ref"
+        all_resolve=false
+      fi
+    done
+    if [[ "$all_resolve" == "true" ]]; then
+      log_pass "Forward invariant: $profile/$phase/index.md references all resolve"
+    fi
+  done
+done
+
+log_test "Bidirectional index invariant: reverse (no orphan .md files)"
+for profile in "${EXPECTED_PROFILES[@]}"; do
+  for phase in "${PHASE_SUBDIRS[@]}"; do
+    phase_dir="$REPO_ROOT/klaude-plugin/profiles/$profile/$phase"
+    index_file="$phase_dir/index.md"
+    [[ -f "$index_file" ]] || continue
+    referenced=$(grep -oE '\]\([^) ]+\.md\)' "$index_file" \
+      | sed -E 's/^\]\((.*)\)$/\1/' \
+      | while IFS= read -r path; do basename "$path"; done \
+      | sort -u)
+    no_orphans=true
+    for f in "$phase_dir"/*.md; do
+      [[ -f "$f" ]] || continue
+      base=$(basename "$f")
+      [[ "$base" == "index.md" ]] && continue
+      if ! printf '%s\n' "$referenced" | grep -qx "$base"; then
+        log_fail "Reverse invariant broken: $profile/$phase/$base exists but is not referenced in index.md"
+        no_orphans=false
+      fi
+    done
+    if [[ "$no_orphans" == "true" ]]; then
+      log_pass "Reverse invariant: $profile/$phase/ has no orphan .md files"
+    fi
+  done
+done
+
+# =============================================================================
+# Section 9: Profile-detection shared file and consumer symlinks
+# =============================================================================
+
+log_section "Section 9: Profile-detection shared file and consumer symlinks"
+
+log_test "Shared profile-detection.md exists"
+assert_file_exists "$REPO_ROOT/klaude-plugin/skills/_shared/profile-detection.md" \
+  "_shared/profile-detection.md exists"
+
+PROFILE_DETECTION_CONSUMERS=(review-code review-spec design implement test document)
+
+log_test "Each consumer skill has a shared-profile-detection.md symlink"
+for skill in "${PROFILE_DETECTION_CONSUMERS[@]}"; do
+  symlink_path="$REPO_ROOT/klaude-plugin/skills/$skill/shared-profile-detection.md"
+  if [[ -L "$symlink_path" ]]; then
+    target=$(readlink "$symlink_path")
+    if [[ "$target" == "../_shared/profile-detection.md" ]]; then
+      log_pass "Symlink target correct for $skill: $target"
+    else
+      log_fail "Symlink target wrong for $skill (got: $target)"
+    fi
+    if [[ -f "$symlink_path" ]]; then
+      log_pass "Symlink resolves to existing file for $skill"
+    else
+      log_fail "Symlink does not resolve for $skill: $symlink_path"
+    fi
+  else
+    log_fail "Not a symlink for $skill: $symlink_path"
+  fi
+done
+
+# =============================================================================
 # Summary
 # =============================================================================
 

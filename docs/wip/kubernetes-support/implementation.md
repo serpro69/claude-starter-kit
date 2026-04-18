@@ -119,7 +119,7 @@ Modify `test/test-plugin-structure.sh`:
   - File `klaude-plugin/profiles/<name>/DETECTION.md` exists (required).
   - `DETECTION.md` contains the three required section headings (`## Path signals`, `## Filename signals`, `## Content signals`). Any may be empty; all must be present. Use `grep -c '^## Path signals' ...` and similar to verify each header appears exactly once.
   - File `klaude-plugin/profiles/<name>/overview.md` exists (required).
-  - For each phase subdirectory name in (`review`, `design`, `test`, `implement`, `document`, `review-spec`): IF `klaude-plugin/profiles/<name>/<phase>/` exists, THEN `<phase>/index.md` must exist. IF the phase subdirectory does not exist, the test skips (a profile is not required to populate every phase).
+  - For each phase subdirectory name in (`review-code`, `design`, `test`, `implement`, `document`, `review-spec`): IF `klaude-plugin/profiles/<name>/<phase>/` exists, THEN `<phase>/index.md` must exist. IF the phase subdirectory does not exist, the test skips (a profile is not required to populate every phase).
 - **Bidirectional index invariant.** For every phase subdirectory that exists in any profile:
   - Forward: every markdown link in `<phase>/index.md` resolves to a file that exists on disk.
   - Reverse (new): every `.md` file in `<phase>/` (except `index.md` itself) is referenced by at least one markdown link in `<phase>/index.md`. Extract the set of filenames from the directory listing, extract the set of filenames named in the index (via `grep -oE '\[[^]]+\]\([^)]+\.md\)' <phase>/index.md`), assert the two sets match modulo `index.md`.
