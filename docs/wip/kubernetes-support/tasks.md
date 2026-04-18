@@ -72,23 +72,23 @@ Subtasks:
 ## Task 4 — Restructure the `review-code` workflow for index-driven loading
 
 - **Phase:** P0
-- **Status:** pending
+- **Status:** in-progress
 - **Depends on:** Task 1, Task 3
 - **Links:** [implementation.md §Step 0.4](implementation.md#step-04--restructure-the-review-code-workflow), [design.md §review-code — P0 refactor + P1 Kubernetes content](design.md#review-code--p0-refactor--p1-kubernetes-content)
 
 Subtasks:
 
-- [ ] Update `klaude-plugin/skills/review-code/SKILL.md`: add reference to `[shared-profile-detection.md](shared-profile-detection.md)` in the appropriate section. Description frontmatter unchanged.
-- [ ] Update `klaude-plugin/skills/review-code/review-process.md`:
+- [x] Update `klaude-plugin/skills/review-code/SKILL.md`: add reference to `[shared-profile-detection.md](shared-profile-detection.md)` in the appropriate section. Description frontmatter unchanged.
+- [x] Update `klaude-plugin/skills/review-code/review-process.md`:
   - Rename "Step 2: Detect primary language" to "Step 2: Detect active profiles"; delegate to the shared procedure.
   - Collapse former Steps 3–6 (SOLID / Removal / Security / Quality) into a two-step sequence: "Step 3: Load profile review indexes" (for each active profile, resolve `${CLAUDE_PLUGIN_ROOT}/profiles/<name>/review-code/index.md`; collect always-load + matching conditional entries) and "Step 4: Apply checklists" (iterate resolved checklists; emit findings grouped by `(profile, checklist)`).
   - Renumber subsequent steps; verify internal references within the file remain consistent.
   - Replace every literal occurrence of `reference/<lang>/` or `reference/{lang}/` with the index-driven path or a description of the new step.
-- [ ] Update `klaude-plugin/skills/review-code/review-isolated.md`: mirror the restructure; the sub-agent prompt receives the list of resolved checklists, not a hardcoded category sequence. **Specific literal-string edit:** the sub-agent prompt template currently injects `klaude-plugin/skills/review-code/reference/{language_key}/` into the spawned agent's prompt — replace this string with the list of resolved checklists prepared in Step 1.
-- [ ] Update `klaude-plugin/agents/code-reviewer.md`: prompt iterates `(profile, checklist)` from the provided list rather than fixed category names. **Specific literal-string edit:** the agent's current Step 2 says "Load the corresponding reference checklists from `klaude-plugin/skills/review-code/reference/{lang}/`" with the full extension table duplicated — rewrite to "Apply the checklists provided in the input payload; for each `(profile, checklist)` record, read the checklist content from `${CLAUDE_PLUGIN_ROOT}/profiles/<profile>/review-code/<checklist>` and apply it to the diff." Remove the extension table entirely (detection is no longer the agent's responsibility).
-- [ ] Verify: `grep -rn 'reference/' klaude-plugin/skills/review-code/ klaude-plugin/agents/code-reviewer.md` finds no residual references to the removed layout (grep scope **expanded to include `agents/`** because `code-reviewer.md` lives there, not under `skills/`).
-- [ ] Verify: `grep -rn '${CLAUDE_PLUGIN_ROOT}/profiles/' klaude-plugin/skills/review-code/` returns matches at Step 3 of `review-process.md` and equivalent points in `review-isolated.md`.
-- [ ] Verify: manual dry-run of `/kk:review-code` on a Go-only commit — output identifies `go` as the active profile; four checklists are loaded from the new `profiles/go/review-code/` location; finding coverage matches pre-P0.
+- [x] Update `klaude-plugin/skills/review-code/review-isolated.md`: mirror the restructure; the sub-agent prompt receives the list of resolved checklists, not a hardcoded category sequence. **Specific literal-string edit:** the sub-agent prompt template currently injects `klaude-plugin/skills/review-code/reference/{language_key}/` into the spawned agent's prompt — replace this string with the list of resolved checklists prepared in Step 1.
+- [x] Update `klaude-plugin/agents/code-reviewer.md`: prompt iterates `(profile, checklist)` from the provided list rather than fixed category names. **Specific literal-string edit:** the agent's current Step 2 says "Load the corresponding reference checklists from `klaude-plugin/skills/review-code/reference/{lang}/`" with the full extension table duplicated — rewrite to "Apply the checklists provided in the input payload; for each `(profile, checklist)` record, read the checklist content from `${CLAUDE_PLUGIN_ROOT}/profiles/<profile>/review-code/<checklist>` and apply it to the diff." Remove the extension table entirely (detection is no longer the agent's responsibility).
+- [x] Verify: `grep -rn 'reference/' klaude-plugin/skills/review-code/ klaude-plugin/agents/code-reviewer.md` finds no residual references to the removed layout (grep scope **expanded to include `agents/`** because `code-reviewer.md` lives there, not under `skills/`).
+- [x] Verify: `grep -rn '${CLAUDE_PLUGIN_ROOT}/profiles/' klaude-plugin/skills/review-code/` returns matches at Step 3 of `review-process.md` and equivalent points in `review-isolated.md`.
+- [ ] Verify: manual dry-run of `/kk:review-code` on a Go-only commit — output identifies `go` as the active profile; four checklists are loaded from the new `profiles/go/review-code/` location; finding coverage matches pre-P0. (**Deferred:** runtime verification belongs to Task 7 P0-V.)
 
 ## Task 5 — Update `test/test-plugin-structure.sh`
 

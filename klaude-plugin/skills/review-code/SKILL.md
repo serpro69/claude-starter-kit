@@ -15,6 +15,8 @@ Perform a structured review of the current git changes with focus on SOLID, arch
 
 Read capy knowledge base conventions at [shared-capy-knowledge-protocol.md](shared-capy-knowledge-protocol.md).
 
+Profile detection — the set of reference checklists loaded for a given diff — is delegated to the shared procedure at [shared-profile-detection.md](shared-profile-detection.md). The workflow below invokes it in Step 2 and uses the resulting `(profile, checklist)` list to drive Steps 3–4.
+
 ## Required Outputs
 
 Before declaring the review complete, verify all outputs are delivered:
@@ -56,14 +58,12 @@ See [review-isolated.md](./review-isolated.md) for the isolated workflow.
 **Phases:**
 
 1. Preflight context — scope changes, re-read changed files, search prior findings
-2. Detect primary language — load language-specific reference checklists
-3. SOLID + architecture smells
-4. Removal candidates + iteration plan
-5. Security and reliability scan
-6. Code quality scan
-7. Self-check and confidence assessment
-8. Index findings — capy index systemic P0/P1 patterns as `kk:review-findings`
-9. Present results with next steps
+2. Detect active profiles — delegate to `shared-profile-detection.md`; produce the list of `(profile, checklist)` records
+3. Load profile review indexes — for each active profile, resolve its `review-code/index.md` and collect always-load + matching conditional checklists
+4. Apply checklists — iterate the resolved list; emit findings grouped by `(profile, checklist)`
+5. Self-check and confidence assessment
+6. Index findings — capy index systemic P0/P1 patterns as `kk:review-findings`
+7. Present results with next steps
 
 See [review-process.md](./review-process.md) for the detailed step-by-step process.
 

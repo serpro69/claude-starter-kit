@@ -14,7 +14,7 @@ Isolated Code Review Progress:
 
 ## Contents
 
-- **Step 1: Prepare Artifacts** — 1a) Capture diff, 1b) Locate spec context, 1c) Detect language, 1d) Resolve pal model, 1e) Curate rejected approaches, 1f) Determine task scope
+- **Step 1: Prepare Artifacts** — 1a) Capture diff, 1b) Locate spec context, 1c) Detect active profiles and resolve checklists, 1d) Resolve pal model, 1e) Curate rejected approaches, 1f) Determine task scope
 - **Step 2: Spawn Reviewers** — Reviewer A (code-reviewer sub-agent), Reviewer B (pal codereview), error handling
 - **Step 3: Annotate Findings** — 3a) Duplicate merging, 3b) Author context, 3c) Author-sourced findings, 3d) pal follow-up
 - **Step 4: Index Findings**
@@ -45,17 +45,17 @@ Spec context is optional but improves review quality:
 
 Capture the relevant spec excerpt (design rationale, task description, documented decisions) as text to inject into the sub-agent prompt.
 
-### 1c) Detect primary language
+### 1c) Detect active profiles and resolve checklists
 
-From the `git diff --stat` output, identify the primary language by file extension:
+Delegate to [shared-profile-detection.md](shared-profile-detection.md) with the diff from Step 1a as input. The procedure returns a list of records — one per matched profile — each naming the trigger signal and the files that activated it.
 
-| Extensions | Language key |
-|---|---|
-| `.go` | `go` |
-| `.js`, `.ts`, `.jsx`, `.tsx`, `.mjs`, `.cjs` | `js_ts` |
-| `.py`, `.pyw` | `python` |
-| `.java` | `java` |
-| `.kt`, `.kts` | `kotlin` |
+For each active profile, resolve the checklists to apply:
+
+1. Read `${CLAUDE_PLUGIN_ROOT}/profiles/<profile>/review-code/index.md`.
+2. Collect every entry under **Always load**.
+3. For every **Load if:** conditional entry, evaluate the predicate against the diff; collect the entry when it matches.
+
+Accumulate a flat list of `(profile, checklist)` records. This list — not any hardcoded category sequence — is what the sub-agent and pal prompts will receive in Step 2. If no profile matched, the list is empty; both reviewers fall back to general guidance.
 
 ### 1d) Resolve pal model
 
@@ -100,10 +100,17 @@ You are reviewing the following code changes. Apply your full review workflow.
 
 {paste the full git diff output here}
 
-## Primary Language
+## Active Profiles and Resolved Checklists
 
-{language key from Step 1c} — load reference checklists from:
-klaude-plugin/skills/review-code/reference/{language_key}/
+{list of (profile, checklist) records from Step 1c, formatted as:
+- profile: <name>
+  checklists:
+    - <checklist_filename>
+    - <checklist_filename>
+    ...
+}
+
+For each record, read the checklist at `${CLAUDE_PLUGIN_ROOT}/profiles/<profile>/review-code/<checklist>` and apply it to the diff. If no profiles are active (empty list), fall back to general review guidance without profile-specific checklists.
 
 ## Spec Context
 

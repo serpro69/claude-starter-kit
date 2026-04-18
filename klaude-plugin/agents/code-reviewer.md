@@ -22,7 +22,7 @@ The spawning workflow injects these artifacts into your prompt:
 - **Git diff** of the changes under review
 - **Spec context** (if available): relevant section from design.md, task description, documented design rationale
 - **Task scope** (if available): which tasks in the feature are in scope for this review and which are pending/out-of-scope — see `klaude-plugin/skills/_shared/review-scope-protocol.md`. When present, this overrides naive reading of the design doc: the design describes the full end state, but only in-scope tasks are expected in the diff.
-- **Primary language** detected from the diff, with path to language-specific checklists
+- **Active profiles and resolved checklists**: a list of `(profile, checklist)` records already resolved by the spawning workflow. You do NOT detect profiles yourself — the calling skill ran profile detection and resolved which checklists apply. Your job is to read and apply them.
 - **Capy read access** for project-specific context via `capy_search`
 
 ## What You Do NOT Have
@@ -49,63 +49,32 @@ Follow these steps in order. Each step references the `review-code` methodology.
 - Analyze the git diff provided in your prompt.
 - If needed, use Read/Grep/Glob to find related modules, usages, and contracts in the codebase.
 - Identify entry points, ownership boundaries, and critical paths (auth, payments, data writes, network).
-- **Capy search:** Search `kk:review-findings` for prior findings in the same files/modules. Search `kk:lang-idioms` for best practices in the detected language.
+- **Capy search:** Search `kk:review-findings` for prior findings in the same files/modules. For any programming-language profile in the input payload, search `kk:lang-idioms` for best practices in that language.
 
 **Edge cases:**
 - **Large diff (>500 lines)**: Summarize by file first, then review in batches by module/feature area.
 - **Mixed concerns**: Group findings by logical feature, not just file order.
 
-### 2) Detect Primary Language
+### 2) Apply the Provided Checklists
 
-Use the language provided by the spawning workflow. Load the corresponding reference checklists from `klaude-plugin/skills/review-code/reference/{lang}/`:
+The spawning workflow has already run profile detection and produced a list of `(profile, checklist)` records. Do not re-detect profiles; do not hardcode categories.
 
-| Extensions | Reference set |
-|---|---|
-| `.go` | `reference/go/` |
-| `.js`, `.ts`, `.jsx`, `.tsx`, `.mjs`, `.cjs` | `reference/js_ts/` |
-| `.py`, `.pyw` | `reference/python/` |
-| `.java` | `reference/java/` |
-| `.kt`, `.kts` | `reference/kotlin/` |
+For each `(profile, checklist)` record in the input payload:
 
-Read the following checklists for the detected language:
-- `solid-checklist.md`
-- `security-checklist.md`
-- `code-quality-checklist.md`
-- `removal-plan.md`
+1. Read the checklist at `${CLAUDE_PLUGIN_ROOT}/profiles/<profile>/review-code/<checklist>`.
+2. Apply it to the diff. The checklist states what to look for — it may cover SOLID/architecture, security, code quality, removal candidates, or a profile-specific concern (e.g., Helm template correctness, RBAC least privilege, Kustomize base/overlay separation).
+3. Emit findings grouped by `(profile, checklist)` so the report surface can organize them.
 
-If the language has no matching reference set, skip language-specific loading and apply general guidance.
+If the input payload has no active profiles (empty list), skip profile-specific loading and apply general guidance: SOLID/architecture smells, security/reliability, code quality, and removal candidates as commonly understood.
 
-### 3) SOLID + Architecture Smells
+General guidance that applies regardless of profile:
 
-Apply the SOLID checklist. Look for:
-- **SRP**: Overloaded modules with unrelated responsibilities
-- **OCP**: Frequent edits to add behavior instead of extension points
-- **LSP**: Subclasses that break expectations or require type checks
-- **ISP**: Wide interfaces with unused methods
-- **DIP**: High-level logic tied to low-level implementations
+- **SOLID / architecture:** SRP violations (overloaded modules), OCP (frequent edits instead of extension), LSP (subclass expectations broken), ISP (wide interfaces), DIP (high-level tied to low-level).
+- **Security / reliability:** XSS, injection, SSRF, path traversal; AuthZ/AuthN gaps; secret leakage; rate limits and unbounded resource use; unsafe deserialization, weak crypto; race conditions and TOCTOU.
+- **Code quality:** swallowed exceptions, overly broad catches, async-error handling; N+1 queries, hot-path CPU/memory issues; null/empty/boundary handling, off-by-one.
+- **Removal candidates:** unused, redundant, feature-flagged-off code. Distinguish **safe delete now** vs **defer with plan**.
 
-### 4) Removal Candidates
-
-Identify code that is unused, redundant, or feature-flagged off. Distinguish **safe delete now** vs **defer with plan**.
-
-### 5) Security and Reliability Scan
-
-Apply the security checklist. Check for:
-- XSS, injection (SQL/NoSQL/command), SSRF, path traversal
-- AuthZ/AuthN gaps, missing tenancy checks
-- Secret leakage or API keys in logs/env/files
-- Rate limits, unbounded loops, CPU/memory hotspots
-- Unsafe deserialization, weak crypto, insecure defaults
-- Race conditions: concurrent access, check-then-act, TOCTOU, missing locks
-
-### 6) Code Quality Scan
-
-Apply the code quality checklist. Check for:
-- **Error handling**: swallowed exceptions, overly broad catch, missing error handling, async errors
-- **Performance**: N+1 queries, CPU-intensive ops in hot paths, missing cache, unbounded memory
-- **Boundary conditions**: null/undefined handling, empty collections, numeric boundaries, off-by-one
-
-### 7) Self-Check and Confidence Assessment
+### 3) Self-Check and Confidence Assessment
 
 For each finding:
 - Re-read the relevant code to confirm the finding is valid

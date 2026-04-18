@@ -5,16 +5,14 @@ Copy this checklist and check off items as you complete them:
 ```
 Code Review Progress:
 - [ ] Step 1: Preflight context
-- [ ] Step 2: Detect primary language
-- [ ] Step 3: SOLID + architecture smells
-- [ ] Step 4: Removal candidates + iteration plan
-- [ ] Step 5: Security and reliability scan
-- [ ] Step 6: Code quality scan
-- [ ] Step 7: Self-check and confidence assessment
-- [ ] Step 8: Index findings
-- [ ] Step 9: Present results
-- [ ] Step 10: Next steps confirmation
-- [ ] Step 11: Verify outputs
+- [ ] Step 2: Detect active profiles
+- [ ] Step 3: Load profile review indexes
+- [ ] Step 4: Apply checklists
+- [ ] Step 5: Self-check and confidence assessment
+- [ ] Step 6: Index findings
+- [ ] Step 7: Present results
+- [ ] Step 8: Next steps confirmation
+- [ ] Step 9: Verify outputs
 ```
 
 ---
@@ -33,67 +31,49 @@ Code Review Progress:
 - **Large diff (>500 lines)**: Summarize by file first, then review in batches by module/feature area.
 - **Mixed concerns**: Group findings by logical feature, not just file order.
 
-### 2) Detect primary language
+### 2) Detect active profiles
 
-From the `git diff --stat` output in step 1, identify the primary language of changed files by extension:
+Delegate to [shared-profile-detection.md](shared-profile-detection.md). For `review-code`, the detection input is the git diff scoped to the set of touched files (captured in Step 1).
 
-| Extensions                                   | Reference set       |
-| -------------------------------------------- | ------------------- |
-| `.go`                                        | `reference/go/`     |
-| `.js`, `.ts`, `.jsx`, `.tsx`, `.mjs`, `.cjs` | `reference/js_ts/`  |
-| `.py`, `.pyw`                                | `reference/python/` |
-| `.java`                                      | `reference/java/`   |
-| `.kt`, `.kts`                                | `reference/kotlin/` |
+The shared procedure returns a list of records:
 
-- **Single language**: Use that language's reference directory for all subsequent steps.
-- **Mixed languages**: Load references from each relevant directory.
-- **No match**: Skip language-specific reference loading; apply only the general guidance in each step.
+```
+[{ profile: "<name>", triggered_by: [...], files: [...] }, ...]
+```
 
-Use `{lang}` below to refer to the detected reference directory.
+Hold this list for Step 3. It replaces the former extension-table lookup: there is no single "primary language"; any number of profiles can be active on the same diff (e.g., `go` + `k8s` when a Go service ships a Helm chart).
 
-### 3) SOLID + architecture smells
+If the list is empty (no profile matched), skip Steps 3–4's profile-specific loading and apply only the general guidance embedded in this file when reviewing.
 
-- Load [reference/{lang}/solid-checklist.md](./reference/{lang}/solid-checklist.md) for specific prompts.
-- Look for:
-  - **SRP**: Overloaded modules with unrelated responsibilities.
-  - **OCP**: Frequent edits to add behavior instead of extension points.
-  - **LSP**: Subclasses that break expectations or require type checks.
-  - **ISP**: Wide interfaces with unused methods.
-  - **DIP**: High-level logic tied to low-level implementations.
-- When you propose a refactor, explain _why_ it improves cohesion/coupling and outline a minimal, safe split.
-- If refactor is non-trivial, propose an incremental plan instead of a large rewrite.
+### 3) Load profile review indexes
 
-### 4) Removal candidates + iteration plan
+For each active profile record from Step 2:
 
-- Load [reference/{lang}/removal-plan.md](./reference/{lang}/removal-plan.md) for template.
-- Identify code that is unused, redundant, or feature-flagged off.
-- Distinguish **safe delete now** vs **defer with plan**.
-- Provide a follow-up plan with concrete steps and checkpoints (tests/metrics).
+1. Resolve `${CLAUDE_PLUGIN_ROOT}/profiles/<profile>/review-code/index.md`.
+2. Read the index. Collect every entry under **Always load**.
+3. For every conditional entry (**Load if:** predicate), evaluate the predicate against the diff. If it matches, collect the entry.
+4. Append the collected entries to a flat list keyed by `(profile, checklist filename)`.
 
-### 5) Security and reliability scan
+The resulting list is the complete set of checklists to apply. Do NOT hardcode checklist names here — the index is authoritative, and new profiles (or new conditional entries added to existing profiles) take effect without edits to this file.
 
-- Load [reference/{lang}/security-checklist.md](./reference/{lang}/security-checklist.md) for coverage.
-- Check for:
-  - XSS, injection (SQL/NoSQL/command), SSRF, path traversal
-  - AuthZ/AuthN gaps, missing tenancy checks
-  - Secret leakage or API keys in logs/env/files
-  - Rate limits, unbounded loops, CPU/memory hotspots
-  - Unsafe deserialization, weak crypto, insecure defaults
-  - **Race conditions**: concurrent access, check-then-act, TOCTOU, missing locks
-- Call out both **exploitability** and **impact**.
+### 4) Apply checklists
 
-### 6) Code quality scan
+Iterate the `(profile, checklist)` list from Step 3. For each pair:
 
-- Load [reference/{lang}/code-quality-checklist.md](./reference/{lang}/code-quality-checklist.md) for coverage.
-- Check for:
-  - **Error handling**: swallowed exceptions, overly broad catch, missing error handling, async errors
-  - **Performance**: N+1 queries, CPU-intensive ops in hot paths, missing cache, unbounded memory
-  - **Boundary conditions**: null/undefined handling, empty collections, numeric boundaries, off-by-one
+1. Read the checklist file at `${CLAUDE_PLUGIN_ROOT}/profiles/<profile>/review-code/<checklist>`.
+2. Apply the checklist to the diff. A checklist may cover SOLID/architecture, security, quality, removal, or a profile-specific concern (e.g., Helm template correctness, RBAC least privilege) — the checklist itself states what to look for.
+3. Emit findings using `(profile, checklist)` as the grouping key so the report in Step 7 can organize them.
+
+General guidance that applies regardless of profile:
+
+- When you propose a refactor, explain _why_ it improves cohesion/coupling and outline a minimal, safe split. If refactor is non-trivial, propose an incremental plan instead of a large rewrite.
+- Call out both **exploitability** and **impact** on security findings.
 - Flag issues that may cause silent failures or production incidents.
+- Distinguish **safe delete now** vs **defer with plan** on removal findings; provide concrete follow-up steps with checkpoints (tests/metrics).
 
-### 7) Self-check and confidence assessment
+### 5) Self-check and confidence assessment
 
-This is the critical verification step. For **each finding** from Steps 3–6:
+This is the critical verification step. For **each finding** from Step 4:
 
 1. Re-read the relevant code and surrounding context independently
 2. Ask: **"Could I be misreading the code?"** — trace execution paths, check for runtime behavior, configuration, or framework conventions that might make this correct
@@ -105,14 +85,14 @@ This is the critical verification step. For **each finding** from Steps 3–6:
    - What uncertainty remains
 6. Downgrade or **remove** findings that don't survive the self-check
 
-### 8) Index findings
+### 6) Index findings
 
 Index any P0/P1 findings that suggest a systemic or structural pattern (not isolated typos or one-off mistakes) as `kk:review-findings`. Index on first encounter — recurrence detection happens on the search side in future reviews.
 
 - If no P0/P1 systemic findings exist, explicitly note "No findings to index" and move on.
 - This step is mandatory — do not skip it even if the review found no issues.
 
-### 9) Present results
+### 7) Present results
 
 #### Output format
 
@@ -177,7 +157,7 @@ Description of the issue and suggested fix.
 - Any areas not covered (e.g., "Did not verify database migrations")
 - Residual risks or recommended follow-up tests
 
-### 10) Next steps confirmation
+### 8) Next steps confirmation
 
 After presenting findings, ask user how to proceed:
 
@@ -200,7 +180,7 @@ Please choose an option or provide specific instructions.
 
 **Important**: Do NOT implement any changes until user explicitly confirms. This is a review-first workflow.
 
-### 11) Verify outputs
+### 9) Verify outputs
 
 Before declaring the review complete, check each item in the **Required Outputs** section of SKILL.md:
 
