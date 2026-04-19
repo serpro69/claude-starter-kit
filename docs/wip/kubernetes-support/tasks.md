@@ -164,27 +164,27 @@ Subtasks:
 ## Task 9 — Author `profiles/k8s/review-code/` checklists and index; append `k8s` to `EXPECTED_PROFILES`
 
 - **Phase:** P1
-- **Status:** pending
+- **Status:** in-progress
 - **Depends on:** Task 8
 - **Links:** [implementation.md §Step 1.3](implementation.md#step-13--author-profilesk8sreview-checklists-and-index-then-append-k8s-to-expected_profiles), [design.md §The Kubernetes profile, concretely](design.md#the-kubernetes-profile-concretely), [design.md §Index file structure](design.md#index-file-structure)
 
 Subtasks:
 
-- [ ] Create `klaude-plugin/profiles/k8s/review-code/security-checklist.md` — RBAC least privilege, NetworkPolicy default-deny, Pod Security Standards, non-root/readOnlyRootFilesystem, secret handling, image provenance, hostPath/hostNetwork/privileged avoidance.
-- [ ] Create `klaude-plugin/profiles/k8s/review-code/architecture-checklist.md` — single-concern resources, config injection via env/ConfigMap/Secret, no hardcoded cluster assumptions, explicit labels/selectors, cluster-vs-application separation.
-- [ ] Create `klaude-plugin/profiles/k8s/review-code/quality-checklist.md` — recommended label set, immutable image tags (digests preferred), resource requests+limits, probe correctness, declarative patterns.
-- [ ] Create `klaude-plugin/profiles/k8s/review-code/reliability-checklist.md` — PodDisruptionBudget presence, probe semantics, graceful shutdown (`terminationGracePeriodSeconds`, `preStop`), anti-affinity, topology spread, RollingUpdate tuning.
-- [ ] Create `klaude-plugin/profiles/k8s/review-code/helm-checklist.md` — `Chart.yaml` metadata completeness, values schema, template correctness, dependency pinning, `helm lint` cleanliness, `NOTES.txt`.
-- [ ] Create `klaude-plugin/profiles/k8s/review-code/kustomize-checklist.md` — base/overlay separation, patch precision, generator stability, common labels, patch-type clarity.
-- [ ] Create `klaude-plugin/profiles/k8s/review-code/removal-plan.md` — template with "Safe to remove now", "Defer with plan", "Checklist before removal" sections tailored to Kubernetes resources (CRDs, PVs, finalizers).
-- [ ] Create `klaude-plugin/profiles/k8s/review-code/index.md` with **predicate-form conditional triggers**:
+- [x] Create `klaude-plugin/profiles/k8s/review-code/security-checklist.md` — RBAC least privilege, NetworkPolicy default-deny, Pod Security Standards, non-root/readOnlyRootFilesystem, secret handling, image provenance, hostPath/hostNetwork/privileged avoidance.
+- [x] Create `klaude-plugin/profiles/k8s/review-code/architecture-checklist.md` — single-concern resources, config injection via env/ConfigMap/Secret, no hardcoded cluster assumptions, explicit labels/selectors, cluster-vs-application separation.
+- [x] Create `klaude-plugin/profiles/k8s/review-code/quality-checklist.md` — recommended label set, immutable image tags (digests preferred), resource requests+limits, probe correctness, declarative patterns.
+- [x] Create `klaude-plugin/profiles/k8s/review-code/reliability-checklist.md` — PodDisruptionBudget presence, probe semantics, graceful shutdown (`terminationGracePeriodSeconds`, `preStop`), anti-affinity, topology spread, RollingUpdate tuning.
+- [x] Create `klaude-plugin/profiles/k8s/review-code/helm-checklist.md` — `Chart.yaml` metadata completeness, values schema, template correctness, dependency pinning, `helm lint` cleanliness, `NOTES.txt`.
+- [x] Create `klaude-plugin/profiles/k8s/review-code/kustomize-checklist.md` — base/overlay separation, patch precision, generator stability, common labels, patch-type clarity.
+- [x] Create `klaude-plugin/profiles/k8s/review-code/removal-plan.md` — template with "Safe to remove now", "Defer with plan", "Checklist before removal" sections tailored to Kubernetes resources (CRDs, PVs, finalizers).
+- [x] Create `klaude-plugin/profiles/k8s/review-code/index.md` with **predicate-form conditional triggers**:
   - Always-load: `security-checklist.md`, `architecture-checklist.md`, `quality-checklist.md`, `removal-plan.md`.
   - Conditional — `reliability-checklist.md` **Load if:** the diff contains any file with a top-level YAML document whose `kind:` is `Deployment`, `StatefulSet`, `DaemonSet`, `Job`, or `CronJob`.
   - Conditional — `helm-checklist.md` **Load if:** the diff contains a file named `Chart.yaml`; OR a file named `values*.yaml` in a directory that also contains `Chart.yaml`; OR a file under a `templates/` directory whose ancestor contains `Chart.yaml`.
   - Conditional — `kustomize-checklist.md` **Load if:** the diff contains `kustomization.yaml`, `kustomization.yml`, or `Kustomization`; OR a file under `bases/` or `overlays/`; OR a patch file referenced by a nearby `kustomization.*`.
   - Include edge-case clarifications in the index prose: a standalone `values.yaml` without a sibling `Chart.yaml` does NOT trigger `helm-checklist.md`; a plain `deployment.yaml` outside `templates/` and without `{{ ... }}` directives is a manifest, not a Helm template.
-- [ ] Append `"k8s"` to `EXPECTED_PROFILES` in `test/test-plugin-structure.sh`. Done in this task (not Task 8) because the structure test's per-profile assertions would fail if `k8s` were in `EXPECTED_PROFILES` before its checklist files exist.
-- [ ] Verify: forward index invariant — every link in `index.md` resolves. Reverse index invariant — every `.md` file in the directory (except `index.md`) is referenced. Each conditional `Load if:` names concrete properties (`kind:` field values, filename strings, directory names) — not vague categories like "workload resources in diff". `bash test/test-plugin-structure.sh` exits 0 with `k8s` in `EXPECTED_PROFILES`.
+- [x] Append `"k8s"` to `EXPECTED_PROFILES` in `test/test-plugin-structure.sh`. Done in this task (not Task 8) because the structure test's per-profile assertions would fail if `k8s` were in `EXPECTED_PROFILES` before its checklist files exist.
+- [x] Verify: forward index invariant — every link in `index.md` resolves. Reverse index invariant — every `.md` file in the directory (except `index.md`) is referenced. Each conditional `Load if:` names concrete properties (`kind:` field values, filename strings, directory names) — not vague categories like "workload resources in diff". `bash test/test-plugin-structure.sh` exits 0 with `k8s` in `EXPECTED_PROFILES`.
 
 ## Task 10 — Phase 1 verification
 
