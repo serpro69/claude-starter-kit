@@ -28,6 +28,7 @@ Claude Code is powerful on its own, but it doesn't know your development workflo
 Out of the box you get:
 
 - **10 workflow skills** — a complete development pipeline invoked as `/skill-name`
+- **Multi-language support** — precise and distinct instructions from implementation to testing to review for: go, java, js/ts, kotlin, python
 - **Multi-model code review** — independent reviewers using sub-agents and external models (Gemini, etc.)
 - **Semantic code analysis** — LSP-powered symbol navigation and reference tracking via Serena
 - **Persistent knowledge base** — findings, decisions, and conventions that survive across sessions via Capy
