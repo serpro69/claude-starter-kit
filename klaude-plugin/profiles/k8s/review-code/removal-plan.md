@@ -8,7 +8,7 @@ Kubernetes removals are high-stakes because resources are often load-bearing at 
 
 Resources where removal is a pure cleanup with no runtime consequence:
 
-- **Orphan `ConfigMap` or `Secret`** — verify with `kubectl get all -o yaml | grep <name>` and `kubectl describe` that no Pod, Deployment, or other resource references the name.
+- **Orphan `ConfigMap` or `Secret`** — verify no references: `kubectl get all` is notoriously incomplete (it covers only Pod/Service/Deployment/ReplicaSet/StatefulSet/DaemonSet/Job/CronJob/ReplicationController — it MISSES ConfigMap/Secret/PVC/Ingress/NetworkPolicy/ServiceAccount/RBAC/CRDs). Use a targeted sweep instead: `kubectl get pod,deploy,sts,ds,job,cronjob,svc,ing,cm,secret,pvc,netpol,sa,role,rolebinding -A -o yaml | grep <name>`, and cross-check with `kubectl describe` for volume/env mounts.
 - **Unreferenced `Service`** — no `Endpoints`, no `Ingress` target, no internal DNS consumers. Check logs and service-mesh routing before assuming unreferenced.
 - **Unreferenced `ServiceAccount`** — no Pod uses it via `spec.serviceAccountName`, no `RoleBinding` / `ClusterRoleBinding` cites it.
 - **Unused `Role` / `ClusterRole`** — no `RoleBinding` / `ClusterRoleBinding` references them.
@@ -56,7 +56,7 @@ For deferred items, the manifest should either remain until the migration is com
 For every resource being removed:
 
 - [ ] **Finalizer audit.** `kubectl get <kind> <name> -o jsonpath='{.metadata.finalizers}'` — nonzero means removal will hang until the finalizer is processed (or force-removed, which risks leaks).
-- [ ] **Consumer check.** Who calls this? For Services: `kubectl get ep <svc>` + downstream DNS consumers. For CRDs: `kubectl get <kind> -A`. For Secrets/ConfigMaps: `grep` manifests + `kubectl describe pods` for volume/env mounts.
+- [ ] **Consumer check.** Who calls this? For Services: `kubectl get ep <svc>` + downstream DNS consumers. For CRDs: `kubectl get <kind> -A`. For Secrets/ConfigMaps: `grep` manifests + `kubectl describe pods` for volume/env mounts. Do NOT rely on `kubectl get all` — it misses ConfigMaps, Secrets, PVCs, Ingresses, NetworkPolicies, RBAC, and CRDs.
 - [ ] **Owner-reference check.** `kubectl get <kind> <name> -o yaml | grep ownerReferences` — if owned by another resource, delete the owner, not the owned resource.
 - [ ] **Backup.** For stateful resources (Secrets, PVCs, Ingress TLS), snapshot to a secure location before removal.
 - [ ] **Rollback plan.** How do you restore? `kubectl apply` of the removed manifest from git? A prior Helm release? A restore from backup? Write it down before removing.

@@ -17,10 +17,10 @@ Conditional triggers are stated as predicates keyed to concrete diff properties 
   **Load if:** the diff contains any file with a top-level YAML document whose `kind:` is `Deployment`, `StatefulSet`, `DaemonSet`, `Job`, or `CronJob`. Evaluate `kind:` as a YAML mapping key at zero indent inside each `---`-separated document block — not as a substring in comments or block scalars.
 
 - [helm-checklist.md](helm-checklist.md) — `Chart.yaml` metadata, `values.yaml` schema, template correctness, dependency pinning, `helm lint` cleanliness, `NOTES.txt`.
-  **Load if:** the diff contains a file named `Chart.yaml`; OR a file whose name starts with `values` (e.g., `values.yaml`, `values-prod.yaml`) in a directory that also contains `Chart.yaml`; OR a file with extension `.yaml`, `.yml`, or `.tpl` under a directory named `templates/` whose ancestor contains `Chart.yaml`.
+  **Load if:** the diff contains a file named `Chart.yaml`; OR a file whose name matches the glob `values*.yaml` or `values*.yml` (e.g., `values.yaml`, `values-prod.yaml`, `values-prod-v2.yml`) in a directory that also contains `Chart.yaml`; OR a file with extension `.yaml`, `.yml`, or `.tpl` under a directory named `templates/` whose ancestor contains `Chart.yaml`.
 
 - [kustomize-checklist.md](kustomize-checklist.md) — base/overlay separation, patch precision, generator stability, common-labels discipline, patch-type clarity.
-  **Load if:** the diff contains a file named `kustomization.yaml`, `kustomization.yml`, or `Kustomization` (exact); OR a file under a directory named `bases/` or `overlays/`; OR a patch file referenced by a nearby `kustomization.*` (strategic merge patch or JSON 6902 patch target).
+  **Load if:** the diff contains a file named `kustomization.yaml`, `kustomization.yml`, or `Kustomization` (exact); OR a file under a directory named `bases/` or `overlays/` **that has a `kustomization.yaml` / `kustomization.yml` / `Kustomization` in the same directory or a direct ancestor** (without that adjacency, `bases/` / `overlays/` are just directory names — some projects use them for unrelated purposes); OR a patch file referenced by a nearby `kustomization.*` (strategic merge patch or JSON 6902 patch target).
 
 ## Edge-case clarifications
 

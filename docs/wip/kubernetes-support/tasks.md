@@ -164,7 +164,7 @@ Subtasks:
 ## Task 9 — Author `profiles/k8s/review-code/` checklists and index; append `k8s` to `EXPECTED_PROFILES`
 
 - **Phase:** P1
-- **Status:** in-progress
+- **Status:** done
 - **Depends on:** Task 8
 - **Links:** [implementation.md §Step 1.3](implementation.md#step-13--author-profilesk8sreview-checklists-and-index-then-append-k8s-to-expected_profiles), [design.md §The Kubernetes profile, concretely](design.md#the-kubernetes-profile-concretely), [design.md §Index file structure](design.md#index-file-structure)
 

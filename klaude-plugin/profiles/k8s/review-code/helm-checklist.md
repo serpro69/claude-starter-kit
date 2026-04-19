@@ -29,7 +29,7 @@ Applied conditionally when the diff contains Helm-shaped files: `Chart.yaml`, `v
 - Every value referenced in `templates/` has a sensible default in `values.yaml`, OR is gated by `required` in the template with a clear error message.
 - Structure mirrors consumer expectations: group by concern (`image`, `resources`, `ingress`, `serviceAccount`), not flat.
 - Boolean-flag vs object-nesting consistency: `ingress.enabled: true` + `ingress.hosts: [...]` is the common pattern; avoid `ingressEnabled` alongside `ingress: {...}`.
-- `values.schema.json` (JSON Schema draft 7 or later) optional but recommended for non-trivial charts — catches type errors at `helm install`/`upgrade` time.
+- `values.schema.json` — JSON Schema **draft-07** (Helm's documented example declares `"$schema": "https://json-schema.org/draft-07/schema#"`; later drafts are not supported reliably by Helm 3's validator and keywords from draft-2019-09 / 2020-12 may silently fail). Optional but recommended for non-trivial charts — catches type errors at `helm install`, `helm upgrade`, `helm lint`, and `helm template` time. Schema validation can be skipped with `--skip-schema-validation` when the schema contains remote references in air-gapped environments.
 - `image.repository`, `image.tag`, `image.pullPolicy` as separate values — consumers override tags for CI image promotion.
 - Secret material is NOT a default in `values.yaml`; mark such values as required without a default, and document at the README level how to supply them (via `--set`, `-f`, Sealed Secrets, External Secrets).
 - Backwards-compat concerns: renaming a values key without a deprecation cycle breaks installers. `Chart.yaml` version bump to major when rename is unavoidable.
@@ -40,14 +40,14 @@ Applied conditionally when the diff contains Helm-shaped files: `Chart.yaml`, `v
 - `{{ .Values.foo | quote }}` on any user-supplied string interpolated into YAML values — prevents YAML injection and unquoted-number bugs (`"123abc"` interpreted as a number).
 - `nil` handling: `{{ .Values.optional | default "x" }}` or `{{- if .Values.optional }}...{{- end }}`. Templates that produce `key: <no value>` on nil are malformed.
 - `toYaml` with `nindent`: `{{ toYaml .Values.x | nindent 4 }}` — get the indent right; empty maps output `{}`, empty lists output `[]`, neither renders well if indentation is wrong.
-- `lookup` function used sparingly — it makes templates non-deterministic (cluster state at render time affects output). Document any usage.
+- `lookup` function used sparingly — it makes templates non-deterministic (cluster state at render time affects output). **In `helm template` (offline rendering) `lookup` always returns an empty value**, so any conditional logic that depends on `lookup` results is never exercised during CI validation via `helm template | kubeconform` — a frequent "works locally, broken on first install" failure source. Guard every `lookup` call with a sensible fallback and document the runtime-only behavior; `helm lint` flags are not sufficient to cover this.
 - `{{- }}` whitespace trimming applied consistently; stray blank lines in rendered output cause diffs to look noisier than they are.
 - Range iteration names the index explicitly (`{{- range $index, $item := .Values.list }}`) when the index is used, not just `{{- range .Values.list }}`.
 - Named template definitions (`{{- define "..." }}...{{- end }}`) live in `_helpers.tpl` files; file names starting with `_` are NOT rendered.
 
 ## Chart dependencies
 
-- `dependencies[]` in `Chart.yaml` pin versions strictly (`1.2.3`), not with floating ranges (`~1.2` or `>=1.2.0`). Floating ranges make a chart un-reproducible.
+- `dependencies[]` in `Chart.yaml` pin versions strictly (`1.2.3`), not with floating ranges (`~1.2` or `>=1.2.0`). **Reproducibility requires strict-pin AND committed `Chart.lock`** — the version pin alone is insufficient if the upstream chart repo allows tag mutation, which many historically have. Treat the two as a pair.
 - Each dependency has a `repository` (URL or `@alias` of a `helm repo add` entry) and a `condition` when optional.
 - `alias` used when the same chart is included multiple times or when naming conflicts arise.
 - `helm dependency update` has been run; `Chart.lock` is present and committed.

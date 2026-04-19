@@ -17,7 +17,7 @@ Applied conditionally — load when the diff contains a top-level YAML document 
 - `PDB` uses `minAvailable` (preferred) OR `maxUnavailable` — not both.
 - `minAvailable` expressed as a percentage when replica count changes over time; as an integer when the workload has a fixed replica count.
 - PDB selector matches the workload's Pod labels exactly.
-- Single-replica workloads generally should not have a PDB blocking eviction — it prevents node drain entirely. If single-replica AND disruption-sensitive, the design problem is the replica count, not the PDB.
+- Single-replica workloads with a **blocking** PDB — `minAvailable: 1` (or equivalently `maxUnavailable: 0`) — prevent node drain entirely and can deadlock cluster upgrades. **This is a P0 finding.** A PDB with `maxUnavailable: 1` on a single-replica workload is non-blocking (drain is permitted because the "max unavailable" budget is met by the drain itself) and is safe; it merely serves as documentation. If the workload is both single-replica and disruption-sensitive, the design problem is the replica count, not the PDB.
 
 ## Probe semantics and interaction
 
@@ -38,9 +38,9 @@ Applied conditionally — load when the diff contains a top-level YAML document 
 ## Anti-affinity and topology spread
 
 - Multi-replica workloads should spread across failure domains:
-  - Prefer `topologySpreadConstraints` (newer, more expressive) over `podAntiAffinity` when the cluster version supports it.
+  - Prefer `topologySpreadConstraints` over `podAntiAffinity` — GA since K8s 1.19, more expressive (declarative `maxSkew`, explicit topology keys, `matchLabelKeys` for version-scoped spread in 1.27+).
   - Typical topology keys: `kubernetes.io/hostname` (node-level), `topology.kubernetes.io/zone` (zone-level).
-  - `whenUnsatisfiable: ScheduleAnyway` (soft) vs `DoNotSchedule` (hard) — hard spread can block scheduling when capacity is tight. Review the choice.
+  - `whenUnsatisfiable: ScheduleAnyway` (soft) vs `DoNotSchedule` (hard) — hard spread can block scheduling when capacity is tight. Review the choice; soft is the safer default for application workloads, hard is appropriate for hard-isolation requirements (e.g., quorum services that must split across zones).
 - `podAntiAffinity` with `requiredDuringSchedulingIgnoredDuringExecution` is hard; `preferredDuringSchedulingIgnoredDuringExecution` is soft. Mismatch between intent and type is common.
 - StatefulSet: `serviceName` set and matches a headless Service; volume claim templates are stable.
 
@@ -52,7 +52,7 @@ Applied conditionally — load when the diff contains a top-level YAML document 
 - `Recreate`: terminates all old Pods before creating new ones — only appropriate when concurrent old+new versions cannot coexist (schema migrations, singleton workloads).
 - `minReadySeconds` for workloads whose readiness isn't immediate — prevents a burst of new Pods declared ready too early.
 - `progressDeadlineSeconds` so a stuck rollout surfaces rather than hanging forever.
-- `revisionHistoryLimit` set to a small-but-useful number (3–10); leaving the default (10) is fine; 0 disables rollback.
+- `revisionHistoryLimit` set to a small-but-useful number (3–10); the default (10) is fine. `revisionHistoryLimit: 0` disables `kubectl rollout undo` entirely and removes the ReplicaSet history that tools like Argo CD use for rollback/diff — flag as P2 unless the workload is ephemeral (CI runner, batch job) or an alternative rollback mechanism is documented.
 
 For `StatefulSet`: `podManagementPolicy` (`OrderedReady` default, `Parallel` for workloads that tolerate concurrent startup); `updateStrategy.rollingUpdate.partition` for staged rollouts.
 
@@ -66,7 +66,7 @@ For `DaemonSet`: `updateStrategy` — `RollingUpdate` or `OnDelete`. Node-impact
 - `CronJob.spec.concurrencyPolicy` (`Allow`, `Forbid`, `Replace`) — the default `Allow` can cause overlapping runs to pile up.
 - `CronJob.spec.startingDeadlineSeconds` so a missed scheduled run doesn't fire late when the controller catches up.
 - `CronJob.spec.successfulJobsHistoryLimit` / `failedJobsHistoryLimit` bounded to avoid etcd bloat.
-- Timezone: `CronJob.spec.timeZone` explicit in clusters that support it (v1.25+); otherwise document the schedule is in controller-local time (usually UTC).
+- Timezone: `CronJob.spec.timeZone` — alpha in K8s 1.24 (feature gate off by default), beta and enabled by default in 1.25, GA in 1.27. Set explicitly on clusters running ≥1.25 with default feature gates; on older clusters, document that the schedule is in kube-controller-manager local time (usually UTC).
 
 ## Questions to ask
 

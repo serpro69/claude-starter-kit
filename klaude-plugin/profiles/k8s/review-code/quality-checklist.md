@@ -13,7 +13,7 @@ Idiomatic manifest quality signals. Applied whenever the `k8s` profile is active
 
 ## Labels and annotations
 
-The recommended label set (SIG Apps, `kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/`) applied consistently on every top-level resource:
+The recommended label set (SIG Apps, [kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/](https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/)) applied consistently on every top-level resource:
 
 - `app.kubernetes.io/name` — the name of the application.
 - `app.kubernetes.io/instance` — unique name identifying this instance.
@@ -38,7 +38,7 @@ Propagate the relevant labels to the Pod template (`spec.template.metadata.label
 - Every container sets `resources.requests` (`cpu` and `memory`) — without requests, the scheduler uses BestEffort placement and the workload is evicted first under pressure.
 - Every container sets `resources.limits.memory` — without a memory limit, a leaking process can OOM the node. (Memory limits without requests is also a finding — they differ.)
 - CPU limits are contentious: they prevent noisy-neighbor effects but can cause throttling that hurts latency. Absence of `cpu` limit is acceptable when the workload's noisy-neighbor risk is analyzed; blind absence is a finding.
-- Requests/limits ratio: when both are set, `limits.memory` should equal `requests.memory` for predictable QoS class `Guaranteed`; CPU can diverge.
+- `Guaranteed` QoS class requires **every container** in the Pod to have `requests == limits` for BOTH `cpu` AND `memory`, with all values > 0. Partial parity (e.g., memory-equal + diverged CPU, OR one container Guaranteed-shaped and another not) yields `Burstable`, not `Guaranteed`. Init and app containers count; ephemeral containers are excluded (they cannot declare resources). Document the QoS intent explicitly — reviewers cannot infer it from partial parity.
 - Ephemeral storage: `resources.requests.ephemeral-storage` and `limits.ephemeral-storage` for workloads writing to emptyDir or container filesystems — prevents node disk exhaustion.
 
 ## Probes
@@ -50,12 +50,14 @@ Propagate the relevant labels to the Pod template (`spec.template.metadata.label
 - `startupProbe` for slow-starting applications — lets liveness/readiness use short intervals without fighting long warm-ups.
 - Probe endpoints return cheaply (no DB round-trip on liveness; a cached readiness signal is fine).
 - `initialDelaySeconds`, `periodSeconds`, `timeoutSeconds`, `failureThreshold`, `successThreshold` tuned to the workload — defaults are rarely optimal.
-- HTTP probes specify the path and port explicitly; TCP probes are a fallback when HTTP is unavailable; `exec` probes are expensive and should be avoided.
+- HTTP probes specify the path and port explicitly; TCP probes are a fallback when HTTP is unavailable. `exec` probes fork a subprocess per check — prefer HTTP/TCP when the application exposes them, but `exec` with a lightweight binary (`redis-cli PING`, `pg_isready`) is the correct probe type for stateful services without HTTP endpoints. Avoid shells with complex logic.
+
+Deeper probe semantics (startup vs liveness ordering, interaction with disruption, graceful shutdown coupling) belong to the reliability review — see `reliability-checklist.md` §Probe semantics and interaction when the diff contains a workload resource.
 
 ## Ports, naming, and discoverability
 
 - Container `ports[]` entries have `name` set — `Service.spec.ports[].targetPort` can then refer to port names, which survive port-number changes.
-- Port names follow the IANA service-name rules (max 15 characters, lowercase, alphanumeric + `-`, must start/end with alphanumeric).
+- Port names in BOTH `containerPorts[].name` AND `Service.spec.ports[].name` follow the IANA service-name rules (max 15 characters, lowercase, alphanumeric + `-`, must start/end with alphanumeric, and must contain at least one letter).
 - `Service.spec.type` explicit (`ClusterIP`, `NodePort`, `LoadBalancer`) — defaulting to `ClusterIP` is fine but naming it makes intent clear.
 - `Service.spec.ports[].appProtocol` set when the protocol matters (`http`, `grpc`, `tcp`) — helps ingress controllers and service meshes.
 

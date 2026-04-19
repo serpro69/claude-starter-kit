@@ -39,7 +39,7 @@ Applied conditionally when the diff contains Kustomize-shaped files: `kustomizat
 
 ## Common labels, annotations, and selectors
 
-- `commonLabels` (deprecated in modern Kustomize; `labels:` with `includeSelectors: true` is preferred) applies labels to every resource AND selectors AND Pod templates. This is powerful and often wrong — labels added to selectors can break existing Deployments' `matchLabels` immutability.
+- `commonLabels` is superseded (still functional in v5.x, but discouraged for new work) by the `labels:` stanza. The critical semantic difference: `commonLabels` applies to metadata AND selectors AND Pod template labels (per official Kustomize docs, `commonLabels` is equivalent to `labels: [{includeSelectors: true}]`). The `labels:` stanza is safer by default because `includeSelectors` defaults to `false` — it applies to metadata only unless you explicitly opt in. **Only set `includeSelectors: true` when you are writing the initial selector-defining base; never add `true` to an overlay that patches an existing Deployment** — adding labels to `matchLabels` retroactively violates selector immutability and forces manual intervention.
 - `commonAnnotations` applies annotations to every resource but NOT to Pod templates — usually harmless.
 - Align with the recommended label set (see quality-checklist.md):
   - `commonLabels.app.kubernetes.io/managed-by: kustomize`
@@ -66,7 +66,7 @@ Avoid alternating styles within a single overlay for the same concern — pick o
 
 ## `kustomization.yaml` hygiene
 
-- `apiVersion: kustomize.config.k8s.io/v1beta1` (or v1) explicit at top of file.
+- `apiVersion: kustomize.config.k8s.io/v1` explicit at top of file (GA since Kustomize v4.x; preferred for new work). `v1beta1` is still accepted but has subtle behavioral differences in `resources:` resolution — flag as a migration target in existing files.
 - `resources:` listed with relative paths, sorted for reviewability.
 - Avoid remote bases (`resources: - github.com/...?ref=...`) in production overlays — pin by commit SHA or vendor the base locally.
 - `components:` used for cross-cutting, reusable pieces (e.g., "enable metrics sidecar on any overlay that includes this component").

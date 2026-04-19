@@ -22,7 +22,7 @@ Declarative-resource shape, separation of concerns, and cluster-vs-application b
 
 - Configuration values (URLs, flags, tuning parameters, connection strings) flow through `env`, `envFrom`, or volume-mounted `ConfigMap` / `Secret` — never hardcoded in the container image or in static manifest literals that should differ per environment.
 - Hostnames: use cluster-local DNS (`svc.cluster.local`) by name, not by IP. IP literals in manifests are a P1 finding — they break on cluster migration.
-- URLs pointing to cluster-internal services use the short form (`myservice` or `myservice.ns`), not hardcoded fully qualified domain names tied to a specific cluster domain.
+- URLs pointing to cluster-internal services use cluster DNS, not hardcoded FQDNs tied to a specific cluster domain. **Distinguish same-namespace from cross-namespace**: within the same namespace, the bare name (`myservice`) resolves via the Pod's DNS search domains. For cross-namespace, the namespace must be qualified (`myservice.other-ns` or `myservice.other-ns.svc`) — a bare `myservice` string resolves only in the caller's local namespace and silently fails (NXDOMAIN) when the target lives elsewhere. IP literals are always a P1 finding.
 - Boolean/enum flags that change per environment (debug vs prod, feature toggles) come from `ConfigMap`, not compile-time constants.
 - `ConfigMap` vs `Secret` choice: secret material → `Secret`; non-secret config → `ConfigMap`. Mixing sensitive values into `ConfigMap` is a security finding (see security-checklist.md) but also an architectural one: it conflates two concerns.
 
