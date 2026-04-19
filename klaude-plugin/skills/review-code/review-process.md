@@ -8,15 +8,16 @@ Copy this checklist and check off items as you complete them:
 Code Review Progress:
 - [ ] Step 1: Scope (filenames only)
 - [ ] Step 2: Detect active profiles
-- [ ] Step 3: Load profile review indexes
+- [ ] Step 3: Load profile review indexes (filename-evaluable entries)
 - [ ] Step 4: Read resolved checklists
 - [ ] Step 5: Read diff + re-read changed files + capy search
-- [ ] Step 6: Apply checklists
-- [ ] Step 7: Self-check and confidence assessment
-- [ ] Step 8: Index findings
-- [ ] Step 9: Present results
-- [ ] Step 10: Next steps confirmation
-- [ ] Step 11: Verify outputs
+- [ ] Step 6: Resolve content-evaluable conditional entries
+- [ ] Step 7: Apply checklists
+- [ ] Step 8: Self-check and confidence assessment
+- [ ] Step 9: Index findings
+- [ ] Step 10: Present results
+- [ ] Step 11: Next steps confirmation
+- [ ] Step 12: Verify outputs
 ```
 
 ---
@@ -51,8 +52,10 @@ For each active profile record from Step 2:
 
 1. Read `<plugin_root>/profiles/<profile>/review-code/index.md`, where `<plugin_root>` is the absolute plugin-root path you already know from SKILL.md context.
 2. Collect every entry under **Always load**.
-3. For every conditional entry (**Load if:** predicate), evaluate the predicate against the filenames from Step 1 (and, if the predicate requires content, note it for Step 5 — do **not** read file content here). If the filename-level predicate matches, collect the entry.
-4. Append the collected entries to a flat list keyed by `(profile, checklist filename)`.
+3. For every conditional entry (**Load if:** predicate), classify the predicate:
+   - **Filename-evaluable** — the predicate is satisfied by filenames, extensions, or directory names alone (e.g., "diff contains `Chart.yaml`", "file under `bases/` or `overlays/`"). Evaluate now against the filename list from Step 1. If it matches, collect the entry into the `(profile, checklist)` list.
+   - **Content-evaluable** — the predicate requires inspecting file bytes (e.g., YAML `kind:` field values, `apiVersion:` keys, specific string anchors). Do **not** read file content here. Instead, append the entry to a **deferred list** keyed by `(profile, checklist, predicate)` — Step 6 resolves this list after Step 5 reads content.
+4. Append the collected filename-evaluable entries to the flat `(profile, checklist)` list.
 
 Do NOT hardcode checklist names — the index is authoritative, and new profiles or new conditional entries take effect without edits to this file.
 
@@ -74,11 +77,23 @@ Now, with every checklist in context, read the content:
 
 This is the only step that reads artifact content. It appears once, by design. Do not repeat `git diff` or file re-reads in later steps.
 
-### 6) Apply checklists
+### 6) Resolve content-evaluable conditional entries
 
-Iterate the `(profile, checklist)` list from Step 3. For each pair, apply the checklist (already in context from Step 4) to the diff (in context from Step 5). A checklist may cover SOLID/architecture, security, quality, removal, or a profile-specific concern (e.g., Helm template correctness, RBAC least privilege) — the checklist itself states what to look for.
+For every `(profile, checklist, predicate)` record on the deferred list from Step 3:
 
-Emit findings using `(profile, checklist)` as the grouping key so the report in Step 9 can organize them.
+1. Evaluate the predicate against the file content now available from Step 5. Apply the same bounded-inspection rules as the shared profile-detection procedure — ~16 KB per file; multi-document YAML inspected per `---`-separated block.
+2. If the predicate matches, use the `Read` tool on `<plugin_root>/profiles/<profile>/review-code/<checklist>` to load the checklist into context, then append `(profile, checklist)` to the flat list that Step 7 iterates.
+3. If the predicate does not match, drop the entry silently — no checklist is loaded for it.
+
+If the deferred list is empty (no profile contributed a content-evaluable conditional), this step is a no-op. Proceed to Step 7.
+
+The deferred list exists so Step 3 can remain a filenames-only step (per the mandatory ordering in SKILL.md) while conditionals that genuinely require content — e.g., loading `reliability-checklist.md` on diffs that contain a `kind: Deployment` YAML document — still reach Step 7. Content-evaluable conditionals that bypass this step will be silently dropped.
+
+### 7) Apply checklists
+
+Iterate the flat `(profile, checklist)` list — the union of Step 3's filename-evaluable entries (whose checklists were read in Step 4) and Step 6's content-evaluable entries (whose checklists were read in Step 6 itself). For each pair, apply the checklist (already in context) to the diff (in context from Step 5). A checklist may cover SOLID/architecture, security, quality, removal, or a profile-specific concern (e.g., Helm template correctness, RBAC least privilege) — the checklist itself states what to look for.
+
+Emit findings using `(profile, checklist)` as the grouping key so the report in Step 10 can organize them.
 
 General guidance that applies regardless of profile — apply these categories on every diff, whether or not a profile-specific checklist covered them:
 
@@ -87,9 +102,9 @@ General guidance that applies regardless of profile — apply these categories o
 - **Code quality:** error handling (swallowed exceptions, overly broad catch, missing handling, async errors); performance (N+1 queries, CPU-intensive ops in hot paths, missing cache, unbounded memory); boundary conditions (null/undefined, empty collections, numeric boundaries, off-by-one). Flag issues that may cause silent failures or production incidents.
 - **Removal candidates:** unused, redundant, or feature-flagged-off code. Distinguish **safe delete now** vs **defer with plan**; provide concrete follow-up steps with checkpoints (tests/metrics).
 
-### 7) Self-check and confidence assessment
+### 8) Self-check and confidence assessment
 
-For **each finding** from Step 6:
+For **each finding** from Step 7:
 
 1. Re-read the relevant code and surrounding context independently.
 2. Ask: **"Could I be misreading the code?"** — trace execution paths, check for runtime behavior, configuration, or framework conventions that might make this correct.
@@ -101,14 +116,14 @@ For **each finding** from Step 6:
    - What uncertainty remains
 6. Downgrade or **remove** findings that don't survive the self-check.
 
-### 8) Index findings
+### 9) Index findings
 
 Index any P0/P1 findings that suggest a systemic or structural pattern (not isolated typos or one-off mistakes) as `kk:review-findings`. Index on first encounter — recurrence detection happens on the search side in future reviews.
 
 - If no P0/P1 systemic findings exist, explicitly note "No findings to index" and move on.
 - This step is mandatory — do not skip it even if the review found no issues.
 
-### 9) Present results
+### 10) Present results
 
 #### Output format
 
@@ -173,7 +188,7 @@ Description of the issue and suggested fix.
 - Any areas not covered (e.g., "Did not verify database migrations")
 - Residual risks or recommended follow-up tests
 
-### 10) Next steps confirmation
+### 11) Next steps confirmation
 
 After presenting findings, ask user how to proceed:
 
@@ -196,7 +211,7 @@ Please choose an option or provide specific instructions.
 
 **Important**: Do NOT implement any changes until user explicitly confirms. This is a review-first workflow.
 
-### 11) Verify outputs
+### 12) Verify outputs
 
 Before declaring the review complete, check each item in the **Required Outputs** section of SKILL.md:
 

@@ -130,10 +130,10 @@ Subtasks:
 
 Subtasks:
 
-- [ ] **test**: `bash test/test-plugin-structure.sh` exits 0.
+- [x] **test**: `bash test/test-plugin-structure.sh` exits 0.
 - [ ] **test**: dry-run `/kk:review-code` on a recent Go-only change; confirm `go` profile detected; four checklists loaded from `profiles/go/review-code/`; findings qualitatively equivalent to pre-P0.
-- [ ] **document**: confirm `CLAUDE.md` and `README.md` updates are accurate; no stale `reference/<lang>/` references anywhere in the plugin.
-- [ ] **review-code**: run `/kk:review-code` against the P0 diff; address P0-blocking findings per project convention.
+- [x] **document**: confirm `CLAUDE.md` and `README.md` updates are accurate; no stale `reference/<lang>/` references anywhere in the plugin.
+- [x] **review-code**: run `/kk:review-code` against the P0 diff; address P0-blocking findings per project convention. (Two P2s and one P3 found and fixed: CLAUDE.md signal-authority wording aligned with shared procedure; review-process.md gained Step 6 to resolve content-evaluable `Load if:` conditionals after Step 5 reads content; review-isolated.md placeholder convention unified on `<plugin_root>`. No P0/P1 findings.)
 - [ ] **review-spec**: run `/kk:review-spec kubernetes-support` with scope `all`; confirm P0's portion of design.md and implementation.md is satisfied by the P0 diff.
 - [ ] Set this task's status to `done` only after all four skills report no P0-blocking findings.
 
