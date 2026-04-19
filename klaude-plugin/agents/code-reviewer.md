@@ -102,7 +102,7 @@ Structure your output exactly as follows. This is the contract the annotation ph
 ## Code Review Findings
 
 **Files reviewed**: {X} files, {Y} lines changed
-**Primary language**: {language}
+**Active profiles**: {comma-separated profile names from the input payload, or "none"}
 **Overall assessment**: [APPROVE / REQUEST_CHANGES / COMMENT]
 
 ---

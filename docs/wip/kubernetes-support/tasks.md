@@ -124,18 +124,18 @@ Subtasks:
 ## Task 7 — Phase 0 verification
 
 - **Phase:** P0
-- **Status:** in-progress
+- **Status:** done
 - **Depends on:** Task 1, Task 2, Task 3, Task 4, Task 5, Task 6
 - **Links:** [implementation.md §Step 0.V](implementation.md#step-0v--p0-verification-task)
 
 Subtasks:
 
 - [x] **test**: `bash test/test-plugin-structure.sh` exits 0.
-- [ ] **test**: dry-run `/kk:review-code` on a recent Go-only change; confirm `go` profile detected; four checklists loaded from `profiles/go/review-code/`; findings qualitatively equivalent to pre-P0.
+- [x] **test**: dry-run `/kk:review-code` on a recent Go-only change; confirm `go` profile detected; four checklists loaded from `profiles/go/review-code/`; findings qualitatively equivalent to pre-P0.
 - [x] **document**: confirm `CLAUDE.md` and `README.md` updates are accurate; no stale `reference/<lang>/` references anywhere in the plugin.
 - [x] **review-code**: run `/kk:review-code` against the P0 diff; address P0-blocking findings per project convention. (Two P2s and one P3 found and fixed: CLAUDE.md signal-authority wording aligned with shared procedure; review-process.md gained Step 6 to resolve content-evaluable `Load if:` conditionals after Step 5 reads content; review-isolated.md placeholder convention unified on `<plugin_root>`. No P0/P1 findings.)
-- [ ] **review-spec**: run `/kk:review-spec kubernetes-support` with scope `all`; confirm P0's portion of design.md and implementation.md is satisfied by the P0 diff.
-- [ ] Set this task's status to `done` only after all four skills report no P0-blocking findings.
+- [x] **review-spec**: run `/kk:review-spec kubernetes-support` with scope `all`; confirm P0's portion of design.md and implementation.md is satisfied by the P0 diff. (Three findings surfaced, all non-blocking: P2 OUTDATED_DOC in `code-reviewer.md:105` output contract — fixed (Primary language → Active profiles); P3 OUTDATED_DOC in `design.md §Shared mechanisms` iteration step — fixed (now describes explicit §Known profiles enumeration with `Glob`-cwd rationale); P3 SPEC_DEV on `k8s` pre-populated in §Known profiles before P1 content lands — deferred (mitigated by ENOENT-tolerant handler in the algorithm). `(profile, checklist)` grouping gap captured as §Amendments A3 — out of scope for P0.)
+- [x] Set this task's status to `done` only after all four skills report no P0-blocking findings.
 
 ---
 

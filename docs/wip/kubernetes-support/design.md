@@ -217,8 +217,8 @@ The file documents:
    - `design` → user-declared signal (a direct question in Step 3: "is this a Kubernetes / Terraform / … feature?") OR keyword inference from the initial idea prose (matches like "Kubernetes", "Helm", "manifests", "Deployment" → surface the question, let the user confirm). Detection in the design phase is the only non-file-based input model; the procedure spells out the interaction pattern.
    - `document` → feature-directory file list; diff optional (post-implementation docs may review the whole feature, not just recent changes).
 2. **The algorithm** applied against each profile's `DETECTION.md`:
-   - Iterate `klaude-plugin/profiles/*/DETECTION.md`.
-   - For each profile, evaluate signals in cost order (path → filename → content).
+   - Iterate the explicit **§Known profiles** list maintained inside `_shared/profile-detection.md`. Filesystem enumeration (`Glob`, `ls`) is not used: the `Glob` tool is `cwd`-scoped and silently returns 0 matches against outside-`cwd` plugin-root paths, even when `${CLAUDE_PLUGIN_ROOT}` substitution resolves correctly (empirical verification indexed as `kk:arch-decisions` "Glob tool is cwd-scoped; use Bash for plugin-root enumeration", 2026-04-19). The list is the authoritative enumeration; adding a new profile means appending its `<name>` to the list (one-line edit, same as `EXPECTED_PROFILES` in the structure test). Entries whose directory does not yet exist on disk are tolerated — the algorithm skips on `ENOENT` silently so the list can be populated ahead of a profile's content landing (see §Algorithm step 1 in `_shared/profile-detection.md`).
+   - For each profile, read its `DETECTION.md` via the `Read` tool (not `Glob`) and evaluate signals in cost order (path → filename → content).
    - Apply authority rule: a file activates the profile if a filename or content signal matches; a path-only match is insufficient.
    - Bounded content inspection: ~16 KB per file, multi-document YAML handled per block.
 3. **Unset-variable handling.** Before emitting results, the procedure checks that `CLAUDE_PLUGIN_ROOT` is set and non-empty. If unset: fail loudly with an actionable error (`CLAUDE_PLUGIN_ROOT is not set; profile detection cannot locate profiles/ directory. See CLAUDE.md §Profile Conventions.`) and fall back to the generic no-profile path. Consumers inherit this check by invoking the shared procedure — they do not need to repeat it.
@@ -503,6 +503,39 @@ These items were flagged by reviews against in-feature commits but are intention
 **Why it's deferred.** Nine `SKILL.md` edits plus their referenced process/rubric files plus affected sub-agents is enough diff to deserve its own review pass. Per-skill wording needs tailoring because each skill's "subject matter" and "minimal early scope" differ (a batch copy-paste risks stilted prose). Bundling it into Task 7's defect-fix commit would obscure both changes.
 
 **When to apply.** Any time after Task 7 lands. Ideally before a second skill's process-bypass failure surfaces in practice; ordering is cheaper to fix proactively than to debug via repeated user-led dry-runs.
+
+**Out of scope for kubernetes-support.** Yes.
+
+### A3 — Surface `(profile, checklist)` grouping and `triggered_by` in review output
+
+**Flagged by:** Task 7 P0 review-spec pass (2026-04-19) — cross-check between `review-process.md`, `code-reviewer.md`, and `review-isolated.md` output templates.
+
+**Current state.** Three files instruct the reviewer to emit findings grouped by `(profile, checklist)`:
+
+- `klaude-plugin/skills/review-code/review-process.md:96` — *"Emit findings using `(profile, checklist)` as the grouping key so the report in Step 10 can organize them."*
+- `klaude-plugin/agents/code-reviewer.md:79` — *"Emit findings grouped by `(profile, checklist)` so the report surface can organize them."*
+- `klaude-plugin/skills/review-code/review-isolated.md` Step 5 — expects a report surface organized by agreement level + profile.
+
+But zero output templates implement the grouping:
+
+- `review-process.md:132–175` (Step 10 template) groups by **severity** (P0–P3) only.
+- `code-reviewer.md:110–131` (Output Format) groups by **severity** (P0–P3) only.
+- `review-isolated.md` Step 5 template (lines 193–228) groups by **reviewer source** (Corroborated / Code Reviewer / External / Author-Sourced).
+
+The `(profile, checklist)` grouping is instructed in three places and silently dropped in three templates. In parallel, the detection output's `triggered_by` field — documented at `_shared/profile-detection.md:135` as *"For debugging and for explaining detection to the user"* — is captured per finding by detection but never surfaces to the user anywhere.
+
+**Architectural concern.** Two separate pieces of per-finding context (which profile fired, and which signal activated it) are computed, held in memory, and discarded before the user sees output. The system collects debugging signal and throws it away. When a reviewer flags a RBAC issue on a Helm template that also happens to match the Go profile via a stray filename, the user has no way to see "this came from profiles/k8s/review-code/security-checklist.md, triggered by `filename: Chart.yaml` in an ancestor directory" — a piece of context the design explicitly scoped for surfacing.
+
+**Proposed refactor.**
+
+1. Decide the output shape. Two viable nestings: (a) severity-major with profile/checklist as a sub-label per finding, or (b) profile-major sections with severity subsections inside. Option (a) preserves the current severity-first mental model reviewers already use; option (b) better expresses the additive-profiles framing.
+2. Update the three output templates to match the chosen shape. Each finding gains a visible `profile: <name>` / `checklist: <filename>` line (for form (a)) or lands inside the profile section (for form (b)).
+3. Surface `triggered_by` once per finding: `triggered_by: content: apiVersion+kind in block 2` (or the signal description returned by detection). Emit "none" for findings whose file was touched but didn't activate any profile.
+4. Update `_shared/profile-detection.md` §Output shape if the field's presentation contract changes (currently the field exists only in the internal record; it would gain a user-visible channel).
+
+**Why it's deferred.** Three coordinated template edits across two skills and one agent; the output-shape decision (severity-major vs profile-major) benefits from a round of feedback on a realistic multi-profile review (e.g., a Go + k8s diff) before locking it in. Task 7's defect-fix bar was no-P0-findings; this is a design-coherence cleanup, not a correctness issue — the skills produce correct findings today, the reports just under-surface the grouping metadata the detection step worked to produce.
+
+**When to apply.** After P1 lands (so a realistic multi-profile review is available as a test fixture) and before P3 verification (so the end-to-end smoke in Task 18 can exercise the surfaced grouping). Earlier is acceptable if another skill grows a profile-aware output template and the precedent starts to calcify.
 
 **Out of scope for kubernetes-support.** Yes.
 
