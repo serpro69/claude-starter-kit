@@ -144,7 +144,7 @@ Subtasks:
 ## Task 8 — Author `profiles/k8s/DETECTION.md` and `overview.md`
 
 - **Phase:** P1
-- **Status:** pending
+- **Status:** in-progress
 - **Depends on:** Task 7
 - **Links:** [implementation.md §Step 1.1](implementation.md#step-11--author-profilesk8sdetectionmd), [implementation.md §Step 1.2](implementation.md#step-12--author-profilesk8soverviewmd), [design.md §Kubernetes detection rule](design.md#kubernetes-detection-rule)
 
@@ -152,14 +152,14 @@ Note: `EXPECTED_PROFILES` append to the test suite is NOT in this task. It lives
 
 Subtasks:
 
-- [ ] Create `klaude-plugin/profiles/k8s/DETECTION.md` using the mandatory three-section schema.
-- [ ] **`## Path signals`**: case-insensitive candidate pre-filter — `k8s/`, `manifests/`, `charts/`, `kustomize/`, `deploy/`, `templates/`.
-- [ ] **`## Filename signals`** (authoritative): `Chart.yaml` → Helm chart root; filename starting with `values` in a directory containing `Chart.yaml` → Helm values by adjacency; `.yaml`/`.yml`/`.tpl` under a `templates/` directory whose ancestor contains `Chart.yaml` → Helm template; `kustomization.yaml`, `kustomization.yml`, or `Kustomization` → Kustomize.
-- [ ] **`## Content signals`** (authoritative for generic YAML): scan each `---`-separated document block; a block with top-level `apiVersion:` AND top-level `kind:` at zero indent → Kubernetes manifest. One matching block activates the profile; first document need not match. Inspection bounded to ~16 KB.
-- [ ] Add the multi-profile behavior statement (additive) and the Dockerfile non-trigger (Dockerfile alone does not activate K8s even under `deploy/`/`k8s/`) outside the three schema sections.
-- [ ] Clarify the `values*` glob adjacency rule in prose: any filename starting with `values` in a directory containing `Chart.yaml` matches; no upper bound on the wildcard; adjacency is the binding constraint.
-- [ ] Create `klaude-plugin/profiles/k8s/overview.md`: what the profile covers, when it activates, per-category lookup-cascade targets for Kubernetes API versions, CRDs, Helm charts, and container images. Include a heading anchor named `Looking up Kubernetes dependencies` (or equivalent) that Task 17's `dependency-handling` body paragraph will cite.
-- [ ] Verify: `test -f klaude-plugin/profiles/k8s/DETECTION.md` and `overview.md`. `grep -c '^## Path signals\|^## Filename signals\|^## Content signals' DETECTION.md` returns 3. DETECTION rule unambiguous enough for a second reader to re-implement without ambiguity on the test cases in [implementation.md §Step 1.1](implementation.md#step-11--author-profilesk8sdetectionmd).
+- [x] Create `klaude-plugin/profiles/k8s/DETECTION.md` using the mandatory three-section schema.
+- [x] **`## Path signals`**: case-insensitive candidate pre-filter — `k8s/`, `manifests/`, `charts/`, `kustomize/`, `deploy/`, `templates/`.
+- [x] **`## Filename signals`** (authoritative): `Chart.yaml` → Helm chart root; filename starting with `values` in a directory containing `Chart.yaml` → Helm values by adjacency; `.yaml`/`.yml`/`.tpl` under a `templates/` directory whose ancestor contains `Chart.yaml` → Helm template; `kustomization.yaml`, `kustomization.yml`, or `Kustomization` → Kustomize.
+- [x] **`## Content signals`** (authoritative for generic YAML): scan each `---`-separated document block; a block with top-level `apiVersion:` AND top-level `kind:` at zero indent → Kubernetes manifest. One matching block activates the profile; first document need not match. Inspection bounded to ~16 KB.
+- [x] Add the multi-profile behavior statement (additive) and the Dockerfile non-trigger (Dockerfile alone does not activate K8s even under `deploy/`/`k8s/`) outside the three schema sections.
+- [x] Clarify the `values*` glob adjacency rule in prose: any filename starting with `values` in a directory containing `Chart.yaml` matches; no upper bound on the wildcard; adjacency is the binding constraint.
+- [x] Create `klaude-plugin/profiles/k8s/overview.md`: what the profile covers, when it activates, per-category lookup-cascade targets for Kubernetes API versions, CRDs, Helm charts, and container images. Include a heading anchor named `Looking up Kubernetes dependencies` (or equivalent) that Task 17's `dependency-handling` body paragraph will cite.
+- [x] Verify: `test -f klaude-plugin/profiles/k8s/DETECTION.md` and `overview.md`. `grep -c '^## Path signals\|^## Filename signals\|^## Content signals' DETECTION.md` returns 3. DETECTION rule unambiguous enough for a second reader to re-implement without ambiguity on the test cases in [implementation.md §Step 1.1](implementation.md#step-11--author-profilesk8sdetectionmd).
 
 ## Task 9 — Author `profiles/k8s/review-code/` checklists and index; append `k8s` to `EXPECTED_PROFILES`
 
