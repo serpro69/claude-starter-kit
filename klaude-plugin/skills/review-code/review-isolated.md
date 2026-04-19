@@ -108,7 +108,7 @@ You are reviewing the following code changes. Apply your full review workflow.
 ...
 }
 
-For each record, read the checklist at `{plugin_root}/profiles/<profile>/review-code/<checklist>` and apply it to the diff — `{plugin_root}` is the absolute plugin-root path the spawning skill substitutes into this prompt before sending it to you. If no profiles are active (empty list), fall back to general review guidance without profile-specific checklists.
+For each record, read the checklist at `<plugin_root>/profiles/<profile>/review-code/<checklist>` and apply it to the diff — `<plugin_root>` is the absolute plugin-root path the spawning skill substitutes into this prompt before sending it to you. If no profiles are active (empty list), fall back to general review guidance without profile-specific checklists.
 
 ## Spec Context
 

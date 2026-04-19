@@ -148,7 +148,7 @@ Not every profile populates every phase — a programming-language profile may o
 - **`## Filename signals`** — literal filenames or filename globs. Authoritative: any match activates the profile.
 - **`## Content signals`** — content-inspection rules (anchors, regexes, key presence). Authoritative for files not already caught by filename signals. Bounded inspection (~16 KB per file; multi-document YAML inspected per `---`-separated block).
 
-**Two dimensions, different orders.** Signals are *evaluated* in cost order (path → filename → content) but *authority* runs filename > content > path. A file caught only by a path signal does not activate the profile.
+**Two dimensions, different orders.** Signals are *evaluated* in cost order (path → filename → content) but *authority* runs filename ≈ content > path — filename and content are equally authoritative; filename resolves first only because it is cheaper to evaluate (a filename match short-circuits content inspection for that file). A file caught only by a path signal does not activate the profile.
 
 Consumers invoke `klaude-plugin/skills/_shared/profile-detection.md` (via the per-skill symlinks `shared-profile-detection.md`) — they do not replicate per-profile logic.
 

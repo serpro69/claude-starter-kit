@@ -65,13 +65,14 @@ This ordering is load-bearing, not stylistic. Reviewing from a diff before loadi
 
 1. Scope — `git diff --stat` for filenames only (no content reads)
 2. Detect active profiles — delegate to `shared-profile-detection.md`; produce the list of `(profile, checklist)` records
-3. Load profile review indexes — for each active profile, resolve its `review-code/index.md` and collect always-load + matching conditional checklists
-4. Read resolved checklists — read every `(profile, checklist)` file into context
+3. Load profile review indexes — for each active profile, resolve its `review-code/index.md`; collect always-load + filename-evaluable conditionals now; defer content-evaluable conditionals to Step 6
+4. Read resolved checklists — read every `(profile, checklist)` file collected in Step 3 into context
 5. Read the diff and re-read changed files — now, with methodology loaded; also run `capy_search` for `kk:review-findings` and `kk:lang-idioms`
-6. Apply checklists — iterate the resolved list; emit findings grouped by `(profile, checklist)`
-7. Self-check and confidence assessment
-8. Index findings — capy index systemic P0/P1 patterns as `kk:review-findings`
-9. Present results with next steps
+6. Resolve content-evaluable conditional entries — for each deferred entry from Step 3, evaluate the predicate against the file content read in Step 5; load any newly-matching checklists into context
+7. Apply checklists — iterate the full resolved list (Steps 3 + 6); emit findings grouped by `(profile, checklist)`
+8. Self-check and confidence assessment
+9. Index findings — capy index systemic P0/P1 patterns as `kk:review-findings`
+10. Present results with next steps
 
 See [review-process.md](./review-process.md) for the detailed step-by-step process.
 
