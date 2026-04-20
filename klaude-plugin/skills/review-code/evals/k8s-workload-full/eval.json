@@ -11,13 +11,13 @@
     "test-files/configmap.yaml"
   ],
   "assertions": [
-    { "id": "1.1", "text": "Identifies `k8s` as the active profile via content signals (`apiVersion:` + `kind:` at zero indent in each YAML document block)." },
-    { "id": "1.2", "text": "Loads the four always-load checklists from `profiles/k8s/review-code/`: `security-checklist.md`, `architecture-checklist.md`, `quality-checklist.md`, `removal-plan.md`." },
-    { "id": "1.3", "text": "Loads `reliability-checklist.md` because the diff contains a top-level YAML document with `kind: Deployment`." },
-    { "id": "1.4", "text": "Does NOT load `helm-checklist.md` — no `Chart.yaml` is present, no file under a `templates/` directory with a `Chart.yaml` ancestor." },
-    { "id": "1.5", "text": "Does NOT load `kustomize-checklist.md` — no `kustomization.yaml`/`kustomization.yml`/`Kustomization`, no `bases/` or `overlays/` path in the diff." },
-    { "id": "1.6", "text": "Does not activate a programming-language profile (no `.go`/`.py`/`.java`/`.js`/`.ts`/`.kt` files in the diff)." },
-    { "id": "1.7", "text": "Emits findings grouped by `(k8s, <checklist>)` — each finding cites which checklist produced it." },
-    { "id": "1.8", "text": "Emits at least one content-level finding from the fixture — candidates include the mutable `:latest` image tag (`deployment.yaml`), missing `resources` requests/limits, missing dedicated `serviceAccountName`, missing `securityContext.runAsNonRoot` / `readOnlyRootFilesystem`, or the absence of a `PodDisruptionBudget` for the Deployment. A model that routes the profile correctly but emits zero findings against a fixture that intentionally contains violations does NOT satisfy this eval." }
+    { "id": "1.1", "text": "Resolver — Active profiles: all three YAML files (`deployment.yaml`, `service.yaml`, `configmap.yaml`) have rows with `profile=k8s` and `signal type=content`, and `triggered_by` cites `apiVersion:` + `kind:` at zero indent." },
+    { "id": "1.2", "text": "Resolver — Loaded checklists: contains `(k8s, security-checklist.md)`, `(k8s, architecture-checklist.md)`, `(k8s, quality-checklist.md)`, `(k8s, removal-plan.md)`, each marked `always`." },
+    { "id": "1.3", "text": "Resolver — Loaded checklists: contains `(k8s, reliability-checklist.md)` with a conditional Load-if reason naming a workload kind (e.g., `kind: Deployment`) present in the diff." },
+    { "id": "1.4", "text": "Resolver — NOT loaded: contains `(k8s, helm-checklist.md)` with a reason citing absence of `Chart.yaml` and no `templates/` directory whose sibling contains `Chart.yaml`." },
+    { "id": "1.5", "text": "Resolver — NOT loaded: contains `(k8s, kustomize-checklist.md)` with a reason citing absence of `kustomization.yaml`/`kustomization.yml`/`Kustomization` and no `bases/`/`overlays/` path." },
+    { "id": "1.6", "text": "Resolver — Active profiles: no row attributes a file to a programming-language profile (`go`, `python`, `js_ts`, `java`, `kotlin`). Only `k8s` appears in the `profile` column." },
+    { "id": "1.7", "text": "Reviewer — output uses the P0/P1/P2/P3 severity headings specified by the `kk:code-reviewer` Output Format, and each finding follows `**[file:line]** Brief title` with description, confidence, and suggested fix." },
+    { "id": "1.8", "text": "Reviewer — emits at least one finding matching the fixture's intentional violations. Candidates: mutable `:latest` image tag in `deployment.yaml`, missing `resources.requests`/`limits`, missing dedicated `serviceAccountName`, missing `securityContext.runAsNonRoot` / `readOnlyRootFilesystem`, absent `PodDisruptionBudget` for the Deployment. A run that routes correctly but emits zero such findings does NOT satisfy this eval." }
   ]
 }

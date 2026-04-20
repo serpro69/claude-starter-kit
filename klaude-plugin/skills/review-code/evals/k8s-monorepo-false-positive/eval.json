@@ -11,11 +11,11 @@
     "test-files/docs/templates/reference.yaml"
   ],
   "assertions": [
-    { "id": "5.1", "text": "Identifies `k8s` as an active profile — via the `Chart.yaml` filename signal." },
-    { "id": "5.2", "text": "Recognizes `templates/service.yaml` as a Helm template — `.yaml` under `templates/` whose immediate parent directory (`./`) contains `Chart.yaml`." },
-    { "id": "5.3", "text": "Does NOT recognize `docs/templates/reference.yaml` as a Helm template — `docs/` does not itself contain a `Chart.yaml`, so the file is outside any chart's template tree even though the repo root has `Chart.yaml`." },
-    { "id": "5.4", "text": "The k8s profile's `files:` output list includes `Chart.yaml` and `templates/service.yaml` but does NOT include `docs/templates/reference.yaml`." },
-    { "id": "5.5", "text": "Loads `helm-checklist.md` (Chart.yaml is in the diff) but only applies it to the chart-root files — findings about `docs/templates/reference.yaml` under the helm-checklist must not appear." },
-    { "id": "5.6", "text": "Emits findings grouped by `(k8s, <checklist>)`; `docs/templates/reference.yaml` is either unmatched by any profile or matched by a non-k8s profile only (generic YAML belongs to no profile by default)." }
+    { "id": "5.1", "text": "Resolver — Active profiles: `Chart.yaml` row has `profile=k8s` and `signal type=filename` with `triggered_by` citing the exact `Chart.yaml` name match." },
+    { "id": "5.2", "text": "Resolver — Active profiles: `templates/service.yaml` row has `profile=k8s` with `triggered_by` citing `.yaml` under `templates/` whose direct-sibling parent (`./`) contains `Chart.yaml`." },
+    { "id": "5.3", "text": "Resolver — Active profiles: `docs/templates/reference.yaml` row has `profile=none` (or equivalent non-k8s attribution), with `triggered_by` explaining that `docs/` does not contain `Chart.yaml` so the direct-sibling rule does not apply, AND that the file content has no `apiVersion:` + `kind:` at zero indent to trigger the content signal." },
+    { "id": "5.4", "text": "Resolver — `docs/templates/reference.yaml` is NOT attributed to `k8s` anywhere in the Active profiles table. No row with that filename has `profile=k8s`." },
+    { "id": "5.5", "text": "Resolver — Loaded checklists: contains `(k8s, helm-checklist.md)` (Chart.yaml is present in the diff). Reviewer — no finding references `docs/templates/reference.yaml` under a helm-checklist concern; helm findings target only `Chart.yaml` and `templates/service.yaml`." },
+    { "id": "5.6", "text": "Reviewer — output uses the P0/P1/P2/P3 severity structure. `docs/templates/reference.yaml` is either absent from findings or mentioned only under generic (non-k8s) commentary, never under a k8s helm- or reliability-checklist finding." }
   ]
 }

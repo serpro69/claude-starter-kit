@@ -12,14 +12,14 @@
     "test-files/templates/_helpers.tpl"
   ],
   "assertions": [
-    { "id": "3.1", "text": "Identifies `k8s` as the active profile — via the `Chart.yaml` filename signal (Helm chart root)." },
-    { "id": "3.2", "text": "Recognizes `values.yaml` as a Helm values file by filename-adjacency to `Chart.yaml` in the same directory." },
-    { "id": "3.3", "text": "Recognizes `templates/deployment.yaml` and `templates/_helpers.tpl` as Helm templates (`.yaml`/`.tpl` under a `templates/` directory whose ancestor contains `Chart.yaml`)." },
-    { "id": "3.4", "text": "Loads the four always-load checklists from `profiles/k8s/review-code/`." },
-    { "id": "3.5", "text": "Loads `helm-checklist.md` because the diff contains `Chart.yaml`." },
-    { "id": "3.6", "text": "Loads `reliability-checklist.md` because the template declares a literal `kind: Deployment`." },
-    { "id": "3.7", "text": "Does NOT load `kustomize-checklist.md`." },
-    { "id": "3.8", "text": "Emits findings grouped by `(k8s, <checklist>)`." },
-    { "id": "3.9", "text": "Emits at least one content-level finding from the fixture — candidates include the mutable `image.tag: latest` in `values.yaml`, the missing `Chart.lock` despite a pinned `postgresql` dependency in `Chart.yaml`, missing `resources` block (`.Values.resources | default {}` yields an empty block when values don't set it), or missing `securityContext` on the templated container. A model that routes correctly but emits zero content-level findings against this fixture does NOT satisfy this eval." }
+    { "id": "3.1", "text": "Resolver — Active profiles: `Chart.yaml` row has `profile=k8s` and `signal type=filename` with `triggered_by` citing the exact `Chart.yaml` name match." },
+    { "id": "3.2", "text": "Resolver — Active profiles: `values.yaml` row has `profile=k8s` with `triggered_by` citing `values*.yaml` filename + sibling `Chart.yaml` adjacency in the same directory." },
+    { "id": "3.3", "text": "Resolver — Active profiles: `templates/deployment.yaml` and `templates/_helpers.tpl` rows have `profile=k8s` with `triggered_by` citing `.yaml`/`.tpl` under a `templates/` directory whose direct-sibling parent contains `Chart.yaml`." },
+    { "id": "3.4", "text": "Resolver — Loaded checklists: contains the four always-load `(k8s, ...)` checklists." },
+    { "id": "3.5", "text": "Resolver — Loaded checklists: contains `(k8s, helm-checklist.md)` with a Load-if reason citing `Chart.yaml` in the diff." },
+    { "id": "3.6", "text": "Resolver — Loaded checklists: contains `(k8s, reliability-checklist.md)` with a Load-if reason citing a `kind: Deployment` present in a templated manifest." },
+    { "id": "3.7", "text": "Resolver — NOT loaded: contains `(k8s, kustomize-checklist.md)` with a reason citing absence of Kustomize filename signals." },
+    { "id": "3.8", "text": "Reviewer — output uses the P0/P1/P2/P3 severity headings with `**[file:line]** Brief title` per finding." },
+    { "id": "3.9", "text": "Reviewer — emits at least one finding matching the fixture's intentional violations. Candidates: mutable `image.tag: latest` in `values.yaml`, missing `Chart.lock` despite pinned `postgresql` dependency in `Chart.yaml`, missing `resources` on the templated container, missing `securityContext` on the templated container. A run that routes correctly but emits zero such findings does NOT satisfy this eval." }
   ]
 }

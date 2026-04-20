@@ -9,10 +9,10 @@
     "test-files/main.go"
   ],
   "assertions": [
-    { "id": "4.1", "text": "Identifies `go` as the active profile — via the `.go` extension content signal." },
-    { "id": "4.2", "text": "Does NOT activate the `k8s` profile — no YAML document in the diff has `apiVersion:` + `kind:` at zero indent, no `Chart.yaml`, no `kustomization.yaml`, no file under a `templates/` directory." },
-    { "id": "4.3", "text": "Loads the Go checklists from `profiles/go/review-code/` (not K8s checklists)." },
-    { "id": "4.4", "text": "Does not load any checklist from `profiles/k8s/review-code/`." },
-    { "id": "4.5", "text": "Emits findings grouped by `(go, <checklist>)`." }
+    { "id": "4.1", "text": "Resolver — Active profiles: `main.go` row has `profile=go` with `triggered_by` citing the `.go` extension (per the go profile's DETECTION.md — extension match is authoritative)." },
+    { "id": "4.2", "text": "Resolver — Active profiles: no row attributes `main.go` (or any file) to `profile=k8s`. The k8s profile does not fire: no YAML document has `apiVersion:` + `kind:` at zero indent, no `Chart.yaml`, no `kustomization.yaml`, no file under a `templates/` directory with a `Chart.yaml` sibling." },
+    { "id": "4.3", "text": "Resolver — Loaded checklists: contains `(go, ...)` entries drawn from the Go profile's `review-code/index.md`. No `(k8s, ...)` entry appears in Loaded." },
+    { "id": "4.4", "text": "Resolver — NOT loaded: does NOT list any `(k8s, ...)` entry either — the k8s profile did not activate, so its `review-code/index.md` is not consulted and its conditional checklists are neither listed in Loaded nor in NOT loaded." },
+    { "id": "4.5", "text": "Reviewer — if findings are emitted, they use the P0/P1/P2/P3 severity structure with `**[file:line]** Brief title`. (The fixture is small and may legitimately produce zero findings; an empty/low-finding review is acceptable here. The eval is primarily about routing, not content.)" }
   ]
 }

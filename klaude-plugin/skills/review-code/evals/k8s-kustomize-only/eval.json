@@ -10,12 +10,12 @@
     "test-files/patches/configmap-patch.yaml"
   ],
   "assertions": [
-    { "id": "2.1", "text": "Identifies `k8s` as the active profile. `kustomization.yaml` activates via the filename signal (authoritative — short-circuits content inspection for that file). `patches/configmap-patch.yaml` additionally matches the content signal (`apiVersion:` + `kind:` at zero indent). Either signal alone activates the profile; both firing is expected here." },
-    { "id": "2.2", "text": "Loads the four always-load checklists from `profiles/k8s/review-code/`." },
-    { "id": "2.3", "text": "Loads `kustomize-checklist.md` because the diff contains a file named `kustomization.yaml`." },
-    { "id": "2.4", "text": "Does NOT load `helm-checklist.md` — no `Chart.yaml`, no `values*` in a `Chart.yaml` directory, no `templates/` ancestor chain." },
-    { "id": "2.5", "text": "Does NOT load `reliability-checklist.md` — no top-level `kind: Deployment`/`StatefulSet`/`DaemonSet`/`Job`/`CronJob` in the diff (only `Kustomization` and `ConfigMap`)." },
-    { "id": "2.6", "text": "Emits findings grouped by `(k8s, <checklist>)`." },
-    { "id": "2.7", "text": "Emits at least one content-level finding — candidates include the deprecated `apiVersion: kustomize.config.k8s.io/v1beta1` (kustomize-checklist flags as a migration target) or the `commonLabels:` block with selector-mutation implications. A model that routes correctly but emits zero findings does NOT satisfy this eval." }
+    { "id": "2.1", "text": "Resolver — Active profiles: `kustomization.yaml` row has `profile=k8s` and `signal type=filename` (filename signal is authoritative — short-circuits content inspection). `patches/configmap-patch.yaml` row has `profile=k8s` and `signal type=content` with `triggered_by` citing `apiVersion:` + `kind:` at zero indent. The two files use distinct signal types in the table." },
+    { "id": "2.2", "text": "Resolver — Loaded checklists: contains the four always-load `(k8s, ...)` checklists (`security-checklist.md`, `architecture-checklist.md`, `quality-checklist.md`, `removal-plan.md`)." },
+    { "id": "2.3", "text": "Resolver — Loaded checklists: contains `(k8s, kustomize-checklist.md)` with a Load-if reason citing `kustomization.yaml` in the diff." },
+    { "id": "2.4", "text": "Resolver — NOT loaded: contains `(k8s, helm-checklist.md)` with a reason citing absence of `Chart.yaml`, no `values*` in a `Chart.yaml` directory, no `templates/` ancestor chain." },
+    { "id": "2.5", "text": "Resolver — NOT loaded: contains `(k8s, reliability-checklist.md)` with a reason citing absence of workload kinds (`Deployment`/`StatefulSet`/`DaemonSet`/`Job`/`CronJob`); only `Kustomization` and `ConfigMap` appear in the diff." },
+    { "id": "2.6", "text": "Reviewer — output uses the P0/P1/P2/P3 severity headings with `**[file:line]** Brief title` per finding, matching the `kk:code-reviewer` Output Format." },
+    { "id": "2.7", "text": "Reviewer — emits at least one finding matching the fixture's intentional violations. Candidates: deprecated `apiVersion: kustomize.config.k8s.io/v1beta1`, `commonLabels:` selector-mutation risk. A run that routes correctly but emits zero such findings does NOT satisfy this eval." }
   ]
 }
