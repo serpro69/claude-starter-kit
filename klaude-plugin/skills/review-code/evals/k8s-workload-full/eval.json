@@ -1,0 +1,22 @@
+{
+  "id": 1,
+  "name": "k8s-workload-full",
+  "description": "A plain Kubernetes workload diff (Deployment + Service + ConfigMap) activates the k8s profile with always-load checklists plus reliability-checklist.",
+  "skills": ["review-code"],
+  "prompt": "I've staged the following changes. Run `/kk:review-code` against them.",
+  "trap": "Model skips the `k8s` profile and applies only generic SOLID/security/quality checks, or spuriously loads `helm-checklist.md` / `kustomize-checklist.md` despite their triggers not firing, or forgets to load `reliability-checklist.md` even though `kind: Deployment` is in the diff.",
+  "files": [
+    "test-files/deployment.yaml",
+    "test-files/service.yaml",
+    "test-files/configmap.yaml"
+  ],
+  "assertions": [
+    { "id": "1.1", "text": "Identifies `k8s` as the active profile via content signals (`apiVersion:` + `kind:` at zero indent in each YAML document block)." },
+    { "id": "1.2", "text": "Loads the four always-load checklists from `profiles/k8s/review-code/`: `security-checklist.md`, `architecture-checklist.md`, `quality-checklist.md`, `removal-plan.md`." },
+    { "id": "1.3", "text": "Loads `reliability-checklist.md` because the diff contains a top-level YAML document with `kind: Deployment`." },
+    { "id": "1.4", "text": "Does NOT load `helm-checklist.md` — no `Chart.yaml` is present, no file under a `templates/` directory with a `Chart.yaml` ancestor." },
+    { "id": "1.5", "text": "Does NOT load `kustomize-checklist.md` — no `kustomization.yaml`/`kustomization.yml`/`Kustomization`, no `bases/` or `overlays/` path in the diff." },
+    { "id": "1.6", "text": "Does not activate a programming-language profile (no `.go`/`.py`/`.java`/`.js`/`.ts`/`.kt` files in the diff)." },
+    { "id": "1.7", "text": "Emits findings grouped by `(k8s, <checklist>)` — each finding cites which checklist produced it." }
+  ]
+}

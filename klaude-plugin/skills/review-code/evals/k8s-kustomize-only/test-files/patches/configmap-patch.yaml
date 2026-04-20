@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: myapp-config
+data:
+  LOG_LEVEL: warn
+  FEATURE_FLAGS: "canary,v2"

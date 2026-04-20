@@ -116,6 +116,48 @@ Authoring requirements for every skill:
 
 Sub-agents delegated by skills (in `klaude-plugin/agents/`) inherit the same rule. Payload delivery order (the spawning skill passing instructions and subject matter in the same prompt) is not sufficient — the sub-agent's own workflow must read instructions before acting, or the LLM will re-create the shortcut on its side.
 
+### Skill evaluations
+
+Skills with non-trivial decision logic (routing, detection, conditional loading) should ship **evaluation scenarios** under `klaude-plugin/skills/<skill>/evals/`. Evals are spec files — no built-in harness exists ([Anthropic docs — Evaluation and iteration](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices#evaluation-and-iteration)) — but they give a reviewer or future harness an objective rubric to grade against.
+
+Directory layout:
+
+```
+klaude-plugin/skills/<skill>/evals/
+  <eval-name>/
+    eval.json          # scenario definition
+    test-files/        # real fixtures (YAML, code, configs, …)
+      …
+```
+
+**One directory per eval, not a single `evals.json`.** Skills that detect on paths or directory adjacency (e.g., `review-code` → `values*` adjacent to `Chart.yaml`, `templates/` ancestor chains, `kustomization.yaml` filename signal) can only be exercised against real filesystem structure. Inline-in-prompt fixtures force the evaluator to describe directory layout in prose, which tests pattern-matching on prose rather than the detection logic. Real fixtures are also syntax-highlightable, validatable (`kubeconform`, `helm lint`, `go build`), and trivial to edit — YAML embedded in JSON strings as `\n`-escaped text is not.
+
+`eval.json` schema:
+
+```json
+{
+  "id": 1,
+  "name": "eval-name-kebab-case",
+  "description": "One-sentence summary of what this eval tests.",
+  "skills": ["skill-name"],
+  "prompt": "The natural user prompt that triggers the skill.",
+  "trap": "The failure hypothesis — what a model is likely to get wrong.",
+  "files": ["test-files/foo.yaml", "test-files/bar.yaml"],
+  "assertions": [
+    { "id": "1.1", "text": "Specific, graded behavior bullet." },
+    { "id": "1.2", "text": "…" }
+  ]
+}
+```
+
+- `skills`, `prompt`, `files` follow the [Anthropic best-practices format](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices#evaluation-and-iteration) so a future harness aligned with that spec can ingest these evals.
+- `trap` and numbered `{id, text}` assertions are borrowed from [samber/cc-skills-golang](https://github.com/samber/cc-skills-golang/blob/main/skills/golang-cli/evals/evals.json) — the trap sharpens intent (*which* failure mode is this eval testing?); numbered assertions make manual grading and failure reports traceable.
+- `assertions[].id` follows `<eval-id>.<n>` — eval 1's assertions are `1.1, 1.2, …`; eval 2's are `2.1, 2.2, …`.
+
+**When to author evals.** Proactively, for skills with detection/routing logic where false positives and false negatives both matter; for skills with conditional content loading; and include at least one **regression eval** proving the skill does NOT activate (or falls back to default behavior) when it shouldn't. Skip for trivial skills whose behavior is captured by the skill's markdown alone.
+
+**Running.** No built-in harness. A reviewer (or a future harness) stages the eval's `test-files/` where the skill expects input, sends `prompt` with the target skill available, and grades the response against each assertion. Keep per-eval directories self-contained so the harness has zero external dependencies.
+
 ## Profile Conventions
 
 Applies when authoring profiles under `klaude-plugin/profiles/`. Profiles make per-domain concerns (programming languages, IaC DSLs, config schemas) available to every phase of the `design` → `implement` → `review-code` → `test` → `document` flow.

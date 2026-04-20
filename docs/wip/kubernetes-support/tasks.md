@@ -195,10 +195,10 @@ Subtasks:
 
 Subtasks:
 
-- [ ] **test**: prepare a synthetic Kubernetes diff (Deployment + Service + ConfigMap); run `/kk:review-code`; confirm `k8s` profile detected, always-load checklists plus `reliability-checklist.md` load, findings grouped by `(k8s, <checklist>)`.
-- [ ] **test**: synthetic Kustomize-only diff (`kustomization.yaml` + a patch) — `kustomize-checklist.md` loads; `helm-checklist.md` does not.
-- [ ] **test**: synthetic Helm-only diff (`Chart.yaml` + `templates/`) — `helm-checklist.md` loads.
-- [ ] **test**: regression — Go-only diff does NOT activate `k8s`.
+- [ ] **test**: prepare a synthetic Kubernetes diff (Deployment + Service + ConfigMap); run `/kk:review-code`; confirm `k8s` profile detected, always-load checklists plus `reliability-checklist.md` load, findings grouped by `(k8s, <checklist>)`. **Eval:** [`evals/k8s-workload-full/eval.json`](../../../klaude-plugin/skills/review-code/evals/k8s-workload-full/eval.json).
+- [ ] **test**: synthetic Kustomize-only diff (`kustomization.yaml` + a patch) — `kustomize-checklist.md` loads; `helm-checklist.md` does not. **Eval:** [`evals/k8s-kustomize-only/eval.json`](../../../klaude-plugin/skills/review-code/evals/k8s-kustomize-only/eval.json).
+- [ ] **test**: synthetic Helm-only diff (`Chart.yaml` + `templates/`) — `helm-checklist.md` loads. **Eval:** [`evals/k8s-helm-chart/eval.json`](../../../klaude-plugin/skills/review-code/evals/k8s-helm-chart/eval.json).
+- [ ] **test**: regression — Go-only diff does NOT activate `k8s`. **Eval:** [`evals/go-regression/eval.json`](../../../klaude-plugin/skills/review-code/evals/go-regression/eval.json).
 - [ ] **document**: confirm `profiles/k8s/` documentation coherence; cross-references to `design.md` accurate.
 - [ ] **review-code**: run `/kk:review-code` on the P1 diff; address findings.
 - [ ] **review-spec**: run `/kk:review-spec kubernetes-support` with scope `all`; confirm P1 portion satisfied.

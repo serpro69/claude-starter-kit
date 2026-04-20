@@ -1,0 +1,18 @@
+{
+  "id": 4,
+  "name": "go-regression",
+  "description": "A Go-only diff (main.go) activates the go profile and does NOT activate the k8s profile, even when the source contains K8s-evocative prose like 'deploy' or 'cluster' in comments.",
+  "skills": ["review-code"],
+  "prompt": "I've staged the following changes. Run `/kk:review-code` against them.",
+  "trap": "Model spuriously activates the `k8s` profile because the file contains the word 'deploy' or 'cluster' in a comment, instead of applying the authoritative rule (k8s content signal requires `apiVersion:` + `kind:` at zero indent in YAML, or a Helm/Kustomize filename signal).",
+  "files": [
+    "test-files/main.go"
+  ],
+  "assertions": [
+    { "id": "4.1", "text": "Identifies `go` as the active profile — via the `.go` extension content signal." },
+    { "id": "4.2", "text": "Does NOT activate the `k8s` profile — no YAML document in the diff has `apiVersion:` + `kind:` at zero indent, no `Chart.yaml`, no `kustomization.yaml`, no file under a `templates/` directory." },
+    { "id": "4.3", "text": "Loads the Go checklists from `profiles/go/review-code/` (not K8s checklists)." },
+    { "id": "4.4", "text": "Does not load any checklist from `profiles/k8s/review-code/`." },
+    { "id": "4.5", "text": "Emits findings grouped by `(go, <checklist>)`." }
+  ]
+}
