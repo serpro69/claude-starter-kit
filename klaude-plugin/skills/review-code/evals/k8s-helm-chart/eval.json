@@ -19,6 +19,7 @@
     { "id": "3.5", "text": "Loads `helm-checklist.md` because the diff contains `Chart.yaml`." },
     { "id": "3.6", "text": "Loads `reliability-checklist.md` because the template declares a literal `kind: Deployment`." },
     { "id": "3.7", "text": "Does NOT load `kustomize-checklist.md`." },
-    { "id": "3.8", "text": "Emits findings grouped by `(k8s, <checklist>)`." }
+    { "id": "3.8", "text": "Emits findings grouped by `(k8s, <checklist>)`." },
+    { "id": "3.9", "text": "Emits at least one content-level finding from the fixture — candidates include the mutable `image.tag: latest` in `values.yaml`, the missing `Chart.lock` despite a pinned `postgresql` dependency in `Chart.yaml`, missing `resources` block (`.Values.resources | default {}` yields an empty block when values don't set it), or missing `securityContext` on the templated container. A model that routes correctly but emits zero content-level findings against this fixture does NOT satisfy this eval." }
   ]
 }

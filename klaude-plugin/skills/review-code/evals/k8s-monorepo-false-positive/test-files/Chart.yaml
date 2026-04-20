@@ -1,0 +1,6 @@
+apiVersion: v2
+name: umbrella
+description: Umbrella chart at the monorepo root — installs the whole product.
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

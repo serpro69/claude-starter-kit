@@ -1,0 +1,21 @@
+{
+  "id": 5,
+  "name": "k8s-monorepo-false-positive",
+  "description": "A monorepo with a root-level Chart.yaml plus an unrelated docs/templates/ subtree must not spuriously flag the docs templates as Helm templates. Regression guard for the tightened ancestor-search rule.",
+  "skills": ["review-code"],
+  "prompt": "I've staged the following changes in a monorepo that ships an umbrella Helm chart at the repository root and also contains an unrelated docs site. Run `/kk:review-code` against them.",
+  "trap": "Model applies the depth-unbounded Helm-template ancestor search: sees the root-level `Chart.yaml` and concludes that every `templates/` directory anywhere in the tree — including `docs/templates/` — is a Helm template. Consequence: `helm-checklist.md` gets applied to `docs/templates/reference.yaml` (a docs-site config, not a Helm template), producing noisy, irrelevant findings. The tightened rule requires the `templates/` directory itself to be a direct sibling of a `Chart.yaml`; `docs/` does not contain a `Chart.yaml`, so `docs/templates/reference.yaml` is not a Helm template.",
+  "files": [
+    "test-files/Chart.yaml",
+    "test-files/templates/service.yaml",
+    "test-files/docs/templates/reference.yaml"
+  ],
+  "assertions": [
+    { "id": "5.1", "text": "Identifies `k8s` as an active profile — via the `Chart.yaml` filename signal." },
+    { "id": "5.2", "text": "Recognizes `templates/service.yaml` as a Helm template — `.yaml` under `templates/` whose immediate parent directory (`./`) contains `Chart.yaml`." },
+    { "id": "5.3", "text": "Does NOT recognize `docs/templates/reference.yaml` as a Helm template — `docs/` does not itself contain a `Chart.yaml`, so the file is outside any chart's template tree even though the repo root has `Chart.yaml`." },
+    { "id": "5.4", "text": "The k8s profile's `files:` output list includes `Chart.yaml` and `templates/service.yaml` but does NOT include `docs/templates/reference.yaml`." },
+    { "id": "5.5", "text": "Loads `helm-checklist.md` (Chart.yaml is in the diff) but only applies it to the chart-root files — findings about `docs/templates/reference.yaml` under the helm-checklist must not appear." },
+    { "id": "5.6", "text": "Emits findings grouped by `(k8s, <checklist>)`; `docs/templates/reference.yaml` is either unmatched by any profile or matched by a non-k8s profile only (generic YAML belongs to no profile by default)." }
+  ]
+}

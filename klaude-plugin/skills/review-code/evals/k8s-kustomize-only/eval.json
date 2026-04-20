@@ -10,11 +10,12 @@
     "test-files/patches/configmap-patch.yaml"
   ],
   "assertions": [
-    { "id": "2.1", "text": "Identifies `k8s` as the active profile — via both the `kustomization.yaml` filename signal and content signals (`apiVersion:` + `kind:` at zero indent in the patch)." },
+    { "id": "2.1", "text": "Identifies `k8s` as the active profile. `kustomization.yaml` activates via the filename signal (authoritative — short-circuits content inspection for that file). `patches/configmap-patch.yaml` additionally matches the content signal (`apiVersion:` + `kind:` at zero indent). Either signal alone activates the profile; both firing is expected here." },
     { "id": "2.2", "text": "Loads the four always-load checklists from `profiles/k8s/review-code/`." },
     { "id": "2.3", "text": "Loads `kustomize-checklist.md` because the diff contains a file named `kustomization.yaml`." },
     { "id": "2.4", "text": "Does NOT load `helm-checklist.md` — no `Chart.yaml`, no `values*` in a `Chart.yaml` directory, no `templates/` ancestor chain." },
     { "id": "2.5", "text": "Does NOT load `reliability-checklist.md` — no top-level `kind: Deployment`/`StatefulSet`/`DaemonSet`/`Job`/`CronJob` in the diff (only `Kustomization` and `ConfigMap`)." },
-    { "id": "2.6", "text": "Emits findings grouped by `(k8s, <checklist>)`." }
+    { "id": "2.6", "text": "Emits findings grouped by `(k8s, <checklist>)`." },
+    { "id": "2.7", "text": "Emits at least one content-level finding — candidates include the deprecated `apiVersion: kustomize.config.k8s.io/v1beta1` (kustomize-checklist flags as a migration target) or the `commonLabels:` block with selector-mutation implications. A model that routes correctly but emits zero findings does NOT satisfy this eval." }
   ]
 }

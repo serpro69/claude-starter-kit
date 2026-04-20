@@ -1,0 +1,9 @@
+site:
+  theme: default
+  nav:
+    - title: Home
+      path: /
+    - title: Reference
+      path: /reference
+footer:
+  copyright: "(c) example project"

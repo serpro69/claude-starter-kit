@@ -113,7 +113,7 @@ Update the following files to consume `shared-profile-detection.md` and the inde
 
 Modify `test/test-plugin-structure.sh`:
 
-- Add `EXPECTED_PROFILES=("go" "java" "js_ts" "kotlin" "python")` (`k8s` will be appended in Step 1.3 of P1, after k8s content files exist).
+- Add `EXPECTED_PROFILES=("go" "java" "js_ts" "kotlin" "python")` (`k8s` will be added in alphabetical position in Step 1.3 of P1, after k8s content files exist; the array is alphabetised and the structure test treats it as a set).
 - **Per-profile assertions (presence-conditional).** Assertions are predicated on what the profile declares; they do NOT require every profile to populate every phase subdirectory:
   - Directory `klaude-plugin/profiles/<name>/` exists (required for every profile in `EXPECTED_PROFILES`).
   - File `klaude-plugin/profiles/<name>/DETECTION.md` exists (required).
@@ -226,7 +226,7 @@ Clarify explicitly (edge-case wording inside the index entry prose):
 - A standalone `values.yaml` with NO sibling `Chart.yaml` does NOT trigger `helm-checklist.md`.
 - A `deployment.yaml` outside any `templates/` directory and containing no `{{ ... }}` directives, matching the K8s content signature, is a plain manifest, not a Helm template.
 
-**Finally,** append `"k8s"` to the `EXPECTED_PROFILES` array in `test/test-plugin-structure.sh`. This is done in THIS step (not a separate step) because `EXPECTED_PROFILES` assertions require the profile's files to exist; appending earlier would fail the structure test.
+**Finally,** add `"k8s"` to the `EXPECTED_PROFILES` array in `test/test-plugin-structure.sh` in alphabetical position (between `js_ts` and `kotlin`). The array is alphabetised and the structure test treats it as a set, so ordering is aesthetic. This is done in THIS step (not a separate step) because `EXPECTED_PROFILES` assertions require the profile's files to exist; adding the entry earlier would fail the structure test.
 
 **Verify.**
 - Every checklist file exists and passes a basic readability check (no dangling markdown, no placeholder text).

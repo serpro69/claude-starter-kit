@@ -94,7 +94,7 @@ Filename signals (authoritative):
 
 - `Chart.yaml` → Helm chart root. Authoritative.
 - `values*.yaml` (any filename starting with `values` in a directory that also contains `Chart.yaml`) → Helm values by adjacency. Authoritative.
-- Files with `.yaml`, `.yml`, or `.tpl` extension inside a `templates/` directory whose parent (or any ancestor in the chart structure) contains a `Chart.yaml` → Helm template. Authoritative by adjacency. Avoids the trap where a standalone edit to `templates/deployment.yaml` contains `{{ if ... }}` directives before any `apiVersion:` and would otherwise fail the content signal.
+- Files with `.yaml`, `.yml`, or `.tpl` extension inside `<dir>/templates/` where `<dir>` itself contains a `Chart.yaml` as a direct child → Helm template. Authoritative by adjacency. The `templates/` directory must sit directly next to a `Chart.yaml` — at a chart root or at a subchart root under `<parent>/charts/<subchart>/`. A `templates/` nested elsewhere in the tree (e.g., `docs/templates/`, `ci/templates/`) does NOT activate this rule even when a `Chart.yaml` exists higher up at the repo root, because those intermediate directories do not themselves contain a `Chart.yaml`. Avoids the monorepo false-positive (umbrella root `Chart.yaml` spuriously claiming unrelated `templates/` directories) and still avoids the trap where a standalone edit to a chart's `templates/deployment.yaml` contains `{{ if ... }}` directives before any `apiVersion:` and would otherwise fail the content signal.
 - `kustomization.yaml`, `kustomization.yml`, or `Kustomization` (exact filenames) → Kustomize. Authoritative.
 
 Content signals (authoritative for generic YAML not caught by filename):
@@ -366,7 +366,7 @@ A new top-level section, **Profile Conventions**, describes:
 - `index.md` as the contract with consuming skills; always-load vs conditional entries with one-line descriptions.
 - Naming: lowercase profile names, underscores allowed where filename-safe (`js_ts` is retained from the existing language convention).
 - Profile content is referenced via `${CLAUDE_PLUGIN_ROOT}/profiles/...` from skills and agents (see [ADR 0003](../../adr/0003-plugin-root-referenced-content.md)).
-- Adding a new profile = copy an existing profile as a template, customize `DETECTION.md` and content, and append to `EXPECTED_PROFILES` in `test/test-plugin-structure.sh`.
+- Adding a new profile = copy an existing profile as a template, customize `DETECTION.md` and content, and add to `EXPECTED_PROFILES` in `test/test-plugin-structure.sh` (the array is alphabetised and the structure test treats it as a set, so position is aesthetic).
 
 A new subsection under **Skill & Command Naming Conventions**, titled **Skill description budget**, records:
 - **Per-entry cap: 1,536 characters.** Each skill's `description` + `when_to_use` combined text is truncated at 1,536 characters regardless of the global budget (per [Claude Code docs — Skill descriptions are cut short](https://code.claude.com/docs/en/skills#skill-descriptions-are-cut-short)).
@@ -423,7 +423,7 @@ Introduces the `profiles/` top-level; migrates programming-language content from
 
 ### P1 — Kubernetes profile for review-code (closes #64)
 
-Adds `profiles/k8s/` with detection, overview, and the seven review-phase checklists plus their index. Appends `k8s` to `EXPECTED_PROFILES`.
+Adds `profiles/k8s/` with detection, overview, and the seven review-phase checklists plus their index. Adds `k8s` to `EXPECTED_PROFILES` (alphabetical; the array is a set).
 
 **Verification criteria.** Structure test passes. A synthetic Kubernetes diff activates the profile, loads the always-load checklists, and loads conditional checklists per their triggers (e.g., Helm checklist present when `Chart.yaml` is in the diff; absent otherwise). Regression check on a non-Kubernetes diff — the profile must remain inactive. Issue #64 is closeable.
 
@@ -540,6 +540,8 @@ The `(profile, checklist)` grouping is instructed in three places and silently d
 **Out of scope for kubernetes-support.** Yes.
 
 ### A4 — Bound the Helm-template ancestor search to the nearest `Chart.yaml`
+
+**Status:** **Resolved in Task 10 (2026-04-20).** The Helm-template filename rule in `klaude-plugin/profiles/k8s/DETECTION.md` and in [§Kubernetes detection rule](#kubernetes-detection-rule) is now scoped to a `templates/` directory that is a direct sibling of a `Chart.yaml` (chart root or subchart root). The monorepo false-positive regression is covered by `klaude-plugin/skills/review-code/evals/k8s-monorepo-false-positive/`. The historical context below is preserved as written at amendment time.
 
 **Flagged by:** Task 8 P1 isolated code review (2026-04-19) — corroborated between `code-reviewer` sub-agent and `pal codereview` (gemini-3-pro-preview).
 

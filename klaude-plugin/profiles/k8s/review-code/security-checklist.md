@@ -20,7 +20,7 @@ Applied whenever the `k8s` profile is active. Findings reference specific resour
 - `Role`/`RoleBinding` preferred over `ClusterRole`/`ClusterRoleBinding` when the workload is namespace-scoped. Cluster-wide bindings should justify why namespace scope is insufficient.
 - No binding to the `system:masters` group; no grants of `impersonate`, `escalate`, or `bind` verbs unless the workload is an RBAC management operator with explicit rationale.
 - `automountServiceAccountToken: false` on the Pod spec (or ServiceAccount) when the workload does not call the API server. Since K8s 1.22 (GA), tokens are mounted as short-lived projected volumes via the `BoundServiceAccountTokenVolume` admission plugin — explicitly disabling automount is still required for workloads that do not need API access. K8s 1.24+ additionally stopped auto-generating long-lived Secret-backed tokens for the default ServiceAccount.
-- When a token IS needed, use an explicit `projected` volume with `serviceAccountToken`: set an **`audience`** to the exact audience the receiver validates (prevents token reuse across services) and an **`expirationSeconds`** at or below the cluster's kubelet refresh window (default 3607s / ~1h; values above ~7200s are silently reduced).
+- When a token IS needed, use an explicit `projected` volume with `serviceAccountToken`: set an **`audience`** to the exact audience the receiver validates (prevents token reuse across services) and an **`expirationSeconds`** at or below the cluster's kubelet refresh window (commonly 3600s / 1h).
 
 ## Pod Security Standards and SecurityContext
 

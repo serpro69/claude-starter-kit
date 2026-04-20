@@ -17,6 +17,7 @@
     { "id": "1.4", "text": "Does NOT load `helm-checklist.md` — no `Chart.yaml` is present, no file under a `templates/` directory with a `Chart.yaml` ancestor." },
     { "id": "1.5", "text": "Does NOT load `kustomize-checklist.md` — no `kustomization.yaml`/`kustomization.yml`/`Kustomization`, no `bases/` or `overlays/` path in the diff." },
     { "id": "1.6", "text": "Does not activate a programming-language profile (no `.go`/`.py`/`.java`/`.js`/`.ts`/`.kt` files in the diff)." },
-    { "id": "1.7", "text": "Emits findings grouped by `(k8s, <checklist>)` — each finding cites which checklist produced it." }
+    { "id": "1.7", "text": "Emits findings grouped by `(k8s, <checklist>)` — each finding cites which checklist produced it." },
+    { "id": "1.8", "text": "Emits at least one content-level finding from the fixture — candidates include the mutable `:latest` image tag (`deployment.yaml`), missing `resources` requests/limits, missing dedicated `serviceAccountName`, missing `securityContext.runAsNonRoot` / `readOnlyRootFilesystem`, or the absence of a `PodDisruptionBudget` for the Deployment. A model that routes the profile correctly but emits zero findings against a fixture that intentionally contains violations does NOT satisfy this eval." }
   ]
 }

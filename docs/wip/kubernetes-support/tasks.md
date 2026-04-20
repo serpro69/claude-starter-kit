@@ -99,7 +99,7 @@ Subtasks:
 
 Subtasks:
 
-- [x] Add `EXPECTED_PROFILES=("go" "java" "js_ts" "kotlin" "python")` — k8s is appended in Task 9 (after k8s files exist), NOT here.
+- [x] Add `EXPECTED_PROFILES=("go" "java" "js_ts" "kotlin" "python")` — k8s is added (in alphabetical position) in Task 9 (after k8s files exist), NOT here.
 - [x] **Presence-conditional per-profile assertions.** For every profile in `EXPECTED_PROFILES`: assert `profiles/<name>/DETECTION.md` and `overview.md` exist. Assert `DETECTION.md` contains the three required section headings (`## Path signals`, `## Filename signals`, `## Content signals`). For each phase subdirectory name in (`review-code`, `design`, `test`, `implement`, `document`, `review-spec`): IF `profiles/<name>/<phase>/` exists, THEN assert `<phase>/index.md` exists. A profile that does not populate a phase does NOT require an assertion for that phase. (Phase name corrected from `review` → `review-code` to match design.md §File structure and on-disk layout; the `review` token was a typo in the original task wording.)
 - [x] **Bidirectional index invariant.** For every `<phase>/index.md` that exists: (forward) every markdown link resolves to a file on disk; (reverse) every `.md` file in the directory — excluding `index.md` itself — is referenced by at least one markdown link in the index.
 - [x] Symlink assertions: each of the six `shared-profile-detection.md` paths under consuming skills is a symlink and resolves to `klaude-plugin/skills/_shared/profile-detection.md`.
@@ -148,7 +148,7 @@ Subtasks:
 - **Depends on:** Task 7
 - **Links:** [implementation.md §Step 1.1](implementation.md#step-11--author-profilesk8sdetectionmd), [implementation.md §Step 1.2](implementation.md#step-12--author-profilesk8soverviewmd), [design.md §Kubernetes detection rule](design.md#kubernetes-detection-rule)
 
-Note: `EXPECTED_PROFILES` append to the test suite is NOT in this task. It lives in Task 9 (after the checklist files exist), because appending `k8s` before the files exist would fail the structure test's per-profile assertions.
+Note: the `EXPECTED_PROFILES` update to the test suite is NOT in this task. It lives in Task 9 (after the checklist files exist), because adding `k8s` to the list before the files exist would fail the structure test's per-profile assertions. `k8s` is inserted in alphabetical position; `EXPECTED_PROFILES` is a set-valued array, not a history-ordered one.
 
 Subtasks:
 
@@ -183,26 +183,27 @@ Subtasks:
   - Conditional — `helm-checklist.md` **Load if:** the diff contains a file named `Chart.yaml`; OR a file named `values*.yaml` in a directory that also contains `Chart.yaml`; OR a file under a `templates/` directory whose ancestor contains `Chart.yaml`.
   - Conditional — `kustomize-checklist.md` **Load if:** the diff contains `kustomization.yaml`, `kustomization.yml`, or `Kustomization`; OR a file under `bases/` or `overlays/`; OR a patch file referenced by a nearby `kustomization.*`.
   - Include edge-case clarifications in the index prose: a standalone `values.yaml` without a sibling `Chart.yaml` does NOT trigger `helm-checklist.md`; a plain `deployment.yaml` outside `templates/` and without `{{ ... }}` directives is a manifest, not a Helm template.
-- [x] Append `"k8s"` to `EXPECTED_PROFILES` in `test/test-plugin-structure.sh`. Done in this task (not Task 8) because the structure test's per-profile assertions would fail if `k8s` were in `EXPECTED_PROFILES` before its checklist files exist.
+- [x] Add `"k8s"` to `EXPECTED_PROFILES` in `test/test-plugin-structure.sh` (alphabetical position between `js_ts` and `kotlin`). Done in this task (not Task 8) because the structure test's per-profile assertions would fail if `k8s` were in `EXPECTED_PROFILES` before its checklist files exist. The list is alphabetised — ordering is aesthetic; the structure test treats it as a set.
 - [x] Verify: forward index invariant — every link in `index.md` resolves. Reverse index invariant — every `.md` file in the directory (except `index.md`) is referenced. Each conditional `Load if:` names concrete properties (`kind:` field values, filename strings, directory names) — not vague categories like "workload resources in diff". `bash test/test-plugin-structure.sh` exits 0 with `k8s` in `EXPECTED_PROFILES`.
 
 ## Task 10 — Phase 1 verification
 
 - **Phase:** P1
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 8, Task 9
 - **Links:** [implementation.md §Step 1.V](implementation.md#step-1v--p1-verification-task)
 
 Subtasks:
 
-- [ ] **test**: prepare a synthetic Kubernetes diff (Deployment + Service + ConfigMap); run `/kk:review-code`; confirm `k8s` profile detected, always-load checklists plus `reliability-checklist.md` load, findings grouped by `(k8s, <checklist>)`. **Eval:** [`evals/k8s-workload-full/eval.json`](../../../klaude-plugin/skills/review-code/evals/k8s-workload-full/eval.json).
-- [ ] **test**: synthetic Kustomize-only diff (`kustomization.yaml` + a patch) — `kustomize-checklist.md` loads; `helm-checklist.md` does not. **Eval:** [`evals/k8s-kustomize-only/eval.json`](../../../klaude-plugin/skills/review-code/evals/k8s-kustomize-only/eval.json).
-- [ ] **test**: synthetic Helm-only diff (`Chart.yaml` + `templates/`) — `helm-checklist.md` loads. **Eval:** [`evals/k8s-helm-chart/eval.json`](../../../klaude-plugin/skills/review-code/evals/k8s-helm-chart/eval.json).
-- [ ] **test**: regression — Go-only diff does NOT activate `k8s`. **Eval:** [`evals/go-regression/eval.json`](../../../klaude-plugin/skills/review-code/evals/go-regression/eval.json).
-- [ ] **document**: confirm `profiles/k8s/` documentation coherence; cross-references to `design.md` accurate.
-- [ ] **review-code**: run `/kk:review-code` on the P1 diff; address findings.
-- [ ] **review-spec**: run `/kk:review-spec kubernetes-support` with scope `all`; confirm P1 portion satisfied.
-- [ ] **Issue #64 closure check**: confirm `review-code` now handles Kubernetes artifacts as designed; the narrow issue-#64 text is satisfied.
+- [x] **test**: prepare a synthetic Kubernetes diff (Deployment + Service + ConfigMap); run `/kk:review-code`; confirm `k8s` profile detected, always-load checklists plus `reliability-checklist.md` load, findings grouped by `(k8s, <checklist>)`. **Eval:** [`evals/k8s-workload-full/eval.json`](../../../klaude-plugin/skills/review-code/evals/k8s-workload-full/eval.json). Content-finding assertion `1.8` added during Task 10. **Run result:** 8/8 PASS via isolated `kk:code-reviewer` sub-agent (see `.sessions/task10-eval-runs.txt`).
+- [x] **test**: synthetic Kustomize-only diff (`kustomization.yaml` + a patch) — `kustomize-checklist.md` loads; `helm-checklist.md` does not. **Eval:** [`evals/k8s-kustomize-only/eval.json`](../../../klaude-plugin/skills/review-code/evals/k8s-kustomize-only/eval.json). Assertion `2.1` reworded to distinguish filename-signal vs content-signal activation per file; assertion `2.7` added for content-level finding coverage. **Run result:** 7/7 PASS.
+- [x] **test**: synthetic Helm-only diff (`Chart.yaml` + `templates/`) — `helm-checklist.md` loads. **Eval:** [`evals/k8s-helm-chart/eval.json`](../../../klaude-plugin/skills/review-code/evals/k8s-helm-chart/eval.json). Content-finding assertion `3.9` added during Task 10. **Run result:** 9/9 PASS.
+- [x] **test**: regression — Go-only diff does NOT activate `k8s`. **Eval:** [`evals/go-regression/eval.json`](../../../klaude-plugin/skills/review-code/evals/go-regression/eval.json). **Run result:** 5/5 PASS.
+- [x] **test (A4 regression)**: monorepo with a root `Chart.yaml` and an unrelated `docs/templates/` subtree — `docs/templates/reference.yaml` must NOT be flagged as a Helm template. **Eval:** [`evals/k8s-monorepo-false-positive/eval.json`](../../../klaude-plugin/skills/review-code/evals/k8s-monorepo-false-positive/eval.json). Authored during Task 10 in response to design.md §A4 step 4. DETECTION.md and §Kubernetes detection rule tightened to require the `templates/` directory to sit directly next to a `Chart.yaml`. **Run result:** 6/6 PASS — sub-agent explicitly excluded `docs/templates/reference.yaml` from the k8s `files:` list.
+- [x] **document**: confirm `profiles/k8s/` documentation coherence; cross-references to `design.md` accurate. Verified; A4 amendment cross-reference kept in `DETECTION.md:24`-adjacent prose — the link target now points at the "Resolved" note in design.md §Amendments A4.
+- [x] **review-code**: run `/kk:review-code` on the P1 diff; address findings. Isolated code-reviewer produced no P0/P1. P2 (A4 monorepo gap), P2 (Chart.lock absence → now covered by assertion `3.9`), P2 (routing-only evals → now covered by `1.8`/`2.7`/`3.9`), P3 (`3607s` non-standard value) all addressed. Findings archived at `.sessions/task10-review-code.txt`.
+- [x] **review-spec**: run `/kk:review-spec kubernetes-support` with scope `all`; confirm P1 portion satisfied. Isolated spec-reviewer produced no P0/P1. P2 blocker (A4 monorepo eval) resolved; P2 wording (assertion 2.1) reworded; P3 (`EXPECTED_PROFILES` wording) resolved by aligning design/implementation/tasks prose with the alphabetical-set convention already on disk. Ambiguity (cross-ref to `design.md#...` breaks after feature-close) noted; deferred to Task 19 feature-close housekeeping. Findings archived at `.sessions/task10-review-spec.txt`.
+- [x] **Issue #64 closure check**: confirm `review-code` now handles Kubernetes artifacts as designed; the narrow issue-#64 text is satisfied. `profiles/k8s/` exists with seven review-code checklists + index; shared profile-detection from P0 routes to it; five evals cover nominal + regression + false-positive scenarios. Issue #64 closeable at P1 merge.
 
 ---
 
