@@ -1,0 +1,20 @@
+{
+  "id": 2,
+  "name": "k8s-kustomize-only",
+  "description": "A Kustomize-only diff (kustomization.yaml + a ConfigMap patch) activates the k8s profile and the kustomize-checklist, but not helm-checklist or reliability-checklist.",
+  "skills": ["review-code"],
+  "prompt": "I've staged the following changes. Run `/kk:review-code` against them.",
+  "trap": "Model sees 'Kubernetes-shaped YAML' and loads `helm-checklist.md` anyway (despite no `Chart.yaml`), or fails to recognize `kustomization.yaml` as the authoritative Kustomize filename signal, or spuriously loads `reliability-checklist.md` even though no workload kind (Deployment/StatefulSet/DaemonSet/Job/CronJob) is present in the diff.",
+  "files": [
+    "test-files/kustomization.yaml",
+    "test-files/patches/configmap-patch.yaml"
+  ],
+  "assertions": [
+    { "id": "2.1", "text": "Identifies `k8s` as the active profile — via both the `kustomization.yaml` filename signal and content signals (`apiVersion:` + `kind:` at zero indent in the patch)." },
+    { "id": "2.2", "text": "Loads the four always-load checklists from `profiles/k8s/review-code/`." },
+    { "id": "2.3", "text": "Loads `kustomize-checklist.md` because the diff contains a file named `kustomization.yaml`." },
+    { "id": "2.4", "text": "Does NOT load `helm-checklist.md` — no `Chart.yaml`, no `values*` in a `Chart.yaml` directory, no `templates/` ancestor chain." },
+    { "id": "2.5", "text": "Does NOT load `reliability-checklist.md` — no top-level `kind: Deployment`/`StatefulSet`/`DaemonSet`/`Job`/`CronJob` in the diff (only `Kustomization` and `ConfigMap`)." },
+    { "id": "2.6", "text": "Emits findings grouped by `(k8s, <checklist>)`." }
+  ]
+}
