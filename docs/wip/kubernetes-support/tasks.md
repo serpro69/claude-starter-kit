@@ -231,16 +231,16 @@ Subtasks:
 ## Task 12 — Extend `implement` with K8s per-task gotchas
 
 - **Phase:** P2
-- **Status:** pending
+- **Status:** in-progress
 - **Depends on:** Task 7
 - **Links:** [implementation.md §Step 2.2](implementation.md#step-22--extend-implement), [design.md §implement — P2 per-task K8s gotchas](design.md#implement--p2-per-task-k8s-gotchas)
 
 Subtasks:
 
-- [ ] Update `klaude-plugin/skills/implement/SKILL.md` Step 2: add the profile-aware clause and the `dependency-handling` reference for K8s API versions / CRDs / Helm / container images.
-- [ ] Create `klaude-plugin/profiles/k8s/implement/index.md` — always-load entry: `gotchas.md`.
-- [ ] Create `klaude-plugin/profiles/k8s/implement/gotchas.md` — API-version pinning, probe-correctness distinctions, image-tag immutability, resource-limits discipline, namespace/label hygiene, CRD-before-CR ordering.
-- [ ] Verify: structure test passes (presence-conditional covers `profiles/k8s/implement/index.md`). Synthetic K8s-task execution surfaces gotchas and fires `dependency-handling` on manifests referencing K8s API versions. Regression: Go-task execution unchanged.
+- [x] Update `klaude-plugin/skills/implement/SKILL.md` Step 2: add the profile-aware clause and the `dependency-handling` reference for K8s API versions / CRDs / Helm / container images. (Also added a Conventions-subsection pointer to `shared-profile-detection.md` + the per-profile `implement/` slot, mirroring Task 11's pattern in `design/SKILL.md`. The widened dep-handling trigger was phrased as a forward-compatible bullet — its formal description-frontmatter rewrite lands in Task 17 (P3).)
+- [x] Create `klaude-plugin/profiles/k8s/implement/index.md` — always-load entry: `gotchas.md`.
+- [x] Create `klaude-plugin/profiles/k8s/implement/gotchas.md` — API-version pinning, probe-correctness distinctions, image-tag immutability, resource-limits discipline, namespace/label hygiene, CRD-before-CR ordering. (Scope extended slightly over plan wording: also covers admission-webhook/operator timing, Helm-specific gotchas, and Kustomize-specific gotchas — all authoring-time pitfalls that would otherwise surface post-write in `review-code` checklists. Angle is deliberately pre-write-avoidance, not post-write-review, to stay distinct from `review-code/` content.)
+- [x] Verify: structure test passes (presence-conditional covers `profiles/k8s/implement/index.md`). `bash test/test-plugin-structure.sh` → 31 cases, 124 assertions, all pass (up from 121 after Task 11; the new `profiles/k8s/implement/` phase dir adds 3 assertions: presence, forward-index, reverse-index). Synthetic K8s-task / Go-task runtime scenarios deferred to Task 15 P2 verification per the cross-task coordination note at the top of this phase.
 
 ## Task 13 — Extend `test` with K8s validator guidance
 

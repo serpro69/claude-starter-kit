@@ -11,6 +11,8 @@ description: |
 
 Read capy knowledge base conventions at [shared-capy-knowledge-protocol.md](shared-capy-knowledge-protocol.md).
 
+Profile detection is delegated to [shared-profile-detection.md](shared-profile-detection.md). When the sub-task's target files activate a profile that contributes an `implement/` subdirectory (e.g., `${CLAUDE_PLUGIN_ROOT}/profiles/k8s/implement/`), its `index.md` lists per-task gotchas the skill must consult BEFORE writing. See Step 2.
+
 ## Required Outputs
 
 Per sub-task cycle (Steps 2–3), verify all outputs are delivered:
@@ -54,8 +56,9 @@ When set, all review checkpoints automatically use isolated variants (`kk:review
 1. Update `tasks.md`: set the task's status to `in-progress`
 2. Follow the plan exactly
 3. Check off subtasks (`- [x]`) in `tasks.md` as you complete them
-4. **Whenever the sub-task touches an external library, SDK, framework, or API** — new import, version bump, unfamiliar call — apply the `dependency-handling` skill BEFORE writing the call. Do not guess signatures or config; look them up via capy/context7 per that skill's rules.
-5. Run verifications as specified; use `test` skill
+4. **Profile-aware per-task gotchas.** Before writing, run the shared profile-detection procedure against the sub-task's target files (and any diff-so-far). For each active profile that contributes an `implement/` subdirectory, load `${CLAUDE_PLUGIN_ROOT}/profiles/<name>/implement/index.md` and read the always-load + any matching conditional content. Apply those gotchas to the upcoming edits — they exist to prevent mistakes the post-write reviewer would otherwise catch. If no active profile contributes an `implement/` subdirectory, skip this step.
+5. **Whenever the sub-task introduces or changes a dependency** — new import, version bump, unfamiliar call, **and per the widened trigger also: a Kubernetes API version, a CRD, a Helm chart or chart dependency, or a container image tag/digest** — apply the `dependency-handling` skill BEFORE writing the call. Do not guess signatures, API versions, or configuration; look them up via capy/context7 per that skill's rules. Per-profile lookup cascades live in each profile's `overview.md` (e.g., `${CLAUDE_PLUGIN_ROOT}/profiles/k8s/overview.md` §Looking up Kubernetes dependencies).
+6. Run verifications as specified; use `test` skill
 
 ### Step 3: Report
 
