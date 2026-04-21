@@ -43,7 +43,7 @@ Return exactly this shape, no preamble, no commentary:
 
 | file | profile | signal type | triggered_by |
 |---|---|---|---|
-| <path> | <profile-or-none> | path \| filename \| content \| — | <the concrete thing that matched, or "no signals fired"> |
+| <path> | <profile-or-none> | path \| filename \| content \| none | <the concrete thing that matched, or "no signals fired"> |
 
 ## Loaded checklists
 
@@ -55,7 +55,7 @@ Return exactly this shape, no preamble, no commentary:
 - `(<profile>, <checklist.md>)` — Load-if <predicate>. Not matched: <why>.
 ```
 
-Every file in the diff appears in the Active profiles table, even when no profile matched (row: `| <path> | none | — | no signals fired |`). Every conditional checklist of every active profile appears in either Loaded or NOT loaded — no silent skips. If the diff has no active profiles at all, emit the table with all rows showing `none`, leave Loaded empty, and leave NOT loaded empty.
+Every file in the diff appears in the Active profiles table, even when no profile matched (row: `| <path> | none | none | no signals fired |`). The `signal type` column MUST always carry an explicit token — one of `path`, `filename`, `content`, or `none`. Do NOT use em-dashes, hyphens, `n/a`, empty cells, or any other placeholder — downstream graders and consumers key off the literal token. Every conditional checklist of every active profile appears in either Loaded or NOT loaded — no silent skips. If the diff has no active profiles at all, emit the table with all rows showing `none`, leave Loaded empty, and leave NOT loaded empty.
 
 ## What You Do Not Do
 
