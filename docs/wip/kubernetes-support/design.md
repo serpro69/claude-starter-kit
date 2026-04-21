@@ -564,6 +564,39 @@ The current phrasing has a secondary issue: Task 8's `DETECTION.md:24` prose say
 
 **Out of scope for Task 8.** Yes — deferring via this amendment keeps the Task 8 PR focused on "implement the spec as written."
 
+### A5 — Extend K8s design question bank with standalone DNS policy and operator-authoring patterns
+
+**Flagged by:** Isolated K8s-correctness review of commit 74f6752 (2026-04-21) — `pal codereview` (gemini-3-pro-preview) HIGH finding B2-1 proposed a new "Compute, Scheduling, and Storage" category plus an "Operator Patterns (if applicable)" category in `klaude-plugin/profiles/k8s/design/questions.md`. The fix commit `f1d8efe` (2026-04-21) adopted the application-workload items (QoS class, `PriorityClass`, storage `reclaimPolicy`, `imagePullSecrets`, service-mesh / `dnsPolicy`-in-mesh, init-containers) under existing categories. The two items below are scope-dependent and deferred here.
+
+**Current state.** `profiles/k8s/design/questions.md` covers application-workload design across Cluster topology, GitOps and delivery, Secrets strategy, Multi-tenancy, Observability, and Reliability and rollback categories. Two design-surface gaps remain after Task 11:
+
+1. **DNS policy, standalone from service mesh.** `dnsPolicy` is currently embedded inside the service-mesh question (Multi-tenancy category — `questions.md:33`). Non-mesh workloads that need a non-default `dnsPolicy` (`ClusterFirst` / `Default` / `ClusterFirstWithHostNet` / `None`) — for example, `hostNetwork` pods, cluster-external resolution, or a custom resolver pipeline — are never prompted, because the question gates on service-mesh presence.
+
+2. **Operator-authoring patterns.** When the designed feature **is** a controller or operator (not an application deployed onto a cluster), critical design decisions include:
+   - Leader-election mode (`Lease`-based preferred; `configmaps`/`endpoints` modes deprecated) and tuning (`lease-duration`, `renew-deadline`, `retry-period`).
+   - Admission-controller webhook ordering (`MutatingAdmissionWebhook` before `ValidatingAdmissionWebhook`), `failurePolicy` choice (`Ignore` vs `Fail`), `sideEffects` declaration, `timeoutSeconds`.
+   - CRD conversion webhooks for multi-version CRD upgrade paths — webhook-backed vs `None`; the `storage: true` version migration plan.
+
+The current rubric assumes the feature is an application, not a controller. Operator-shaped features will satisfy the existing rubric superficially but leave their most load-bearing decisions undocumented.
+
+**Architectural concern.** The general K8s design profile is optimized for the common case (application design). It does not discriminate between "application" and "operator/controller" design modes. A future designer of an operator will hit this gap; without prompts, operator-authoring decisions default silently, and `review-spec` has no specification-side record to check against.
+
+**Proposed refactor.**
+
+1. **Standalone DNS policy question** — add to `profiles/k8s/design/questions.md` (Cluster topology or Reliability and rollback category): "`dnsPolicy` — default (`ClusterFirst`) or non-default (`Default` for node DNS only, `ClusterFirstWithHostNet` for `hostNetwork: true` pods, `None` with custom `dnsConfig`)? When the default is insufficient, what is the resolution pipeline this workload expects?"
+2. **Operator patterns — design decision first.** Decide whether to:
+   - (a) Add a conditional "If this feature includes a controller or operator..." sub-section to `profiles/k8s/design/questions.md` covering leader election, webhook ordering, and CRD conversion; or
+   - (b) Split into a sibling profile `k8s-operator` with its own `DETECTION.md` (filename signals: `kubebuilder.yaml`, `PROJECT`, `config/crd/`, `config/webhook/`) and `design/` content.
+   Option (a) is lower friction; option (b) is cleaner when operator-design cases become common.
+3. Cross-align with review-code checklists — add operator-specific review-code content if any of these decisions warrant review-time verification (none currently do).
+4. If option (b) is chosen, update `DETECTION.md`'s §Known profiles list in `_shared/profile-detection.md` and `EXPECTED_PROFILES` in `test/test-plugin-structure.sh`.
+
+**Why it's deferred.** Task 11's fix commit closed 24 of 25 review findings in scope. The remaining B2-1 operator-patterns item is scope-dependent: adding operator prompts to the general design flow pollutes the common application-design path, while splitting profiles pre-commits to an architectural shape that deserves its own scoping discussion (and would benefit from a real operator-design case before committing). The standalone-DNS item is a one-bullet edit, but bundling it with the operator decision keeps both in one coherent follow-up.
+
+**When to apply.** After all four phases (P0–P3) have landed and the plugin is shipping the K8s profile. Earlier if a user surfaces an operator-design session and hits the gap. The standalone-DNS prompt is a low-cost add at any time.
+
+**Out of scope for kubernetes-support.** Yes.
+
 ## References
 
 - [ADR 0001 — Profile/language detection remains a single additive axis](../../adr/0001-profile-detection-model.md)

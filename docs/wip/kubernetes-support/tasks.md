@@ -214,7 +214,7 @@ Subtasks:
 ## Task 11 — Extend `design` with K8s-aware idea refinement
 
 - **Phase:** P2
-- **Status:** in-progress
+- **Status:** done
 - **Depends on:** Task 7
 - **Links:** [implementation.md §Step 2.1](implementation.md#step-21--extend-design), [design.md §design — P2 Kubernetes-aware idea refinement](design.md#design--p2-kubernetes-aware-idea-refinement)
 
