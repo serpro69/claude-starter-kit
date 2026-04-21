@@ -28,7 +28,7 @@ Once you've become familiar with the project and code, you can start asking me q
 
 **Detect active profiles before refining.** The design phase runs before any code exists, so file-based detection is impossible — use the idea-prose pattern documented in [shared-profile-detection.md §The `design` interaction pattern](shared-profile-detection.md). Check the idea prose against the high-precision auto-trigger set (`Kubernetes`, `K8s`, `Helm chart`, `kubectl`, `kustomize`, `manifest.yaml`, `Deployment resource`, `StatefulSet`, `DaemonSet`, `CronJob`); on any match, ask the user to confirm that the corresponding profile should activate for this session. If no auto-trigger matches but the idea is ambiguous — it names infrastructure, deployment, runtime, or platform concerns without naming a specific technology, or it uses overloaded tokens like `cluster` / `namespace` / `pod` that collide with non-K8s meanings — ask explicitly: _"Does this feature involve Kubernetes, Terraform, or other IaC artifacts? If yes, which?"_ Confirmation is required; never auto-activate a profile silently.
 
-For each active profile, read `${CLAUDE_PLUGIN_ROOT}/profiles/<name>/design/index.md` (skip silently if absent — not every profile populates a `design/` subdirectory) and load every file listed under **Always load**. A profile's `questions.md` (when present) seeds the refinement question pool — e.g., the `k8s` profile contributes cluster-topology, GitOps-choice, secrets-strategy, multi-tenancy, observability, and rollback-posture questions. Integrate the profile's questions into the flow below — one question per message, as always.
+For each active profile, use the `Read` tool on `<plugin_root>/profiles/<name>/design/index.md` — where `<plugin_root>` is the absolute plugin-root path you already know from SKILL.md context. Skip silently if absent; not every profile populates a `design/` subdirectory. Load every file listed under **Always load**; a profile's `questions.md` (when present) seeds the refinement question pool. Integrate the profile's questions into the flow below — one question per message, as always.
 
 Ideally, the questions would be multiple choice, but open-ended questions are OK too.
 
@@ -46,7 +46,7 @@ Document in .md files the entire design and write a comprehensive implementation
 
 Feel free to break out the design/implementation documents into multi-part files, if necessary.
 
-**For each active profile** (from Step 3), re-consult `${CLAUDE_PLUGIN_ROOT}/profiles/<name>/design/index.md` and apply every always-load entry whose content shapes the final design document. Profile-contributed `sections.md` (when present) names required sections the design document must cover — e.g., the `k8s` profile requires a cluster-compat matrix, resource budget, reliability posture, security posture, and failure-mode narrative. Do not drop a required section silently; if a section genuinely does not apply, state so explicitly with a one-line justification.
+**For each active profile** (from Step 3), re-consult `<plugin_root>/profiles/<name>/design/index.md` (using the same resolved plugin-root path you used in Step 3) and apply every always-load entry whose content shapes the final design document. Profile-contributed `sections.md` (when present) names required sections the design document must cover. Do not drop a required section silently; if a section genuinely does not apply, state so explicitly with a one-line justification.
 
 When creating documentation, follow this approach:
 
