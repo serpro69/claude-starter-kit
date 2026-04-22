@@ -263,16 +263,16 @@ Subtasks:
 ## Task 14 — Extend `document` with K8s doc rubric
 
 - **Phase:** P2
-- **Status:** pending
+- **Status:** in-progress
 - **Depends on:** Task 7
 - **Links:** [implementation.md §Step 2.4](implementation.md#step-24--extend-document), [design.md §document — P2 rubric for K8s artifacts](design.md#document--p2-rubric-for-k8s-artifacts)
 
 Subtasks:
 
-- [ ] Update `klaude-plugin/skills/document/SKILL.md` guidelines: add the profile-aware clause.
-- [ ] Create `klaude-plugin/profiles/k8s/document/index.md` — always-load entry: `rubric.md`.
-- [ ] Create `klaude-plugin/profiles/k8s/document/rubric.md` — RBAC decision rationale, rollback runbook, resource-baseline documentation, cluster-compat matrix, NetworkPolicy/egress posture.
-- [ ] Verify: structure test passes (presence-conditional covers `profiles/k8s/document/index.md`). Synthetic K8s documentation session surfaces the rubric. Regression: Go documentation session unchanged.
+- [x] Update `klaude-plugin/skills/document/SKILL.md` guidelines: add the profile-aware clause. (Also added a Conventions-subsection pointer to `shared-profile-detection.md` + the per-profile `document/` slot, and a `## Workflow` section with the ADR 0004 mandatory-order directive — mirroring the Task 12/13 pattern. Writing documentation is action on subject matter; the mandatory-order directive ensures profile content is loaded before docs are written. Guideline #3 is the profile-aware clause with explicit "loaded in Step 2 of the Workflow" back-reference.)
+- [x] Create `klaude-plugin/profiles/k8s/document/index.md` — always-load entry: `rubric.md`.
+- [x] Create `klaude-plugin/profiles/k8s/document/rubric.md` — RBAC decision rationale, rollback runbook, resource-baseline documentation, cluster-compat matrix, NetworkPolicy/egress posture. (Each section includes required subsections; "Applying the rubric" closing section mandates explicit `N/A — <reason>` for inapplicable topics rather than silent omission. Also updated `profiles/k8s/overview.md` Populated-phases list to include `document/` and removed it from the deferred-phases note.)
+- [x] Verify: structure test passes (presence-conditional covers `profiles/k8s/document/index.md`). `bash test/test-plugin-structure.sh` → 31 cases, 130 assertions, all pass (up from 127 after Task 13; the new `profiles/k8s/document/` phase dir adds 3 assertions: presence, forward-index, reverse-index). Synthetic K8s-documentation / Go-documentation runtime scenarios deferred to Task 15 P2 verification per the cross-task coordination note at the top of this phase.
 
 ## Task 15 — Phase 2 verification
 
