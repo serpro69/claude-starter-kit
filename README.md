@@ -56,7 +56,7 @@ Out of the box you get:
 ### API Keys
 
 - [Context7](https://context7.com/) API key — for library documentation lookups
-- Gemini API key for [Pal](https://github.com/BeehiveInnovations/pal-mcp-server) (or [any other provider](https://github.com/BeehiveInnovations/pal-mcp-server/blob/main/docs/getting-started.md)) — for multi-model code review
+- Gemini API key for [Pal](https://github.com/serpro69/pal-mcp-server) (or [any other provider](https://github.com/serpro69/pal-mcp-server/blob/main/docs/getting-started.md)) — for multi-model code review
 
 ### MCP Server Configuration
 
@@ -102,23 +102,23 @@ You don't need all servers to get started. Add them incrementally:
     "command": "sh",
     "args": [
       "-c",
-      "$HOME/.local/bin/uvx --from git+https://github.com/BeehiveInnovations/pal-mcp-server.git pal-mcp-server"
+      "$HOME/.local/bin/uvx --from git+https://github.com/serpro69/pal-mcp-server.git pal-mcp-server"
     ],
     "env": {
       "PATH": "/usr/local/bin:/usr/bin:/bin:$HOME/.local/bin",
-      # see https://github.com/BeehiveInnovations/pal-mcp-server/blob/main/docs/configuration.md#model-configuration
+      # see https://github.com/serpro69/pal-mcp-server/blob/main/docs/configuration.md#model-configuration
       "DEFAULT_MODEL": "auto",
-      # see https://github.com/BeehiveInnovations/pal-mcp-server/blob/main/docs/advanced-usage.md#thinking-modes
+      # see https://github.com/serpro69/pal-mcp-server/blob/main/docs/advanced-usage.md#thinking-modes
       "DEFAULT_THINKING_MODE_THINKDEEP": "high",
       "GEMINI_API_KEY": "YOUR_GEMINI_API_KEY",
-      # see https://github.com/BeehiveInnovations/pal-mcp-server/blob/main/docs/configuration.md#model-usage-restrictions
+      # see https://github.com/serpro69/pal-mcp-server/blob/main/docs/configuration.md#model-usage-restrictions
       "GOOGLE_ALLOWED_MODELS": "gemini-3.1-pro-preview,gemini-3-flash-preview"
     }
   }
 }
 ```
 
-See [Pal configuration docs](https://github.com/BeehiveInnovations/pal-mcp-server/blob/main/docs/configuration.md) for model and thinking mode options.
+See [Pal configuration docs](https://github.com/serpro69/pal-mcp-server/blob/main/docs/configuration.md) for model and thinking mode options.
 
 </details>
 
@@ -242,7 +242,7 @@ Four servers provide complementary capabilities:
 | --------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
 | **[Context7](https://context7.com/)**                           | Up-to-date library documentation and code examples                                     |
 | **[Serena](https://github.com/oraios/serena)**                  | Semantic code analysis via LSP — symbol navigation, reference tracking, targeted reads |
-| **[Pal](https://github.com/BeehiveInnovations/pal-mcp-server)** | Multi-model AI integration — chat, debugging, code review, planning, security audit    |
+| **[Pal](https://github.com/serpro69/pal-mcp-server)** | Multi-model AI integration — chat, debugging, code review, planning, security audit    |
 | **[Capy](https://github.com/serpro69/capy)**                    | Persistent knowledge base — cross-session project memory with FTS5 search              |
 
 ### Knowledge Base (Capy)
