@@ -481,24 +481,31 @@ These items were flagged by reviews against in-feature commits but are intention
 
 **Flagged by:** Task 7 P0 verification dry-run (2026-04-19) — user-led `/kk:review-code` runs in a sibling Go project (`capy`) reproduced the same process-bypass behavior across three consecutive invocations. Diagnosis and fix framework captured in [ADR 0004 — Skill workflow ordering: instructions before action](../../adr/0004-skill-workflow-ordering.md).
 
-**Current state.** [ADR 0004](../../adr/0004-skill-workflow-ordering.md) establishes the universal convention: every plugin skill must fully load its instructions before acting on subject matter. The ADR + [CLAUDE.md §Skill workflow ordering](../../../CLAUDE.md#skill-workflow-ordering--instructions-before-action) bind the rule for future skill authoring. Only `review-code` (`SKILL.md` + `review-process.md`) and its sub-agent (`klaude-plugin/agents/code-reviewer.md`) have been retrofitted as part of Task 7's defect fix. The remaining nine skills still follow the old pattern:
+**Current state.** [ADR 0004](../../adr/0004-skill-workflow-ordering.md) establishes the universal convention: every plugin skill must fully load its instructions before acting on subject matter. The ADR + [CLAUDE.md §Skill workflow ordering](../../../CLAUDE.md#skill-workflow-ordering--instructions-before-action) bind the rule for future skill authoring.
 
-- `review-spec`, `review-design` — review family, same analyze-an-artifact shape as `review-code`
-- `test` — profile-driven validator guidance
-- `implement` — executes a task plan; needs per-task profile gotchas loaded before editing code
-- `design` — turns idea into PRD; needs question bank + section schema loaded before engaging the idea prose
-- `document` — needs profile rubric loaded before writing docs
-- `merge-docs` — needs merge methodology loaded before reading the two docs
-- `dependency-handling` — needs the cascade rule (capy-first, context7-second, web-last) loaded before making lookups
-- `chain-of-verification` — meta-skill; needs the CoVe process loaded before applying verification
+Retrofit progress as of Task 14 close:
 
-**Architectural concern.** The convention binds future work but not existing skills. Each un-swept skill is a latent instance of the same failure mode, waiting to surface the next time a user inspects its behavior carefully.
+| Skill | Workflow section | Mandatory-order directive | Directive gates all subject-matter-reading actions | Minimal-early-scope step (ADR 0004 §Decision step 2) |
+|---|---|---|---|---|
+| `review-code` (+ `code-reviewer` sub-agent) | ✅ Task 7 | ✅ Task 7 | ✅ (Step 5 in `review-process.md`) | ✅ Step 1 is `git diff --stat` |
+| `implement` | ✅ Task 12 | ✅ Task 12 | ⚠️ wording "act on the sub-task" — breadth ambiguous; audit needed | ❌ no explicit filename-only step before Step 2 |
+| `test` | ✅ Task 13 | ✅ Task 13 | ❌ gates `run validator/test/binary` only — reading code-under-test not gated | ❌ no explicit filename-only step before Step 1 |
+| `design` | ✅ Task 11 | ⚠️ partial — check `idea-process.md` / `existing-task-process.md` breadth and scope-step on re-audit | ⚠️ audit needed | ⚠️ audit needed |
+| `document` | ✅ Task 14 | ✅ Task 14 review-fix | ✅ Task 14 review-fix (gates feature-tree reading + writes) | ✅ Task 14 review-fix (Step 1 minimal-scope listing) |
+| `review-spec`, `review-design`, `merge-docs`, `dependency-handling`, `chain-of-verification` | ❌ | ❌ | ❌ | ❌ |
+
+The Task-14 isolated review (commit `559fc2f`) surfaced a refinement that A2's original wording did not capture: adding a Workflow section with a mandatory-order directive is necessary but **not sufficient** — the directive must gate **all** subject-matter-reading actions (not just the skill's primary write/run action), and the Workflow must carry an explicit filename-only minimal-scope step before profile detection. Skills marked ❌/⚠️ above still carry this defect even where the Workflow section already exists. See `kk:review-findings` indexed during Task 14 for the failure-mode signature.
+
+**Architectural concern.** The convention binds future work but not existing skills, and "Workflow section exists" no longer implies full compliance. Each un-swept or partially-swept skill is a latent instance of the same failure mode, waiting to surface the next time a user inspects its behavior carefully.
 
 **Proposed refactor.**
-1. For each of the nine remaining skills, add a **Mandatory ordering** block at the top of its Workflow section in `SKILL.md`, naming the rule by intent (subject matter and minimal-early-scope vary per skill — see the table in [ADR 0004 §Decision](../../adr/0004-skill-workflow-ordering.md#decision)). Reference ADR 0004 for rationale.
-2. For each skill, audit the process/rubric files it references. If content-level read instructions (`git diff`, `Read` of subject-matter files, etc.) appear before instruction-loading steps, reorder so content reads happen once, after instructions are loaded.
-3. For sub-agents referenced by these skills (`design-reviewer`, `spec-reviewer`, any others), apply the same ordering fix internally — payload delivery order does not substitute for the sub-agent reading its instructions before acting.
-4. Dedup pass per skill: grep for repeated `git diff` / subject-matter `Read` instructions; collapse each to one instance at the post-instruction position.
+1. **For skills with no Workflow section yet** (`review-spec`, `review-design`, `merge-docs`, `dependency-handling`, `chain-of-verification`): add a **Mandatory ordering** block at the top of a new Workflow section in `SKILL.md`, naming the rule by intent. Subject matter and minimal-early-scope vary per skill — see the table in [ADR 0004 §Decision](../../adr/0004-skill-workflow-ordering.md#decision). Reference ADR 0004 for rationale.
+2. **For skills with a Workflow section already** (`implement`, `test`, `design`): audit the existing mandatory-order directive's **gate breadth** and confirm it explicitly covers every subject-matter-reading action the skill performs (not just the primary write/run action). Audit the Workflow steps and confirm an explicit filename-only minimal-scope step precedes profile detection. Apply the Task-14 fix shape to skills where either check fails:
+   - Widen the directive to gate subject-matter reading, e.g., `test/SKILL.md:18` → `Do not read code-under-test content, run validators, tests, or binaries, or otherwise act on subject matter until…`
+   - Insert a Step-0 (or new Step 1) minimal-scope listing before profile detection (`git diff --stat`, feature-directory listing, etc. — the exact shape differs per skill's subject matter per ADR 0004's table).
+3. For every skill (both groups above), audit the process/rubric files it references. If content-level read instructions (`git diff`, `Read` of subject-matter files, etc.) appear before instruction-loading steps, reorder so content reads happen once, after instructions are loaded.
+4. For sub-agents referenced by these skills (`design-reviewer`, `spec-reviewer`, any others), apply the same ordering fix internally — payload delivery order does not substitute for the sub-agent reading its instructions before acting.
+5. Dedup pass per skill: grep for repeated `git diff` / subject-matter `Read` instructions; collapse each to one instance at the post-instruction position.
 
 **Why it's deferred.** Nine `SKILL.md` edits plus their referenced process/rubric files plus affected sub-agents is enough diff to deserve its own review pass. Per-skill wording needs tailoring because each skill's "subject matter" and "minimal early scope" differ (a batch copy-paste risks stilted prose). Bundling it into Task 7's defect-fix commit would obscure both changes.
 
