@@ -11,11 +11,14 @@ description: |
 
 Read capy knowledge base conventions at [shared-capy-knowledge-protocol.md](shared-capy-knowledge-protocol.md).
 
+Profile detection is delegated to [shared-profile-detection.md](shared-profile-detection.md). When an active profile contributes a `test/` subdirectory (e.g., `${CLAUDE_PLUGIN_ROOT}/profiles/k8s/test/`), its `index.md` lists validators, check categories, and any binary-presence or auto-detection protocols the skill must apply. Load profile content BEFORE running validators — a missing pre-check step can crash on a tool that isn't installed.
+
 ## Guidelines
 
 1. Always try to add tests for any new functionality, and make sure to cover all cases and code branches, according to requirements.
 2. Always try to add tests for any bug-fixes, if the discovered bug is not already covered by tests. If the bug was already covered by tests, fix the existing tests as needed.
 3. Always run all existing tests after you are done with a given implementation or bug-fix.
+4. **Profile-aware validator planning (load before running).** After language-specific test patterns, run the shared profile-detection procedure against the changed files. For each active profile that contributes a `test/` subdirectory, load `${CLAUDE_PLUGIN_ROOT}/profiles/<name>/test/index.md` and read the always-load + any matching conditional content BEFORE executing any validator named there. Apply the validators and check categories the profile specifies; honor binary-presence protocols the profile documents (missing binaries should surface install hints, not shell errors).
 
 **Capy search:** Before applying test guidelines, search `kk:test-patterns` for project-specific testing approaches and known edge cases.
 

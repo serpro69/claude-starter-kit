@@ -246,18 +246,18 @@ Subtasks:
 ## Task 13 — Extend `test` with K8s validator guidance
 
 - **Phase:** P2
-- **Status:** pending
+- **Status:** in-progress
 - **Depends on:** Task 7
 - **Links:** [implementation.md §Step 2.3](implementation.md#step-23--extend-test), [design.md §test — P2 validator guidance with policy-hook auto-detection](design.md#test--p2-validator-guidance-with-policy-hook-auto-detection)
 
 Subtasks:
 
-- [ ] Update `klaude-plugin/skills/test/SKILL.md` guidelines: add the profile-aware clause.
-- [ ] Create `klaude-plugin/profiles/k8s/test/index.md` — always-load entries: `validators.md`, `policy-hook.md`, `presence-check-protocol.md`. No conditional entries unless a natural split emerges during authoring.
-- [ ] Create `klaude-plugin/profiles/k8s/test/presence-check-protocol.md` — before running any validator, check that its binary is on `PATH`. If missing, surface per-tool install hint; either fall back to descriptive guidance or mark the check as skipped in the report. Missing a floor binary does NOT block the test run. Apply to floor, menu, and policy tools alike.
-- [ ] Create `klaude-plugin/profiles/k8s/test/validators.md` — **floor** (mandated when binary present): `kubeconform` on all matched YAML, `helm lint` on each Helm chart dir, `kustomize build` on each Kustomize dir. Include per-tool install hints. **Menu** (suggested, user opts in): `kube-score`, `kube-linter`, `polaris`, `trivy config`, `checkov`, `kics`. **Cluster-dependent optional** (requires live cluster + `kubectl`): `kubectl --dry-run=server`, `popeye`.
-- [ ] Create `klaude-plugin/profiles/k8s/test/policy-hook.md` — auto-detection rules (each gated by BOTH the project marker AND the binary being on PATH): `.conftest/` or `policies/*.rego` AND `conftest` on PATH → `conftest test`; `kyverno-policies/` or Kyverno resources AND `kyverno` on PATH → `kyverno test`; `.gator/` or Gatekeeper resources AND `gator` on PATH → `gator test`; no markers → skip silently.
-- [ ] Verify: structure test passes. Synthetic K8s test-plan prescribes the floor, catalogs the menu, describes policy-hook auto-detection. Synthetic scenario with `.conftest/` present triggers policy-hook. Synthetic scenario with one floor binary missing (`kubeconform` uninstalled) surfaces install hint without crashing; other floor checks still run.
+- [x] Update `klaude-plugin/skills/test/SKILL.md` guidelines: add the profile-aware clause. (Also added a Conventions-subsection pointer to `shared-profile-detection.md` + the per-profile `test/` slot, mirroring Task 11's and Task 12's pattern. The profile-aware clause is guideline #4, with explicit "load before running" wording per ADR 0004 since executing a validator is action on subject matter.)
+- [x] Create `klaude-plugin/profiles/k8s/test/index.md` — always-load entries: `validators.md`, `policy-hook.md`, `presence-check-protocol.md`. No conditional entries unless a natural split emerges during authoring. (No conditional split emerged — the policy hook is a gate within `policy-hook.md`, not a separate checklist.)
+- [x] Create `klaude-plugin/profiles/k8s/test/presence-check-protocol.md` — before running any validator, check that its binary is on `PATH`. If missing, surface per-tool install hint; either fall back to descriptive guidance or mark the check as skipped in the report. Missing a floor binary does NOT block the test run. Apply to floor, menu, and policy tools alike.
+- [x] Create `klaude-plugin/profiles/k8s/test/validators.md` — **floor** (mandated when binary present): `kubeconform` on all matched YAML, `helm lint` on each Helm chart dir, `kustomize build` on each Kustomize dir. Include per-tool install hints. **Menu** (suggested, user opts in): `kube-score`, `kube-linter`, `polaris`, `trivy config`, `checkov`, `kics`. **Cluster-dependent optional** (requires live cluster + `kubectl`): `kubectl --dry-run=server`, `popeye`.
+- [x] Create `klaude-plugin/profiles/k8s/test/policy-hook.md` — auto-detection rules (each gated by BOTH the project marker AND the binary being on PATH): `.conftest/` or `policies/*.rego` AND `conftest` on PATH → `conftest test`; `kyverno-policies/` or Kyverno resources AND `kyverno` on PATH → `kyverno test`; `.gator/` or Gatekeeper resources AND `gator` on PATH → `gator test`; no markers → skip silently.
+- [x] Verify: structure test passes (presence-conditional covers `profiles/k8s/test/index.md`). `bash test/test-plugin-structure.sh` → 31 cases, 127 assertions, all pass (up from 124 after Task 12; the new `profiles/k8s/test/` phase dir adds 3 assertions: presence, forward-index, reverse-index). Synthetic K8s test-plan scenarios (floor prescribed, menu cataloged, policy hook triggered by `.conftest/`, missing floor binary surfaces install hint without crashing) deferred to Task 15 P2 verification per the cross-task coordination note at the top of this phase.
 
 ## Task 14 — Extend `document` with K8s doc rubric
 
