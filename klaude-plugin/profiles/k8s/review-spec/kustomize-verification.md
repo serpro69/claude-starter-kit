@@ -37,8 +37,15 @@ If the design describes configuration injection via ConfigMap or Secret:
 
 If the design specifies a labeling standard:
 
-- `commonLabels` in `kustomization.yaml` should include the labels the design requires on all resources.
-- Verify that `commonLabels` does not inject labels into selectors where immutability constraints apply (Deployment `spec.selector.matchLabels` are immutable after creation). Kustomize ≥4.1 supports `labels[].includeSelectors: false` — check that selector exclusion is configured when the design's labels are metadata-only.
+- Verify selector immutability constraints (Deployment `spec.selector.matchLabels` are immutable after creation). The `commonLabels` field inherently injects labels into selectors — it cannot be configured otherwise. If the design's labels are metadata-only, the Kustomization must use the `labels:` field instead with `includeSelectors: false` (Kustomize ≥4.1). A Kustomization using `commonLabels` for metadata-only labels is `SPEC_DEV` (wrong mechanism, even if the labels are correct).
 - `commonAnnotations` should match any design-specified annotation standard.
 
 Mismatch between the design's label set and the Kustomize configuration → `SPEC_DEV`.
+
+## Components usage
+
+If the design specifies modular, optional, or cross-cutting features (e.g., "optional monitoring sidecar", "database connection add-on"):
+
+- Verify these are implemented using the `components:` field (Kustomize ≥4.1) rather than duplicating resources across overlays or hardcoding them into the base.
+- A design-specified modular feature that is instead duplicated across overlays → `SPEC_DEV` (wrong structural pattern).
+- The presence of a `components:` directory or `components:` entries in `kustomization.yaml` is not `EXTRA_IMPL` when the design describes optional/cross-cutting features — it is the correct Kustomize mechanism for that design pattern.

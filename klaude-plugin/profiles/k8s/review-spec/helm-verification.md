@@ -7,7 +7,7 @@ Verification patterns for comparing Helm chart implementations against design sp
 | Design constraint | Chart.yaml field | Finding type if mismatch |
 |---|---|---|
 | Target app version | `appVersion` | `SPEC_DEV` |
-| K8s compat range from cluster-compat matrix | `kubeVersion` | `SPEC_DEV` (missing or wrong range) |
+| K8s compat range from cluster-compat matrix | `kubeVersion` | `SPEC_DEV` (wrong range) or `MISSING_IMPL` (absent) — only if design specifies cluster-compat matrix |
 | Chart API version | `apiVersion` (should be `v2`) | `SPEC_DEV` |
 | Chart dependencies | `dependencies[]` entries | `MISSING_IMPL` (dep missing) or `SPEC_DEV` (version/repo wrong) |
 
@@ -36,7 +36,7 @@ If the design specifies required inputs (values the installer must provide, with
 
 - **Conditional features.** If the design says "feature X is optional, controlled by a flag" — the template should gate the resource with `{{ if .Values.x.enabled }}`. Missing gate on a design-described optional feature → `SPEC_DEV`.
 - **Environment-specific behavior.** If the design describes different behavior per environment and the chart uses value overrides to achieve this, verify the template conditionals and value structures support the described variations.
-- **Default rendering.** The chart rendered with default values (`helm template .`) should produce manifests consistent with the design's "default deployment" description. Resources present in the rendered output but absent from the design's default → `EXTRA_IMPL`; resources described in the design's default but absent from the rendered output → `MISSING_IMPL`.
+- **Default rendering.** The chart rendered with default values (`helm dependency build && helm template .` — dependencies must be resolved first) should produce manifests consistent with the design's "default deployment" description. Resources present in the rendered output but absent from the design's default → `EXTRA_IMPL`; resources described in the design's default but absent from the rendered output → `MISSING_IMPL`.
 
 ## Dependency pinning
 
@@ -47,4 +47,4 @@ If the design lists external chart dependencies:
 - Repository URLs should match the design's stated chart sources.
 - `Chart.lock` should exist with resolved versions consistent with `Chart.yaml` constraints.
 
-Missing `Chart.lock` when `dependencies[]` is non-empty is `SPEC_DEV` at P3 (reproducibility concern, not a behavioral deviation).
+Missing `Chart.lock` when `dependencies[]` is non-empty is `MISSING_IMPL` at P3 (reproducibility concern — the file should exist but doesn't).

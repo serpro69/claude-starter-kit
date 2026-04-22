@@ -61,6 +61,8 @@ When reviewing features that involve Infrastructure-as-Code profiles (Kubernetes
 - A field value in a manifest that disagrees with the design → `SPEC_DEV`
 - A manifest resource the design does not mention → `EXTRA_IMPL`
 
+`DOC_INCON` and `OUTDATED_DOC` apply unchanged — their semantics are doc-vs-doc or code-vs-doc, which declarative IaC does not alter.
+
 If the spawning workflow provides profile-specific review-spec checklists, read and apply them alongside the standard finding taxonomy.
 
 ## Severity Levels
@@ -96,6 +98,8 @@ Read the design docs provided in your prompt:
 - `tasks.md` — task statuses and subtask checklists
 
 **Capy search:** Search `kk:arch-decisions` for design rationale that may explain intentional spec deviations. Search `kk:review-findings` for known patterns from prior reviews.
+
+**Load profile checklists.** If the spawning prompt includes profile-specific review-spec checklist paths, read each via the `Read` tool now, before proceeding to per-task verification. Do not begin verification until all listed checklists are in context.
 
 ### 2) Determine Review Scope
 

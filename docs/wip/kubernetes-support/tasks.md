@@ -296,7 +296,7 @@ Subtasks:
 ## Task 16 — Extend `review-spec` for K8s spec-vs-implementation semantics
 
 - **Phase:** P3
-- **Status:** in-progress
+- **Status:** done
 - **Depends on:** Task 10
 - **Links:** [implementation.md §Step 3.1](implementation.md#step-31--extend-review-spec), [design.md §review-spec — P3 K8s-awareness polish](design.md#review-spec--p3-k8s-awareness-polish)
 

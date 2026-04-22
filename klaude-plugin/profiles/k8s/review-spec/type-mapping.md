@@ -29,14 +29,14 @@ For each resource whose shape the design constrains, verify field values match:
 | Design constraint | Manifest field to check | Finding type if mismatch |
 |---|---|---|
 | Replica count | `spec.replicas` | `SPEC_DEV` |
-| Image tag/digest | `spec.containers[].image` | `SPEC_DEV` |
-| Resource requests/limits | `spec.containers[].resources` | `SPEC_DEV` |
-| Probe paths and ports | `readinessProbe`, `livenessProbe`, `startupProbe` | `SPEC_DEV` |
+| Image tag/digest | `spec.template.spec.containers[].image` (or `spec.containers[]` for bare Pods) | `SPEC_DEV` |
+| Resource requests/limits | `spec.template.spec.containers[].resources` | `SPEC_DEV` |
+| Probe paths and ports | `spec.template.spec.containers[].readinessProbe`, `livenessProbe`, `startupProbe` | `SPEC_DEV` |
 | RBAC verbs and resources | `rules[].verbs`, `rules[].resources` | `SPEC_DEV` |
-| Security context | `securityContext`, `podSecurityContext` | `SPEC_DEV` |
-| Env vars / config keys | `env[]`, `envFrom[]`, ConfigMap `data` keys | `SPEC_DEV` |
-| Port numbers and names | `ports[].containerPort`, Service `ports[].port` | `SPEC_DEV` |
-| Tolerations and affinity | `tolerations[]`, `affinity` | `SPEC_DEV` |
+| Security context | `spec.template.spec.securityContext`, `containers[].securityContext` | `SPEC_DEV` |
+| Env vars / config keys | `spec.template.spec.containers[].env[]`, `envFrom[]`, ConfigMap `data` keys | `SPEC_DEV` |
+| Port numbers and names | `spec.template.spec.containers[].ports[].containerPort`, Service `spec.ports[].port` | `SPEC_DEV` |
+| Tolerations and affinity | `spec.template.spec.tolerations[]`, `spec.template.spec.affinity` | `SPEC_DEV` |
 | PDB minAvailable/maxUnavailable | `spec.minAvailable`, `spec.maxUnavailable` | `SPEC_DEV` |
 
 **Precision matters.** A design that says "resource limits should be set" is satisfied by any non-zero limits. A design that says "memory limit: 512Mi" is only satisfied by exactly that value. Match your confidence to the precision of the design's language.
@@ -45,7 +45,7 @@ For each resource whose shape the design constrains, verify field values match:
 
 Kubernetes resources reference each other through labels, selectors, and names. When the design describes a traffic flow or ownership chain, verify the connecting fields are consistent:
 
-- **Deployment → Service → Ingress chain.** The Deployment's `spec.template.metadata.labels` must match the Service's `spec.selector`; the Service's `metadata.name` and `spec.ports[].port` must match the Ingress's `backend.service.name` and `backend.service.port`.
+- **Deployment → Service → Ingress chain.** The Deployment's `spec.template.metadata.labels` must match the Service's `spec.selector`; the Service's `metadata.name` and `spec.ports[].port` must match the Ingress's `spec.rules[].http.paths[].backend.service.name` and `backend.service.port.number` (or `port.name`). Note: the `backend.serviceName`/`backend.servicePort` form indicates the removed `extensions/v1beta1` API and is itself a finding.
 - **RBAC chain.** A RoleBinding's `roleRef` must name an existing Role; its `subjects[]` must reference the intended ServiceAccount(s). A design that says "the app service account can read secrets in its namespace" maps to a specific Role + RoleBinding + ServiceAccount triple.
 - **HPA → target.** The HPA's `scaleTargetRef` must reference the correct Deployment/StatefulSet; the metrics it uses must be available.
 - **NetworkPolicy → pods.** The `podSelector` in the NetworkPolicy must match the labels of the pods the design intends to protect.

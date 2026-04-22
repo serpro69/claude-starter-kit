@@ -67,6 +67,8 @@ When profile detection identifies an Infrastructure-as-Code profile (e.g., Kuber
 - A field value in a manifest that disagrees with the design → `SPEC_DEV`
 - A manifest resource the design does not mention → `EXTRA_IMPL`
 
+`DOC_INCON` and `OUTDATED_DOC` apply unchanged — their semantics are doc-vs-doc or code-vs-doc, which declarative IaC does not alter.
+
 For each active IaC profile that populates a `review-spec/` slot, load `${CLAUDE_PLUGIN_ROOT}/profiles/<name>/review-spec/index.md` for domain-specific verification patterns.
 
 ## Severity Levels
