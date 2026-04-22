@@ -18,7 +18,7 @@
       }
     }
   },
-  "model": "opus[1m]",
+  "model": "claude-opus-4-6[1m]",
   "permissions": {
     "allow": [
       "Bash(cat:*)",
