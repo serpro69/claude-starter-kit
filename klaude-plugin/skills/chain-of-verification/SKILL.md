@@ -88,6 +88,17 @@ See [chain-of-verification-isolated.md](./chain-of-verification-isolated.md) for
 | Codebase verification       | `/kk:chain-of-verification:isolated --explore`          |
 | Cost-sensitive verification | `/chain-of-verification` or `/kk:chain-of-verification:isolated --haiku` |
 
+## Workflow
+
+**Mandatory order — questions before verification.** The flow below is strictly sequential. Do not answer verification questions, consult external sources, or revise the original response until you have generated the full initial response and formulated all verification questions. Jumping to verification before questions are fully formed collapses the independence that makes CoVe effective. See [ADR 0004](../../../docs/adr/0004-skill-workflow-ordering.md) for the rationale.
+
+1. **Generate initial response.** Produce a baseline answer to the user's question. This is the subject matter — it exists in context but is not yet verified.
+2. **Formulate verification questions.** Create 3–5 targeted questions designed to expose errors in the initial response. The questions must be formulated without consulting external sources — they probe the response's own claims.
+3. **Independent verification.** Answer each question independently, without referencing the initial response. Use `capy_search` if needed. In isolated mode, sub-agents handle this step.
+4. **Reconciliation.** Compare verification answers against the initial response. Revise where discrepancies are found.
+
+See the Process Overview below and the mode-specific process files for detailed steps.
+
 ## Process Overview
 
 The CoVe workflow follows 4 steps:

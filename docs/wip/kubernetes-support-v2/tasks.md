@@ -210,15 +210,15 @@ Subtasks:
 ## Task 15 — Wave 1: Add Workflow sections to skills missing them
 
 - **Phase:** P4
-- **Status:** pending
+- **Status:** done
 - **Depends on:** —
 - **Links:** [implementation.md §Step 4.1](implementation.md#step-41--wave-1-add-workflow-sections-to-skills-missing-them)
 
 Subtasks:
 
-- [ ] Re-audit: `grep -n '## Workflow' klaude-plugin/skills/*/SKILL.md` to determine current state. Document which skills are confirmed missing.
-- [ ] For each missing skill: add `## Workflow` section to SKILL.md with mandatory-order directive (naming the rule by intent, not step numbers) and explicit minimal-scope step before profile detection. Tailor the directive wording per skill — what constitutes "subject matter" and "minimal scope" differs (see design.md §A2 table).
-- [ ] Verify: `grep -n '## Workflow' klaude-plugin/skills/*/SKILL.md` returns a match for every skill in the plugin.
+- [x] Re-audit: `grep -n '## Workflow' klaude-plugin/skills/*/SKILL.md` to determine current state. Document which skills are confirmed missing. *Confirmed missing: `design`, `implement`, `dependency-handling`, `chain-of-verification` — matches original audit.*
+- [x] For each missing skill: add `## Workflow` section to SKILL.md with mandatory-order directive (naming the rule by intent, not step numbers) and explicit minimal-scope step before profile detection. Tailor the directive wording per skill — what constitutes "subject matter" and "minimal scope" differs (see design.md §A2 table). *Added tailored directives: `design` ("understanding before engagement"), `implement` ("plan before execution"), `dependency-handling` ("lookup before usage"), `chain-of-verification` ("questions before verification").*
+- [x] Verify: `grep -n '## Workflow' klaude-plugin/skills/*/SKILL.md` returns a match for every skill in the plugin. *All 10 skills return a match. 143 structure test assertions passed, 0 failed.*
 
 ## Task 16 — Wave 2: Widen directive breadth in partially-compliant skills
 

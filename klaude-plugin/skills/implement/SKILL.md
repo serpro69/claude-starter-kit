@@ -40,6 +40,18 @@ By default, review checkpoints use standard mode. The user can request **isolate
 
 When set, all review checkpoints automatically use isolated variants (`kk:review-code:isolated`, `kk:review-spec:isolated`) without per-checkpoint prompting. The user can override at any checkpoint ("use standard review for this one").
 
+## Workflow
+
+**Mandatory order — plan before execution.** The flow below is strictly sequential. Do not read source files to modify, write code, edit files, run tests, or otherwise act on any sub-task until you have loaded the full plan context (design, implementation plan, task list) and, for each sub-task, completed profile detection and loaded all resolved profile content. The only early contact with the codebase is the task's target filenames — enough to drive profile detection, not enough to pattern-match implementation. See [ADR 0004](../../../docs/adr/0004-skill-workflow-ordering.md) for the rationale.
+
+**Phases** (summary — The Process below has the detailed steps):
+
+1. **Load plan context.** Read `tasks.md`, `design.md`, and `implementation.md`. Search capy knowledge base for relevant prior context. Identify the next pending task.
+2. **Per sub-task: detect active profiles.** Run the shared profile-detection procedure against the sub-task's target files.
+3. **Per sub-task: load profile content.** For each active profile contributing an `implement/` subdirectory, load its `index.md` and resolved content (per-task gotchas, coding guidelines).
+4. **Per sub-task: execute.** Only now: read source files, write code, run tests, apply the plan.
+5. **Report and review.** Show results, run code review, update task status.
+
 ## The Process
 
 ### Step 1: Load and Review Plan
