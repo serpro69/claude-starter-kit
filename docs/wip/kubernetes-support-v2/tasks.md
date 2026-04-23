@@ -13,14 +13,14 @@
 ## Task 1 — Add `## Design signals` to K8s DETECTION.md
 
 - **Phase:** P1
-- **Status:** pending
+- **Status:** done
 - **Depends on:** —
 - **Links:** [implementation.md §Step 1.1](implementation.md#step-11--add--design-signals-to-k8s-detectionmd)
 
 Subtasks:
 
-- [ ] Edit `klaude-plugin/profiles/k8s/DETECTION.md` — append `## Design signals` section after the three existing mandatory sections. Include `display_name: Kubernetes` and the token list: `Kubernetes`, `K8s`, `Helm chart`, `kubectl`, `kustomize`, `manifest.yaml`, `Deployment resource`, `StatefulSet`, `DaemonSet`, `CronJob`.
-- [ ] Verify: `grep -c '## Design signals' klaude-plugin/profiles/k8s/DETECTION.md` returns 1. Token list matches the current hard-coded list in `_shared/profile-detection.md` §The design interaction pattern exactly.
+- [x] Edit `klaude-plugin/profiles/k8s/DETECTION.md` — append `## Design signals` section after the three existing mandatory sections. Include `display_name: Kubernetes` and the token list: `Kubernetes`, `K8s`, `Helm chart`, `kubectl`, `kustomize`, `manifest.yaml`, `Deployment resource`, `StatefulSet`, `DaemonSet`, `CronJob`.
+- [x] Verify: `grep -c '## Design signals' klaude-plugin/profiles/k8s/DETECTION.md` returns 1. Token list matches the current hard-coded list in `_shared/profile-detection.md` §The design interaction pattern exactly.
 
 ## Task 2 — Rewrite shared procedure's design interaction pattern
 

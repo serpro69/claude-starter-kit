@@ -38,6 +38,21 @@ Authoritative for generic YAML files (`.yaml` or `.yml`) not already caught by a
 
 The Kubernetes profile is **additive**. It coexists with programming-language profiles or any other IaC profile on the same diff. When Go source files sit alongside Kubernetes manifests, both `go` and `k8s` activate; downstream skills consult both profiles' content and emit findings grouped by `(profile, checklist)`.
 
+## Design signals
+
+display_name: Kubernetes
+tokens:
+  - Kubernetes
+  - K8s
+  - Helm chart
+  - kubectl
+  - kustomize
+  - manifest.yaml
+  - Deployment resource
+  - StatefulSet
+  - DaemonSet
+  - CronJob
+
 ## Dockerfile non-trigger
 
 A Dockerfile on its own — even under a `deploy/` or `k8s/` directory — does NOT activate the `k8s` profile. Dockerfiles match no filename signal here (they are not `Chart.yaml` / `values*.yaml` / `kustomization.yaml`) and no content signal (they do not contain `apiVersion:` + `kind:`). When a Dockerfile appears in the same diff as Kubernetes manifests, `k8s` activates on the manifests' signals; the Dockerfile itself is not reviewed by this profile. A future container profile may own Dockerfiles independently.
