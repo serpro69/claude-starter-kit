@@ -97,17 +97,6 @@ See [chain-of-verification-isolated.md](./chain-of-verification-isolated.md) for
 3. **Independent verification.** Answer each question independently, without referencing the initial response. Use `capy_search` if needed. In isolated mode, sub-agents handle this step.
 4. **Reconciliation.** Compare verification answers against the initial response. Revise where discrepancies are found.
 
-See the Process Overview below and the mode-specific process files for detailed steps.
-
-## Process Overview
-
-The CoVe workflow follows 4 steps:
-
-1. **Initial Response** - Generate baseline answer
-2. **Verification Questions** - Create 3-5 targeted questions to expose errors
-3. **Independent Verification** - Answer questions without referencing the original
-4. **Reconciliation** - Revise answer based on verification findings
-
 See [chain-of-verification-process.md](./chain-of-verification-process.md) for the standard workflow, or [chain-of-verification-isolated.md](./chain-of-verification-isolated.md) for the isolated sub-agent workflow.
 
 ## Invocation
