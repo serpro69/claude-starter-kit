@@ -63,17 +63,17 @@ Subtasks:
 ## Task 5 — P1 (A1) verification
 
 - **Phase:** P1
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1, Task 2, Task 3, Task 4
 - **Links:** [implementation.md §Step 1.V](implementation.md#step-1v--a1-verification)
 
 Subtasks:
 
-- [ ] **test**: `bash test/test-plugin-structure.sh` passes.
-- [ ] **test**: synthetic design session with K8s keywords → profile activates via generic iteration.
-- [ ] **test**: regression — design session for pure Go feature → no profile activates.
-- [ ] **review-code**: run `/kk:review-code` on the P1 diff; address findings.
-- [ ] `grep -rn 'Kubernetes.*auto-trigger\|Helm chart.*auto-trigger' klaude-plugin/skills/` returns 0.
+- [x] **test**: `bash test/test-plugin-structure.sh` passes.
+- [x] **test**: synthetic design session with K8s keywords → profile activates via generic iteration.
+- [x] **test**: regression — design session for pure Go feature → no profile activates.
+- [x] **review-code**: run `/kk:review-code` on the P1 diff; address findings.
+- [x] `grep -rn 'Kubernetes.*auto-trigger\|Helm chart.*auto-trigger' klaude-plugin/skills/` returns 0.
 
 ---
 
