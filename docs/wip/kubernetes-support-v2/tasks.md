@@ -151,15 +151,15 @@ Subtasks:
 ## Task 11 — Author `profiles/k8s-operator/` detection and overview
 
 - **Phase:** P3
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 5 (A1 landed, so `## Design signals` is available)
 - **Links:** [implementation.md §Step 3.2](implementation.md#step-32--author-profilesk8s-operatordetectionmd-and-overviewmd)
 
 Subtasks:
 
-- [ ] Create `klaude-plugin/profiles/k8s-operator/DETECTION.md` with all four sections: `## Path signals` (`internal/controller/`, `api/`, `controllers/`), `## Filename signals` (`PROJECT`, `config/crd/`, `config/webhook/`), `## Content signals` (`Makefile` with `controller-gen`/`manifests`; Go imports of `sigs.k8s.io/controller-runtime`), `## Design signals` (`display_name: Kubernetes Operator`; tokens: `operator`, `controller`, `kubebuilder`, `controller-runtime`, `CRD authoring`, `custom resource definition authoring`, `reconciliation loop`).
-- [ ] Create `klaude-plugin/profiles/k8s-operator/overview.md` — scope, activation summary, relationship to `k8s` profile (additive), "Looking up operator dependencies" cascade targets.
-- [ ] Verify: `grep -c '## Path signals\|## Filename signals\|## Content signals\|## Design signals' klaude-plugin/profiles/k8s-operator/DETECTION.md` returns 4.
+- [x] Create `klaude-plugin/profiles/k8s-operator/DETECTION.md` with all four sections: `## Path signals` (`internal/controller/`, `api/`, `controllers/`), `## Filename signals` (`PROJECT`, `config/crd/`, `config/webhook/`), `## Content signals` (`Makefile` with `controller-gen`/`manifests`; Go imports of `sigs.k8s.io/controller-runtime`), `## Design signals` (`display_name: Kubernetes Operator`; tokens: `operator`, `controller`, `kubebuilder`, `controller-runtime`, `CRD authoring`, `custom resource definition authoring`, `reconciliation loop`).
+- [x] Create `klaude-plugin/profiles/k8s-operator/overview.md` — scope, activation summary, relationship to `k8s` profile (additive), "Looking up operator dependencies" cascade targets.
+- [x] Verify: `grep -c '## Path signals\|## Filename signals\|## Content signals\|## Design signals' klaude-plugin/profiles/k8s-operator/DETECTION.md` returns 4.
 
 ## Task 12 — Author `profiles/k8s-operator/design/` content
 
