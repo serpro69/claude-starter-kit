@@ -178,15 +178,15 @@ Subtasks:
 ## Task 13 — Register `k8s-operator` profile
 
 - **Phase:** P3
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 12
 - **Links:** [implementation.md §Step 3.4](implementation.md#step-34--register-the-new-profile)
 
 Subtasks:
 
-- [ ] Append `k8s-operator` to `klaude-plugin/skills/_shared/profile-detection.md` §Known profiles (alphabetical: between `k8s` and `kotlin`).
-- [ ] Append `"k8s-operator"` to `EXPECTED_PROFILES` in `test/test-plugin-structure.sh` (alphabetical: between `k8s` and `kotlin`).
-- [ ] Verify: `bash test/test-plugin-structure.sh` passes with `k8s-operator` in `EXPECTED_PROFILES`.
+- [x] Append `k8s-operator` to `klaude-plugin/skills/_shared/profile-detection.md` §Known profiles (alphabetical: between `k8s` and `kotlin`).
+- [x] Append `"k8s-operator"` to `EXPECTED_PROFILES` in `test/test-plugin-structure.sh` (alphabetical: between `k8s` and `kotlin`).
+- [x] Verify: `bash test/test-plugin-structure.sh` passes with `k8s-operator` in `EXPECTED_PROFILES`. *143 assertions passed, 0 failed.*
 
 ## Task 14 — P3 (A5) verification
 

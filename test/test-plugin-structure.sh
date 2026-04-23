@@ -216,7 +216,7 @@ fi
 
 log_section "Section 8: Profiles"
 
-EXPECTED_PROFILES=(go java js_ts k8s kotlin python)
+EXPECTED_PROFILES=(go java js_ts k8s k8s-operator kotlin python)
 PHASE_SUBDIRS=(review-code design test implement document review-spec)
 REQUIRED_DETECTION_HEADINGS=("Path signals" "Filename signals" "Content signals")
 

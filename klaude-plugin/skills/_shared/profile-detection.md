@@ -53,6 +53,7 @@ An explicit list is boring, deterministic, and unambiguous; runtime filesystem e
 - `js_ts`
 - `kotlin`
 - `k8s`
+- `k8s-operator`
 
 ### Algorithm
 
