@@ -1,6 +1,6 @@
 # Tasks — kubernetes-support
 
-- **Feature status:** pending
+- **Feature status:** done
 - **Design:** [design.md](design.md)
 - **Implementation plan:** [implementation.md](implementation.md)
 - **Branch:** `k8s_support`
@@ -345,16 +345,16 @@ Subtasks:
 ## Task 19 — Feature close
 
 - **Phase:** feature-close
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 7, Task 10, Task 15, Task 18, Task 20
 - **Links:** [implementation.md §Feature close](implementation.md#feature-close)
 
 Subtasks:
 
-- [ ] `git mv docs/wip/kubernetes-support docs/done/kubernetes-support`.
-- [ ] Update the feature-status metadata in the moved `design.md` and `implementation.md` (status → `done`).
-- [ ] Update this `tasks.md`'s header status to `done`; confirm every task above is `done`. Task 20 is a post-close handoff pointer and is EXEMPT from this gate — it intentionally remains `pending` in the frozen feature dir until a follow-up cycle picks it up.
-- [ ] Verify: `docs/done/kubernetes-support/` exists; `docs/wip/kubernetes-support/` does not; `git log --stat docs/done/kubernetes-support/` shows history preserved.
+- [x] `git mv docs/wip/kubernetes-support docs/done/kubernetes-support`.
+- [x] Update the feature-status metadata in the moved `design.md` and `implementation.md` (status → `done`).
+- [x] Update this `tasks.md`'s header status to `done`; confirm every task above is `done`. Task 20 is a post-close handoff pointer and is EXEMPT from this gate — it intentionally remains `pending` in the frozen feature dir until a follow-up cycle picks it up.
+- [x] Verify: `docs/done/kubernetes-support/` exists; `docs/wip/kubernetes-support/` does not; `git log --stat docs/done/kubernetes-support/` shows history preserved.
 
 ---
 
