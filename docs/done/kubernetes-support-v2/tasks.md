@@ -1,6 +1,6 @@
 # Tasks — kubernetes-support-v2
 
-- **Feature status:** pending
+- **Feature status:** done
 - **Design:** [design.md](design.md)
 - **Implementation plan:** [implementation.md](implementation.md)
 - **Parent feature:** [kubernetes-support](../kubernetes-support/design.md) (frozen history)
@@ -268,29 +268,29 @@ Subtasks:
 ## Task 19 — Final verification
 
 - **Phase:** P5
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 5, Task 9, Task 14, Task 18
 - **Links:** [implementation.md §Step 5.V](implementation.md#step-5v--end-to-end-verification)
 
 Subtasks:
 
-- [ ] **test**: `bash test/test-plugin-structure.sh` passes with all P1–P4 changes.
-- [ ] **document**: CLAUDE.md accurate; no stale references to hard-coded K8s tokens in skill files.
-- [ ] **review-code**: run `/kk:review-code` on the full v2 diff; address findings.
-- [ ] **review-spec**: run `/kk:review-spec kubernetes-support-v2` with scope `all`; confirm all amendments satisfied.
+- [x] **test**: `bash test/test-plugin-structure.sh` passes with all P1–P4 changes. *143 assertions passed, 0 failed.*
+- [x] **document**: CLAUDE.md accurate; no stale references to hard-coded K8s tokens in skill files. *All K8s references in skills are legitimate: IaC examples, eval fixtures, pedagogical prose, dependency-handling triggers. `grep 'Kubernetes.*auto-trigger\|Helm chart.*auto-trigger'` returns 0.*
+- [x] **review-code**: run `/kk:review-code` on the full v2 diff; address findings. *APPROVE — 0 P0/P1/P2. 1 P3 (missing period in implement/SKILL.md Workflow step 2) — fixed.*
+- [x] **review-spec**: run `/kk:review-spec kubernetes-support-v2` with scope `all`; confirm all amendments satisfied. *0 findings — all four amendments (A1, A2, A3, A5) fully satisfied. No SPEC_DEV, no MISSING_IMPL, no DOC_INCON.*
 
 ---
 
 ## Task 20 — Feature close
 
 - **Phase:** feature-close
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 19
 - **Links:** [implementation.md §Feature close](implementation.md#feature-close)
 
 Subtasks:
 
-- [ ] `git mv docs/wip/kubernetes-support-v2 docs/done/kubernetes-support-v2`.
-- [ ] Update feature-status metadata in the moved `design.md` and `implementation.md` (status → `done`).
-- [ ] Update this `tasks.md`'s header status to `done`; confirm every task above is `done`.
-- [ ] Verify: `docs/done/kubernetes-support-v2/` exists; `docs/wip/kubernetes-support-v2/` does not.
+- [x] `git mv docs/wip/kubernetes-support-v2 docs/done/kubernetes-support-v2`.
+- [x] Update feature-status metadata in the moved `design.md` and `implementation.md` (status → `done`).
+- [x] Update this `tasks.md`'s header status to `done`; confirm every task above is `done`.
+- [x] Verify: `docs/done/kubernetes-support-v2/` exists; `docs/wip/kubernetes-support-v2/` does not.
