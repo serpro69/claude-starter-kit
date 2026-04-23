@@ -95,14 +95,14 @@ Subtasks:
 ## Task 7 — Update `code-reviewer.md` output template
 
 - **Phase:** P2
-- **Status:** pending
+- **Status:** done
 - **Depends on:** —
 - **Links:** [implementation.md §Step 2.2](implementation.md#step-22--update-code-reviewermd-output-template)
 
 Subtasks:
 
-- [ ] Edit `klaude-plugin/agents/code-reviewer.md` Output Format section — add the same per-finding sub-labels (Profile, Checklist, Triggered by). Instruct the agent to carry `triggered_by` data from its input payload through to each finding.
-- [ ] Verify: the output template includes Profile/Checklist/Triggered-by. Instruction text tells the agent where `triggered_by` comes from.
+- [x] Edit `klaude-plugin/agents/code-reviewer.md` Output Format section — add the same per-finding sub-labels (Profile, Checklist, Triggered by). Instruct the agent to carry `triggered_by` data from its input payload through to each finding.
+- [x] Verify: the output template includes Profile/Checklist/Triggered-by. Instruction text tells the agent where `triggered_by` comes from.
 
 ## Task 8 — Update `review-isolated.md` output template
 

@@ -22,7 +22,7 @@ The spawning workflow injects these artifacts into your prompt:
 - **Git diff** of the changes under review
 - **Spec context** (if available): relevant section from design.md, task description, documented design rationale
 - **Task scope** (if available): which tasks in the feature are in scope for this review and which are pending/out-of-scope — see `klaude-plugin/skills/_shared/review-scope-protocol.md`. When present, this overrides naive reading of the design doc: the design describes the full end state, but only in-scope tasks are expected in the diff.
-- **Active profiles and resolved checklists**: a list of `(profile, checklist)` records already resolved by the spawning workflow. You do NOT detect profiles yourself — the calling skill ran profile detection and resolved which checklists apply. Your job is to read and apply them.
+- **Active profiles and resolved checklists**: a list of `(profile, checklist, triggered_by)` records already resolved by the spawning workflow. You do NOT detect profiles yourself — the calling skill ran profile detection and resolved which checklists apply. Your job is to read and apply them. The `triggered_by` field describes the detection signal that activated the profile (e.g., `filename — Chart.yaml in parent directory`); carry it through to your output findings.
 - **Capy read access** for project-specific context via `capy_search`
 
 ## What You Do NOT Have
@@ -76,7 +76,7 @@ Now, with every checklist in context:
 
 For each `(profile, checklist)` record from Step 1, apply the checklist (already in context) to the diff (in context from Step 2). The checklist states what to look for — it may cover SOLID/architecture, security, code quality, removal candidates, or a profile-specific concern (e.g., Helm template correctness, RBAC least privilege, Kustomize base/overlay separation).
 
-Emit findings grouped by `(profile, checklist)` so the report surface can organize them.
+Tag each finding with its `(profile, checklist)` origin and the `triggered_by` signal from the input payload. These materialize as per-finding sub-labels in the output template — not as separate profile-grouped sections. For generic findings (SOLID, security, code quality, removal) not sourced from a profile checklist, use `Profile: generic · Checklist: —` and `Triggered by: —`.
 
 General guidance that applies regardless of profile:
 
@@ -110,6 +110,8 @@ Structure your output exactly as follows. This is the contract the annotation ph
 ### P0 - Critical
 
 - **[file:line]** Brief title
+  - Profile: {profile_name} · Checklist: {checklist_filename}
+  - Triggered by: {signal_type} — {signal_description}
   - Description of issue
   - Confidence: {N}% — {reasoning for confidence level}
   - Suggested fix
@@ -117,6 +119,8 @@ Structure your output exactly as follows. This is the contract the annotation ph
 ### P1 - High
 
 - **[file:line]** Brief title
+  - Profile: generic · Checklist: —
+  - Triggered by: —
   - Description of issue
   - Confidence: {N}% — {reasoning for confidence level}
   - Suggested fix
@@ -142,7 +146,7 @@ Structure your output exactly as follows. This is the contract the annotation ph
 
 ### Output rules
 
-- Every finding MUST include `file:line`, severity, confidence with reasoning, description, and suggested fix.
+- Every finding MUST include `file:line`, severity, Profile/Checklist/Triggered-by sub-labels, confidence with reasoning, description, and suggested fix.
 - Use `(none)` under a severity section if no findings at that level.
 - Do NOT add findings outside the P0-P3 structure.
 - Do NOT include a "next steps" or "how to proceed" section — the reconciliation phase handles that.
