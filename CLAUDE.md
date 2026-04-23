@@ -182,13 +182,14 @@ klaude-plugin/profiles/<name>/
 
 Not every profile populates every phase — a programming-language profile may only need `review-code/`; an IaC profile like `k8s` populates all six. A phase subdirectory contains only its `index.md` and the files the index references; human-facing authoring notes belong in `overview.md` or a sibling file at the profile root.
 
-### `DETECTION.md` — three-section schema
+### `DETECTION.md` — schema
 
-`DETECTION.md` is the single authoritative source for "when does this profile activate". It uses a mandatory three-section schema; every heading must be present even when its body is empty:
+`DETECTION.md` is the single authoritative source for "when does this profile activate". It has three mandatory sections (every heading must be present even when its body is empty) and one optional section:
 
 - **`## Path signals`** — path globs that promote a file to a candidate. Fast pre-filter only; not authoritative on their own.
 - **`## Filename signals`** — literal filenames or filename globs. Authoritative: any match activates the profile.
 - **`## Content signals`** — content-inspection rules (anchors, regexes, key presence). Authoritative for files not already caught by filename signals. Bounded inspection (~16 KB per file; multi-document YAML inspected per `---`-separated block).
+- **`## Design signals`** *(optional)* — enables design-phase detection for profiles that participate before code exists. Contains `display_name` (human-readable label for confirmation prompts) and `tokens` (keyword list matched against idea prose). Not required; not asserted by the structure test. Only relevant to profiles that need design-phase activation.
 
 **Two dimensions, different orders.** Signals are *evaluated* in cost order (path → filename → content) but *authority* runs filename ≈ content > path — filename and content are equally authoritative; filename resolves first only because it is cheaper to evaluate (a filename match short-circuits content inspection for that file). A file caught only by a path signal does not activate the profile.
 
@@ -239,7 +240,7 @@ Files outside `klaude-plugin/` (this CLAUDE.md, README.md, ADRs under `docs/adr/
 ### Adding a new profile
 
 1. Copy an existing profile as a template (e.g., `cp -r klaude-plugin/profiles/go klaude-plugin/profiles/<name>`).
-2. Rewrite `DETECTION.md` with the new profile's three-section rule. Keep all three headings, even when empty.
+2. Rewrite `DETECTION.md` with the new profile's signals. Keep all three mandatory headings (`## Path signals`, `## Filename signals`, `## Content signals`) even when empty. Add `## Design signals` if the profile needs design-phase activation.
 3. Rewrite `overview.md`: what the profile covers, when it activates, and "Looking up dependencies" cascade targets for each dependency category the profile cares about.
 4. Populate the phase subdirectories the profile needs. Each populated phase must have an `index.md` listing its content files (always-load + conditional with explicit **Load if:** clauses). Leave phases the profile does not serve absent — the structure test's presence-conditional assertion only fires on directories that exist.
 5. Append the profile name to `EXPECTED_PROFILES` in `test/test-plugin-structure.sh` — *after* the profile's files exist, not before. Per-profile assertions will fail if the profile is listed first.

@@ -51,14 +51,14 @@ Subtasks:
 ## Task 4 — Update CLAUDE.md for `## Design signals`
 
 - **Phase:** P1
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1
 - **Links:** [implementation.md §Step 1.4](implementation.md#step-14--update-claudemd)
 
 Subtasks:
 
-- [ ] Edit `CLAUDE.md` §Profile Conventions → DETECTION.md schema description. Add a note that a fourth optional section `## Design signals` may be present, with `display_name` and `tokens` fields. State it is not required and triggers no structure-test assertion when absent.
-- [ ] Verify: `CLAUDE.md` mentions `## Design signals` as optional. No conflicting claim that DETECTION.md has exactly three sections.
+- [x] Edit `CLAUDE.md` §Profile Conventions → DETECTION.md schema description. Add a note that a fourth optional section `## Design signals` may be present, with `display_name` and `tokens` fields. State it is not required and triggers no structure-test assertion when absent.
+- [x] Verify: `CLAUDE.md` mentions `## Design signals` as optional. No conflicting claim that DETECTION.md has exactly three sections.
 
 ## Task 5 — P1 (A1) verification
 
