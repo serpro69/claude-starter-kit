@@ -1,0 +1,1159 @@
+ ▐▛███▜▌   Claude Code v2.1.116
+▝▜█████▛▘  Opus 4.7 (1M context) · Claude Team
+  ▘▘ ▝▝    ~/Projects/personal/claude-toolbox
+
+❯ /plugin                                                                       
+  ⎿  ✓ Enabled kk. Run /reload-plugins to apply.
+
+❯ /reload-plugins                                                               
+  ⎿  Reloaded: 4 plugins · 7 skills · 10 agents · 1 hook · 0 plugin MCP servers · 2 plugin LSP servers
+
+❯ /reload-plugins                                                               
+  ⎿  Reloaded: 4 plugins · 7 skills · 10 agents · 1 hook · 0 plugin MCP servers · 2 plugin LSP servers
+
+❯ /plugin                                                                       
+  ⎿  kk is already at the latest version (0.10.0).
+
+❯ I want to add go support to some of the skills, now that we've done a         
+  baseline for skill multilang support while implementing kubernetes support    
+  for most skills.                                                              
+  This repo contains a lot of good skills that we could use verbatim in         
+  @./klaude-plugin/profiles/go, particularly the recommended list from          
+  https://github.com/samber/cc-skills-golang/#-skills                           
+  These could be directly integrated into checklists for review, implement,     
+  design, and other skills as appropriate.                                      
+  I would like to avoid the copy-paste and the maintenance burden that comes    
+  with it.                                                                      
+  How can we integrate these in a smart way?                                    
+  ⎿  Listed directory klaude-plugin/profiles/go/
+
+● Let me explore the current Go profile structure and understand how the k8s
+  profile integrates content, then look at what samber's repo offers.
+
+● Explore(Explore Go profile and k8s profile)
+  ⎿  Done (22 tool uses · 36.8k tokens · 1m 18s)
+  (ctrl+o to expand)
+
+● Good, now I have full understanding of the architecture. Let me look at what
+  samber's repo offers.
+
+  Called capy 2 times (ctrl+o to expand)
+
+● Now let me look at how their skills are actually structured internally — the
+  SKILL.md and content files.
+
+  Called capy 4 times (ctrl+o to expand)
+
+● Now let me check what a samber skill's internal directory looks like — whether
+   there are docs/ subdirectories with separate content files.
+
+  Called capy 2 times (ctrl+o to expand)
+
+● OK, I've done the research. Here's the honest assessment.
+
+  The core tension: samber's skills and kk's profiles are architecturally
+  different things.
+
+  - samber's skills = standalone agent skills with frontmatter, personas ("You
+  are a senior Go security engineer"), modes (review/audit/coding),
+  cross-references between skills, and their own trigger logic. ~2-3k tokens in
+  SKILL.md + heavy references/ subdirectories with the actual knowledge.
+  - kk's profiles = phase-specific checklist content consumed by parent skills
+  (review-code, implement, etc.) via the index.md contract. No frontmatter, no
+  persona, no modes — just knowledge applied within a structured workflow.
+
+  Jamming SKILL.md files into profile checklists means the review-code skill
+  reads "You are a senior Go security engineer" as a checklist item. That's a
+  format mismatch. But the references/ subdirectories — those contain the actual
+   Go knowledge (injection patterns, crypto rules, pattern catalogs) and ARE
+  checklist-shaped.
+
+  Three real options:
+
+  Option 1: Side-by-side plugin (zero maintenance)
+
+  Install samber's plugin alongside kk. Both fire on Go code — samber as
+  standalone skills, kk through the structured review-code/implement/design
+  process.
+
+  - Pro: Zero maintenance, clean separation, samber's cross-references work
+  - Con: The two systems don't talk. samber's security rules fire independently,
+   NOT as part of review-code's structured checklist application against the
+  diff. You get two parallel, uncoordinated review streams for Go code. That's
+  noisy and defeats the purpose of kk's structured review process.
+
+  Option 2: Git submodule + reference the references/ content (low maintenance)
+
+  Add samber's repo as a submodule. In the Go profile's index.md files,
+  reference specific references/*.md files from samber — NOT the SKILL.md files
+  (those are skill orchestration, not checklist content). Keep kk's own
+  checklists for things samber doesn't cover.
+
+  klaude-plugin/
+    vendor/cc-skills-golang/          ← git submodule
+    profiles/go/
+      review-code/
+        index.md                      ← references
+  ../../vendor/.../references/injection.md etc.
+        solid-checklist.md            ← kk's own (samber doesn't have a SOLID
+  equivalent)
+        removal-plan.md               ← kk's own
+
+  - Pro: True upstream tracking, content flows through structured review,
+  references/ content is knowledge-shaped (no frontmatter/persona)
+  - Con: Submodule friction (clone, template-sync). Must update index.md if
+  samber renames files. The bidirectional invariant in test-plugin-structure.sh
+  needs adjustment for external paths.
+
+  Option 3: Vendor script + manifest (practical middle ground)
+
+  A script reads a manifest mapping samber skill → phase → specific files,
+  fetches from GitHub raw URLs, strips frontmatter, places in the profile tree.
+  Run manually or in CI.
+
+  - Pro: Local files committed to repo, works with template-sync, full control
+  over format
+  - Con: Still copies (automated, not manual, but copies). Local edits create
+  divergence. Periodic manual refresh.
+
+  ---
+  My recommendation: Option 2 (submodule) if you want the content flowing
+  through the structured profile system — which I think you do, because that's
+  the whole point of kk's review-code process. The key insight is to reference
+  references/ content, not SKILL.md files.
+
+  Option 1 is architecturally clean but produces two uncoordinated review
+  streams, which I think is worse than the submodule tax.
+
+  What's your take — does the submodule approach work for your template-sync
+  setup, or is that a dealbreaker?
+
+✻ Sautéed for 4m 39s
+
+※ recap: We're figuring out how to integrate samber/cc-skills-golang content into the kk Go profile without copy-paste. I recommended a git submodule approach referencing their references/ subdirectories. Waiting on your take on whether submodules work with your template-sync setup. (disable recaps in /config)
+
+❯ Submodule is not an option because claude code plugin installation might not  
+  support it natively.                                                          
+
+● Fair point — plugin installation is a flat copy, so submodules would be empty
+  directories downstream.
+
+  That leaves two real options:
+
+  Option A: Side-by-side plugin (reconsideration)
+
+  I was too quick to dismiss this. The "two uncoordinated streams" concern is
+  smaller than I made it sound. In practice, kk's review-code fires on
+  deliberate /kk:review-code invocation. samber's skills fire on their own
+  triggers or direct invocation. They don't compete for the same interaction —
+  kk handles structured reviews, samber handles implementation-time guidance.
+  The overlap in your existing Go checklists (security, SOLID) is content you
+  already wrote and maintain anyway.
+
+  But this doesn't give you what you asked for: samber's knowledge flowing
+  through the structured profile pipeline, applied against the diff as part of
+  review-code's checklist process.
+
+  Option B: Vendor script + manifest (the real answer given your constraint)
+
+  A committed vendor/ directory under the Go profile, populated by a script.
+  This is the Go-style vendoring pattern — automated copy, committed to repo,
+  periodic refresh.
+
+  The key insight from the research: samber's skills have a references/
+  subdirectory with the actual knowledge content (injection patterns, crypto
+  rules, etc.) — these are checklist-shaped, no frontmatter or persona. SKILL.md
+   is orchestration we don't want. So we vendor references/ content, not
+  SKILL.md.
+
+  The script would:
+  1. Read a manifest mapping samber skill + file → Go profile phase
+  2. Fetch the specific references/*.md files from GitHub raw URLs
+  3. Place them under the appropriate phase directory
+  4. A GitHub Action runs periodically, diffs against upstream, opens a PR when
+  samber publishes changes
+
+  Maintenance burden: review and merge an automated PR when samber updates.
+  That's it.
+
+  The manifest also serves as documentation of what came from where, and gives
+  you full control over which content maps to which phase. You can choose to
+  vendor only the recommended skills, not all 16.
+
+  ---
+  Want me to go with Option B and start with a design for the manifest format
+  and the vendor script?
+
+✻ Cooked for 52s
+
+❯ ok, this sounds like a good baseline, but skills themselves contain good      
+  information also if we strip out the skill-specific "noise" (metadata,        
+  persona etc)                                                                  
+
+● Agreed. Looking at the fetched SKILL.md content — golang-code-style for
+  example — the frontmatter, persona, modes, allowed-tools, and cross-reference
+  boilerplate are maybe 10-15% of the file. The rest is pure Go knowledge (line
+  length rules, variable declarations, slice initialization, composite
+  literals). Same story with golang-security: strip the "You are a senior Go
+  security engineer" persona and the review/audit/coding modes, and what's left
+  is actionable security guidance.
+
+  So the vendor transform would be:
+
+  Strip from SKILL.md:
+  - YAML frontmatter (--- block)
+  - Persona declarations (> **Persona:**...)
+  - Mode descriptions (**Modes:** + the bullet list)
+  - allowed-tools / compatibility lines
+  - Cross-references to other samber skills (samber/cc-skills-golang@...) —
+  since they won't exist as skills in this context
+  - The "community default / supersedes" note
+
+  Keep from SKILL.md:
+  - All actual Go knowledge sections (rules, examples, code blocks, tables)
+
+  Copy references/*.md as-is — those are already pure knowledge content.
+
+  The result per vendored skill would be one transformed SKILL.md (renamed to
+  something descriptive like code-style.md) plus its reference files, placed
+  under the appropriate profile phase directory and wired into index.md.
+
+  Want me to kick off /kk:design for this? The deliverable would be the manifest
+   schema, the vendor script design, the skill-to-phase mapping for the
+  recommended skills, and the CI refresh automation.
+
+❯ describe the manifest you're thinking about                                   
+
+● A YAML file at the Go profile root — something like
+  klaude-plugin/profiles/go/vendor-manifest.yml — that captures three things:
+
+  1. Upstream source + pin
+
+  upstream:
+    repo: samber/cc-skills-golang
+    ref: v1.1.3  # tag pin, not main — reproducible builds
+
+  2. File mappings: which files go where
+
+  Each entry maps a source file from a samber skill to a target file in a Go
+  profile phase, with an optional transform and optional Load if: condition (for
+   conditional entries in index.md).
+
+  files:
+    - skill: golang-security
+      source: SKILL.md
+      phase: review-code
+      as: security-samber.md
+      strip: true
+
+    - skill: golang-security
+      source: references/injection.md
+      phase: review-code
+      as: security-injection-ref.md
+      # no strip — references are clean already
+
+    - skill: golang-database
+      source: SKILL.md
+      phase: review-code
+      as: database.md
+      strip: true
+      condition: "Diff imports database/sql, sqlx, gorm, ent, or pgx"
+
+    - skill: golang-design-patterns
+      source: SKILL.md
+      phase: implement
+      as: design-patterns.md
+      strip: true
+
+  One skill can map to multiple phases. One skill can contribute multiple files.
+   The condition field, when present, becomes the Load if: clause in the
+  generated index.md.
+
+  3. Strip rules (global)
+
+  strip_patterns:
+    - yaml_frontmatter
+    - persona_declaration
+    - modes_section
+    - cross_skill_references  # samber/cc-skills-golang@... links
+    - community_default_note
+
+  Applied to every file with strip: true. Could allow per-file overrides, but in
+   practice the noise is the same shape across all SKILL.md files.
+
+  What the vendor script does with this:
+  1. Fetches each source from upstream.repo at ref
+  2. Applies strip transform if flagged
+  3. Writes to klaude-plugin/profiles/go/<phase>/<as>
+  4. Regenerates (or validates) each phase's index.md — always-load entries for
+  unconditional files, conditional entries with the condition as the Load if:
+  clause
+
+  What stays manual: deciding which skills map to which phases, and writing the
+  conditions. That's the curation step — the manifest IS the curation.
+
+  Thoughts? Anything you'd add or reshape?
+
+✻ Cooked for 38s
+
+❯ what if instead we specify what to keep, instead of what to strip?            
+● Better. Allowlist beats denylist — if samber adds a new preamble section
+  tomorrow, a strip list silently lets it through, but a keep list ignores it by
+   default.
+
+  And the pattern across their SKILL.md files is consistent: frontmatter →
+  preamble noise → first # H1 → real content. So the simplest keep rule is just:
+
+  keep: from_first_h1  # everything from the first # heading onward
+
+  That one rule handles all SKILL.md files uniformly. The frontmatter, persona,
+  modes, community-default note, cross-skill references — all live above the
+  first H1.
+
+  If you need finer control for specific files, a heading-level keep:
+
+  - skill: golang-security
+    source: SKILL.md
+    phase: review-code
+    as: security-samber.md
+    keep: from_first_h1
+
+  - skill: golang-security
+    source: SKILL.md
+    phase: review-code
+    as: security-injection-only.md
+    keep:
+      headings:
+        - "## Injection Prevention"
+        - "## Cryptography"
+
+  But I'd start with from_first_h1 as the default and only add heading-level
+  extraction if you actually need to cherry-pick. The granular form is there as
+  an escape hatch, not the common case.
+
+  For references/*.md files — no transform at all, they're already clean. So
+  keep could default to all (or just be absent):
+
+  - skill: golang-security
+    source: references/injection.md
+    phase: review-code
+    as: security-injection-ref.md
+    # no keep field → copy verbatim
+
+❯ agreed, before we proceed to design, chat with pal about this feature and the 
+   proposed approach                                                            
+
+  Called pal (ctrl+o to expand)
+
+● Good input from Gemini. Here's the summary of what it raised, with my take:
+
+  Agreed — worth incorporating:
+
+  1. Injection markers in index.md (<!-- BEGIN VENDORED --> / <!-- END VENDORED 
+  -->) instead of full auto-generation. This preserves hand-written edge-case
+  clarifications and manual entries. Smart — the k8s profile's index.md has that
+   kind of human curation we don't want clobbered.
+  2. Token budget bloat — don't dump everything into "Always load." Most
+  vendored content should be conditional, especially in implement/. Only the
+  most universal content (code-style, error-handling) justifies always-load.
+  3. Relative link rot — samber's files contain internal links like [see 
+  injection](references/injection.md) that break when vendored flat. The script
+  needs a link-rewrite pass.
+  4. Fail loud on missing H1 — if from_first_h1 finds no heading, the script
+  should exit non-zero, not produce garbage.
+
+  Overlap management — the suggestion to scope your existing checklists to
+  project/org-specific concerns while samber covers ecosystem standards is the
+  right split. Don't merge files; load both with clear roles.
+
+  Phase mapping suggestion:
+  - implement: design-patterns, structs-interfaces, concurrency, context,
+  data-structures, error-handling (pre-write gotchas)
+  - review-code: code-style, naming, security (reactive diff checks)
+  - design: database, grpc, observability (architecture decisions)
+  - test: testing, benchmark
+  - document: mostly empty, maybe cli
+
+  What I'd push back on from Gemini: the phase mapping is a reasonable starting
+  point but some skills span phases (e.g., golang-security is both review-code
+  AND implement — you want security rules before writing, not just during
+  review). We'll sort that in the detailed curation.
+
+  Want to proceed to /kk:design now?
+
+✻ Sautéed for 1m 24s
+
+※ recap: We're adding Go language support to kk plugin skills by vendoring content from samber/cc-skills-golang via a manifest-driven script, avoiding copy-paste maintenance. We finished the approach discussion with PAL feedback incorporated. Next step is running /kk:design to produce the formal design doc. (disable recaps in /config)
+
+❯ yes                                                                           
+
+● Skill(kk:design)
+  ⎿  Successfully loaded skill
+
+● I'll follow the design skill workflow. Starting with keyword scan and loading
+  instructions.
+
+  The idea is about plugin infrastructure — vendor manifest (YAML), a shell
+  script, CI automation (GitHub Actions), and markdown transformation. No
+  Go/k8s/Python code is being written, so I expect no domain profiles to
+  activate. Let me load the process file and confirm.
+
+  Read 2 files (ctrl+o to expand)
+
+● Now running profile detection for the design phase. Let me check which
+  profiles have design signals.
+
+  Searched for 1 pattern, read 2 files (ctrl+o to expand)
+
+● Only k8s and k8s-operator have design signals. The idea prose contains no
+  Kubernetes tokens — no profiles activate. Proceeding with generic design flow.
+
+  Task Progress:
+  - [x] Step 1: Understand the current state of the project (from prior
+  conversation)
+  - [ ] Step 2: Check the documentation
+  - [ ] Step 3: Help refine the idea/feature
+  - [ ] Step 4: Describe the design
+  - [ ] Step 5: Document the design
+  - [ ] Step 6: Create the task list
+
+  Step 2 — checking documentation and prior decisions.
+
+  Searched for 2 patterns, called capy (ctrl+o to expand)
+
+● There's existing WIP docs for language-specific-skills — directly relevant.
+  Let me read those and the key ADRs.
+
+  Read 2 files (ctrl+o to expand)
+
+● Important finding: the existing docs/wip/language-specific-skills/ docs
+  describe a pre-profile architecture (standalone lang-* skills,
+  template-cleanup pruning). The project has since evolved to the profile
+  system. This new feature builds on profiles, not the old approach.
+
+  Let me read the relevant ADRs to understand current architectural constraints.
+
+  Read 2 files (ctrl+o to expand)
+
+● Now let me check the existing test assertions and the current Go profile
+  content.
+
+  Searched for 1 pattern, read 2 files (ctrl+o to expand)
+
+● Good. I now have full context on the architecture (ADRs 0001-0004), the
+  existing Go profile, the test assertions (bidirectional index invariant), and
+  the outdated WIP docs. No profiles activate for this infrastructure work.
+
+  Task Progress:
+  - [x] Step 1: Understand the current state of the project
+  - [x] Step 2: Check the documentation
+  - [ ] Step 3: Help refine the idea/feature
+  - [ ] Step 4: Describe the design
+  - [ ] Step 5: Document the design
+  - [ ] Step 6: Create the task list
+
+  Moving to Step 3 — refinement questions. One at a time.
+
+  ---
+  Question 1: Overlap management
+
+  The Go profile already has 4 hand-written checklists in review-code/:
+  security-checklist.md, solid-checklist.md, code-quality-checklist.md, and
+  removal-plan.md. samber's golang-security overlaps heavily with your security
+  checklist, and golang-code-style overlaps with parts of code-quality.
+
+  How do you want to handle the overlap?
+
+  - A) Replace — Vendored content replaces the overlapping hand-written files.
+  Your originals go away; samber becomes the source of truth. Leaner, but you
+  lose any org-specific items you added.
+  - B) Supplement — Keep both side by side. Hand-written files scope to
+  org/project-specific concerns; vendored files cover ecosystem-standard rules.
+  index.md loads both with clear role labels. More content loaded, but clean
+  separation.
+  - C) Merge then vendor — Do a one-time manual merge of your additions into a
+  fork of samber's content, then vendor the merged result. Richest content, but
+  you're now maintaining a delta that the automated refresh can't handle
+  cleanly.
+
+✻ Baked for 2m 3s
+
+❯ Let's do A                                                                    
+
+● Clear. One note: removal-plan.md has no samber equivalent (it's a
+  staged-removal template, not Go knowledge), and solid-checklist.md is
+  partially unique (SOLID expressed in Go terms — samber has
+  golang-design-patterns and golang-structs-interfaces which cover some of the
+  same ground but not the SOLID framing specifically). I'll work out which
+  hand-written files survive vs get replaced during the detailed mapping.
+
+  ---
+  Question 2: Phase scope
+
+  The Go profile currently only has review-code/. This feature could populate up
+   to 5 more phases: implement/, design/, test/, document/, review-spec/.
+
+  Which phases do you want to populate now?
+
+  - A) All 5 — Full coverage. More work upfront but the Go profile becomes as
+  mature as k8s.
+  - B) High-value subset — review-code (enrich existing) + implement + test.
+  These three have the clearest mapping to samber's content. design/, document/,
+   and review-spec/ are deferred.
+  - C) Just review-code + implement — Minimal viable scope. Enrich review with
+  samber's checklists, add pre-write gotchas for implement. Everything else
+  later.
+
+❯ A                                                                             
+● Got it — full phase coverage.
+
+  ---
+  Question 3: Existing WIP docs
+
+  There are existing design docs at docs/wip/language-specific-skills/ from an
+  earlier iteration that proposed standalone lang-* skills with template-cleanup
+   pruning — a completely different architecture from the current profile
+  system. Those docs are now outdated.
+
+  Should I:
+
+  - A) Create new docs under a new feature directory (e.g.,
+  docs/wip/go-vendor-integration/) and leave the old ones as historical context
+  - B) Update the existing docs in-place to reflect the profile-based vendor
+  approach, since it's the same feature area (Go language support) evolving
+
+❯ A                                                                             
+
+● ---
+  Question 4: CI automation scope
+
+  The vendor script needs to exist regardless. But should the GitHub Action that
+   periodically checks for upstream samber updates and opens a PR be part of
+  this feature, or a follow-up?
+
+  - A) Include in this feature — Ship the vendor script + CI automation
+  together. Complete end-to-end solution from day one.
+  - B) Defer CI to follow-up — Ship the vendor script with a manual make 
+  vendor-go (or similar) target. Automate later once the manifest and script are
+   proven.
+
+❯ B                                                                             
+
+● ---
+  Question 5: Skill-to-phase mapping
+
+  This is the core curation decision. Here's my proposed mapping of samber's
+  recommended skills to profile phases. Some skills appear in multiple phases
+  (e.g., security is both a pre-write gotcha and a review checklist). Does this
+  look right, or would you shuffle anything?
+
+  ┌─────────────────────┬─────────┬─────────┬─────────┬─────────┬─────────┐
+  │    samber skill     │ review- │ impleme │ design  │  test   │ documen │
+  │                     │  code   │   nt    │         │         │    t    │
+  ├─────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+  │ golang-code-style   │ always  │         │         │         │         │
+  ├─────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+  │ golang-naming       │ always  │         │         │         │         │
+  ├─────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+  │ golang-security     │ always  │ always  │         │         │         │
+  ├─────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+  │ golang-performance  │ conditi │ always  │         │         │         │
+  │                     │ onal    │         │         │         │         │
+  ├─────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+  │ golang-error-handli │ always  │ always  │         │         │         │
+  │ ng                  │         │         │         │         │         │
+  ├─────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+  │ golang-design-patte │         │ always  │         │         │         │
+  │ rns                 │         │         │         │         │         │
+  ├─────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+  │ golang-structs-inte │         │ always  │         │         │         │
+  │ rfaces              │         │         │         │         │         │
+  ├─────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+  │ golang-data-structu │         │ conditi │         │         │         │
+  │ res                 │         │ onal    │         │         │         │
+  ├─────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+  │ golang-concurrency  │ conditi │ conditi │         │         │         │
+  │                     │ onal    │ onal    │         │         │         │
+  ├─────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+  │ golang-context      │         │ conditi │         │         │         │
+  │                     │         │ onal    │         │         │         │
+  ├─────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+  │ golang-database     │         │ conditi │ conditi │         │         │
+  │                     │         │ onal    │ onal    │         │         │
+  ├─────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+  │ golang-grpc         │         │ conditi │ conditi │         │         │
+  │                     │         │ onal    │ onal    │         │         │
+  ├─────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+  │ golang-http         │         │ conditi │ conditi │         │         │
+  │                     │         │ onal    │ onal    │         │         │
+  ├─────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+  │ golang-observabilit │         │         │ conditi │         │         │
+  │ y                   │         │         │ onal    │         │         │
+  ├─────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+  │ golang-testing      │         │         │         │ always  │         │
+  ├─────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+  │ golang-benchmark    │         │         │         │ conditi │         │
+  │                     │         │         │         │ onal    │         │
+  ├─────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+  │ golang-cli          │         │         │         │         │ conditi │
+  │                     │         │         │         │         │ onal    │
+  ├─────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+  │ golang-continuous-i │         │         │         │         │ conditi │
+  │ ntegration          │         │         │         │         │ onal    │
+  ├─────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+  │ golang-dependency-i │         │ conditi │         │         │         │
+  │ njection            │         │ onal    │         │         │         │
+  └─────────────────────┴─────────┴─────────┴─────────┴─────────┴─────────┘
+
+  review-spec gets no vendored content — that phase checks implementation
+  against design docs, not Go-specific rules.
+
+❯ looks good                                                                    
+
+● ---
+  Question 6: Provenance tracking
+
+  Should vendored files include a header comment noting their source? Something
+  like:
+
+  <!-- Vendored from samber/cc-skills-golang v1.1.3 — golang-security/SKILL.md
+  -->
+  <!-- Do not edit manually; regenerate with: make vendor-go -->
+
+  This makes it obvious which files are vendored vs hand-written, and what
+  version they came from. The alternative is tracking provenance only in the
+  manifest (leaner files, but less visible).
+
+  - A) Header in each vendored file — self-documenting, visible in any context
+  - B) Manifest-only — cleaner files, provenance lives in one place
+
+❯ B                                                                             
+
+● All refinement questions answered. Summary of decisions:
+
+  ┌─────────────────────┬───────────────────────────────────────────────────┐
+  │      Decision       │                      Choice                       │
+  ├─────────────────────┼───────────────────────────────────────────────────┤
+  │ Overlap             │ Replace hand-written files where samber covers    │
+  │                     │ same ground                                       │
+  ├─────────────────────┼───────────────────────────────────────────────────┤
+  │ Phase scope         │ All 5 phases + enrich existing review-code        │
+  ├─────────────────────┼───────────────────────────────────────────────────┤
+  │ WIP docs            │ New docs/wip/go-vendor-integration/               │
+  ├─────────────────────┼───────────────────────────────────────────────────┤
+  │ CI automation       │ Deferred — manual make vendor-go for now          │
+  ├─────────────────────┼───────────────────────────────────────────────────┤
+  │ Skill-to-phase      │ Approved as proposed                              │
+  │ mapping             │                                                   │
+  ├─────────────────────┼───────────────────────────────────────────────────┤
+  │ Provenance          │ Manifest-only, no headers in vendored files       │
+  └─────────────────────┴───────────────────────────────────────────────────┘
+
+  Task Progress:
+  - [x] Step 1: Understand the current state of the project
+  - [x] Step 2: Check the documentation
+  - [x] Step 3: Help refine the idea/feature
+  - [ ] Step 4: Describe the design
+  - [ ] Step 5: Document the design
+  - [ ] Step 6: Create the task list
+
+  Moving to Step 4 — describing the design in sections. I'll go 200-300 words
+  per section and check in after each.
+
+  ---
+  Section 1: Manifest schema and file placement
+
+  The manifest lives at klaude-plugin/profiles/go/vendor-manifest.yml. It has
+  three top-level keys:
+
+  upstream — pins the source repository and version:
+  upstream:
+    repo: samber/cc-skills-golang
+    ref: v1.1.3
+
+  keep_default — the default transform applied to SKILL.md files. Set to
+  from_first_h1, meaning everything before the first #  heading is stripped
+  (frontmatter, persona, modes, cross-references). Individual entries can
+  override with keep: all (verbatim copy, used for references/ files) or keep: {
+   headings: [...] } (cherry-pick specific H2 sections).
+
+  files — a flat list of file mapping entries:
+  files:
+    - skill: golang-security
+      source: SKILL.md
+      phase: review-code
+      as: security.md
+      keep: from_first_h1
+    - skill: golang-security
+      source: SKILL.md
+      phase: implement
+      as: security-gotchas.md
+      keep: from_first_h1
+    - skill: golang-security
+      source: references/injection.md
+      phase: review-code
+      as: security-injection-ref.md
+      keep: all
+    - skill: golang-database
+      source: SKILL.md
+      phase: review-code
+      as: database.md
+      keep: from_first_h1
+      condition: "Diff imports database/sql, sqlx, gorm, ent, or pgx"
+
+  Each entry specifies: the source skill directory, the source file within it,
+  the target phase subdirectory, the target filename (as), the keep rule, and an
+   optional condition that maps to the Load if: clause in index.md.
+
+  Vendored files land at klaude-plugin/profiles/go/<phase>/<as>. They sit
+  alongside any surviving hand-written files in the same directory — no separate
+   vendor/ subdirectory. This keeps the bidirectional index invariant simple:
+  every .md in the phase directory (except index.md) must be in the index,
+  whether vendored or hand-written.
+
+  Does this look right so far?
+
+❯ 1. The manifest should not be colocated with either skills or profiles to     
+  avoid agents reading those during skill execution                             
+  2. keep_default and files should be part of the 'upstream', so that it's      
+  possible to specify multiple upstreams as well                                
+  3. source skill directory should be repo-relative path, not just a dir name,  
+  again to be able to support other upstreams                                   
+                                                                                
+  everything else looks fine                                                    
+
+● Good catches. Revised:
+
+  Section 1 (revised): Manifest schema and file placement
+
+  Manifest location — outside the plugin tree to avoid agents reading it during
+  skill execution. Proposed: scripts/go-vendor-manifest.yml with the vendor
+  script at scripts/vendor-profiles.sh. The scripts/ directory is a natural home
+   for build/maintenance tooling, and the naming convention
+  (<profile>-vendor-manifest.yml) supports adding manifests for other profiles
+  later.
+
+  Revised schema — multi-upstream capable, repo-relative source paths:
+
+  upstreams:
+    - repo: samber/cc-skills-golang
+      ref: v1.1.3
+      keep_default: from_first_h1
+      files:
+        - source: skills/golang-security/SKILL.md
+          phase: review-code
+          as: security.md
+
+        - source: skills/golang-security/references/injection.md
+          phase: review-code
+          as: security-injection-ref.md
+          keep: all
+
+        - source: skills/golang-database/SKILL.md
+          phase: review-code
+          as: database.md
+          condition: "Diff imports database/sql, sqlx, gorm, ent, or pgx"
+
+        - source: skills/golang-design-patterns/SKILL.md
+          phase: implement
+          as: design-patterns.md
+
+    # future: another upstream
+    - repo: some-org/go-observability-skills
+      ref: v2.0.0
+      keep_default: all
+      files:
+        - source: docs/tracing-checklist.md
+          phase: review-code
+          as: tracing.md
+          condition: "Diff imports go.opentelemetry.io"
+
+  Each upstream has its own repo, ref, keep_default, and files list. Each file
+  entry uses a repo-relative source path. Per-file keep overrides the upstream's
+   keep_default. condition remains optional — absent means always-load.
+
+  Vendored files still land at klaude-plugin/profiles/go/<phase>/<as>, alongside
+   surviving hand-written files. No separate vendor subdirectory — the
+  bidirectional index invariant stays simple.
+
+  Does this look right?
+
+❯ looks ok, but we can also remove 'upstreams' key and just do an array of      
+  repos, to improve readability                                                 
+
+● Agreed — the manifest file IS the list. Cleaner:
+
+  - repo: samber/cc-skills-golang
+    ref: v1.1.3
+    keep_default: from_first_h1
+    files:
+      - source: skills/golang-security/SKILL.md
+        phase: review-code
+        as: security.md
+      - source: skills/golang-database/SKILL.md
+        phase: review-code
+        as: database.md
+        condition: "Diff imports database/sql, sqlx, gorm, ent, or pgx"
+
+  - repo: some-org/go-observability-skills
+    ref: v2.0.0
+    keep_default: all
+    files:
+      - source: docs/tracing-checklist.md
+        phase: review-code
+        as: tracing.md
+        condition: "Diff imports go.opentelemetry.io"
+
+  Moving on.
+
+  ---
+  Section 2: Vendor script behavior
+
+  The vendor script lives at scripts/vendor-profiles.sh. It takes one argument:
+  the path to a manifest file. Invoked as make vendor-go (which calls
+  scripts/vendor-profiles.sh scripts/go-vendor-manifest.yml).
+
+  Execution flow:
+
+  1. Parse the manifest. Read each upstream entry. For each, resolve the GitHub
+  raw content base URL from repo and ref (e.g.,
+  https://raw.githubusercontent.com/samber/cc-skills-golang/v1.1.3/).
+  2. Fetch each source file. Download via curl from the raw URL. Fail loud (exit
+   1) if any fetch returns non-200.
+  3. Apply the keep transform. Per-file keep overrides the upstream's
+  keep_default. Three modes:
+    - all — verbatim copy (used for references/ files)
+    - from_first_h1 — strip everything before the first line matching ^# . Exit
+  1 if no H1 found (fail loud, don't produce garbage).
+    - headings: [list] — extract only named H2 sections (escape hatch, unlikely
+  to be used initially)
+  4. Rewrite relative links. Scan for markdown links pointing to files within
+  the same skill directory (e.g., [see injection](references/injection.md)). If
+  the link target is another vendored file, rewrite to its as filename. If not
+  vendored, strip the link (leave text, remove URL). This prevents broken links.
+  5. Write to target. Place the transformed content at
+  klaude-plugin/profiles/go/<phase>/<as>. Create the phase directory if it
+  doesn't exist.
+  6. Update index.md. For each phase directory that received files, regenerate
+  the content between injection markers (<!-- BEGIN VENDORED --> / <!-- END 
+  VENDORED -->). Always-load entries (no condition) get a markdown link +
+  one-line description. Conditional entries get the link + description + **Load 
+  if:** <condition>. Content outside the markers is untouched.
+  7. Report. Print a summary: files fetched, transforms applied, phases updated.
+
+  Does this look right?
+
+❯ let's do this one in go rather than bash, it's easier to write,test and it's  
+  type-safe                                                                     
+
+● Makes sense — YAML parsing, link rewriting, and the keep transform are all
+  much cleaner in Go with proper types and tests.
+
+  Revised: the vendor tool lives at cmd/vendor-profiles/main.go (standard Go
+  project layout for CLI tools). Invoked as go run ./cmd/vendor-profiles 
+  -manifest scripts/go-vendor-manifest.yml, with a make vendor-go shortcut. The
+  manifest schema maps directly to Go structs:
+
+  type Upstream struct {
+      Repo        string  `yaml:"repo"`
+      Ref         string  `yaml:"ref"`
+      KeepDefault string  `yaml:"keep_default"`
+      Files       []File  `yaml:"files"`
+  }
+
+  type File struct {
+      Source    string `yaml:"source"`
+      Phase     string `yaml:"phase"`
+      As        string `yaml:"as"`
+      Keep      string `yaml:"keep,omitempty"`
+      Condition string `yaml:"condition,omitempty"`
+  }
+
+  Same execution flow (fetch, transform, link-rewrite, write, update index.md
+  markers), but testable with unit tests for each step — especially the
+  from_first_h1 transform and the link rewriter. The manifest is []Upstream at
+  the top level.
+
+  ---
+  Section 3: index.md integration
+
+  Each phase's index.md uses injection markers to separate hand-written entries
+  from vendored ones:
+
+  # Go — review checklists
+
+  ## Always load
+
+  - [solid-checklist.md](solid-checklist.md) — SOLID design principles in Go
+  terms.
+  - [removal-plan.md](removal-plan.md) — staged-removal template for retiring Go
+   code.
+
+  <!-- BEGIN VENDORED -->
+  - [security.md](security.md) — Go security: injection, crypto, secrets, SSRF,
+  auth.
+  - [code-style.md](code-style.md) — Code style, formatting, conventions.
+  - [naming.md](naming.md) — Naming conventions and identifier clarity.
+  - [error-handling.md](error-handling.md) — Error wrapping, sentinel errors,
+  handling patterns.
+
+  ## Conditional
+
+  - [database.md](database.md) — Database patterns and SQL safety. **Load if:**
+  Diff imports database/sql, sqlx, gorm, ent, or pgx.
+  - [performance.md](performance.md) — Performance anti-patterns. **Load if:**
+  Diff touches hot-path code or benchmarks.
+  - [concurrency.md](concurrency.md) — Goroutine lifecycle, channels, sync
+  primitives. **Load if:** Diff uses goroutines, channels, or sync package.
+  <!-- END VENDORED -->
+
+  Key rules:
+  - The vendor tool only writes between the markers. Everything outside
+  (hand-written entries, edge-case clarifications) is preserved.
+  - If no markers exist yet (new phase directory), the tool creates the full
+  index.md with markers — all content is vendored initially, and the user can
+  add hand-written entries outside the markers later.
+  - The ## Always load and ## Conditional headings inside the markers are
+  generated from the manifest's condition field presence/absence.
+  - The bidirectional index invariant still holds: every .md in the phase
+  directory is referenced (either in hand-written section or vendored section),
+  and every reference resolves to a file on disk.
+
+  Does this look right?
+
+❯ yes                                                                           
+
+● ---
+  Section 4: Phase-by-phase content plan
+
+  This section details what each phase directory looks like after vendoring —
+  which existing files survive, which get replaced, and which vendored files are
+   added.
+
+  review-code/ (enrich existing)
+
+  Existing files disposition:
+  - security-checklist.md — replaced by vendored security.md (from
+  golang-security/SKILL.md)
+  - code-quality-checklist.md — replaced by vendored code-style.md (from
+  golang-code-style/SKILL.md) + error-handling.md (from
+  golang-error-handling/SKILL.md), which together cover the same ground more
+  thoroughly
+  - solid-checklist.md — survives (SOLID framing in Go terms has no direct
+  samber equivalent)
+  - removal-plan.md — survives (staged-removal template, not Go knowledge)
+
+  Vendored always-load: security.md, code-style.md, naming.md,
+  error-handling.md, performance.md
+  Vendored conditional: database.md, concurrency.md, grpc.md, http.md
+
+  Plus references/ files from relevant skills where they add depth (e.g.,
+  security-injection-ref.md from golang-security/references/).
+
+  implement/ (new — pre-write gotchas)
+
+  All vendored. Always-load: design-patterns.md, structs-interfaces.md,
+  error-handling.md, security.md
+  Conditional: concurrency.md, context.md, data-structures.md, database.md,
+  grpc.md, http.md, dependency-injection.md
+
+  design/ (new — architecture questions)
+
+  All vendored, all conditional: database.md, grpc.md, http.md, observability.md
+
+  Since design-phase content seeds the refinement question pool, these files
+  would contain extracted architectural questions relevant to Go projects that
+  use those technologies.
+
+  test/ (new — testing guidance)
+
+  Vendored always-load: testing.md (from golang-testing/SKILL.md)
+  Vendored conditional: benchmark.md (from golang-benchmark/SKILL.md)
+
+  document/ (new — documentation rubric)
+
+  Vendored conditional: cli.md (from golang-cli/SKILL.md),
+  continuous-integration.md (from golang-continuous-integration/SKILL.md)
+
+  review-spec/ — no vendored content. This phase checks implementation against
+  design docs, not Go-specific rules.
+
+  Does the disposition of existing files and the per-phase plan look right?
+
+❯ yes                                                                           
+
+● ---
+  Section 5: Testing and validation
+
+  Three layers of testing:
+
+  Unit tests for the vendor tool (cmd/vendor-profiles/)
+
+  Standard Go tests covering:
+  - Manifest parsing — valid YAML, multiple upstreams, missing fields error
+  - from_first_h1 transform — strips preamble, preserves content after first # ,
+   exits non-zero when no H1 found
+  - headings transform — extracts named H2 sections, ignores others
+  - Link rewriting — rewrites links to co-vendored files, strips links to
+  non-vendored files, leaves external URLs untouched
+  - Index.md injection — writes between markers, preserves content outside
+  markers, generates correct always-load vs conditional sections, creates full
+  index.md when no markers exist
+
+  Integration test (end-to-end vendor run)
+
+  A test in cmd/vendor-profiles/ that uses a small fixture manifest pointing at
+  a local test directory (not GitHub — no network dependency in tests) with
+  sample SKILL.md and references files. Verifies the full pipeline: parse →
+  fetch → transform → write → index update. Checks output files exist, content
+  is transformed correctly, and index.md has the right entries between markers.
+
+  Plugin structure test (test/test-plugin-structure.sh)
+
+  The existing test already asserts the bidirectional index invariant for all
+  profiles. After vendoring populates new phase directories, the test
+  automatically covers them — no changes needed to the test logic itself. But we
+   do need to ensure:
+  - New phase directories (implement/, design/, test/, document/) are created by
+   the vendor run, not committed empty
+  - The overview.md is updated to reflect the newly populated phases
+  - The hand-written entries outside the injection markers in
+  review-code/index.md still pass the forward invariant (links resolve)
+
+  Makefile target: make vendor-go runs go run ./cmd/vendor-profiles -manifest 
+  scripts/go-vendor-manifest.yml and then bash test/test-plugin-structure.sh to
+  validate the result.
+
+  Does this look right?
+
+❯ yes                                                                           
+
+● ---
+  Section 6: Developer workflow and future extensibility
+
+  Running the vendor tool:
+
+  make vendor-go          # fetch, transform, place, update index.md files
+  make test-structure     # validate bidirectional invariant (also runs at end 
+  of vendor-go)
+
+  First-time setup: go mod tidy pulls in the YAML parsing dependency (likely
+  gopkg.in/yaml.v3, already in the Go ecosystem — no exotic deps). No other
+  setup needed.
+
+  Updating when samber releases a new version:
+
+  1. Edit scripts/go-vendor-manifest.yml — bump ref: v1.1.3 to the new tag
+  2. Run make vendor-go
+  3. Review the diff — the changed files are the vendored content under
+  klaude-plugin/profiles/go/
+  4. Commit
+
+  If samber restructures files (renames, moves), the fetch step fails loud (404
+  on the old path). The developer updates the source paths in the manifest and
+  re-runs.
+
+  Adding a new samber skill to the profile:
+
+  1. Add a files entry to the manifest — specify source, phase, as, and optional
+   condition
+  2. Run make vendor-go
+  3. The tool places the file and updates the index.md markers
+  4. Commit
+
+  Adding a second upstream:
+
+  Append a new entry to the manifest array with its own repo, ref, keep_default,
+   and files. The tool iterates all upstreams in order. No code changes needed.
+
+  Adding vendor support for another profile (e.g., Python):
+
+  Create scripts/python-vendor-manifest.yml, add a make vendor-python target
+  pointing at it. The vendor tool is profile-agnostic — the manifest specifies
+  the target profile's phase directories. The Go tool itself needs no changes.
+
+  ---
+  That's the full design. Six sections: manifest schema, vendor tool behavior,
+  index.md integration, phase-by-phase plan, testing, and developer workflow.
+  Ready for Step 5 — shall I write the design and implementation docs?
+
+❯ proceed                                                                       
+
+  Ran 1 bash command (ctrl+o to expand)
+
+● Write(docs/wip/go-vendor-integration/design.md)
+  ⎿  Wrote 329 lines to docs/wip/go-vendor-integration/design.md
+      1 # Go Vendor Integration — Design
+      3 ## Overview
+      5 Integrate external Go knowledge from [samber/cc-skills-golang](ht
+         profile via an automated vendor pipeline. A YAML manifest maps u
+        etches, transforms, and places the content; and injection markers
+         in `index.md` files separate vendored entries from hand-written 
+      6 
+      8 
+        d-written checklists. samber/cc-skills-golang provides ~16 high-q
+        le, concurrency, testing, des
+     … +432 lines (ctrl+o to expand)
+
+● Now the implementation plan.
+
+● Write(docs/wip/go-vendor-integration/implementation.md)
+  ⎿  Wrote 291 lines to docs/wip/go-vendor-integration/implementation.md
+       1 # Go Vendor Integration — Implementation Plan
+       3 ## Prerequisites
+       4 
+         n/profiles/<name>/<phase>/index.md` contract, bidirectional inde
+         profile-content-organization.md) and [CLAUDE.md — Profile Conven
+         tions](../../../CLAUDE.md).
+         n/profiles/go/` with only `review-code/` populated.
+       7 - Go toolchain (`go 1.22+`) for building and testing the vendor 
+       8 - Access to GitHub raw content URLs for fetching upstream files.
+      10 ## Phases
+     … +388 lines (ctrl+o to expand)
+
+● Now the task list, following the example-tasks format.
+  Read 1 file (ctrl+o to expand)
+
+● Write(docs/wip/go-vendor-integration/tasks.md)
+  ⎿  Wrote 125 lines to docs/wip/go-vendor-integration/tasks.md
+       1 # Tasks: Go Vendor Integration
+       2 
+       3 > Design: [./design.md](./design.md)
+       4 > Implementation: [./implementation.md](./implementation.md)
+       5 > Status: pending
+       6 > Created: 2026-04-23
+       7 
+       8 ## Task 1: Go module and CLI skeleton
+       9 - **Status:** pending
+      10 - **Depends on:** —
+     … +183 lines (ctrl+o to expand)
+
+● Now let me index the key architecture decisions in capy.
+
+  Called capy (ctrl+o to expand)
+
+● Task Progress:
+  - [x] Step 1: Understand the current state of the project
+  - [x] Step 2: Check the documentation
+  - [x] Step 3: Help refine the idea/feature
+  - [x] Step 4: Describe the design
+  - [x] Step 5: Document the design
+  - [x] Step 6: Create the task list
+
+  Design complete. Three files created:
+
+  - docs/wip/go-vendor-integration/design.md — Full design: manifest schema,
+  vendor tool architecture, index.md injection markers, phase-by-phase content
+  plan (which samber skills map where, which existing files survive/get
+  replaced), link rewriting rules, testing strategy, developer workflow.
+  - docs/wip/go-vendor-integration/implementation.md — 3-phase implementation
+  plan: (1) build the Go CLI tool with unit tests, (2) populate all Go profile
+  phases with vendored content, (3) validate and clean up.
+  - docs/wip/go-vendor-integration/tasks.md — 10 tasks, from CLI skeleton
+  through final verification. Tasks 1-7 build the tool, Task 8-9 populate the
+  profile, Task 10 is end-to-end verification including
+  review-code/review-spec/test/document skill invocations.
+
+  Key architecture decisions indexed in capy as kk:arch-decisions.
+
+✻ Worked for 4m 7s
