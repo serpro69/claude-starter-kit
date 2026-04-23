@@ -164,16 +164,16 @@ Subtasks:
 ## Task 12 — Author `profiles/k8s-operator/design/` content
 
 - **Phase:** P3
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 11
 - **Links:** [implementation.md §Step 3.3](implementation.md#step-33--author-profilesk8s-operatordesign-content)
 
 Subtasks:
 
-- [ ] Create `klaude-plugin/profiles/k8s-operator/design/index.md` — always-load entries: `questions.md`, `sections.md`.
-- [ ] Create `klaude-plugin/profiles/k8s-operator/design/questions.md` — leader-election mode, admission-webhook ordering/failurePolicy, CRD conversion webhooks, reconciliation design (idempotency, status subresource, finalizers, error backoff).
-- [ ] Create `klaude-plugin/profiles/k8s-operator/design/sections.md` — required sections: CRD schema design, reconciliation loop architecture, RBAC generation scope, webhook topology.
-- [ ] Verify: forward index invariant (every link in `index.md` resolves); reverse index invariant (every `.md` except `index.md` is referenced).
+- [x] Create `klaude-plugin/profiles/k8s-operator/design/index.md` — always-load entries: `questions.md`, `sections.md`.
+- [x] Create `klaude-plugin/profiles/k8s-operator/design/questions.md` — leader-election mode, admission-webhook ordering/failurePolicy, CRD conversion webhooks, reconciliation design (idempotency, status subresource, finalizers, error backoff).
+- [x] Create `klaude-plugin/profiles/k8s-operator/design/sections.md` — required sections: CRD schema design, reconciliation loop architecture, RBAC generation scope, webhook topology.
+- [x] Verify: forward index invariant (every link in `index.md` resolves); reverse index invariant (every `.md` except `index.md` is referenced).
 
 ## Task 13 — Register `k8s-operator` profile
 
