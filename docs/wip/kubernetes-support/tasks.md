@@ -346,7 +346,7 @@ Subtasks:
 
 - **Phase:** feature-close
 - **Status:** pending
-- **Depends on:** Task 7, Task 10, Task 15, Task 18
+- **Depends on:** Task 7, Task 10, Task 15, Task 18, Task 20
 - **Links:** [implementation.md §Feature close](implementation.md#feature-close)
 
 Subtasks:
@@ -358,14 +358,12 @@ Subtasks:
 
 ---
 
-## Task 20 — Design amendments follow-up (post-feature handoff)
+## Task 20 — Design amendments follow-up (post-implementation handoff)
 
-- **Phase:** post-feature
+- **Phase:** post-implementation
 - **Status:** pending
-- **Depends on:** Task 19
+- **Depends on:** Task 18
 - **Links:** [design.md §Amendments](design.md#amendments-post-review-deferrals)
-
-Handoff pointer — NOT a gate on Task 19 closure. Remains `pending` in the frozen feature dir (`docs/done/kubernetes-support/`) until a follow-up session picks up the amendment backlog. A future contributor starts here when the prerequisites described in each amendment's "When to apply" clause are met.
 
 Subtasks:
 
