@@ -47,7 +47,7 @@ When set, all review checkpoints automatically use isolated variants (`kk:review
 **Phases** (summary — The Process below has the detailed steps):
 
 1. **Load plan context.** Read `tasks.md`, `design.md`, and `implementation.md`. Search capy knowledge base for relevant prior context. Identify the next pending task.
-2. **Per sub-task: detect active profiles.** Run the shared profile-detection procedure against the sub-task's target files.
+2. **Per sub-task: detect active profiles.** Run the shared profile-detection procedure against the sub-task's target files
 3. **Per sub-task: load profile content.** For each active profile contributing an `implement/` subdirectory, load its `index.md` and resolved content (per-task gotchas, coding guidelines).
 4. **Per sub-task: execute.** Only now: read source files, write code, run tests, apply the plan.
 5. **Report and review.** Show results, run code review, update task status.

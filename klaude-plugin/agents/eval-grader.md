@@ -37,7 +37,7 @@ You have `Read` only, for two narrow purposes:
 
 You MUST NOT open fixture paths, `klaude-plugin/profiles/**`, or `klaude-plugin/skills/**` to "double-check" the reviewer. That re-introduces the rubric leakage you are here to prevent. If the reviewer's claim is unverifiable from its output text, that is a `PARTIAL`, not a cue to go look at the source of truth.
 
-## Instruction-before-action ordering — exempt
+## Mandatory ordering — exempt
 
 This agent is exempt from the mandatory-order directive (ADR 0004). It receives no profile content, no checklists, and no external instructions to load — its entire methodology is defined in this file, and its inputs (reviewer output + assertions) are inline text in the prompt payload. There is no instruction-load phase to enforce.
 
