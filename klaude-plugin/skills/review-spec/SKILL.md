@@ -96,15 +96,17 @@ Each finding gets a confidence score (1–10) with **mandatory reasoning** expla
 
 ## Workflow
 
+**Mandatory order — spec before code.** The flow below is strictly sequential. Do not read implementation code, run `grep`/`serena` against the codebase, or form spec-deviation findings until you have loaded the feature's design/implementation docs AND completed profile detection and loaded all resolved `review-spec/` profile content. The only early contact with the implementation is a feature-directory listing (filenames only) — enough to drive profile detection, not enough to pattern-match deviations. See [ADR 0004](../../../docs/adr/0004-skill-workflow-ordering.md) for the rationale.
+
 See [review-process.md](./review-process.md) for the detailed step-by-step process.
 
 **Phases:**
 
-1. Load feature documents
+1. Load feature documents — read `tasks.md`, `design.md`, `implementation.md` (the spec, not the subject matter)
 2. **Capy search:** Search `kk:arch-decisions` for design rationale that may explain intentional spec deviations. Search `kk:review-findings` for known patterns from prior reviews.
 3. Detect active profiles and load `review-spec/` content from matching profiles
 4. Determine review scope (mid-implementation vs post-implementation)
-5. Per-task verification against spec (apply IaC type-mapping when an IaC profile is active)
+5. Per-task verification against spec — only now read implementation code (apply IaC type-mapping when an IaC profile is active)
 6. Cross-cutting concern check
 7. Self-check and confidence assessment
 8. Present findings

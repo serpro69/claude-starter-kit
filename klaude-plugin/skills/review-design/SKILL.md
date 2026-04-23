@@ -54,6 +54,8 @@ See [review-isolated.md](./review-isolated.md) for the isolated workflow.
 
 ## Workflow
 
+**Mandatory order — methodology before evaluation.** The flow below is strictly sequential. Do not evaluate document quality, assess technical soundness, or form findings until this SKILL.md and the process file are fully loaded. The design documents are both instruction context (they define what the feature is) and subject matter (they are what you evaluate) — but the review methodology and rubric must be loaded first. See [ADR 0004](../../../docs/adr/0004-skill-workflow-ordering.md) for the rationale.
+
 **Phases:**
 
 1. Load documents — parse scope, locate feature directory, read in-scope docs

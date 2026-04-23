@@ -223,15 +223,15 @@ Subtasks:
 ## Task 16 — Wave 2: Widen directive breadth in partially-compliant skills
 
 - **Phase:** P4
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 15
 - **Links:** [implementation.md §Step 4.2](implementation.md#step-42--wave-2-widen-directive-breadth-in-partially-compliant-skills)
 
 Subtasks:
 
-- [ ] Re-audit each skill that has a Workflow section. For each, check: (a) does the directive gate ALL subject-matter-reading actions? (b) is there a minimal-scope step before profile detection? (c) do process files have content-read instructions before instruction-load steps?
-- [ ] For skills failing any check: widen directive, insert minimal-scope step, reorder process files. Dedup any repeated content-read instructions.
-- [ ] Verify: per skill, the directive explicitly gates all subject-matter reading; a minimal-scope step precedes profile detection; no content-read before instruction-load in process files.
+- [x] Re-audit each skill that has a Workflow section. For each, check: (a) does the directive gate ALL subject-matter-reading actions? (b) is there a minimal-scope step before profile detection? (c) do process files have content-read instructions before instruction-load steps? *Three skills needed fixes: `review-spec` (no directive, phases lacked explicit gating), `review-design` (no directive), `merge-docs` (no directive, Workflow was bare pointer). The original candidates (`implement`, `test`, `design`) are already compliant — `implement` had a sub-task directive pre-existing, `test` and `document` had full directives from prior work.*
+- [x] For skills failing any check: widen directive, insert minimal-scope step, reorder process files. Dedup any repeated content-read instructions. *Added directives: `review-spec` ("spec before code"), `review-design` ("methodology before evaluation"), `merge-docs` ("grounding before merging"). Clarified phase descriptions in `review-spec` to distinguish spec-load from code-read phases. No process file reordering needed — all three had correct ordering already, just lacked the explicit directive.*
+- [x] Verify: per skill, the directive explicitly gates all subject-matter reading; a minimal-scope step precedes profile detection; no content-read before instruction-load in process files. *All 10 skills confirmed: mandatory-order directive present, subject-matter gating explicit. 143 structure test assertions passed, 0 failed.*
 
 ## Task 17 — Wave 3: Sub-agent audit
 
