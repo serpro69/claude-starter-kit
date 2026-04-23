@@ -10,6 +10,7 @@ Questions used during idea refinement when the `k8s` profile is active. Ask one 
 - API deprecations — for the target minor version, which API versions used in this design are already `Deprecated` or scheduled for removal (e.g., `policy/v1beta1/PodDisruptionBudget` removed in 1.25, `batch/v1beta1/CronJob` removed in 1.25)? Name the migration API for each.
 - Third-party CRDs — which CRDs does this feature install or consume (cert-manager, Prometheus Operator, Argo CD, Flux, external-secrets)? What exact operator release version pins the CRD schema?
 - Stateful workload? If yes: `StorageClass` name and provisioner, access mode (`ReadWriteOnce` / `ReadWriteOncePod` / `ReadWriteMany`), `reclaimPolicy` (`Retain` preferred for production data — `Delete` destroys the backing volume on PVC deletion and is irreversible once bound), and backup/restore SLO.
+- `dnsPolicy` — default (`ClusterFirst`) or non-default (`Default` for node DNS only, `ClusterFirstWithHostNet` for `hostNetwork: true` pods, `None` with custom `dnsConfig`)? When is the default insufficient, and what resolution pipeline does this workload expect?
 
 ## GitOps and delivery
 
@@ -30,7 +31,7 @@ Questions used during idea refinement when the `k8s` profile is active. Ask one 
 - NetworkPolicy posture — default-deny plus explicit allow edges (across ingress AND egress), default-allow, or no NetworkPolicy (accepted risk)?
 - `LimitRange` defaults — if containers omit `resources.requests` / `limits`, what does the namespace `LimitRange` inject (`default` and `defaultRequest`)? Or does the namespace have no `LimitRange`, meaning all containers must set explicit requests/limits?
 - Admission-time guardrails — `ResourceQuota` per namespace, PSA labels (`restricted` / `baseline` / `privileged`) AND enforcement mode (`enforce` / `audit` / `warn` — `warn`/`audit` alone provide no enforcement), policy engine (Kyverno, Gatekeeper) with enforced rules?
-- Service mesh — is a service mesh (Istio, Linkerd, Cilium Service Mesh) active in the target namespace? If yes: is sidecar injection enabled for this workload, and does the design account for mTLS, mesh-aware NetworkPolicy, and `dnsPolicy` configuration (`ClusterFirst` / `Default` / `ClusterFirstWithHostNet` / `None`)?
+- Service mesh — is a service mesh (Istio, Linkerd, Cilium Service Mesh) active in the target namespace? If yes: is sidecar injection enabled for this workload, and does the design account for mTLS, mesh-aware NetworkPolicy, and sidecar DNS interception (mesh sidecars may override the pod's DNS resolution pipeline — confirm the mesh's DNS behavior is compatible with the workload's expected resolution path)?
 
 ## Observability
 

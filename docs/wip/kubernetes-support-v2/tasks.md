@@ -138,15 +138,15 @@ Subtasks:
 ## Task 10 — Extract standalone DNS policy question
 
 - **Phase:** P3
-- **Status:** pending
+- **Status:** done
 - **Depends on:** —
 - **Links:** [implementation.md §Step 3.1](implementation.md#step-31--extract-standalone-dns-policy-question)
 
 Subtasks:
 
-- [ ] Edit `klaude-plugin/profiles/k8s/design/questions.md` — find the Multi-tenancy category's service-mesh bullet (~line 33) where `dnsPolicy` is embedded. Extract DNS policy to a standalone question in the Cluster topology category covering `ClusterFirst`, `Default`, `ClusterFirstWithHostNet`, `None` with custom `dnsConfig`.
-- [ ] Retain mesh-specific DNS concerns (sidecar DNS interception) in the service-mesh bullet.
-- [ ] Verify: DNS policy question is standalone, not gated behind service-mesh presence.
+- [x] Edit `klaude-plugin/profiles/k8s/design/questions.md` — find the Multi-tenancy category's service-mesh bullet (~line 33) where `dnsPolicy` is embedded. Extract DNS policy to a standalone question in the Cluster topology category covering `ClusterFirst`, `Default`, `ClusterFirstWithHostNet`, `None` with custom `dnsConfig`.
+- [x] Retain mesh-specific DNS concerns (sidecar DNS interception) in the service-mesh bullet.
+- [x] Verify: DNS policy question is standalone, not gated behind service-mesh presence.
 
 ## Task 11 — Author `profiles/k8s-operator/` detection and overview
 
