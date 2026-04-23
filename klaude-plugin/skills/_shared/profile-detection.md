@@ -26,21 +26,19 @@ Not every consumer has a diff available. Use the input listed for your skill:
 
 ### The `design` interaction pattern
 
-The design phase runs before any code exists, so file-based detection is impossible.
-Instead, the skill checks the idea prose against a **high-precision auto-trigger set**:
+The design phase runs before any code exists, so file-based detection is impossible. Detection uses idea-prose keyword matching against tokens declared in each profile's `DETECTION.md`.
 
-```
-Kubernetes, K8s, Helm chart, kubectl, kustomize, manifest.yaml,
-Deployment resource, StatefulSet, DaemonSet, CronJob
-```
+**Algorithm:**
 
-If any auto-trigger token matches, surface a single confirmation prompt:
-"This appears to be a Kubernetes feature. Activate the Kubernetes profile for this design session?" — let the user confirm yes/no.
+1. **Collect tokens.** Iterate §Known profiles. For each `<name>`, `Read` `<plugin_root>/profiles/<name>/DETECTION.md`. If the file has no `## Design signals` section, skip — that profile does not participate in design-phase detection. Otherwise, parse `display_name` and `tokens` from the section.
+2. **Build union.** Collect all declared tokens into a single set, each tagged by its source profile name and `display_name`.
+3. **Match.** Check the idea prose against the union. Matching is case-insensitive, whole-word (so `pod` in "podcast" does not fire).
+4. **Confirm.** On match, surface a confirmation prompt per matched profile:
+   *"This appears to be a {display_name} feature. Activate the {profile_name} profile?"* — let the user confirm yes/no. When multiple profiles match, confirm each independently.
+5. **Fallback.** If no token matches but the idea is **ambiguous** — names infrastructure, deployment, runtime, or platform concerns without naming a specific technology (e.g., _"add a caching layer for the service"_, _"build a CI pipeline"_, _"deploy to production"_); or includes overloaded tokens that collide across domains — build the fallback prompt dynamically from all profiles that declare `## Design signals`:
+   *"Does this feature involve {display_name_1, display_name_2, ...}? If yes, which?"*
 
-If no auto-trigger matches but the idea is **ambiguous** — names infrastructure, deployment, runtime, or platform concerns without naming a specific technology (e.g., _"add a caching layer for the service"_, _"build a CI pipeline"_, _"deploy to production"_); or includes overloaded tokens like `cluster`, `namespace`, `pod` that collide with non-K8s meanings — ask explicitly:
-"Does this feature involve Kubernetes, Terraform, or other IaC artifacts? If yes, which?"
-
-The narrow auto-trigger set avoids noisy false positives from tokens that overload across domains. Confirmation is required — the design skill never auto-activates a profile silently.
+Confirmation is required — the design skill never auto-activates a profile silently. The narrow per-profile token sets avoid noisy false positives from tokens that overload across domains.
 
 Once activated, subsequent design-phase steps treat the profile as active in the same record shape produced by file-based detection (see §Output shape).
 

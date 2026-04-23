@@ -25,15 +25,15 @@ Subtasks:
 ## Task 2 — Rewrite shared procedure's design interaction pattern
 
 - **Phase:** P1
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1
 - **Links:** [implementation.md §Step 1.2](implementation.md#step-12--rewrite-the-shared-procedures-design-interaction-pattern)
 
 Subtasks:
 
-- [ ] Edit `klaude-plugin/skills/_shared/profile-detection.md` §The `design` interaction pattern. Replace the K8s-specific content (hard-coded token list, hard-coded "Kubernetes" confirmation prompt) with a generic iteration: iterate §Known profiles, `Read` each `DETECTION.md`, collect tokens from `## Design signals` (skip if absent), build union, match against idea prose.
-- [ ] Write the dynamic confirmation prompt: on match → *"This appears to be a {profile.display_name} feature. Activate the {profile.name} profile?"*; on no-match + ambiguous → build list from all profiles with Design signals: *"Does this feature involve {display_name_1, display_name_2, ...}? If yes, which?"*
-- [ ] Verify: `grep -c 'Kubernetes' klaude-plugin/skills/_shared/profile-detection.md` returns 0 (no K8s-specific literals remain outside §Known profiles list entry). The §Known profiles list still includes `k8s` as a profile name — that is a registry entry, not a hard-coded trigger.
+- [x] Edit `klaude-plugin/skills/_shared/profile-detection.md` §The `design` interaction pattern. Replace the K8s-specific content (hard-coded token list, hard-coded "Kubernetes" confirmation prompt) with a generic iteration: iterate §Known profiles, `Read` each `DETECTION.md`, collect tokens from `## Design signals` (skip if absent), build union, match against idea prose.
+- [x] Write the dynamic confirmation prompt: on match → *"This appears to be a {profile.display_name} feature. Activate the {profile.name} profile?"*; on no-match + ambiguous → build list from all profiles with Design signals: *"Does this feature involve {display_name_1, display_name_2, ...}? If yes, which?"*
+- [x] Verify: `grep -c 'Kubernetes' klaude-plugin/skills/_shared/profile-detection.md` returns 0 (no K8s-specific literals remain outside §Known profiles list entry). The §Known profiles list still includes `k8s` as a profile name — that is a registry entry, not a hard-coded trigger. **Note:** two pre-existing didactic examples in §Two dimensions (line 92) and §Output shape (line 136) use K8s/Helm as illustrative cases — left as-is since they're pedagogical, not functional.
 
 ## Task 3 — Update `design` skill files to consume generic iteration
 
