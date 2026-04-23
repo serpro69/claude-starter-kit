@@ -1,7 +1,7 @@
 # Kubernetes support v2 — design amendments follow-up
 
 - **Feature:** kubernetes-support-v2
-- **Status:** in-design
+- **Status:** done
 - **Parent feature:** [kubernetes-support](../kubernetes-support/design.md) (frozen history after Task 19)
 - **Originating amendments:** [design.md §Amendments](../kubernetes-support/design.md#amendments-post-review-deferrals) — A1, A2, A3, A4 (resolved), A5
 - **Implementation plan:** [implementation.md](implementation.md)

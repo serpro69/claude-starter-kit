@@ -3,7 +3,7 @@
 - **Feature:** kubernetes-support-v2
 - **Design:** [design.md](design.md)
 - **Tasks:** [tasks.md](tasks.md)
-- **Status:** implementation-plan
+- **Status:** done
 
 This document is a step-by-step guide for implementing the v2 design amendments. Each step is paired with an explicit verification. Tasks in [tasks.md](tasks.md) reference the corresponding steps here.
 
