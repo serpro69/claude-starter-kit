@@ -11,7 +11,7 @@ Profile detection ([ADR 0001](0001-profile-detection-model.md)) produces a set o
 
 Two orthogonal organizational questions must be answered together:
 
-1. **Where does profile content live?** The plugin has an existing `klaude-plugin/skills/_shared/<name>.md` pattern for shared instructions consumed by multiple skills, with per-skill symlinks. That pattern works for mechanism (capy knowledge protocol, review-scope protocol, pal-codereview invocation). For profile *content*, which can grow along two axes — number of profiles, and (skill × profile) combinations — the flat `_shared/` directory becomes a dumping ground that mixes mechanism with content, and the symlink count grows linearly with profile count.
+1. **Where does profile content live?** The plugin has an existing `skills/_shared/<name>.md` pattern for shared instructions consumed by multiple skills, with per-skill symlinks. That pattern works for mechanism (capy knowledge protocol, review-scope protocol, pal-codereview invocation). For profile *content*, which can grow along two axes — number of profiles, and (skill × profile) combinations — the flat `_shared/` directory becomes a dumping ground that mixes mechanism with content, and the symlink count grows linearly with profile count.
 
 2. **What shape does content take inside a profile?** The existing `reference/<lang>/` directory uses fixed filenames: `security-checklist.md`, `solid-checklist.md`, `code-quality-checklist.md`, `removal-plan.md`. For Kubernetes, "SOLID" is a stretch and "code-quality" is an awkward name for YAML. Additional profile-specific checklists (Helm, Kustomize) do not fit any of the four slots.
 
@@ -19,12 +19,12 @@ The two questions are linked: if content organization is hardcoded by filename a
 
 ## Decision
 
-**Profile content lives in a new top-level `klaude-plugin/profiles/<name>/` directory, peer to `skills/`. Each profile is self-contained and self-describing. Skills discover content via `index.md` files inside per-phase subdirectories, not via hardcoded filenames. The index acts as a router: it lists available content with always-load vs conditional-load metadata and one-line descriptions; consumers load the subset relevant to the current task.**
+**Profile content lives in a new top-level `profiles/<name>/` directory, peer to `skills/`. Each profile is self-contained and self-describing. Skills discover content via `index.md` files inside per-phase subdirectories, not via hardcoded filenames. The index acts as a router: it lists available content with always-load vs conditional-load metadata and one-line descriptions; consumers load the subset relevant to the current task.**
 
 Profile layout:
 
 ```
-klaude-plugin/profiles/<name>/
+profiles/<name>/
   DETECTION.md         # authoritative trigger rule (per ADR 0001)
   overview.md          # human-readable profile summary, dependency-lookup targets
   review/

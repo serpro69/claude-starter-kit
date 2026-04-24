@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/helpers.sh"
 
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-VALIDATE_BASH="$REPO_ROOT/klaude-plugin/scripts/validate-bash.sh"
+VALIDATE_BASH="$REPO_ROOT/plugins/claude/scripts/validate-bash.sh"
 CAPY_SH="$REPO_ROOT/.claude/scripts/capy.sh"
 
 # =============================================================================

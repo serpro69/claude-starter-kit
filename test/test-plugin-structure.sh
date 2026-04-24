@@ -15,10 +15,10 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 log_section "Section 1: Plugin Manifest"
 
 log_test "plugin.json exists"
-assert_file_exists "$REPO_ROOT/klaude-plugin/.claude-plugin/plugin.json" "Plugin manifest exists"
+assert_file_exists "$REPO_ROOT/plugins/claude/.claude-plugin/plugin.json" "Plugin manifest exists"
 
 log_test "plugin.json is valid JSON"
-plugin_json=$(cat "$REPO_ROOT/klaude-plugin/.claude-plugin/plugin.json")
+plugin_json=$(cat "$REPO_ROOT/plugins/claude/.claude-plugin/plugin.json")
 assert_json_valid "$plugin_json" "Plugin manifest is valid JSON"
 
 log_test "plugin.json has correct name"
@@ -51,9 +51,9 @@ assert_json_valid "$marketplace_json" "Marketplace manifest is valid JSON"
 log_test "marketplace.json has correct name"
 assert_json_field "$marketplace_json" '.name' "claude-toolbox" "Marketplace name is claude-toolbox"
 
-log_test "marketplace.json plugin source is relative path to klaude-plugin"
+log_test "marketplace.json plugin source is relative path to plugins/claude"
 plugin_source=$(echo "$marketplace_json" | jq -r '.plugins[0].source')
-assert_equals "./klaude-plugin" "$plugin_source" "Plugin source is ./klaude-plugin"
+assert_equals "./plugins/claude" "$plugin_source" "Plugin source is ./plugins/claude"
 
 log_test "marketplace.json plugin name matches plugin.json"
 mp_plugin_name=$(echo "$marketplace_json" | jq -r '.plugins[0].name')
@@ -80,7 +80,7 @@ EXPECTED_SKILLS=(
 
 log_test "All 10 skill directories exist"
 for skill in "${EXPECTED_SKILLS[@]}"; do
-  if [[ -d "$REPO_ROOT/klaude-plugin/skills/$skill" ]]; then
+  if [[ -d "$REPO_ROOT/skills/$skill" ]]; then
     log_pass "Skill exists: $skill"
   else
     log_fail "Skill missing: $skill"
@@ -89,7 +89,7 @@ done
 
 log_test "Each skill has a SKILL.md"
 for skill in "${EXPECTED_SKILLS[@]}"; do
-  assert_file_exists "$REPO_ROOT/klaude-plugin/skills/$skill/SKILL.md" "SKILL.md for $skill"
+  assert_file_exists "$REPO_ROOT/skills/$skill/SKILL.md" "SKILL.md for $skill"
 done
 
 # =============================================================================
@@ -102,7 +102,7 @@ EXPECTED_COMMANDS=(chain-of-verification review-spec migrate-from-taskmaster syn
 
 log_test "All 4 command directories exist"
 for cmd in "${EXPECTED_COMMANDS[@]}"; do
-  if [[ -d "$REPO_ROOT/klaude-plugin/commands/$cmd" ]]; then
+  if [[ -d "$REPO_ROOT/plugins/claude/commands/$cmd" ]]; then
     log_pass "Command exists: $cmd"
   else
     log_fail "Command missing: $cmd"
@@ -116,8 +116,8 @@ done
 log_section "Section 5: Hooks and Scripts"
 
 log_test "hooks.json exists and is valid JSON"
-assert_file_exists "$REPO_ROOT/klaude-plugin/hooks/hooks.json" "hooks.json exists"
-hooks_json=$(cat "$REPO_ROOT/klaude-plugin/hooks/hooks.json")
+assert_file_exists "$REPO_ROOT/plugins/claude/hooks/hooks.json" "hooks.json exists"
+hooks_json=$(cat "$REPO_ROOT/plugins/claude/hooks/hooks.json")
 assert_json_valid "$hooks_json" "hooks.json is valid JSON"
 
 log_test "hooks.json references CLAUDE_PLUGIN_ROOT"
@@ -128,8 +128,8 @@ else
 fi
 
 log_test "validate-bash.sh exists and is executable"
-assert_file_exists "$REPO_ROOT/klaude-plugin/scripts/validate-bash.sh" "validate-bash.sh exists"
-if [[ -x "$REPO_ROOT/klaude-plugin/scripts/validate-bash.sh" ]]; then
+assert_file_exists "$REPO_ROOT/plugins/claude/scripts/validate-bash.sh" "validate-bash.sh exists"
+if [[ -x "$REPO_ROOT/plugins/claude/scripts/validate-bash.sh" ]]; then
   log_pass "validate-bash.sh is executable"
 else
   log_fail "validate-bash.sh should be executable"
@@ -193,7 +193,7 @@ log_section "Section 7: Cross-references"
 log_test "Skill references do NOT have kk: prefix (skills are unprefixed)"
 # Skills should be referenced without kk: prefix in skill files
 wrongly_prefixed=$(grep -rE '`kk:(plan|implement|test|document|review-code|review-spec|merge-docs)`' \
-  "$REPO_ROOT/klaude-plugin/skills/" 2>/dev/null || true)
+  "$REPO_ROOT/skills/" 2>/dev/null || true)
 if [[ -z "$wrongly_prefixed" ]]; then
   log_pass "Skill references correctly unprefixed"
 else
@@ -203,7 +203,7 @@ fi
 log_test "Command references use /kk: prefix"
 # Commands in command files should use /kk: prefix in examples
 has_kk_commands=$(grep -rE '/kk:(chain-of-verification|review-spec|migrate-from-taskmaster|sync-workflow):' \
-  "$REPO_ROOT/klaude-plugin/commands/" 2>/dev/null || true)
+  "$REPO_ROOT/plugins/claude/commands/" 2>/dev/null || true)
 if [[ -n "$has_kk_commands" ]]; then
   log_pass "Command references use /kk: prefix"
 else
@@ -222,7 +222,7 @@ REQUIRED_DETECTION_HEADINGS=("Path signals" "Filename signals" "Content signals"
 
 log_test "All profile directories exist"
 for profile in "${EXPECTED_PROFILES[@]}"; do
-  if [[ -d "$REPO_ROOT/klaude-plugin/profiles/$profile" ]]; then
+  if [[ -d "$REPO_ROOT/profiles/$profile" ]]; then
     log_pass "Profile exists: $profile"
   else
     log_fail "Profile missing: $profile"
@@ -231,13 +231,13 @@ done
 
 log_test "Each profile has DETECTION.md and overview.md"
 for profile in "${EXPECTED_PROFILES[@]}"; do
-  assert_file_exists "$REPO_ROOT/klaude-plugin/profiles/$profile/DETECTION.md" "DETECTION.md for $profile"
-  assert_file_exists "$REPO_ROOT/klaude-plugin/profiles/$profile/overview.md" "overview.md for $profile"
+  assert_file_exists "$REPO_ROOT/profiles/$profile/DETECTION.md" "DETECTION.md for $profile"
+  assert_file_exists "$REPO_ROOT/profiles/$profile/overview.md" "overview.md for $profile"
 done
 
 log_test "Each DETECTION.md has the three required section headings"
 for profile in "${EXPECTED_PROFILES[@]}"; do
-  detection_file="$REPO_ROOT/klaude-plugin/profiles/$profile/DETECTION.md"
+  detection_file="$REPO_ROOT/profiles/$profile/DETECTION.md"
   if [[ ! -f "$detection_file" ]]; then
     log_fail "DETECTION.md missing for $profile — cannot check headings"
     continue
@@ -254,7 +254,7 @@ done
 log_test "Presence-conditional: each existing phase subdirectory has index.md"
 for profile in "${EXPECTED_PROFILES[@]}"; do
   for phase in "${PHASE_SUBDIRS[@]}"; do
-    phase_dir="$REPO_ROOT/klaude-plugin/profiles/$profile/$phase"
+    phase_dir="$REPO_ROOT/profiles/$profile/$phase"
     if [[ -d "$phase_dir" ]]; then
       assert_file_exists "$phase_dir/index.md" "index.md for $profile/$phase"
     fi
@@ -264,7 +264,7 @@ done
 log_test "Bidirectional index invariant: forward (all index references resolve)"
 for profile in "${EXPECTED_PROFILES[@]}"; do
   for phase in "${PHASE_SUBDIRS[@]}"; do
-    index_file="$REPO_ROOT/klaude-plugin/profiles/$profile/$phase/index.md"
+    index_file="$REPO_ROOT/profiles/$profile/$phase/index.md"
     [[ -f "$index_file" ]] || continue
     # Extract markdown link targets ending in .md (basename form — flat phase dirs)
     referenced=()
@@ -274,7 +274,7 @@ for profile in "${EXPECTED_PROFILES[@]}"; do
     done < <(grep -oE '\]\([^) ]+\.md\)' "$index_file" | sed -E 's/^\]\((.*)\)$/\1/')
     all_resolve=true
     for ref in "${referenced[@]}"; do
-      if [[ ! -f "$REPO_ROOT/klaude-plugin/profiles/$profile/$phase/$ref" ]]; then
+      if [[ ! -f "$REPO_ROOT/profiles/$profile/$phase/$ref" ]]; then
         log_fail "Forward invariant broken: $profile/$phase/index.md references missing file: $ref"
         all_resolve=false
       fi
@@ -288,7 +288,7 @@ done
 log_test "Bidirectional index invariant: reverse (no orphan .md files)"
 for profile in "${EXPECTED_PROFILES[@]}"; do
   for phase in "${PHASE_SUBDIRS[@]}"; do
-    phase_dir="$REPO_ROOT/klaude-plugin/profiles/$profile/$phase"
+    phase_dir="$REPO_ROOT/profiles/$profile/$phase"
     index_file="$phase_dir/index.md"
     [[ -f "$index_file" ]] || continue
     referenced=$(grep -oE '\]\([^) ]+\.md\)' "$index_file" \
@@ -318,14 +318,14 @@ done
 log_section "Section 9: Profile-detection shared file and consumer symlinks"
 
 log_test "Shared profile-detection.md exists"
-assert_file_exists "$REPO_ROOT/klaude-plugin/skills/_shared/profile-detection.md" \
+assert_file_exists "$REPO_ROOT/skills/_shared/profile-detection.md" \
   "_shared/profile-detection.md exists"
 
 PROFILE_DETECTION_CONSUMERS=(review-code review-spec design implement test document)
 
 log_test "Each consumer skill has a shared-profile-detection.md symlink"
 for skill in "${PROFILE_DETECTION_CONSUMERS[@]}"; do
-  symlink_path="$REPO_ROOT/klaude-plugin/skills/$skill/shared-profile-detection.md"
+  symlink_path="$REPO_ROOT/skills/$skill/shared-profile-detection.md"
   if [[ -L "$symlink_path" ]]; then
     target=$(readlink "$symlink_path")
     if [[ "$target" == "../_shared/profile-detection.md" ]]; then
@@ -350,7 +350,7 @@ done
 log_section "Section 10: Skill description length"
 
 log_test "dependency-handling description fits within 1,536-character per-entry cap"
-dep_skill="$REPO_ROOT/klaude-plugin/skills/dependency-handling/SKILL.md"
+dep_skill="$REPO_ROOT/skills/dependency-handling/SKILL.md"
 dep_desc=$(awk '/^description:/{in_desc=1; next} in_desc { if (/^[^ \t]/) exit; sub(/^  /, ""); printf "%s", $0 }' "$dep_skill")
 dep_desc_len=${#dep_desc}
 if (( dep_desc_len == 0 )); then

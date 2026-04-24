@@ -1,6 +1,6 @@
 # JS/TS — detection
 
-Declares when the `js_ts` profile activates on a given set of files. Consumed by `klaude-plugin/skills/_shared/profile-detection.md`. Multiple profiles may activate additively on the same diff.
+Declares when the `js_ts` profile activates on a given set of files. Consumed by `skills/_shared/profile-detection.md`. Multiple profiles may activate additively on the same diff.
 
 The profile covers JavaScript and TypeScript jointly: review concerns (typing, async, modules, React patterns) overlap substantially, and the ecosystem tools (npm, bundlers, Node/browser runtimes) are shared.
 

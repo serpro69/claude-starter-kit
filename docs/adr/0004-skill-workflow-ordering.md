@@ -57,7 +57,7 @@ The specialization — "profile checklists/gotchas/rubrics are part of instructi
 ### Scope boundary — what this ADR does not decide
 
 - **Per-skill adoption pace.** This ADR binds the convention. Applying the mandatory-order directive to every existing skill's `SKILL.md` is a follow-up sweep tracked separately.
-- **Sub-agent workflows.** When a skill spawns a sub-agent (e.g., `code-reviewer`, `design-reviewer`, `spec-reviewer`), the sub-agent's own workflow applies the same rule internally: read the provided payload's instruction/checklist files before analyzing the attached subject matter. Payload delivery order (the spawning skill putting instructions and diff in the same prompt) is not sufficient — the sub-agent must read-before-apply on its own side too. This ADR extends to agent files (`klaude-plugin/agents/*.md`) on the same terms as skill files.
+- **Sub-agent workflows.** When a skill spawns a sub-agent (e.g., `code-reviewer`, `design-reviewer`, `spec-reviewer`), the sub-agent's own workflow applies the same rule internally: read the provided payload's instruction/checklist files before analyzing the attached subject matter. Payload delivery order (the spawning skill putting instructions and diff in the same prompt) is not sufficient — the sub-agent must read-before-apply on its own side too. This ADR extends to agent files (`plugins/claude/agents/*.md`) on the same terms as skill files.
 
 ## Consequences
 
@@ -84,9 +84,9 @@ The specialization — "profile checklists/gotchas/rubrics are part of instructi
 
 The ordering change was applied to `review-code` concurrently with the acceptance of this ADR:
 
-- `klaude-plugin/skills/review-code/SKILL.md` — added the mandatory-order directive at the top of the Workflow section.
-- `klaude-plugin/skills/review-code/review-process.md` — reordered so Step 1 is filename-only scope, Step 2 is profile detection, Step 3 loads profile `review-code/index.md` files, Step 4 reads every resolved checklist, Step 5 (new dedicated step) reads the full diff + re-reads changed files + runs `capy_search`, Step 6 applies checklists. Content-level read instructions appear exactly once, at Step 5.
-- `klaude-plugin/agents/code-reviewer.md` — same ordering applied to the sub-agent: read provided checklists before analyzing the injected diff.
+- `skills/review-code/SKILL.md` — added the mandatory-order directive at the top of the Workflow section.
+- `skills/review-code/review-process.md` — reordered so Step 1 is filename-only scope, Step 2 is profile detection, Step 3 loads profile `review-code/index.md` files, Step 4 reads every resolved checklist, Step 5 (new dedicated step) reads the full diff + re-reads changed files + runs `capy_search`, Step 6 applies checklists. Content-level read instructions appear exactly once, at Step 5.
+- `plugins/claude/agents/code-reviewer.md` — same ordering applied to the sub-agent: read provided checklists before analyzing the injected diff.
 
 A follow-up dry-run (three consecutive invocations on the same diff, mirroring the Context section's experiment) confirms whether the failure mode reproduces. The result is recorded in `docs/wip/kubernetes-support/tasks.md` Task 7.
 

@@ -1,6 +1,6 @@
 # Kubernetes Operator — detection
 
-Declares when the `k8s-operator` profile activates on a given set of files. Consumed by `klaude-plugin/skills/_shared/profile-detection.md`. Detection is additive: an operator project typically activates both `k8s-operator` (for controller code) and `k8s` (for the manifests it generates/deploys).
+Declares when the `k8s-operator` profile activates on a given set of files. Consumed by `skills/_shared/profile-detection.md`. Detection is additive: an operator project typically activates both `k8s-operator` (for controller code) and `k8s` (for the manifests it generates/deploys).
 
 Evaluation follows the shared cost-ordered procedure (path → filename → content). Authority runs filename ≈ content > path: filename or content signals activate the profile; path alone never does, it only promotes a file to a candidate.
 

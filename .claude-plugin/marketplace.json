@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "kk",
-      "source": "./klaude-plugin",
+      "source": "./plugins/claude",
       "description": "Development workflow skills, commands, and hooks"
     }
   ]
