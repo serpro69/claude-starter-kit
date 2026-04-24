@@ -118,15 +118,23 @@ routing rules, and sub-agent roster injected at session start.
   resolution (compute absolute repo root from script's own location, map
   `${CLAUDE_PLUGIN_ROOT}` → `<repo-root>/plugins/claude` and profiles →
   `<repo-root>/profiles/`), capy routing rules, sub-agent roster.
-- `.codex/hooks.json` — hook configuration registering the `SessionStart`
-  event to run `session-start.sh`. Structure:
+- `.codex/hooks.json` — hook configuration using Codex's hook schema.
+  Event names are top-level keys; each contains an array of matcher groups
+  with nested hook handler entries:
   ```json
-  [
-    {
-      "event": "SessionStart",
-      "command": [".codex/scripts/session-start.sh"]
-    }
-  ]
+  {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".codex/scripts/session-start.sh"
+          }
+        ]
+      }
+    ]
+  }
   ```
 
 **Also touch:**
@@ -164,12 +172,22 @@ hooks on Bash.
 
 **Files to update:**
 
-- `.codex/hooks.json` — add `PreToolUse` event entry:
+- `.codex/hooks.json` — add `PreToolUse` matcher group to the existing
+  file (alongside SessionStart from Phase 3):
   ```json
   {
-    "event": "PreToolUse",
-    "matcher": "Bash",
-    "command": [".codex/scripts/pretooluse-bash.sh"]
+    "SessionStart": [ ... ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".codex/scripts/pretooluse-bash.sh"
+          }
+        ]
+      }
+    ]
   }
   ```
 
@@ -251,35 +269,27 @@ For each `Bash(...)` entry, create a `prefix_rule` with:
 
 ---
 
-## Phase 7: Statusline {#phase-7-statusline}
+## Phase 7: Statusline configuration {#phase-7-statusline}
 
-**Goal:** Port Claude's statusline to codex with feature parity.
+**Goal:** Configure codex's built-in statusline with the best available
+items.
 
-**Files to create:**
-
-- `.codex/scripts/statusline.sh` — shell script that reads codex's status
-  input, extracts model/context/usage data, formats with Catppuccin theming.
-
-**Implementation approach:**
-
-1. Investigate codex's statusline input format. The `tui.status_line` config
-   in `config.toml` is documented but the input contract (what data is
-   piped to the script) is not fully documented. Check codex source or
-   experiment to determine the format.
-2. Port the formatting logic from `.claude/scripts/statusline_enhanced.sh`.
-   Adapt field extraction to codex's input format.
-3. Support `CODEX_STATUSLINE_MODE` and `CODEX_STATUSLINE_THEME` env vars.
+Codex's `tui.status_line` is an `array<string>` of built-in status item
+identifiers — it does not support custom command-driven scripts like Claude.
+No custom statusline script is created. See design.md §11 for details.
 
 **Files to update:**
 
-- `.codex/config.toml` — add `tui.status_line` pointing at the script.
+- `.codex/config.toml` — add `[tui]` section with `status_line`:
+  ```toml
+  [tui]
+  status_line = ["model-with-reasoning", "current-dir"]
+  ```
 
 **Verification:**
 
-- The script produces themed output when given sample input.
-  → verify: pipe sample status JSON and check output contains ANSI color
-  codes and expected fields.
-- In a codex session, the statusline displays model and context info.
+- In a codex session, the statusline displays model and directory info.
+  → verify: visual inspection in the TUI footer.
 
 ---
 
@@ -297,8 +307,7 @@ on template-sync.
      same as `.claude/scripts/capy.sh`).
   4. Add variable substitution for `.codex/config.toml` and `AGENTS.md`.
   5. Add codex-specific manifest variables: `CODEX_MODEL`,
-     `CODEX_APPROVAL_POLICY`, `CODEX_STATUSLINE_MODE`,
-     `CODEX_STATUSLINE_THEME` — all optional with sensible defaults.
+     `CODEX_APPROVAL_POLICY` — all optional with sensible defaults.
 
 - `.github/workflows/template-sync.yml`:
   1. Add codex variable backfilling to the manifest migration logic.
@@ -322,25 +331,31 @@ on template-sync.
 
 - `.codex/config.toml` — add all sections:
   ```toml
-  [features]
-  codex_hooks = true
-
+  # Top-level settings (MUST appear before any [table] header)
   model = "gpt-5.5"
   model_reasoning_effort = "high"
   approval_policy = "on-request"
   sandbox_mode = "workspace-write"
+
+  [features]
+  codex_hooks = true
 
   [agents]
   max_threads = 6
   max_depth = 1
 
   [tui]
-  status_line = ".codex/scripts/statusline.sh"
+  status_line = ["model-with-reasoning", "current-dir"]
 
   [mcp_servers.capy]
   command = "bash"
   args = [".codex/scripts/capy.sh", "serve"]
   ```
+
+  **TOML scoping note:** bare keys after a `[table]` header belong to that
+  table. Top-level settings (model, approval_policy, etc.) must appear
+  before the first `[table]` declaration, or they will be scoped
+  incorrectly (e.g., `features.model` instead of top-level `model`).
 
   Variable placeholders for template-sync substitution where applicable.
 
@@ -424,11 +439,13 @@ Runs after every other phase merges.
 - **Phase 1** must land before anything else (path invariants).
 - **Phase 2** (codex plugin scaffold) depends on Phase 1.
 - **Phase 3** (bootstrap) depends on Phase 1 (needs `.codex/` directory).
-- **Phases 4, 5, 6, 7** can proceed in parallel after Phase 3 (each is
-  independent: hooks, agents, rules, statusline).
+- **Phases 4, 5, 6** can proceed in parallel after Phase 3 (each is
+  independent: hooks, agents, rules).
+- **Phase 7** (statusline) is config-only, can proceed any time after
+  Phase 1.
 - **Phase 8** (template-sync) depends on Phases 1–7 (needs all files in
   place to know what to sync).
 - **Phase 9** (config.toml) depends on Phases 3, 4, 7 (hooks, statusline
-  wiring).
+  config).
 - **Phase 10** (tests/docs/ADR) depends on all prior phases.
 - **Phase 11** last.

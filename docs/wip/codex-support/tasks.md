@@ -42,7 +42,7 @@
 ### Subtasks
 - [ ] 3.1 Create `AGENTS.md` at repo root — provider identity block, behavioral instructions (port from `.claude/CLAUDE.extra.md`), capy routing rules (replicate from `.claude/capy/CLAUDE.md`). Use `%PROJECT_NAME%` placeholder for template-sync substitution
 - [ ] 3.2 Create `.codex/scripts/session-start.sh` — shell script emitting `SessionStart` JSON with `additionalContext` containing: provider identity, tool-name mapping table (Read→read_file, Write→write_file, Edit→apply_patch, Bash→shell, Grep→shell+grep, Glob→shell+find, WebSearch→web_search, WebFetch→capy, Agent/Task→natural-language subagent spawning, Skill→$mention), `${CLAUDE_PLUGIN_ROOT}` path resolution (compute absolute repo root from script location, map to `<repo-root>/plugins/claude` for plugin refs and `<repo-root>/profiles/` for profile refs), capy routing rules, sub-agent roster (all five agents)
-- [ ] 3.3 Create `.codex/hooks.json` with `SessionStart` event entry pointing at `session-start.sh`
+- [ ] 3.3 Create `.codex/hooks.json` using Codex's hook schema — event names as top-level keys, matcher groups with nested hook handlers: `{"SessionStart": [{"matcher": "startup|resume", "hooks": [{"type": "command", "command": ".codex/scripts/session-start.sh"}]}]}`
 - [ ] 3.4 Create `.codex/config.toml` with initial `[features] codex_hooks = true`
 - [ ] 3.5 Verify: `bash .codex/scripts/session-start.sh < /dev/null | jq .` exits 0 with valid JSON; in a codex session, provider identity appears
 
@@ -53,7 +53,7 @@
 
 ### Subtasks
 - [ ] 4.1 Create `.codex/scripts/pretooluse-bash.sh` — reads `tool_input.command` from stdin JSON; checks file-path denylist (FORBIDDEN_PATTERNS ported from `plugins/claude/scripts/validate-bash.sh`: `.env`, `.ansible/`, `.terraform/`, `build/`, `dist/`, `node_modules`, `__pycache__`, `.git/`, `venv/`, `.pyc`, `.csv`, `.log`) and capy HTTP patterns (`curl`/`wget`, `fetch('http`, `requests.get(`, `requests.post(`, `http.get(`, `http.request(`); emits `permissionDecision: "deny"` JSON on match, exits 0 with no output on pass-through
-- [ ] 4.2 Update `.codex/hooks.json` — add `PreToolUse` event entry with `matcher: "Bash"` pointing at `pretooluse-bash.sh`
+- [ ] 4.2 Update `.codex/hooks.json` — add `PreToolUse` matcher group using Codex hook schema: `{"PreToolUse": [{"matcher": "Bash", "hooks": [{"type": "command", "command": ".codex/scripts/pretooluse-bash.sh"}]}]}` alongside existing SessionStart entry
 - [ ] 4.3 Verify: `echo '{"tool_input":{"command":"cat .env"}}' | bash .codex/scripts/pretooluse-bash.sh | jq .hookSpecificOutput.permissionDecision` outputs `"deny"`; same for `curl https://example.com`; `echo '{"tool_input":{"command":"ls"}}' | bash .codex/scripts/pretooluse-bash.sh` produces no output with exit 0
 
 ## Task 5: Sub-agents
@@ -80,16 +80,16 @@
 - [ ] 6.2 Create `.codex/rules/default.rules` — one `prefix_rule()` per `Bash(...)` denied command with `decision = "deny"`, `justification`, and at least one `match`/`not_match` inline test case. Port "ask" commands as `decision = "prompt"`
 - [ ] 6.3 Verify: `codex execpolicy check --pretty --rules .codex/rules/default.rules -- rm -rf /tmp/test` shows `deny`; `codex execpolicy check --pretty --rules .codex/rules/default.rules -- ls` shows `allow`
 
-## Task 7: Statusline
+## Task 7: Statusline configuration
 - **Status:** pending
 - **Depends on:** Task 1
 - **Docs:** [implementation.md#phase-7-statusline](./implementation.md#phase-7-statusline)
 
+Codex's `tui.status_line` is an `array<string>` of built-in item identifiers — it does not support custom command-driven scripts. No custom script is created.
+
 ### Subtasks
-- [ ] 7.1 Investigate codex's statusline input format — check docs, experiment, or check codex source to determine what data is piped to the statusline command
-- [ ] 7.2 Create `.codex/scripts/statusline.sh` — port formatting logic from `.claude/scripts/statusline_enhanced.sh`, adapt field extraction to codex's input format, support `CODEX_STATUSLINE_MODE` and `CODEX_STATUSLINE_THEME` env vars
-- [ ] 7.3 Update `.codex/config.toml` — add `[tui] status_line` pointing at the script
-- [ ] 7.4 Verify: script produces themed output when given sample input; in a codex session, statusline displays model and context info
+- [ ] 7.1 Update `.codex/config.toml` — add `[tui] status_line = ["model-with-reasoning", "current-dir"]` to configure the best available built-in items
+- [ ] 7.2 Verify: in a codex session, statusline footer displays model and directory info
 
 ## Task 8: Template-sync extension
 - **Status:** pending
@@ -97,8 +97,8 @@
 - **Docs:** [implementation.md#phase-8-template-sync](./implementation.md#phase-8-template-sync)
 
 ### Subtasks
-- [ ] 8.1 Update `.github/scripts/template-sync.sh` — add `.codex/` to sparse-clone file list; add `AGENTS.md` to root-level files; add strip rules excluding `.codex/scripts/capy.sh`; add variable substitution for `.codex/config.toml` and `AGENTS.md`
-- [ ] 8.2 Add codex-specific manifest variables to `.github/template-state.json` schema: `CODEX_MODEL`, `CODEX_APPROVAL_POLICY`, `CODEX_STATUSLINE_MODE`, `CODEX_STATUSLINE_THEME` — all optional with sensible defaults
+- [ ] 8.1 Update `.github/scripts/template-sync.sh` — add `.codex/` to sparse-clone file list; add `AGENTS.md` to root-level files; add strip rules excluding `.codex/scripts/capy.sh` from sync (per-repo, same as Claude side); add variable substitution for `.codex/config.toml` and `AGENTS.md`
+- [ ] 8.2 Add codex-specific manifest variables to `docs/template-sync/template-state-schema.json` (the actual schema source): `CODEX_MODEL`, `CODEX_APPROVAL_POLICY` — all optional with sensible defaults. Also update `.github/template-state.example.json` and any relevant test fixtures
 - [ ] 8.3 Update `.github/workflows/template-sync.yml` — add codex variable backfilling to manifest migration; add `.codex/` to commit/PR diff scope
 - [ ] 8.4 Verify: dry-run template-sync on a test downstream repo — `.codex/` files appear in diff; downstream repo without codex variables syncs cleanly
 
@@ -108,7 +108,7 @@
 - **Docs:** [implementation.md#phase-9-config](./implementation.md#phase-9-config)
 
 ### Subtasks
-- [ ] 9.1 Finalize `.codex/config.toml` with all sections: `[features]`, model/reasoning, approval policy, sandbox mode, `[agents]` thread/depth limits, `[tui]` statusline, `[mcp_servers.capy]`. Add template-sync variable placeholders where applicable
+- [ ] 9.1 Finalize `.codex/config.toml` with all sections. **TOML scoping:** top-level settings (`model`, `model_reasoning_effort`, `approval_policy`, `sandbox_mode`) MUST appear before any `[table]` header — bare keys after `[features]` would be scoped as `features.model` etc. Order: top-level keys → `[features]` → `[agents]` → `[tui]` → `[mcp_servers.capy]`. Add template-sync variable placeholders where applicable
 - [ ] 9.2 Verify: TOML parses cleanly (`python3 -c "import tomllib; ..."` exits 0); in a codex session, model and feature flags are active
 
 ## Task 10: Tests, documentation, and ADR

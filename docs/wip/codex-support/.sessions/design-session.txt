@@ -46,7 +46,7 @@
   What's your instinct — full restructure as planned, or lightweight codex-only
   addition on top of the current layout?
 
-✻ Cogitated for 41s
+✻ Churned for 41s
 
 ※ recap: We're pivoting from opencode to codex as the next provider to support, using the opencode design docs as a baseline. I asked whether you want the full repo restructure or a lightweight codex-only addition, and whether capy enforcement (impossible without hooks on codex) is a hard requirement. (disable recaps in /config)
 
@@ -122,7 +122,7 @@
   What's your read — full restructure, or add codex support on top of the
   current layout first and restructure later if it proves out?
 
-✻ Brewed for 1m 28s
+✻ Crunched for 1m 28s
 
 ❯ I want minimal restructure and full (as much as codex supports) feature       
   parity.                                                                       
@@ -177,7 +177,7 @@
   Total repo changes: one directory move, one new plugins/codex/ tree, zero
   skill rewrites. Skills stay single-source. What do you think?
 
-✻ Cogitated for 58s
+✻ Churned for 58s
 
 ❯ sound like a good alternative                                                 
 
@@ -255,7 +255,7 @@
 
   I'll synthesize the findings once they come back.
 
-✻ Sautéed for 52s
+✻ Crunched for 52s
 
 ● Agent "Research codex subagents deeply" completed
 
@@ -512,7 +512,7 @@
 
   This is all the research we need. Ready to start the design doc?
 
-✻ Worked for 41s
+✻ Brewed for 41s
 
 ❯ yes, proceed by loading kk:design and following it                            
 
@@ -577,7 +577,7 @@
 
   Does this section look right?
 
-✻ Worked for 1m 5s
+✻ Churned for 1m 5s
 
 ❯ yes                                                                           
 
@@ -1180,7 +1180,7 @@
   Next step per the workflow would be review-design before implementation. Want
   me to run that, or do you want to review the docs yourself first?
 
-✻ Churned for 6m 5s
+✻ Worked for 6m 5s
 
 ※ recap: Adding Codex support to claude-toolbox. Design doc, implementation plan, task list, and ADR are all written in docs/wip/codex-support/. Next step is running review-design to validate the docs before implementation begins.
 
@@ -1382,7 +1382,7 @@
   I'd recommend option 1 — it's the same pattern we're already doing for skills
   and keeps things clean. What's your preference?
 
-✻ Brewed for 1m 9s
+✻ Sautéed for 1m 9s
 
 ❯ agree                                                                         
 
@@ -1932,3 +1932,953 @@
 
   Four files updated: design.md, implementation.md, tasks.md, plus the
   already-written ADR 0005.
+
+❯ /export design-session.txt                                                    
+  ⎿  Conversation exported to: /tmp/tmp.PODCtuQxKI/design-session.txt
+
+❯ Here are some findings from another agent. Can you corroborate each and       
+  propose an action:                                                            
+                                                                                
+  • ## Design Review: Codex Support                                             
+                                                                                
+    Scope: design.md, implementation.md, tasks.md                               
+    Overall assessment: MAJOR_GAPS                                              
+    Documents:                                                                  
+                                                                                
+    - Design: docs/wip/codex-support/design.md:1                                
+    - Implementation: docs/wip/codex-support/implementation.md:1                
+    - Tasks: docs/wip/codex-support/tasks.md:1                                  
+                                                                                
+    Summary: 6 findings: 1 critical, 3 high, 1 medium, 1 low                    
+    Capy indexing: Indexed the hook-schema pattern to kk:review-findings and    
+  the plugin-                                                                   
+    delivery constraint to kk:arch-decisions.                                   
+                                                                                
+    ———                                                                         
+                                                                                
+    ## Findings                                                                 
+                                                                                
+    ### P0 - Critical                                                           
+                                                                                
+    - [TECH_RISK] Planned hooks.json shape will not register Codex hooks        
+        - Section: docs/wip/codex-support/implementation.md:121,                
+  docs/wip/codex-support/                                                       
+          implementation.md:167, docs/wip/codex-support/tasks.md:45             
+        - Confidence: 10/10 — I re-read design, implementation, and tasks; all  
+  specify a                                                                     
+          flat event/command shape, while current Codex docs specify a nested   
+  top-level                                                                     
+          hooks object.                                                         
+        - Description: SessionStart and PreToolUse are central to this design,  
+  but the                                                                       
+          documented .codex/hooks.json structure is not the Codex hook config   
+  format.                                                                       
+          That means provider mapping, path mapping, capy routing, and denylist 
+          enforcement would not run.                                            
+        - Evidence: The plan uses [{ "event": "SessionStart", "command": [...]  
+  }] and a                                                                      
+          standalone PreToolUse object. Current OpenAI Codex hook docs define   
+  {"hooks":                                                                     
+          {"SessionStart": [{"matcher": "...", "hooks": [{"type": "command",    
+  "command":                                                                    
+          "..."}]}]}} and command values as strings, not arrays:                
+          https://developers.openai.com/codex/hooks                             
+        - Recommendation: Rewrite all hook examples and tasks to the current    
+  Codex                                                                         
+          shape, include matcher: "startup|resume" for SessionStart, use        
+  command-hook                                                                  
+          entries, and add a verification that starts Codex with the hooks      
+  enabled                                                                       
+          rather than only validating JSON.                                     
+                                                                                
+    ### P1 - High                                                               
+                                                                                
+    - [TECH_RISK] Marketplace plugin install does not deliver .codex/ agents,   
+  hooks,                                                                        
+      rules, config, or AGENTS.md                                               
+        - Section: docs/wip/codex-support/design.md:8, docs/wip/codex-support/  
+          design.md:180, docs/wip/codex-support/implementation.md:192           
+        - Confidence: 9/10 — I checked the Codex plugin docs and subagent docs; 
+   plugin                                                                       
+          manifests package skills/MCP/apps/assets, while custom agents and     
+  hooks are                                                                     
+          project/user config-layer files.                                      
+        - Description: The design promises Codex users get sub-agents, capy     
+  context                                                                       
+          protection, rules, config, and template configs, but the marketplace  
+  install                                                                       
+          path only loads plugins/codex and its manifest. The planned .codex/   
+          agents, .codex/hooks.json, .codex/rules, .codex/config.toml, and root 
+          AGENTS.md are outside the plugin and are only available in this repo  
+  or via                                                                        
+          template-sync.                                                        
+        - Evidence: Codex plugin docs list skills, .mcp.json, .app.json, and    
+  assets as                                                                     
+          plugin contents; custom agents are loaded from ~/.codex/agents/ or    
+  .codex/age                                                                    
+          nts/: https://developers.openai.com/codex/plugins/build and           
+          https://developers.openai.com/codex/subagents                         
+        - Recommendation: Split the installation story explicitly: plugin       
+  install                                                                       
+          provides skills plus bundled MCP only; template-sync or a bootstrap   
+  command                                                                       
+          installs project-scoped agents/hooks/rules/AGENTS.md. Add tests/smoke 
+   checks                                                                       
+          for both paths.                                                       
+    - [TECH_RISK] Statusline design assumes a command hook that Codex config    
+  does not                                                                      
+      support                                                                   
+        - Section: docs/wip/codex-support/design.md:432,                        
+  docs/wip/codex-support/                                                       
+          implementation.md:254, docs/wip/codex-support/implementation.md:337,  
+  docs/wip/                                                                     
+          codex-support/tasks.md:83                                             
+        - Confidence: 10/10 — the current config reference gives a concrete     
+  type for                                                                      
+          tui.status_line; it is not a command path.                            
+        - Description: The plan creates .codex/scripts/statusline.sh and sets   
+          tui.status_line = ".codex/scripts/statusline.sh", but current Codex   
+  config                                                                        
+          defines tui.status_line as array<string> | null, an ordered list of   
+  status                                                                        
+          item identifiers.                                                     
+        - Evidence: OpenAI config reference: tui.status_line is an ordered list 
+   of foot                                                                      
+          er item identifiers or null:                                          
+          https://developers.openai.com/codex/config-reference                  
+        - Recommendation: Remove the custom statusline script from this phase   
+  unless                                                                        
+          Codex exposes a supported command-statusline extension. Otherwise     
+  configure                                                                     
+          only supported built-in status-line identifiers.                      
+    - [INCONSISTENT] Phase 9 TOML places top-level Codex settings inside        
+  [features]                                                                    
+        - Section: docs/wip/codex-support/implementation.md:323,                
+  docs/wip/codex-support/                                                       
+          tasks.md:105                                                          
+        - Confidence: 9/10 — this is TOML table scope behavior, and the current 
+   Codex                                                                        
+          config reference lists these as top-level settings.                   
+        - Description: In the proposed config block, model,                     
+  model_reasoning_effort,                                                       
+          approval_policy, and sandbox_mode appear after [features], so TOML    
+  treats them                                                                   
+          as features.model, features.approval_policy, etc. The intended        
+  top-level                                                                     
+          settings will not apply.                                              
+        - Evidence: The config block starts [features], then sets codex_hooks,  
+  then imm                                                                      
+          ediately sets model, approval_policy, and sandbox_mode. Codex         
+  documents these                                                               
+          as top-level keys:                                                    
+  https://developers.openai.com/codex/config-reference                          
+        - Recommendation: Put top-level settings before [features], or use a    
+  structure                                                                     
+          that clearly returns to top-level before declaring feature flags.     
+                                                                                
+    ### P2 - Medium                                                             
+                                                                                
+    - [INCONSISTENT] Starlark rules examples do not match the actual Claude     
+  deny/ask                                                                      
+      source                                                                    
+        - Section: docs/wip/codex-support/design.md:369,                        
+  docs/wip/codex-support/                                                       
+          implementation.md:232, .claude/settings.json:33                       
+        - Confidence: 8/10 — I verified the current settings file; only         
+  Bash(rm:*) is                                                                 
+          denied and ask is empty.                                              
+        - Description: The design says to translate denied commands including   
+  git push                                                                      
+          --force and git reset --hard, but those are not present in .claude/   
+          settings.json. This makes the source of truth unclear.                
+        - Evidence: .claude/settings.json has permissions.deny with Bash(rm:*)  
+  plus                                                                          
+          Read(...) entries; no git push/reset entries.                         
+        - Recommendation: Either update the docs to say Codex intentionally     
+  adds new                                                                      
+          Codex-only rules beyond Claude parity, or remove those examples and   
+          keep .claude/settings.json as the strict source of truth.             
+                                                                                
+    ### P3 - Low                                                                
+                                                                                
+    - [STRUCTURE] Task 8 points to the generated manifest as if it were the     
+  schema file                                                                   
+        - Section: docs/wip/codex-support/tasks.md:99,                          
+  docs/template-sync/template-                                                  
+          state-schema.json:1                                                   
+        - Confidence: 8/10 — the repo contains a schema under                   
+  docs/template-sync/ and an                                                    
+          example under .github/, while downstream .github/template-state.json  
+  is                                                                            
+          generated.                                                            
+        - Description: Task 8.2 says to add variables to                        
+  “.github/template-state.json                                                  
+          schema,” but that path is the downstream state manifest, not the      
+  schema source                                                                 
+          in this repo.                                                         
+        - Evidence: The actual schema file is                                   
+  docs/template-sync/template-state-                                            
+          schema.json; .github/template-state.example.json is only an example.  
+        - Recommendation: Rename the task target to                             
+  docs/template-sync/template-state-                                            
+          schema.json and also mention updating                                 
+  .github/template-state.example.json and                                       
+          relevant fixtures/tests.                                              
+                                                                                
+    ———                                                                         
+                                                                                
+    ## Clean Areas                                                              
+                                                                                
+    - Plugin manifest fields skills and mcpServers match current Codex plugin   
+  docs.                                                                         
+    - Marketplace structure using .agents/plugins/marketplace.json and          
+  source.path: "./                                                              
+      plugins/codex" matches Codex repo marketplace guidance.                   
+    - Codex skill discovery via /skills or $mention is accurate, and current    
+  docs                                                                          
+      confirm symlinked skill folders are supported.                            
+    - The design’s Bash-only hook enforcement limitation matches current Codex  
+  docs and                                                                      
+      the ADR captures the advisory fallback.                                   
+    - Local codebase references for counts are accurate: 10 skills, 6 skill     
+  SKILL.md                                                                      
+      files using ${CLAUDE_PLUGIN_ROOT}, and 5 Claude agent markdown files.     
+                                                                                
+                                                                                
+
+● Let me corroborate the critical findings against the indexed codex docs.
+
+  Called capy 7 times (ctrl+o to expand)
+
+● Now I have the exact schemas. Let me verify the remaining findings.
+
+  Searched for 1 pattern, listed 1 directory (ctrl+o to expand)
+
+● All six findings corroborated. Here's my assessment and proposed actions:
+
+  P0 — hooks.json schema is wrong. CONFIRMED CRITICAL.
+
+  The config-schema.json proves it. The correct format is:
+  {
+    "SessionStart": [{
+      "matcher": "startup|resume",
+      "hooks": [{ "type": "command", "command":
+  ".codex/scripts/session-start.sh" }]
+    }],
+    "PreToolUse": [{
+      "matcher": "Bash",
+      "hooks": [{ "type": "command", "command":
+  ".codex/scripts/pretooluse-bash.sh" }]
+    }]
+  }
+  Key differences: event names are top-level keys (not "event" field), nested
+  MatcherGroup with matcher + hooks array, command is a string (not array),
+  requires "type": "command".
+  Action: Rewrite all hook examples in design.md, implementation.md, and
+  tasks.md.
+
+  P1 — Plugin doesn't deliver .codex/ configs. CONFIRMED.
+  Action: Add explicit split in §5.2: plugin install = skills + MCP only;
+  template-sync or manual setup = agents/hooks/rules/config/AGENTS.md. Add a
+  bootstrap script option.
+
+  P1 — Statusline is not a command hook. CONFIRMED.
+  The schema proves tui.status_line is array<string> — ordered item identifiers
+  like "model-with-reasoning", "current-dir". Not a script path.
+  Action: Remove custom statusline script from the design. Replace with
+  configuring supported built-in identifiers. Remove Phase 7 from
+  implementation, simplify Task 7 to config-only.
+
+  P1 — TOML table scope. CONFIRMED.
+  Action: Restructure config.toml example to put top-level keys before
+  [features].
+
+  P2 — Starlark examples don't match source. CONFIRMED.
+  The deny list only has Bash(rm:*) — no git push --force or git reset --hard.
+  Action: Either explicitly state these are new codex-only additions beyond
+  Claude parity, or remove them. I'd recommend keeping them as intentional
+  expansions and labeling them as such.
+
+  P3 — Task 8 schema path. CONFIRMED.
+  Schema is at docs/template-sync/template-state-schema.json, not
+  .github/template-state.json.
+  Action: Fix the path reference in Task 8.
+
+  Want me to apply all six fixes now?
+
+✻ Brewed for 2m 3s
+
+❯ Apply all fixes except for 'P2 — Starlark examples don't match source.        
+  CONFIRMED'                                                                    
+
+● Applying five fixes across all three docs. Let me start with the hooks schema
+  (P0) since it touches multiple files.
+
+  Read 1 file (ctrl+o to expand)
+
+● Now let me read the statusline section and the config section.
+
+  Read 1 file (ctrl+o to expand)
+
+● Now applying all fixes. Starting with P0 — hooks.json schema in design.md.
+
+● Update(docs/wip/codex-support/design.md)
+  ⎿  Added 21 lines, removed 2 lines
+      210  
+      211  ### 6.1 Hook configuration
+      212  
+      213 -Lives at `.codex/hooks.json`. Fires on every session start. Ru
+          -ns                                                            
+      214 -`.codex/scripts/session-start.sh`, which emits JSON with `addi
+          -tionalContext`.                                               
+      213 +Lives at `.codex/hooks.json`. The file uses Codex's hook schem
+          +a — event                                                     
+      214 +names are top-level keys, each containing an array of matcher 
+          +groups with                                                   
+      215 +nested hook handler entries:                                  
+      216  
+      217 +```json                                                       
+      218 +{                                                             
+      219 +  "SessionStart": [                                           
+      220 +    {                                                         
+      221 +      "matcher": "startup|resume",                            
+      222 +      "hooks": [                                              
+      223 +        {                                                     
+      224 +          "type": "command",                                  
+      225 +          "command": ".codex/scripts/session-start.sh"        
+      226 +        }                                                     
+      227 +      ]                                                       
+      228 +    }                                                         
+      229 +  ]                                                           
+      230 +}                                                             
+      231 +```                                                           
+      232 +                                                              
+      233 +Requires `[features] codex_hooks = true` in `config.toml`.    
+      234 +                                                              
+      235  ### 6.2 Injected content
+      236  
+      237  **Provider identity and tool-name mapping:**
+
+● Now fix the PreToolUse hook schema reference in §7.1.
+
+  Read 1 file (ctrl+o to expand)
+
+● Now fix the statusline section (P1 — not a command hook).
+
+● Update(docs/wip/codex-support/design.md)
+  ⎿  Added 28 lines, removed 16 lines
+      450  
+      451  ## 11. Statusline
+      452  
+      453 -Claude's statusline is driven by shell scripts that read JSON 
+          -from stdin,                                                   
+      454 -extract model/context/usage data, and format with Catppuccin t
+          -heming.                                                       
+      453 +Claude's statusline is driven by custom shell scripts that rea
+          +d JSON from                                                   
+      454 +stdin and format with Catppuccin theming. Codex's statusline i
+          +s                                                             
+      455 +fundamentally different.                                      
+      456  
+      456 -### 11.1 Port                                                 
+      457 +### 11.1 Codex statusline model                               
+      458  
+      458 -`.codex/scripts/statusline.sh` replicates the logic:          
+      459 +Codex's `tui.status_line` is an `array<string>` of built-in st
+          +atus item                                                     
+      460 +identifiers — NOT a command path. The config schema defines it
+          + as:                                                          
+      461  
+      460 -1. Read codex's status input format                           
+      461 -2. Extract equivalent fields: model, context usage, token coun
+          -ts                                                            
+      462 -3. Format using the same Catppuccin theming logic             
+      463 -4. Output compact status string                               
+      462 +> "Ordered list of status line item identifiers. When set, the
+          + TUI renders                                                  
+      463 +> the selected items as the status line. When unset, the TUI d
+          +efaults to:                                                   
+      464 +> `model-with-reasoning` and `current-dir`."                  
+      465  
+      465 -`config.toml` wires it via the `tui` section. Env vars mapped:
+      466 -`CLAUDE_STATUSLINE_MODE` → `CODEX_STATUSLINE_MODE`,           
+      467 -`CLAUDE_STATUSLINE_THEME` → `CODEX_STATUSLINE_THEME`.         
+      466 +There is no extension point for custom statusline scripts. Cod
+          +ex does not                                                   
+      467 +support the command-driven statusline model that Claude uses. 
+      468  
+      469 -### 11.2 Implementation risk                                  
+      469 +### 11.2 What we ship                                         
+      470  
+      471 -Codex's statusline input format isn't fully documented. The im
+          -plementation                                                  
+      472 -task needs to investigate what data codex passes to the status
+          -line command.                                                 
+      473 -If the format is incompatible or undocumented, the statusline 
+          -port starts                                                   
+      474 -minimal and expands as codex documents the interface.         
+      471 +Configure the best available built-in identifiers in `.codex/c
+          +onfig.toml`:                                                  
+      472  
+      473 +```toml                                                       
+      474 +[tui]                                                         
+      475 +status_line = ["model-with-reasoning", "current-dir"]         
+      476 +```                                                           
+      477 +                                                              
+      478 +This provides model and directory info — the same core informa
+          +tion Claude's                                                 
+      479 +statusline shows, minus the custom theming. Custom statusline 
+          +scripts are                                                   
+      480 +not possible until Codex exposes a command-based extension poi
+          +nt.                                                           
+      481 +                                                              
+      482 +### 11.3 Parity gap                                           
+      483 +                                                              
+      484 +No Catppuccin theming, no context-window usage display, no cus
+          +tom                                                           
+      485 +formatting. This is a codex platform limitation, not a design 
+          +choice.                                                       
+      486 +Documented but not blocked on.                                
+      487 +                                                              
+      488  ## 12. MCP Configuration
+      489  
+      490  ### 12.1 Capy
+
+● Now remove statusline scripts from the target layout in §4.2.
+
+● Update(docs/wip/codex-support/design.md)
+  ⎿  Removed 1 line
+      116  │   │   └── default.rules
+      117  │   └── scripts/
+      118  │       ├── capy.sh
+      119 -│       ├── statusline.sh                                     
+      119  │       └── session-start.sh
+      120  ├── .claude-plugin/marketplace.json      # UPDATED source → ./
+           plugins/claude
+      121  ├── .claude/                             # UNCHANGED
+
+● Now fix P1 — split install story in §5.2.
+
+● Update(docs/wip/codex-support/design.md)
+  ⎿  Added 23 lines
+      192  They skip step 1 — the marketplace is auto-discovered. They op
+           en `/plugins`
+      193  and install directly.
+      194  
+      195 +### 5.2.1 What the plugin delivers vs. what it doesn't        
+      196 +                                                              
+      197 +The plugin install provides **skills and MCP configuration onl
+          +y** — these                                                   
+      198 +are the artifacts the Codex plugin manifest supports (`skills`
+          +, `mcpServers`,                                               
+      199 +`apps`, `assets`). Codex plugins cannot bundle hooks, custom a
+          +gents, rules,                                                 
+      200 +config, or project instructions.                              
+      201 +                                                              
+      202 +The remaining artifacts live outside the plugin and reach user
+          +s via two paths:                                              
+      203 +                                                              
+      204 +| Artifact | Location | Delivery mechanism |                  
+      205 +|---|---|---|                                                 
+      206 +| Skills + capy MCP | `plugins/codex/` | Plugin install |     
+      207 +| Custom agents (`.toml`) | `.codex/agents/` | Template-sync o
+          +r manual setup |                                              
+      208 +| Hooks (`hooks.json`) | `.codex/hooks.json` | Template-sync o
+          +r manual setup |                                              
+      209 +| Starlark rules | `.codex/rules/` | Template-sync or manual s
+          +etup |                                                        
+      210 +| Config (`config.toml`) | `.codex/config.toml` | Template-syn
+          +c or manual setup |                                           
+      211 +| Project instructions | `AGENTS.md` | Template-sync or manual
+          + setup |                                                      
+      212 +                                                              
+      213 +For downstream repos using template-sync, all artifacts are de
+          +livered                                                       
+      214 +automatically. For standalone users who only install the plugi
+          +n, the                                                        
+      215 +plugin README documents a manual setup section with copy-paste
+          + instructions                                                 
+      216 +for each artifact.                                            
+      217 +                                                              
+      218  ### 5.3 No sparse checkout
+      219  
+      220  `codex plugin marketplace add serpro69/claude-toolbox --sparse
+            .agents/plugins`
+
+● Now update template config table in §10.1 to remove statusline script.
+  Read 1 file (ctrl+o to expand)
+
+● Update(docs/wip/codex-support/design.md)
+  ⎿  Removed 1 line
+      441  | `.codex/hooks.json` | None (static) | SessionStart + PreTool
+           Use hook definitions |
+      442  | `.codex/agents/*.toml` | None (static) | All five sub-agent 
+           definitions |
+      443  | `.codex/rules/default.rules` | None (static) | Starlark comm
+           and policies |
+      444 -| `.codex/scripts/statusline.sh` | None (static) | Statusline 
+          -port |                                                        
+      444  | `.codex/scripts/session-start.sh` | None (static) | SessionS
+           tart hook script |
+      445  | `AGENTS.md` | `PROJECT_NAME` | Provider identity + behaviora
+           l instructions |
+      446  
+
+● Now fix the implementation.md — hooks schema in Phase 3 and Phase 4, remove
+  Phase 7 statusline script, fix Phase 9 TOML scope.
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(docs/wip/codex-support/implementation.md)
+  ⎿  Added 16 lines, removed 8 lines
+      118    resolution (compute absolute repo root from script's own loc
+           ation, map
+      119    `${CLAUDE_PLUGIN_ROOT}` → `<repo-root>/plugins/claude` and p
+           rofiles →
+      120    `<repo-root>/profiles/`), capy routing rules, sub-agent rost
+           er.
+      121 -- `.codex/hooks.json` — hook configuration registering the `Se
+          -ssionStart`                                                   
+      122 -  event to run `session-start.sh`. Structure:                 
+      121 +- `.codex/hooks.json` — hook configuration using Codex's hook 
+          +schema.                                                       
+      122 +  Event names are top-level keys; each contains an array of ma
+          +tcher groups                                                  
+      123 +  with nested hook handler entries:                           
+      124    ```json
+      124 -  [                                                           
+      125 -    {                                                         
+      126 -      "event": "SessionStart",                                
+      127 -      "command": [".codex/scripts/session-start.sh"]          
+      128 -    }                                                         
+      129 -  ]                                                           
+      125 +  {                                                           
+      126 +    "SessionStart": [                                         
+      127 +      {                                                       
+      128 +        "matcher": "startup|resume",                          
+      129 +        "hooks": [                                            
+      130 +          {                                                   
+      131 +            "type": "command",                                
+      132 +            "command": ".codex/scripts/session-start.sh"      
+      133 +          }                                                   
+      134 +        ]                                                     
+      135 +      }                                                       
+      136 +    ]                                                         
+      137 +  }                                                           
+      138    ```
+      139  
+      140  **Also touch:**
+
+● Now fix Phase 4 PreToolUse hook format.
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(docs/wip/codex-support/implementation.md)
+  ⎿  Added 14 lines, removed 4 lines
+      172  
+      173  **Files to update:**
+      174  
+      175 -- `.codex/hooks.json` — add `PreToolUse` event entry:         
+      175 +- `.codex/hooks.json` — add `PreToolUse` matcher group to the 
+          +existing                                                      
+      176 +  file (alongside SessionStart from Phase 3):                 
+      177    ```json
+      178    {
+      178 -    "event": "PreToolUse",                                    
+      179 -    "matcher": "Bash",                                        
+      180 -    "command": [".codex/scripts/pretooluse-bash.sh"]          
+      179 +    "SessionStart": [ ... ],                                  
+      180 +    "PreToolUse": [                                           
+      181 +      {                                                       
+      182 +        "matcher": "Bash",                                    
+      183 +        "hooks": [                                            
+      184 +          {                                                   
+      185 +            "type": "command",                                
+      186 +            "command": ".codex/scripts/pretooluse-bash.sh"    
+      187 +          }                                                   
+      188 +        ]                                                     
+      189 +      }                                                       
+      190 +    ]                                                         
+      191    }
+      192    ```
+      193  
+
+● Now fix Phase 7 — replace custom statusline with config-only approach.
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(docs/wip/codex-support/implementation.md)
+  ⎿  Added 13 lines, removed 21 lines
+      269  
+      270  ---
+      271  
+      272 -## Phase 7: Statusline {#phase-7-statusline}                  
+      272 +## Phase 7: Statusline configuration {#phase-7-statusline}    
+      273  
+      274 -**Goal:** Port Claude's statusline to codex with feature parit
+          -y.                                                            
+      274 +**Goal:** Configure codex's built-in statusline with the best 
+          +available                                                     
+      275 +items.                                                        
+      276  
+      276 -**Files to create:**                                          
+      277 +Codex's `tui.status_line` is an `array<string>` of built-in st
+          +atus item                                                     
+      278 +identifiers — it does not support custom command-driven script
+          +s like Claude.                                                
+      279 +No custom statusline script is created. See design.md §11 for 
+          +details.                                                      
+      280  
+      278 -- `.codex/scripts/statusline.sh` — shell script that reads cod
+          -ex's status                                                   
+      279 -  input, extracts model/context/usage data, formats with Catpp
+          -uccin theming.                                                
+      280 -                                                              
+      281 -**Implementation approach:**                                  
+      282 -                                                              
+      283 -1. Investigate codex's statusline input format. The `tui.statu
+          -s_line` config                                                
+      284 -   in `config.toml` is documented but the input contract (what
+          - data is                                                      
+      285 -   piped to the script) is not fully documented. Check codex s
+          -ource or                                                      
+      286 -   experiment to determine the format.                        
+      287 -2. Port the formatting logic from `.claude/scripts/statusline_
+          -enhanced.sh`.                                                 
+      288 -   Adapt field extraction to codex's input format.            
+      289 -3. Support `CODEX_STATUSLINE_MODE` and `CODEX_STATUSLINE_THEME
+          -` env vars.                                                   
+      290 -                                                              
+      281  **Files to update:**
+      282  
+      293 -- `.codex/config.toml` — add `tui.status_line` pointing at the
+          - script.                                                      
+      283 +- `.codex/config.toml` — add `[tui]` section with `status_line
+          +`:                                                            
+      284 +  ```toml                                                     
+      285 +  [tui]                                                       
+      286 +  status_line = ["model-with-reasoning", "current-dir"]       
+      287 +  ```                                                         
+      288  
+      289  **Verification:**
+      290  
+      297 -- The script produces themed output when given sample input.  
+      298 -  → verify: pipe sample status JSON and check output contains 
+          -ANSI color                                                    
+      299 -  codes and expected fields.                                  
+      300 -- In a codex session, the statusline displays model and contex
+          -t info.                                                       
+      291 +- In a codex session, the statusline displays model and direct
+          +ory info.                                                     
+      292 +  → verify: visual inspection in the TUI footer.              
+      293  
+      294  ---
+      295  
+
+● Now fix Phase 9 — TOML table scope issue.
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(docs/wip/codex-support/implementation.md)
+  ⎿  Added 10 lines, removed 4 lines
+      332  
+      333  - `.codex/config.toml` — add all sections:
+      334    ```toml
+      335 -  [features]                                                  
+      336 -  codex_hooks = true                                          
+      337 -                                                              
+      335 +  # Top-level settings (MUST appear before any [table] header)
+      336    model = "gpt-5.5"
+      337    model_reasoning_effort = "high"
+      338    approval_policy = "on-request"
+      339    sandbox_mode = "workspace-write"
+      340  
+      341 +  [features]                                                  
+      342 +  codex_hooks = true                                          
+      343 +                                                              
+      344    [agents]
+      345    max_threads = 6
+      346    max_depth = 1
+      347  
+      348    [tui]
+      348 -  status_line = ".codex/scripts/statusline.sh"                
+      349 +  status_line = ["model-with-reasoning", "current-dir"]       
+      350  
+      351    [mcp_servers.capy]
+      352    command = "bash"
+      353    args = [".codex/scripts/capy.sh", "serve"]
+      354    ```
+      355  
+      356 +  **TOML scoping note:** bare keys after a `[table]` header be
+          +long to that                                                  
+      357 +  table. Top-level settings (model, approval_policy, etc.) mus
+          +t appear                                                      
+      358 +  before the first `[table]` declaration, or they will be scop
+          +ed                                                            
+      359 +  incorrectly (e.g., `features.model` instead of top-level `mo
+          +del`).                                                        
+      360 +                                                              
+      361    Variable placeholders for template-sync substitution where a
+           pplicable.
+      362  
+      363  **Verification:**
+
+● Now fix the template-sync Phase 8 to remove statusline script reference.
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(docs/wip/codex-support/implementation.md)
+  ⎿  Added 1 line, removed 2 lines
+      307       same as `.claude/scripts/capy.sh`).
+      308    4. Add variable substitution for `.codex/config.toml` and `A
+           GENTS.md`.
+      309    5. Add codex-specific manifest variables: `CODEX_MODEL`,
+      310 -     `CODEX_APPROVAL_POLICY`, `CODEX_STATUSLINE_MODE`,        
+      311 -     `CODEX_STATUSLINE_THEME` — all optional with sensible def
+          -aults.                                                        
+      310 +     `CODEX_APPROVAL_POLICY` — all optional with sensible defa
+          +ults.                                                         
+      311  
+      312  - `.github/workflows/template-sync.yml`:
+      313    1. Add codex variable backfilling to the manifest migration 
+           logic.
+
+● Now update the appendix dependency note for Phase 7.
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(docs/wip/codex-support/implementation.md)
+  ⎿  Added 5 lines, removed 3 lines
+      439  - **Phase 1** must land before anything else (path invariants)
+           .
+      440  - **Phase 2** (codex plugin scaffold) depends on Phase 1.
+      441  - **Phase 3** (bootstrap) depends on Phase 1 (needs `.codex/` 
+           directory).
+      442 -- **Phases 4, 5, 6, 7** can proceed in parallel after Phase 3 
+          -(each is                                                      
+      443 -  independent: hooks, agents, rules, statusline).             
+      442 +- **Phases 4, 5, 6** can proceed in parallel after Phase 3 (ea
+          +ch is                                                         
+      443 +  independent: hooks, agents, rules).                         
+      444 +- **Phase 7** (statusline) is config-only, can proceed any tim
+          +e after                                                       
+      445 +  Phase 1.                                                    
+      446  - **Phase 8** (template-sync) depends on Phases 1–7 (needs all
+            files in
+      447    place to know what to sync).
+      448  - **Phase 9** (config.toml) depends on Phases 3, 4, 7 (hooks, 
+           statusline
+      447 -  wiring).                                                    
+      449 +  config).                                                    
+      450  - **Phase 10** (tests/docs/ADR) depends on all prior phases.
+      451  - **Phase 11** last.
+
+● Now update tasks.md — fix Task 3 hooks.json format, Task 4 hooks.json format,
+  Task 7 statusline, Task 8 schema path, Task 9 TOML scope.
+
+● Update(docs/wip/codex-support/tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      42  ### Subtasks
+      43  - [ ] 3.1 Create `AGENTS.md` at repo root — provider identity b
+          lock, behavioral instructions (port from `.claude/CLAUDE.extra.
+          md`), capy routing rules (replicate from `.claude/capy/CLAUDE.m
+          d`). Use `%PROJECT_NAME%` placeholder for template-sync substit
+          ution
+      44  - [ ] 3.2 Create `.codex/scripts/session-start.sh` — shell scri
+          pt emitting `SessionStart` JSON with `additionalContext` contai
+          ning: provider identity, tool-name mapping table (Read→read_fil
+          e, Write→write_file, Edit→apply_patch, Bash→shell, Grep→shell+g
+          rep, Glob→shell+find, WebSearch→web_search, WebFetch→capy, Agen
+          t/Task→natural-language subagent spawning, Skill→$mention), `${
+          CLAUDE_PLUGIN_ROOT}` path resolution (compute absolute repo roo
+          t from script location, map to `<repo-root>/plugins/claude` for
+           plugin refs and `<repo-root>/profiles/` for profile refs), cap
+          y routing rules, sub-agent roster (all five agents)
+      45 -- [ ] 3.3 Create `.codex/hooks.json` with `SessionStart` event 
+         -entry pointing at `session-start.sh`                           
+      45 +- [ ] 3.3 Create `.codex/hooks.json` using Codex's hook schema 
+         +— event names as top-level keys, matcher groups with nested hoo
+         +k handlers: `{"SessionStart": [{"matcher": "startup|resume", "h
+         +ooks": [{"type": "command", "command": ".codex/scripts/session-
+         +start.sh"}]}]}`                                                
+      46  - [ ] 3.4 Create `.codex/config.toml` with initial `[features] 
+          codex_hooks = true`
+      47  - [ ] 3.5 Verify: `bash .codex/scripts/session-start.sh < /dev/
+          null | jq .` exits 0 with valid JSON; in a codex session, provi
+          der identity appears
+      48  
+
+● Update(docs/wip/codex-support/tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      53  
+      54  ### Subtasks
+      55  - [ ] 4.1 Create `.codex/scripts/pretooluse-bash.sh` — reads `t
+          ool_input.command` from stdin JSON; checks file-path denylist (
+          FORBIDDEN_PATTERNS ported from `plugins/claude/scripts/validate
+          -bash.sh`: `.env`, `.ansible/`, `.terraform/`, `build/`, `dist/
+          `, `node_modules`, `__pycache__`, `.git/`, `venv/`, `.pyc`, `.c
+          sv`, `.log`) and capy HTTP patterns (`curl`/`wget`, `fetch('htt
+          p`, `requests.get(`, `requests.post(`, `http.get(`, `http.reque
+          st(`); emits `permissionDecision: "deny"` JSON on match, exits 
+          0 with no output on pass-through
+      56 -- [ ] 4.2 Update `.codex/hooks.json` — add `PreToolUse` event e
+         -ntry with `matcher: "Bash"` pointing at `pretooluse-bash.sh`   
+      56 +- [ ] 4.2 Update `.codex/hooks.json` — add `PreToolUse` matcher
+         + group using Codex hook schema: `{"PreToolUse": [{"matcher": "B
+         +ash", "hooks": [{"type": "command", "command": ".codex/scripts/
+         +pretooluse-bash.sh"}]}]}` alongside existing SessionStart entry
+      57  - [ ] 4.3 Verify: `echo '{"tool_input":{"command":"cat .env"}}'
+           | bash .codex/scripts/pretooluse-bash.sh | jq .hookSpecificOut
+          put.permissionDecision` outputs `"deny"`; same for `curl https:
+          //example.com`; `echo '{"tool_input":{"command":"ls"}}' | bash 
+          .codex/scripts/pretooluse-bash.sh` produces no output with exit
+           0
+      58  
+      59  ## Task 5: Sub-agents
+
+● Now fix Task 7 — statusline.
+
+● Update(docs/wip/codex-support/tasks.md)
+  ⎿  Added 5 lines, removed 5 lines
+      80  - [ ] 6.2 Create `.codex/rules/default.rules` — one `prefix_rul
+          e()` per `Bash(...)` denied command with `decision = "deny"`, `
+          justification`, and at least one `match`/`not_match` inline tes
+          t case. Port "ask" commands as `decision = "prompt"`
+      81  - [ ] 6.3 Verify: `codex execpolicy check --pretty --rules .cod
+          ex/rules/default.rules -- rm -rf /tmp/test` shows `deny`; `code
+          x execpolicy check --pretty --rules .codex/rules/default.rules 
+          -- ls` shows `allow`
+      82  
+      83 -## Task 7: Statusline                                          
+      83 +## Task 7: Statusline configuration                            
+      84  - **Status:** pending
+      85  - **Depends on:** Task 1
+      86  - **Docs:** [implementation.md#phase-7-statusline](./implementa
+          tion.md#phase-7-statusline)
+      87  
+      88 +Codex's `tui.status_line` is an `array<string>` of built-in ite
+         +m identifiers — it does not support custom command-driven scrip
+         +ts. No custom script is created.                               
+      89 +                                                               
+      90  ### Subtasks
+      89 -- [ ] 7.1 Investigate codex's statusline input format — check d
+         -ocs, experiment, or check codex source to determine what data i
+         -s piped to the statusline command                              
+      90 -- [ ] 7.2 Create `.codex/scripts/statusline.sh` — port formatti
+         -ng logic from `.claude/scripts/statusline_enhanced.sh`, adapt f
+         -ield extraction to codex's input format, support `CODEX_STATUSL
+         -INE_MODE` and `CODEX_STATUSLINE_THEME` env vars                
+      91 -- [ ] 7.3 Update `.codex/config.toml` — add `[tui] status_line`
+         - pointing at the script                                        
+      92 -- [ ] 7.4 Verify: script produces themed output when given samp
+         -le input; in a codex session, statusline displays model and con
+         -text info                                                      
+      91 +- [ ] 7.1 Update `.codex/config.toml` — add `[tui] status_line 
+         += ["model-with-reasoning", "current-dir"]` to configure the bes
+         +t available built-in items                                     
+      92 +- [ ] 7.2 Verify: in a codex session, statusline footer display
+         +s model and directory info                                     
+      93  
+      94  ## Task 8: Template-sync extension
+      95  - **Status:** pending
+
+● Now fix Task 8 — schema path (P3).
+
+● Update(docs/wip/codex-support/tasks.md)
+  ⎿  Added 1 line, removed 1 line
+       98  
+       99  ### Subtasks
+      100  - [ ] 8.1 Update `.github/scripts/template-sync.sh` — add `.co
+           dex/` to sparse-clone file list; add `AGENTS.md` to root-level
+            files; add strip rules excluding `.codex/scripts/capy.sh`; ad
+           d variable substitution for `.codex/config.toml` and `AGENTS.m
+           d`
+      101 -- [ ] 8.2 Add codex-specific manifest variables to `.github/te
+          -mplate-state.json` schema: `CODEX_MODEL`, `CODEX_APPROVAL_POLI
+          -CY`, `CODEX_STATUSLINE_MODE`, `CODEX_STATUSLINE_THEME` — all o
+          -ptional with sensible defaults                                
+      101 +- [ ] 8.2 Add codex-specific manifest variables to `docs/templ
+          +ate-sync/template-state-schema.json` (the actual schema source
+          +): `CODEX_MODEL`, `CODEX_APPROVAL_POLICY` — all optional with 
+          +sensible defaults. Also update `.github/template-state.example
+          +.json` and any relevant test fixtures                         
+      102  - [ ] 8.3 Update `.github/workflows/template-sync.yml` — add c
+           odex variable backfilling to manifest migration; add `.codex/`
+            to commit/PR diff scope
+      103  - [ ] 8.4 Verify: dry-run template-sync on a test downstream r
+           epo — `.codex/` files appear in diff; downstream repo without 
+           codex variables syncs cleanly
+      104  
+
+● Now fix Task 9 — TOML scope.
+
+● Update(docs/wip/codex-support/tasks.md)  ⎿  Added 1 line, removed 1 line
+      108  - **Docs:** [implementation.md#phase-9-config](./implementatio
+           n.md#phase-9-config)
+      109  
+      110  ### Subtasks
+      111 -- [ ] 9.1 Finalize `.codex/config.toml` with all sections: `[f
+          -eatures]`, model/reasoning, approval policy, sandbox mode, `[a
+          -gents]` thread/depth limits, `[tui]` statusline, `[mcp_servers
+          -.capy]`. Add template-sync variable placeholders where applica
+          -ble                                                           
+      111 +- [ ] 9.1 Finalize `.codex/config.toml` with all sections. **T
+          +OML scoping:** top-level settings (`model`, `model_reasoning_e
+          +ffort`, `approval_policy`, `sandbox_mode`) MUST appear before 
+          +any `[table]` header — bare keys after `[features]` would be s
+          +coped as `features.model` etc. Order: top-level keys → `[featu
+          +res]` → `[agents]` → `[tui]` → `[mcp_servers.capy]`. Add templ
+          +ate-sync variable placeholders where applicable               
+      112  - [ ] 9.2 Verify: TOML parses cleanly (`python3 -c "import tom
+           llib; ..."` exits 0); in a codex session, model and feature fl
+           ags are active
+      113  
+      114  ## Task 10: Tests, documentation, and ADR
+
+● Finally, remove statusline script references from Task 8 template-sync and
+  Task 10 tests.
+
+● Update(docs/wip/codex-support/tasks.md)
+  ⎿  Added 1 line, removed 1 line
+       97  - **Docs:** [implementation.md#phase-8-template-sync](./implem
+           entation.md#phase-8-template-sync)
+       98  
+       99  ### Subtasks
+      100 -- [ ] 8.1 Update `.github/scripts/template-sync.sh` — add `.co
+          -dex/` to sparse-clone file list; add `AGENTS.md` to root-level
+          - files; add strip rules excluding `.codex/scripts/capy.sh`; ad
+          -d variable substitution for `.codex/config.toml` and `AGENTS.m
+          -d`                                                            
+      100 +- [ ] 8.1 Update `.github/scripts/template-sync.sh` — add `.co
+          +dex/` to sparse-clone file list; add `AGENTS.md` to root-level
+          + files; add strip rules excluding `.codex/scripts/capy.sh` fro
+          +m sync (per-repo, same as Claude side); add variable substitut
+          +ion for `.codex/config.toml` and `AGENTS.md`                  
+      101  - [ ] 8.2 Add codex-specific manifest variables to `docs/templ
+           ate-sync/template-state-schema.json` (the actual schema source
+           ): `CODEX_MODEL`, `CODEX_APPROVAL_POLICY` — all optional with 
+           sensible defaults. Also update `.github/template-state.example
+           .json` and any relevant test fixtures
+      102  - [ ] 8.3 Update `.github/workflows/template-sync.yml` — add c
+           odex variable backfilling to manifest migration; add `.codex/`
+            to commit/PR diff scope
+      103  - [ ] 8.4 Verify: dry-run template-sync on a test downstream r
+           epo — `.codex/` files appear in diff; downstream repo without 
+           codex variables syncs cleanly
+
+● All five fixes applied across all three documents:
+
+  - P0 (critical): Rewrote hooks.json schema in design.md §6.1,
+  implementation.md Phases 3 & 4, and tasks.md Tasks 3 & 4. Correct format:
+  event names as top-level keys → matcher groups → {"type": "command", 
+  "command": "..."} handlers.
+  - P1 (install story): Added §5.2.1 to design.md explicitly splitting what the
+  plugin delivers (skills + MCP) vs. what needs template-sync/manual setup
+  (agents, hooks, rules, config, AGENTS.md).
+  - P1 (statusline): Replaced custom script approach with built-in identifier
+  config in design.md §11, implementation.md Phase 7, and tasks.md Task 7.
+  tui.status_line = ["model-with-reasoning", "current-dir"].
+  - P1 (TOML scope): Fixed config.toml example in implementation.md Phase 9 —
+  top-level keys before [features], added scoping note. Fixed tasks.md Task 9.
+  - P3 (schema path): Fixed Task 8.2 to reference
+  docs/template-sync/template-state-schema.json.

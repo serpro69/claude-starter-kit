@@ -116,7 +116,6 @@ claude-toolbox/
 │   │   └── default.rules
 │   └── scripts/
 │       ├── capy.sh
-│       ├── statusline.sh
 │       └── session-start.sh
 ├── .claude-plugin/marketplace.json      # UPDATED source → ./plugins/claude
 ├── .claude/                             # UNCHANGED
@@ -193,6 +192,29 @@ install the plugin from the TUI browser.
 They skip step 1 — the marketplace is auto-discovered. They open `/plugins`
 and install directly.
 
+### 5.2.1 What the plugin delivers vs. what it doesn't
+
+The plugin install provides **skills and MCP configuration only** — these
+are the artifacts the Codex plugin manifest supports (`skills`, `mcpServers`,
+`apps`, `assets`). Codex plugins cannot bundle hooks, custom agents, rules,
+config, or project instructions.
+
+The remaining artifacts live outside the plugin and reach users via two paths:
+
+| Artifact | Location | Delivery mechanism |
+|---|---|---|
+| Skills + capy MCP | `plugins/codex/` | Plugin install |
+| Custom agents (`.toml`) | `.codex/agents/` | Template-sync or manual setup |
+| Hooks (`hooks.json`) | `.codex/hooks.json` | Template-sync or manual setup |
+| Starlark rules | `.codex/rules/` | Template-sync or manual setup |
+| Config (`config.toml`) | `.codex/config.toml` | Template-sync or manual setup |
+| Project instructions | `AGENTS.md` | Template-sync or manual setup |
+
+For downstream repos using template-sync, all artifacts are delivered
+automatically. For standalone users who only install the plugin, the
+plugin README documents a manual setup section with copy-paste instructions
+for each artifact.
+
 ### 5.3 No sparse checkout
 
 `codex plugin marketplace add serpro69/claude-toolbox --sparse .agents/plugins`
@@ -210,8 +232,27 @@ tool-name mapping table into the session context. Zero skill file changes.
 
 ### 6.1 Hook configuration
 
-Lives at `.codex/hooks.json`. Fires on every session start. Runs
-`.codex/scripts/session-start.sh`, which emits JSON with `additionalContext`.
+Lives at `.codex/hooks.json`. The file uses Codex's hook schema — event
+names are top-level keys, each containing an array of matcher groups with
+nested hook handler entries:
+
+```json
+{
+  "SessionStart": [
+    {
+      "matcher": "startup|resume",
+      "hooks": [
+        {
+          "type": "command",
+          "command": ".codex/scripts/session-start.sh"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Requires `[features] codex_hooks = true` in `config.toml`.
 
 ### 6.2 Injected content
 
@@ -400,7 +441,6 @@ Rules are validated offline:
 | `.codex/hooks.json` | None (static) | SessionStart + PreToolUse hook definitions |
 | `.codex/agents/*.toml` | None (static) | All five sub-agent definitions |
 | `.codex/rules/default.rules` | None (static) | Starlark command policies |
-| `.codex/scripts/statusline.sh` | None (static) | Statusline port |
 | `.codex/scripts/session-start.sh` | None (static) | SessionStart hook script |
 | `AGENTS.md` | `PROJECT_NAME` | Provider identity + behavioral instructions |
 
@@ -431,28 +471,40 @@ skips codex files gracefully or uses sensible defaults.
 
 ## 11. Statusline
 
-Claude's statusline is driven by shell scripts that read JSON from stdin,
-extract model/context/usage data, and format with Catppuccin theming.
+Claude's statusline is driven by custom shell scripts that read JSON from
+stdin and format with Catppuccin theming. Codex's statusline is
+fundamentally different.
 
-### 11.1 Port
+### 11.1 Codex statusline model
 
-`.codex/scripts/statusline.sh` replicates the logic:
+Codex's `tui.status_line` is an `array<string>` of built-in status item
+identifiers — NOT a command path. The config schema defines it as:
 
-1. Read codex's status input format
-2. Extract equivalent fields: model, context usage, token counts
-3. Format using the same Catppuccin theming logic
-4. Output compact status string
+> "Ordered list of status line item identifiers. When set, the TUI renders
+> the selected items as the status line. When unset, the TUI defaults to:
+> `model-with-reasoning` and `current-dir`."
 
-`config.toml` wires it via the `tui` section. Env vars mapped:
-`CLAUDE_STATUSLINE_MODE` → `CODEX_STATUSLINE_MODE`,
-`CLAUDE_STATUSLINE_THEME` → `CODEX_STATUSLINE_THEME`.
+There is no extension point for custom statusline scripts. Codex does not
+support the command-driven statusline model that Claude uses.
 
-### 11.2 Implementation risk
+### 11.2 What we ship
 
-Codex's statusline input format isn't fully documented. The implementation
-task needs to investigate what data codex passes to the statusline command.
-If the format is incompatible or undocumented, the statusline port starts
-minimal and expands as codex documents the interface.
+Configure the best available built-in identifiers in `.codex/config.toml`:
+
+```toml
+[tui]
+status_line = ["model-with-reasoning", "current-dir"]
+```
+
+This provides model and directory info — the same core information Claude's
+statusline shows, minus the custom theming. Custom statusline scripts are
+not possible until Codex exposes a command-based extension point.
+
+### 11.3 Parity gap
+
+No Catppuccin theming, no context-window usage display, no custom
+formatting. This is a codex platform limitation, not a design choice.
+Documented but not blocked on.
 
 ## 12. MCP Configuration
 
