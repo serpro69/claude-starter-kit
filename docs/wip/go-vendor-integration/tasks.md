@@ -53,15 +53,15 @@
 - [x] 4.5 Write `transform_test.go`: from_first_h1 with frontmatter+persona, no-H1 error, empty file error, headings extraction, nested H3 inclusion, all passthrough
 
 ## Task 5: Link rewriting
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 2
 - **Docs:** [implementation.md — Task 1.5](./implementation.md#task-15-link-rewriting)
 
 ### Subtasks
-- [ ] 5.1 Implement markdown link regex parser in `cmd/vendor-profiles/linkrewrite.go`
-- [ ] 5.2 Implement link classifier: external URL → preserve, co-vendored → rewrite to `as` filename, cross-skill ref → strip to text, non-vendored internal → strip to text
-- [ ] 5.3 The rewriter takes the full file list for the current upstream + the source file's directory to resolve relative paths
-- [ ] 5.4 Write `linkrewrite_test.go`: external URL preserved, co-vendored rewrite, cross-skill stripping, non-vendored stripping
+- [x] 5.1 Implement markdown link regex parser in `cmd/vendor-profiles/linkrewrite.go`
+- [x] 5.2 Implement link classifier: external URL → preserve, co-vendored → rewrite to `as` filename, cross-skill ref → strip to text, non-vendored internal → strip to text
+- [x] 5.3 The rewriter takes the full file list for the current upstream + the source file's directory to resolve relative paths
+- [x] 5.4 Write `linkrewrite_test.go`: external URL preserved, co-vendored rewrite, cross-skill stripping, non-vendored stripping
 
 ## Task 6: index.md injection
 - **Status:** pending

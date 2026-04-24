@@ -8,7 +8,7 @@ import (
 
 var linkRegex = regexp.MustCompile(`\[([^\]]+)\]\(([^)]+)\)`)
 
-func RewriteLinks(content []byte, sourceFile string, files []*File) []byte {
+func RewriteLinks(content []byte, sourceFile, sourcePhase string, files []*File) []byte {
 	sourceDir := path.Dir(sourceFile)
 
 	result := linkRegex.ReplaceAllStringFunc(string(content), func(match string) string {
@@ -23,10 +23,16 @@ func RewriteLinks(content []byte, sourceFile string, files []*File) []byte {
 			return match
 		}
 
-		resolved := path.Clean(path.Join(sourceDir, target))
+		targetPath, fragment, _ := strings.Cut(target, "#")
+		resolved := path.Clean(path.Join(sourceDir, targetPath))
+
 		for _, f := range files {
-			if f.Source == resolved {
-				return "[" + displayText + "](" + f.As + ")"
+			if f.Source == resolved && f.Phase == sourcePhase {
+				rewritten := f.As
+				if fragment != "" {
+					rewritten += "#" + fragment
+				}
+				return "[" + displayText + "](" + rewritten + ")"
 			}
 		}
 

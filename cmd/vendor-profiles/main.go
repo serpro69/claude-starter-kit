@@ -48,7 +48,7 @@ func run(manifestPath, targetDir string, dryRun bool) error {
 				return fmt.Errorf("transforming %s: %w", file.Source, err)
 			}
 
-			transformed = RewriteLinks(transformed, file.Source, upstream.Files)
+			transformed = RewriteLinks(transformed, file.Source, file.Phase, upstream.Files)
 
 			outPath := fmt.Sprintf("%s/%s/%s", targetDir, file.Phase, file.As)
 
