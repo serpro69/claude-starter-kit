@@ -1,6 +1,6 @@
 # Java — detection
 
-Declares when the `java` profile activates on a given set of files. Consumed by `klaude-plugin/skills/_shared/profile-detection.md`. Multiple profiles may activate additively on the same diff.
+Declares when the `java` profile activates on a given set of files. Consumed by `skills/_shared/profile-detection.md`. Multiple profiles may activate additively on the same diff.
 
 ## Path signals
 

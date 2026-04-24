@@ -212,7 +212,7 @@ Already have a project? Install just the kk plugin to get all skills, commands, 
 /plugin install kk@claude-toolbox
 ```
 
-That's it. All 10 skills are now available as `/skill-name` (annotated with `(kk)` in the slash command menu). See the [kk plugin documentation](./klaude-plugin/README.md) for details.
+That's it. All 10 skills are now available as `/skill-name` (annotated with `(kk)` in the slash command menu). See the [kk plugin documentation](./plugins/claude/README.md) for details.
 
 > [!TIP]
 > Want the full configuration too (settings, statusline, Serena, sync infrastructure)? See [Adopting into Existing Repositories](#adopting-into-existing-repositories).
@@ -230,7 +230,7 @@ After setup, try the core workflow:
 
 4. **Review the code.** `/review-code` checks for SOLID violations, security risks, and quality issues. Use `/review-code:isolated` for independent sub-agent reviewers with zero authorship bias.
 
-This is the core loop. See the [kk plugin README](./klaude-plugin/README.md) for all available skills and the full workflow pipeline.
+This is the core loop. See the [kk plugin README](./plugins/claude/README.md) for all available skills and the full workflow pipeline.
 
 ## What's Included
 
@@ -253,11 +253,11 @@ Without Capy, each session starts fresh — all skills still work, they just don
 
 **Installation:** `brew install serpro69/tap/capy` then run `capy setup` in your project directory. The bootstrap script sets up Capy automatically if the binary is on PATH.
 
-### kk Plugin ([`klaude-plugin/`](./klaude-plugin/README.md))
+### kk Plugin ([`plugins/claude/`](./plugins/claude/README.md))
 
 The **kk** plugin contains all development workflow functionality — 10 skills, 4 commands, and hooks — distributed via the Claude Code plugin system. Skills are invoked as `/skill-name`, commands as `/kk:dir:command`.
 
-Includes: **design**, **implement**, **test**, **document**, **development-guidelines**, **review-code**, **review-spec**, **review-design**, **merge-docs**, **chain-of-verification**. Plus commands for CoVe, implementation review, design review, Task Master migration, and sync workflow updates. See the [plugin README](./klaude-plugin/README.md) for full details.
+Includes: **design**, **implement**, **test**, **document**, **development-guidelines**, **review-code**, **review-spec**, **review-design**, **merge-docs**, **chain-of-verification**. Plus commands for CoVe, implementation review, design review, Task Master migration, and sync workflow updates. See the [plugin README](./plugins/claude/README.md) for full details.
 
 Alongside `skills/`, `commands/`, `agents/`, and `hooks/`, the plugin ships a top-level `profiles/` directory. Each profile (e.g., `go`, `python`, `k8s`) bundles per-domain content — detection rules, review checklists, design prompts, test validators, doc rubrics — that the workflow skills consult when the code under work matches the profile. Profiles are the extension point for new languages and IaC DSLs; see the **Profile Conventions** section of [`CLAUDE.md`](./CLAUDE.md) for the full authoring contract.
 
@@ -406,7 +406,7 @@ It will port pending tasks, clean up TM files, update configs, and walk you thro
 
 If you prefer to migrate manually, follow these steps after syncing:
 
-1. **Port any pending tasks** to the new format: create `/docs/wip/[feature]/tasks.md` files following the [example task file](./klaude-plugin/skills/design/example-tasks.md). Completed tasks don't need porting.
+1. **Port any pending tasks** to the new format: create `/docs/wip/[feature]/tasks.md` files following the [example task file](./skills/design/example-tasks.md). Completed tasks don't need porting.
 
 1. **Remove Task Master files and config:**
 
@@ -512,7 +512,7 @@ for test in test/test-*.sh; do $test; done
 ## Repository Structure
 
 ```
-klaude-plugin/                   # kk plugin (distributed via plugin system)
+plugins/claude/                   # kk plugin (distributed via plugin system)
 ├── .claude-plugin/plugin.json   # Plugin manifest
 ├── skills/                      # 10 development workflow skills
 ├── commands/                    # 4 slash commands

@@ -69,7 +69,7 @@ jobs:
       - name: Validate Version is Newer
         run: |
           NEW_SEMVER="${{ steps.validate.outputs.semver }}"
-          CURRENT_VERSION=$(jq -r '.version' klaude-plugin/.claude-plugin/plugin.json)
+          CURRENT_VERSION=$(jq -r '.version' plugins/claude/.claude-plugin/plugin.json)
 
           echo "Current version: $CURRENT_VERSION"
           echo "New version: $NEW_SEMVER"
@@ -86,7 +86,7 @@ jobs:
         run: |
           VERSION="${{ steps.validate.outputs.version }}"
           SEMVER="${{ steps.validate.outputs.semver }}"
-          CURRENT_VERSION=$(jq -r '.version' klaude-plugin/.claude-plugin/plugin.json)
+          CURRENT_VERSION=$(jq -r '.version' plugins/claude/.claude-plugin/plugin.json)
 
           echo "### Dry Run — Release Preview" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
@@ -94,7 +94,7 @@ jobs:
           echo "**Plugin version:** $CURRENT_VERSION → $SEMVER" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**Actions that would be performed:**" >> "$GITHUB_STEP_SUMMARY"
-          echo "1. Update \`klaude-plugin/.claude-plugin/plugin.json\` version to \`$SEMVER\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "1. Update \`plugins/claude/.claude-plugin/plugin.json\` version to \`$SEMVER\`" >> "$GITHUB_STEP_SUMMARY"
           echo "2. Commit: \`Release $VERSION\`" >> "$GITHUB_STEP_SUMMARY"
           echo "3. Tag: \`$VERSION\`" >> "$GITHUB_STEP_SUMMARY"
           echo "4. Push commit and tag" >> "$GITHUB_STEP_SUMMARY"
@@ -116,8 +116,8 @@ jobs:
         if: inputs.dry_run != true
         run: |
           SEMVER="${{ steps.validate.outputs.semver }}"
-          jq --arg v "$SEMVER" '.version = $v' klaude-plugin/.claude-plugin/plugin.json > klaude-plugin/.claude-plugin/plugin.json.tmp
-          mv klaude-plugin/.claude-plugin/plugin.json.tmp klaude-plugin/.claude-plugin/plugin.json
+          jq --arg v "$SEMVER" '.version = $v' plugins/claude/.claude-plugin/plugin.json > plugins/claude/.claude-plugin/plugin.json.tmp
+          mv plugins/claude/.claude-plugin/plugin.json.tmp plugins/claude/.claude-plugin/plugin.json
           echo "Updated plugin.json version to $SEMVER"
 
       - name: Commit and Tag
@@ -126,7 +126,7 @@ jobs:
           VERSION="${{ steps.validate.outputs.version }}"
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add klaude-plugin/.claude-plugin/plugin.json
+          git add plugins/claude/.claude-plugin/plugin.json
           git commit -m "Release $VERSION"
           git tag "$VERSION"
           echo "Created commit and tag $VERSION"

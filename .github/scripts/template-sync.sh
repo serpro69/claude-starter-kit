@@ -460,7 +460,7 @@ backfill_manifest_variables() {
 # skills/commands/hooks to the kk plugin system.
 #
 # Args:
-#   $1 - Path to fetched upstream directory (parent of klaude-plugin/)
+#   $1 - Path to fetched upstream directory (parent of plugins/claude/)
 #
 # Returns:
 #   0 if migration is needed
@@ -469,7 +469,7 @@ needs_plugin_migration() {
   local upstream_dir="$1"
 
   # Check if upstream has the plugin
-  if [[ ! -f "$upstream_dir/klaude-plugin/.claude-plugin/plugin.json" ]]; then
+  if [[ ! -f "$upstream_dir/plugins/claude/.claude-plugin/plugin.json" ]]; then
     return 1
   fi
 
@@ -745,7 +745,7 @@ fetch_upstream_templates() {
   if ! git sparse-checkout init --cone --quiet 2>/dev/null; then
     log_warn "Sparse-checkout init failed, continuing with full checkout"
   fi
-  if ! git sparse-checkout set .claude .serena .github/workflows/template-sync.yml .github/scripts/template-sync.sh docs/update.sh klaude-plugin/.claude-plugin/plugin.json --quiet 2>/dev/null; then
+  if ! git sparse-checkout set .claude .serena .github/workflows/template-sync.yml .github/scripts/template-sync.sh docs/update.sh plugins/claude/.claude-plugin/plugin.json --quiet 2>/dev/null; then
     log_warn "Sparse-checkout set failed, config dirs may not exist at this version"
   fi
 

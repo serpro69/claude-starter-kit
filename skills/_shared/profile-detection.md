@@ -3,7 +3,7 @@
 Single source of truth for computing the set of profiles active in the current context.
 Consumed by six skills: `review-code`, `review-spec`, `design`, `implement`, `test`, and `document`.
 
-Every profile under `klaude-plugin/profiles/<name>/` declares its own trigger rule in `DETECTION.md` using the mandatory three-section schema (`## Path signals`, `## Filename signals`, `## Content signals`).
+Every profile under `profiles/<name>/` declares its own trigger rule in `DETECTION.md` using the mandatory three-section schema (`## Path signals`, `## Filename signals`, `## Content signals`).
 The shared procedure below applies the same algorithm against every profile's declared values.
 
 ### Inputs per consuming skill

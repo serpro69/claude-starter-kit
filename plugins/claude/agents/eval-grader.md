@@ -35,7 +35,7 @@ You have `Read` only, for two narrow purposes:
 - Reading a reviewer-output file path if the harness writes it to disk rather than inlining it.
 - Referencing this agent file or a harness playbook if you need to re-consult grading conventions.
 
-You MUST NOT open fixture paths, `klaude-plugin/profiles/**`, or `klaude-plugin/skills/**` to "double-check" the reviewer. That re-introduces the rubric leakage you are here to prevent. If the reviewer's claim is unverifiable from its output text, that is a `PARTIAL`, not a cue to go look at the source of truth.
+You MUST NOT open fixture paths, `profiles/**`, or `skills/**` to "double-check" the reviewer. That re-introduces the rubric leakage you are here to prevent. If the reviewer's claim is unverifiable from its output text, that is a `PARTIAL`, not a cue to go look at the source of truth.
 
 ## Mandatory ordering — exempt
 

@@ -6,19 +6,19 @@
 > Created: 2026-04-24
 
 ## Task 1: Repository restructure
-- **Status:** pending
+- **Status:** done
 - **Depends on:** —
 - **Docs:** [implementation.md#phase-1-restructure](./implementation.md#phase-1-restructure)
 
 ### Subtasks
-- [ ] 1.1 Move every `klaude-plugin/skills/<name>/` to the new top-level `skills/<name>/`
-- [ ] 1.2 Move every `klaude-plugin/profiles/<name>/` to the new top-level `profiles/<name>/` (six skills reference profiles via `${CLAUDE_PLUGIN_ROOT}/profiles/`; shared location eliminates cross-plugin path dependencies)
-- [ ] 1.3 Move remaining `klaude-plugin/` → `plugins/claude/` preserving all contents (`commands/`, `agents/`, `hooks/`, `scripts/`, `.claude-plugin/plugin.json`, `README.md`)
-- [ ] 1.4 Create relative symlinks: `plugins/claude/skills` → `../../skills` and `plugins/claude/profiles` → `../../profiles`
-- [ ] 1.5 Update `.claude-plugin/marketplace.json`: change the `kk` plugin's `source` from `./klaude-plugin` to `./plugins/claude`
-- [ ] 1.6 Grep the repo for all hard-coded `klaude-plugin/` path references in scripts, docs, tests, CLAUDE.md, ADRs; update each to `plugins/claude/`. **Exception:** `template-sync.sh`'s `run_plugin_migration` `dirs_to_remove` — keep old names (historical downstream cleanup paths)
-- [ ] 1.7 Update `CLAUDE.md` — all `klaude-plugin/` references become `plugins/claude/`, all `klaude-plugin/skills/` references become `skills/`, all `klaude-plugin/profiles/` references become `profiles/`
-- [ ] 1.8 Verify: `jq . .claude-plugin/marketplace.json` exits 0; `file plugins/claude/skills` and `file plugins/claude/profiles` both report symlink; `ls profiles/*/DETECTION.md | head` lists profiles; `for test in test/test-*.sh; do $test; done` exits 0
+- [x] 1.1 Move every `klaude-plugin/skills/<name>/` to the new top-level `skills/<name>/`
+- [x] 1.2 Move every `klaude-plugin/profiles/<name>/` to the new top-level `profiles/<name>/` (six skills reference profiles via `${CLAUDE_PLUGIN_ROOT}/profiles/`; shared location eliminates cross-plugin path dependencies)
+- [x] 1.3 Move remaining `klaude-plugin/` → `plugins/claude/` preserving all contents (`commands/`, `agents/`, `hooks/`, `scripts/`, `.claude-plugin/plugin.json`, `README.md`)
+- [x] 1.4 Create relative symlinks: `plugins/claude/skills` → `../../skills` and `plugins/claude/profiles` → `../../profiles`
+- [x] 1.5 Update `.claude-plugin/marketplace.json`: change the `kk` plugin's `source` from `./klaude-plugin` to `./plugins/claude`
+- [x] 1.6 Grep the repo for all hard-coded `klaude-plugin/` path references in scripts, docs, tests, CLAUDE.md, ADRs; update each to `plugins/claude/`. **Exception:** `template-sync.sh`'s `run_plugin_migration` `dirs_to_remove` — keep old names (historical downstream cleanup paths)
+- [x] 1.7 Update `CLAUDE.md` — all `klaude-plugin/` references become `plugins/claude/`, all `klaude-plugin/skills/` references become `skills/`, all `klaude-plugin/profiles/` references become `profiles/`
+- [x] 1.8 Verify: `jq . .claude-plugin/marketplace.json` exits 0; `file plugins/claude/skills` and `file plugins/claude/profiles` both report symlink; `ls profiles/*/DETECTION.md | head` lists profiles; `for test in test/test-*.sh; do $test; done` exits 0
 
 ## Task 2: Codex plugin scaffold
 - **Status:** pending

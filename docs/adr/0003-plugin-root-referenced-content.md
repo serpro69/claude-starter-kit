@@ -7,9 +7,9 @@
 
 ## Context
 
-[ADR 0002](0002-profile-content-organization.md) introduces `klaude-plugin/profiles/<name>/` as a new top-level directory, peer to `klaude-plugin/skills/`. Profile content is consumed by multiple skills (`review-code`, `review-spec`, `design`, `implement`, `test`, `document`) and by their sub-agents.
+[ADR 0002](0002-profile-content-organization.md) introduces `profiles/<name>/` as a new top-level directory, peer to `skills/`. Profile content is consumed by multiple skills (`review-code`, `review-spec`, `design`, `implement`, `test`, `document`) and by their sub-agents.
 
-The plugin has an existing pattern for content shared across skills: `klaude-plugin/skills/_shared/<name>.md` with per-consuming-skill symlinks at `skills/<skill>/shared-<name>.md` → `../_shared/<name>.md`. This pattern is documented in `CLAUDE.md` and used today by `capy-knowledge-protocol.md`, `pal-codereview-invocation.md`, and `review-scope-protocol.md`.
+The plugin has an existing pattern for content shared across skills: `skills/_shared/<name>.md` with per-consuming-skill symlinks at `skills/<skill>/shared-<name>.md` → `../_shared/<name>.md`. This pattern is documented in `CLAUDE.md` and used today by `capy-knowledge-protocol.md`, `pal-codereview-invocation.md`, and `review-scope-protocol.md`.
 
 If the same pattern were applied to profiles, a per-skill symlink into `profiles/` would look like:
 
@@ -19,7 +19,7 @@ skills/review-code/profiles  →  ../../profiles
 
 This link points **outside** the `skills/` directory, to a sibling of `skills/`. A prior architecture decision, recorded in `kk:arch-decisions` during the OpenCode-support feature's design review, notes that relative symlinks pointing outside a package directory break under some plugin installers — specifically OpenCode's Bun-cache install, which copies the package into `~/.cache/opencode/node_modules/` without preserving outside-package relatives. The existing `_shared/` symlinks work because both ends stay inside `skills/`, so the relative path `../_shared/<name>.md` continues to resolve after the copy. A symlink into `profiles/` does not share that property.
 
-Separately, Claude Code's runtime harness provides the environment variable `${CLAUDE_PLUGIN_ROOT}`, which resolves to the installed plugin's root directory. The plugin already uses this variable in `klaude-plugin/hooks/hooks.json` for hook script references.
+Separately, Claude Code's runtime harness provides the environment variable `${CLAUDE_PLUGIN_ROOT}`, which resolves to the installed plugin's root directory. The plugin already uses this variable in `plugins/claude/hooks/hooks.json` for hook script references.
 
 ## Decision
 
@@ -62,7 +62,7 @@ Only two forms survive unsubstituted:
 
 Sub-agent context behaves identically to the main context; the substitution happens once in the harness pre-processing step, before any agent reads the content.
 
-**Follow-up verification on 2026-04-19** (same environment; probe skill at `klaude-plugin/skills/test-plugin-root/SKILL.md` — temporary, removed after testing) tested how the substituted path is consumed by each tool the agent has when the substitution appears in **top-level SKILL.md prose**:
+**Follow-up verification on 2026-04-19** (same environment; probe skill at `skills/test-plugin-root/SKILL.md` — temporary, removed after testing) tested how the substituted path is consumed by each tool the agent has when the substitution appears in **top-level SKILL.md prose**:
 
 | Tool | Brace form in SKILL.md | Agent's tool input | Tool behavior |
 |---|---|---|---|
@@ -74,8 +74,8 @@ The `Glob` tool is scoped to the project `cwd`. Even when given a valid resolved
 
 **Mechanism clarification (observed 2026-04-19).** A later probe against plugin v0.10.0-rc.1-alpha.3, reading `shared-profile-detection.md` (a `_shared/` referenced content file loaded via a per-skill symlink), emitted a `Bash(ls ${CLAUDE_PLUGIN_ROOT}/profiles/*/DETECTION.md)` call with the **literal `${CLAUDE_PLUGIN_ROOT}` token** reaching the shell. Shell expanded it against the unset env var to empty and silently missed. This pinned down the actual substitution boundary:
 
-- **Substitution happens at plugin-load time**, for files the harness loads directly: `SKILL.md`, `klaude-plugin/agents/*.md`, hook configs, MCP configs. By the time the agent's context receives these files, `${CLAUDE_PLUGIN_ROOT}` is already replaced with an absolute path.
-- **The `Read` tool does not substitute.** When an agent calls `Read` at runtime on any file — including files inside `klaude-plugin/` (referenced content under `_shared/`, profile files, anything in `profiles/`) — the tool returns the on-disk bytes verbatim. `${CLAUDE_PLUGIN_ROOT}` in that content stays literal. If the agent then copies that literal into another tool argument (Bash, another Read), the downstream tool receives the literal too: Bash shell-expands against the usually-unset env var to empty; Read fails ENOENT.
+- **Substitution happens at plugin-load time**, for files the harness loads directly: `SKILL.md`, `plugins/claude/agents/*.md`, hook configs, MCP configs. By the time the agent's context receives these files, `${CLAUDE_PLUGIN_ROOT}` is already replaced with an absolute path.
+- **The `Read` tool does not substitute.** When an agent calls `Read` at runtime on any file — including files inside `plugins/claude/` (referenced content under `_shared/`, profile files, anything in `profiles/`) — the tool returns the on-disk bytes verbatim. `${CLAUDE_PLUGIN_ROOT}` in that content stays literal. If the agent then copies that literal into another tool argument (Bash, another Read), the downstream tool receives the literal too: Bash shell-expands against the usually-unset env var to empty; Read fails ENOENT.
 
 The 2026-04-17/18 SKILL.md probes were correct — substitution works for SKILL.md. Our 2026-04-18 follow-up note in `shared-profile-detection.md` claiming "verified on 2026-04-18; see ADR 0003 §Verification" was incorrect about *this* file — the probe sessions behind it tested SKILL.md, not `_shared/` content. The conflation was the bug. Symlink traversal, version regression, and install inconsistency all turned out to be non-causes — the mechanism was simply load-time vs runtime.
 
@@ -84,15 +84,15 @@ The 2026-04-17/18 SKILL.md probes were correct — substitution works for SKILL.
 The rules follow directly from the mechanism:
 
 1. **Plugin-load-time-substituted files** (safe to use `${CLAUDE_PLUGIN_ROOT}/…` freely):
-   - `klaude-plugin/skills/<name>/SKILL.md`
-   - `klaude-plugin/agents/<name>.md`
-   - `klaude-plugin/hooks/*.json` command strings
+   - `skills/<name>/SKILL.md`
+   - `plugins/claude/agents/<name>.md`
+   - `plugins/claude/hooks/*.json` command strings
    - `.mcp.json` / `mcp.json` configs
 
    Paths written with the brace form here reach the agent as resolved absolute paths and can be copied directly into tool arguments.
 
 2. **Runtime-Read files** (the literal token reaches the agent; do NOT pass it to tools):
-   - Any file referenced from a SKILL.md and loaded via `Read` at runtime. This includes everything in `klaude-plugin/skills/_shared/`, every per-skill referenced content file, every `profiles/**/*.md`, every file an agent reads mid-workflow.
+   - Any file referenced from a SKILL.md and loaded via `Read` at runtime. This includes everything in `skills/_shared/`, every per-skill referenced content file, every `profiles/**/*.md`, every file an agent reads mid-workflow.
 
    For these files, two patterns are safe:
    - **Explicit content** (preferred): hard-code the list of names/paths the procedure needs. Example: the **Known profiles** list in `shared-profile-detection.md` — profiles are enumerated from an explicit list in the file, not from a runtime filesystem walk.
@@ -106,7 +106,7 @@ CLAUDE.md and `docs/adr/*.md` live outside the plugin tree; they are not subject
 
 Authoritative spec: [`code.claude.com/docs/en/plugins-reference`](https://code.claude.com/docs/en/plugins-reference) — "`${CLAUDE_PLUGIN_ROOT}` and `${CLAUDE_PLUGIN_DATA}` are substituted inline anywhere they appear in skill content, agent content, hook commands, and MCP or LSP server configs."
 
-Related upstream bug: [claude-code issue #9354](https://github.com/anthropics/claude-code/issues/9354) — `${CLAUDE_PLUGIN_ROOT}` was reportedly not substituted in slash-command markdown. Our empirical result above covers SKILL.md prose specifically, not slash-command markdown. If this plugin ever needs to reference the variable in `klaude-plugin/commands/<name>/*.md` files, re-verify at that time.
+Related upstream bug: [claude-code issue #9354](https://github.com/anthropics/claude-code/issues/9354) — `${CLAUDE_PLUGIN_ROOT}` was reportedly not substituted in slash-command markdown. Our empirical result above covers SKILL.md prose specifically, not slash-command markdown. If this plugin ever needs to reference the variable in `plugins/claude/commands/<name>/*.md` files, re-verify at that time.
 
 Indexed as `kk:arch-decisions` for future retrieval: verification date, results, and caveats.
 
@@ -132,7 +132,7 @@ Put profiles under (say) `review-code/profiles/` and have other skills reach acr
 
 ### Single symlink at plugin root pointing at profiles
 
-Create `klaude-plugin/skills/profiles` → `../profiles`. Skills would then reference `profiles/<name>/…` as a sibling directory within `skills/`.
+Create `skills/profiles` → `../profiles`. Skills would then reference `profiles/<name>/…` as a sibling directory within `skills/`.
 
 **Rejected.** Still an outside-skills-directory link from the perspective of downstream skills that would resolve through it. Preserves the fragility without its benefit. Also semantically misleading — skills would appear to have an in-tree `profiles` subfolder that does not exist in the source.
 
@@ -215,4 +215,4 @@ This ADR does **not** migrate `_shared/` to `${CLAUDE_PLUGIN_ROOT}` references. 
 - [CLAUDE.md — Shared instructions](../../CLAUDE.md) (existing convention, retained)
 - [CLAUDE.md — Profile Conventions](../../CLAUDE.md) (added by this feature)
 - `kk:arch-decisions` — OpenCode Bun-cache symlink fragility (from OpenCode-support feature design review)
-- `klaude-plugin/hooks/hooks.json` — prior use of `${CLAUDE_PLUGIN_ROOT}` in the plugin
+- `plugins/claude/hooks/hooks.json` — prior use of `${CLAUDE_PLUGIN_ROOT}` in the plugin

@@ -21,7 +21,7 @@ The spawning workflow injects these artifacts into your prompt:
 
 - **Git diff** of the changes under review
 - **Spec context** (if available): relevant section from design.md, task description, documented design rationale
-- **Task scope** (if available): which tasks in the feature are in scope for this review and which are pending/out-of-scope — see `klaude-plugin/skills/_shared/review-scope-protocol.md`. When present, this overrides naive reading of the design doc: the design describes the full end state, but only in-scope tasks are expected in the diff.
+- **Task scope** (if available): which tasks in the feature are in scope for this review and which are pending/out-of-scope — see `skills/_shared/review-scope-protocol.md`. When present, this overrides naive reading of the design doc: the design describes the full end state, but only in-scope tasks are expected in the diff.
 - **Active profiles and resolved checklists**: a list of `(profile, checklist, triggered_by)` records already resolved by the spawning workflow. You do NOT detect profiles yourself — the calling skill ran profile detection and resolved which checklists apply. Your job is to read and apply them. The `triggered_by` field describes the detection signal that activated the profile (e.g., `filename — Chart.yaml in parent directory`); carry it through to your output findings.
 - **Capy read access** for project-specific context via `capy_search`
 

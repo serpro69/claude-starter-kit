@@ -1,6 +1,6 @@
 # Kubernetes — detection
 
-Declares when the `k8s` profile activates on a given set of files. Consumed by `klaude-plugin/skills/_shared/profile-detection.md`. Detection is additive: multiple profiles may activate on the same diff (e.g., `go` + `k8s`).
+Declares when the `k8s` profile activates on a given set of files. Consumed by `skills/_shared/profile-detection.md`. Detection is additive: multiple profiles may activate on the same diff (e.g., `go` + `k8s`).
 
 Evaluation follows the shared cost-ordered procedure (path → filename → content). Authority runs filename ≈ content > path: filename or content signals activate the profile; path alone never does, it only promotes a file to a candidate.
 

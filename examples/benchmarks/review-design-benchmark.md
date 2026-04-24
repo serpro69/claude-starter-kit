@@ -70,11 +70,11 @@ The skill achieves **perfect format compliance** across all 3 evals. Baselines d
   - **Section:** design.md:Architecture > Directory Structure; implementation.md:throughout
   - **Confidence:** 10/10 -- The design shows `.claude/skills/` as the skill directory
     (e.g., `.claude/skills/lang-go/`). The actual repository stores all skills under
-    `klaude-plugin/skills/`. There is no `.claude/skills/` directory in the repository.
+    `skills/`. There is no `.claude/skills/` directory in the repository.
     Every path reference in both documents is wrong.
   - **Evidence:** design.md line 43 shows `.claude/skills/` tree; implementation.md lines
     26, 401-402, 423-424, 464, 470, 535, 564, 697, 701-702 all reference `.claude/skills/`.
-    Actual skill location: `klaude-plugin/skills/`.
+    Actual skill location: `skills/`.
   - **Recommendation:** Replace all `.claude/skills/` references with the correct path. If
     the intent is that downstream template-created repos will have `.claude/skills/` (after
     plugin installation), this must be explicitly stated as an assumption in the design.
@@ -167,10 +167,10 @@ inconsistencies between the design docs and the actual codebase.
 
 ## Critical Issues
 
-### 1. Wrong directory structure -- skills live in `klaude-plugin/skills/`, not `.claude/skills/`
+### 1. Wrong directory structure -- skills live in `skills/`, not `.claude/skills/`
 
 The design repeatedly references `.claude/skills/` as the location for language skills.
-In the actual repository, all skills live under `klaude-plugin/skills/`.
+In the actual repository, all skills live under `skills/`.
 
 **Impact:** High. Must be corrected throughout both documents.
 
@@ -204,7 +204,7 @@ The actual skill is called `development-guidelines`.
 
 ## Recommendations
 
-1. Fix all path references to use `klaude-plugin/skills/`
+1. Fix all path references to use `skills/`
 2. Redesign the multi-language story
 3. Rename `development-process` to `development-guidelines`
 4-7. Address distribution model, cleanup behavior, effort estimates, capy integration

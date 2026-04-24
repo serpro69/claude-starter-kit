@@ -1783,8 +1783,8 @@ log_test "needs_plugin_migration returns true when upstream has plugin and not y
 reset_globals
 test_dir=$(create_temp_dir "plugin-migration")
 # Create upstream with plugin manifest
-mkdir -p "$test_dir/upstream/klaude-plugin/.claude-plugin"
-echo '{"name":"kk"}' > "$test_dir/upstream/klaude-plugin/.claude-plugin/plugin.json"
+mkdir -p "$test_dir/upstream/plugins/claude/.claude-plugin"
+echo '{"name":"kk"}' > "$test_dir/upstream/plugins/claude/.claude-plugin/plugin.json"
 # Create manifest without plugin_migrated flag
 mkdir -p "$test_dir/project/.github"
 cat > "$test_dir/project/.github/template-state.json" <<'JSON'

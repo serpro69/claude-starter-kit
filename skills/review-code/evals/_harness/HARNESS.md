@@ -21,14 +21,14 @@ This harness uses three sub-agents per eval, each with a narrowly scoped input, 
 - **Reviewer** — a `kk:code-reviewer` sub-agent, one per eval. Receives exactly the contract it is designed for in isolated mode: the diff, the pre-resolved `(profile, checklist)` list from the profile resolver, and any spec context. Applies checklists, emits findings. Does NOT redo detection.
 - **Grader** — a `kk:eval-grader` sub-agent, one per eval. Receives the profile resolver's output AND the reviewer's output, plus the eval's `assertions`. Grades each assertion against whichever artifact is relevant (routing assertions against resolver output; content/finding assertions against reviewer output). Does NOT see the fixture, the worktree, or any of the skill's source files.
 
-**Why three agents.** Splitting detection from review mirrors the real isolated-mode invocation: the main session resolves profiles, then hands `kk:code-reviewer` a pre-resolved list (see `klaude-plugin/agents/code-reviewer.md`'s "Active profiles and resolved checklists" contract). The orchestrator could resolve profiles inline, but doing so would (a) contaminate the orchestrator's context with every profile's `DETECTION.md` for every run, and (b) leak the orchestrator's knowledge of the eval assertions into the detection output. Delegating to `kk:profile-resolver` isolates detection structurally. The same agent is intended to be usable in production skill invocations that want to offload detection for context-management reasons.
+**Why three agents.** Splitting detection from review mirrors the real isolated-mode invocation: the main session resolves profiles, then hands `kk:code-reviewer` a pre-resolved list (see `plugins/claude/agents/code-reviewer.md`'s "Active profiles and resolved checklists" contract). The orchestrator could resolve profiles inline, but doing so would (a) contaminate the orchestrator's context with every profile's `DETECTION.md` for every run, and (b) leak the orchestrator's knowledge of the eval assertions into the detection output. Delegating to `kk:profile-resolver` isolates detection structurally. The same agent is intended to be usable in production skill invocations that want to offload detection for context-management reasons.
 
 ## Procedure
 
 ### 1. Stage worktrees
 
 ```
-klaude-plugin/skills/review-code/evals/_harness/setup.sh
+skills/review-code/evals/_harness/setup.sh
 ```
 
 Prints the absolute path of the stage dir on stdout. Capture it as `STAGE_DIR`. Under `STAGE_DIR` there is one git worktree per eval (`STAGE_DIR/<eval-name>/`) with the fixture files staged (`git diff --cached` shows them as added) on an empty base commit.
@@ -138,7 +138,7 @@ With this harness, caveats 1–3 from the prior session notes are resolved struc
 
 ## Authoring notes
 
-When adding a new eval under `klaude-plugin/skills/review-code/evals/`:
+When adding a new eval under `skills/review-code/evals/`:
 
 - The `test-files/` tree must be self-contained — `setup.sh` copies it verbatim into a fresh git repo, so any cross-reference (relative imports, file adjacency) must hold within `test-files/`.
 - Keep `eval.prompt` natural — it reaches the reviewer only as framing context. Do not leak assertion language into it.

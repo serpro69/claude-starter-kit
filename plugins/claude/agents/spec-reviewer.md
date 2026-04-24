@@ -21,7 +21,7 @@ The spawning workflow injects these into your prompt:
 
 - **Design docs**: paths to `design.md` and `implementation.md` for the feature
 - **Task tracking**: path to `tasks.md` with current task statuses
-- **Task scope**: which tasks are in scope (done) and which are out-of-scope (pending/in-progress) — see `klaude-plugin/skills/_shared/review-scope-protocol.md` for the artifact shape and interpretation rules
+- **Task scope**: which tasks are in scope (done) and which are out-of-scope (pending/in-progress) — see `skills/_shared/review-scope-protocol.md` for the artifact shape and interpretation rules
 - **Read/Grep/Glob access** to source files in the repository
 - **Capy read access** for project-specific context via `capy_search`
 

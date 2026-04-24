@@ -8,7 +8,7 @@ import (
 
 func main() {
 	manifestPath := flag.String("manifest", "", "path to the vendor manifest YAML file (required)")
-	targetDir := flag.String("target", "klaude-plugin/profiles/go", "profile root directory for output")
+	targetDir := flag.String("target", "profiles/go", "profile root directory for output")
 	dryRun := flag.Bool("dry-run", false, "print planned actions without writing files")
 	flag.Parse()
 
