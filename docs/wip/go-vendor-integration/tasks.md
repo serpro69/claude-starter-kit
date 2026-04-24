@@ -2,7 +2,7 @@
 
 > Design: [./design.md](./design.md)
 > Implementation: [./implementation.md](./implementation.md)
-> Status: pending
+> Status: done
 > Created: 2026-04-23
 
 ## Task 1: Go module and CLI skeleton
@@ -112,15 +112,15 @@
 - [x] 9.5 Verify: `test/test-plugin-structure.sh` passes — no orphans, no broken links, all invariants green (155/155 assertions)
 
 ## Task 10: Final verification
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 8, Task 9
 
 ### Subtasks
-- [ ] 10.1 Run `go test ./cmd/vendor-profiles/...` — all unit and integration tests pass
-- [ ] 10.2 Run `make vendor-go` — full pipeline succeeds, structure test passes
-- [ ] 10.3 Run `bash test/test-plugin-structure.sh` independently — all profile assertions green
-- [ ] 10.4 Verify token budget: count approximate tokens loaded per phase for always-load entries, flag if any phase exceeds ~8k tokens
-- [ ] 10.5 Run `test` skill to verify all tasks
-- [ ] 10.6 Run `document` skill to update any relevant docs
-- [ ] 10.7 Run `review-code` skill with Go input to review the implementation
-- [ ] 10.8 Run `review-spec` skill to verify implementation matches design and implementation docs
+- [x] 10.1 Run `go test ./cmd/vendor-profiles/...` — all unit and integration tests pass
+- [x] 10.2 Run `make vendor-go` — full pipeline succeeds, structure test passes
+- [x] 10.3 Run `bash test/test-plugin-structure.sh` independently — all profile assertions green
+- [x] 10.4 Verify token budget: count approximate tokens loaded per phase for always-load entries, flag if any phase exceeds ~8k tokens
+- [x] 10.5 Run `test` skill to verify all tasks
+- [x] 10.6 Run `document` skill to update any relevant docs
+- [x] 10.7 Run `review-code` skill with Go input to review the implementation
+- [x] 10.8 Run `review-spec` skill to verify implementation matches design and implementation docs

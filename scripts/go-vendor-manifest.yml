@@ -9,28 +9,30 @@
       phase: review-code
       as: security.md
 
-    - source: skills/golang-security/references/injection.md
-      phase: review-code
-      as: security-injection-ref.md
-      keep: all
-
     - source: skills/golang-code-style/SKILL.md
       phase: review-code
       as: code-style.md
-
-    - source: skills/golang-naming/SKILL.md
-      phase: review-code
-      as: naming.md
 
     - source: skills/golang-error-handling/SKILL.md
       phase: review-code
       as: error-handling.md
 
+    # Conditional
+    - source: skills/golang-security/references/injection.md
+      phase: review-code
+      as: security-injection-ref.md
+      keep: all
+      condition: "Diff handles user input, SQL queries, command execution, or template rendering"
+
+    - source: skills/golang-naming/SKILL.md
+      phase: review-code
+      as: naming.md
+      condition: "Diff introduces new exported types, functions, or packages"
+
     - source: skills/golang-performance/SKILL.md
       phase: review-code
       as: performance.md
-
-    # Conditional
+      condition: "Diff involves hot paths, allocations, caching, or performance-sensitive code"
     - source: skills/golang-database/SKILL.md
       phase: review-code
       as: database.md
@@ -61,11 +63,11 @@
       phase: implement
       as: error-handling.md
 
+    # Conditional
     - source: skills/golang-security/SKILL.md
       phase: implement
       as: security.md
-
-    # Conditional
+      condition: "Task handles auth, crypto, user input, secrets, or network I/O"
     - source: skills/golang-concurrency/SKILL.md
       phase: implement
       as: concurrency.md

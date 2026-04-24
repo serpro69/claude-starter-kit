@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -75,6 +76,9 @@ func ParseManifest(path string) (Manifest, error) {
 			}
 			if file.As == "" {
 				return nil, fmt.Errorf("upstream[%d] (%s) file[%d]: as is required", i, upstream.Repo, j)
+			}
+			if strings.ContainsAny(file.As, "/\\") || strings.Contains(file.As, "..") {
+				return nil, fmt.Errorf("upstream[%d] (%s) file[%d]: as must be a plain filename, got %q", i, upstream.Repo, j, file.As)
 			}
 			if err := validateKeep(file.Keep); err != nil {
 				return nil, fmt.Errorf("upstream[%d] (%s) file[%d]: %w", i, upstream.Repo, j, err)

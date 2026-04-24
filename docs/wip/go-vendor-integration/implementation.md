@@ -58,7 +58,7 @@
   }
   ```
 - Parse the manifest file using `gopkg.in/yaml.v3`.
-- Validate: `repo`, `ref`, `source`, `phase`, `as` are required. `phase` must be one of the known phase names. `keep` must be `"all"`, `"from_first_h1"`, or a `headings` object.
+- Validate: `repo`, `ref`, `source`, `phase`, `as` are required. `phase` must be one of the known phase names. `as` must be a plain filename (no path separators or `..` — prevents directory traversal via manifest). `keep` must be `"all"`, `"from_first_h1"`, or a `headings` object.
 - Resolve effective keep: if a file entry has no `keep`, use the upstream's `keep_default`. If neither is set, default to `"all"`.
 
 **Verify:** `manifest_test.go` — parse valid manifests (single upstream, multi-upstream), reject missing required fields, resolve keep defaults correctly.

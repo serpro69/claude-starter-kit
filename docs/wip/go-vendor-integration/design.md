@@ -150,18 +150,20 @@ Each phase's `index.md` uses HTML comment markers to separate vendored from hand
 - [removal-plan.md](removal-plan.md) — staged-removal template for retiring Go code.
 
 <!-- BEGIN VENDORED -->
+## Always load
+
 - [security.md](security.md) — Go security: injection, crypto, secrets, auth.
 - [code-style.md](code-style.md) — Code style, formatting, conventions.
-- [naming.md](naming.md) — Naming conventions and identifier clarity.
 - [error-handling.md](error-handling.md) — Error wrapping, sentinel errors, handling.
-- [performance.md](performance.md) — Performance anti-patterns and optimization.
 
 ## Conditional
 
+- [security-injection-ref.md](security-injection-ref.md) — Injection vulnerabilities. **Load if:** Diff handles user input, SQL queries, command execution, or template rendering.
+- [naming.md](naming.md) — Naming conventions and identifier clarity. **Load if:** Diff introduces new exported types, functions, or packages.
+- [performance.md](performance.md) — Performance anti-patterns and optimization. **Load if:** Diff involves hot paths, allocations, caching, or performance-sensitive code.
 - [database.md](database.md) — Database patterns and SQL safety. **Load if:** Diff imports database/sql, sqlx, gorm, ent, or pgx.
 - [concurrency.md](concurrency.md) — Goroutine lifecycle, channels, sync primitives. **Load if:** Diff uses goroutines, channels, or sync package.
 - [grpc.md](grpc.md) — gRPC service patterns. **Load if:** Diff imports google.golang.org/grpc.
-- [http.md](http.md) — HTTP handler patterns. **Load if:** Diff imports net/http or an HTTP framework.
 <!-- END VENDORED -->
 ```
 
@@ -199,15 +201,14 @@ Both hold naturally: vendored files are placed in the phase directory AND refere
 | Target file | Source | Load |
 |---|---|---|
 | `security.md` | `golang-security/SKILL.md` | always |
-| `security-injection-ref.md` | `golang-security/references/injection.md` | always |
 | `code-style.md` | `golang-code-style/SKILL.md` | always |
-| `naming.md` | `golang-naming/SKILL.md` | always |
 | `error-handling.md` | `golang-error-handling/SKILL.md` | always |
-| `performance.md` | `golang-performance/SKILL.md` | always |
+| `security-injection-ref.md` | `golang-security/references/injection.md` | conditional |
+| `naming.md` | `golang-naming/SKILL.md` | conditional |
+| `performance.md` | `golang-performance/SKILL.md` | conditional |
 | `database.md` | `golang-database/SKILL.md` | conditional |
 | `concurrency.md` | `golang-concurrency/SKILL.md` | conditional |
 | `grpc.md` | `golang-grpc/SKILL.md` | conditional |
-| `http.md` | `golang-http/SKILL.md` | conditional |
 
 ### implement/ (new)
 
@@ -218,13 +219,12 @@ All vendored. Pre-write gotchas loaded before the agent writes code.
 | `design-patterns.md` | `golang-design-patterns/SKILL.md` | always |
 | `structs-interfaces.md` | `golang-structs-interfaces/SKILL.md` | always |
 | `error-handling.md` | `golang-error-handling/SKILL.md` | always |
-| `security.md` | `golang-security/SKILL.md` | always |
+| `security.md` | `golang-security/SKILL.md` | conditional |
 | `concurrency.md` | `golang-concurrency/SKILL.md` | conditional |
 | `context.md` | `golang-context/SKILL.md` | conditional |
 | `data-structures.md` | `golang-data-structures/SKILL.md` | conditional |
 | `database.md` | `golang-database/SKILL.md` | conditional |
 | `grpc.md` | `golang-grpc/SKILL.md` | conditional |
-| `http.md` | `golang-http/SKILL.md` | conditional |
 | `dependency-injection.md` | `golang-dependency-injection/SKILL.md` | conditional |
 
 ### design/ (new)
@@ -235,7 +235,6 @@ All vendored, all conditional. Feeds the refinement question pool when Go + the 
 |---|---|---|
 | `database.md` | `golang-database/SKILL.md` | conditional |
 | `grpc.md` | `golang-grpc/SKILL.md` | conditional |
-| `http.md` | `golang-http/SKILL.md` | conditional |
 | `observability.md` | `golang-observability/SKILL.md` | conditional |
 
 ### test/ (new)

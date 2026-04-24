@@ -247,6 +247,22 @@ Files outside `klaude-plugin/` (this CLAUDE.md, README.md, ADRs under `docs/adr/
 6. Append the profile name to the **Known profiles** list in `klaude-plugin/skills/_shared/profile-detection.md`. This list is the authoritative runtime enumeration — consumers iterate it rather than enumerating the filesystem (see §Referencing profile content for why).
 7. Run `bash test/test-plugin-structure.sh` and confirm green.
 
+### Vendored profile content
+
+Some profiles populate phase content by vendoring files from external upstream repositories (e.g., the Go profile vendors from [samber/cc-skills-golang](https://github.com/samber/cc-skills-golang)). A Go CLI tool at `cmd/vendor-profiles/` drives this:
+
+1. A YAML manifest (`scripts/<profile>-vendor-manifest.yml`) maps upstream files to profile phase directories, specifying keep transforms, target filenames, and load conditions.
+2. The tool fetches each file, applies transforms (strip frontmatter via `from_first_h1`, extract specific headings, or passthrough), rewrites internal markdown links, and writes to the target phase directory.
+3. Each phase's `index.md` is updated between `<!-- BEGIN VENDORED -->` / `<!-- END VENDORED -->` injection markers. Content outside the markers (hand-written entries) is preserved.
+
+**Developer workflow:**
+
+- **Update upstream version:** Edit the manifest's `ref` field, run `make vendor-go`, review the diff, commit.
+- **Add a file to an existing profile:** Add a `files` entry to the manifest, run `make vendor-go`.
+- **Add vendoring for a new profile:** Create `scripts/<profile>-vendor-manifest.yml`, add a `make vendor-<profile>` target. The tool is profile-agnostic.
+
+The `make vendor-go` target runs the vendor tool and then `test/test-plugin-structure.sh` to validate the bidirectional index invariant. See `docs/wip/go-vendor-integration/design.md` for the full manifest schema and transform details.
+
 ## ADR location
 
 Architecture decisions that span more than one feature live at `docs/adr/NNNN-slug.md` using [Michael Nygard's template](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions) (Context, Decision, Consequences). Per-feature design docs live at `docs/wip/<feature>/` while work is active and move to `docs/done/<feature>/` on completion — they are not ADRs.

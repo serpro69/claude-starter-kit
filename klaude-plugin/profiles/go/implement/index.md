@@ -6,10 +6,10 @@
 - [design-patterns.md](design-patterns.md) — Idiomatic Go patterns for production-ready code. For error handling details see the `samber/cc-skills-golang@golang-erro
 - [structs-interfaces.md](structs-interfaces.md) — > "The bigger the interface, the weaker the abstraction." — Go Proverbs
 - [error-handling.md](error-handling.md) — This skill guides the creation of robust, idiomatic error handling in Go applications. Follow these principles to write 
-- [security.md](security.md) — Security in Go follows the principle of **defense in depth**: protect at multiple layers, validate all inputs, use secur
 
 ## Conditional
 
+- [security.md](security.md) — Security in Go follows the principle of **defense in depth**: protect at multiple layers, validate all inputs, use secur **Load if:** Task handles auth, crypto, user input, secrets, or network I/O
 - [concurrency.md](concurrency.md) — Go's concurrency model is built on goroutines and channels. Goroutines are cheap but not free — every goroutine you sp **Load if:** Task involves goroutines, channels, or sync primitives
 - [context.md](context.md) — `context.Context` is Go's mechanism for propagating cancellation signals, deadlines, and request-scoped values across AP **Load if:** Task involves context propagation or cancellation
 - [data-structures.md](data-structures.md) — Built-in and standard library data structures: internals, correct usage, and selection guidance. For safety pitfalls (ni **Load if:** Task involves custom data structures, generics, or collection types
