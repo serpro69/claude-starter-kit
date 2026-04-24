@@ -87,16 +87,17 @@
 - [x] 7.4 Verify: `go test ./cmd/vendor-profiles/...` all green, `make vendor-go` runs end-to-end
 
 ## Task 8: Create manifest and populate Go profile
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 7
 - **Docs:** [implementation.md — Task 2.1, Task 2.2](./implementation.md#task-21-create-the-manifest)
+- **Deviation:** `golang-http` skill does not exist in samber/cc-skills-golang (as of v1.2.5). Removed `http.md` entries from review-code, implement, and design phases. Design doc assumed this skill existed.
 
 ### Subtasks
-- [ ] 8.1 Write `scripts/go-vendor-manifest.yml` with all file entries from the design doc's Phase-by-Phase Content Plan
-- [ ] 8.2 Pin to latest samber/cc-skills-golang tag
-- [ ] 8.3 Verify with dry run: `go run ./cmd/vendor-profiles -manifest scripts/go-vendor-manifest.yml -dry-run`
-- [ ] 8.4 Run `make vendor-go` — all phase directories created and populated
-- [ ] 8.5 Spot-check vendored files: no frontmatter, no persona, links rewritten, content starts at H1
+- [x] 8.1 Write `scripts/go-vendor-manifest.yml` with all file entries from the design doc's Phase-by-Phase Content Plan
+- [x] 8.2 Pin to latest samber/cc-skills-golang tag (v1.2.5)
+- [x] 8.3 Verify with dry run: `go run ./cmd/vendor-profiles -manifest scripts/go-vendor-manifest.yml -dry-run`
+- [x] 8.4 Run vendor pipeline — all phase directories created and populated (26 files across 5 phases)
+- [x] 8.5 Spot-check vendored files: no frontmatter, no persona, links rewritten, content starts at H1
 
 ## Task 9: Delete replaced files and update profile docs
 - **Status:** pending
