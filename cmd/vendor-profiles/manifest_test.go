@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -270,6 +271,36 @@ func TestParseManifest_KeepValidation(t *testing.T) {
 			wantErr: "missing 'headings' key",
 		},
 		{
+			name: "keep object unexpected extra keys",
+			yaml: `
+- repo: foo/bar
+  ref: v1.0.0
+  files:
+    - source: foo.md
+      phase: test
+      as: bar.md
+      keep:
+        headings:
+          - "## Foo"
+        extra_key: bar
+`,
+			wantErr: "unexpected keys",
+		},
+		{
+			name: "empty headings list",
+			yaml: `
+- repo: foo/bar
+  ref: v1.0.0
+  files:
+    - source: foo.md
+      phase: test
+      as: bar.md
+      keep:
+        headings: []
+`,
+			wantErr: "headings list must not be empty",
+		},
+		{
 			name: "valid keep headings",
 			yaml: `
 - repo: foo/bar
@@ -393,9 +424,7 @@ func TestResolveKeep_HeadingsKeep(t *testing.T) {
 	headings := map[string]any{"headings": []any{"## Foo", "## Bar"}}
 	f := &File{Keep: headings}
 	f.ResolveKeep("from_first_h1")
-	got := fmt.Sprintf("%v", f.EffectiveKeep)
-	want := fmt.Sprintf("%v", headings)
-	if got != want {
+	if !reflect.DeepEqual(f.EffectiveKeep, headings) {
 		t.Errorf("EffectiveKeep = %v, want %v", f.EffectiveKeep, headings)
 	}
 }

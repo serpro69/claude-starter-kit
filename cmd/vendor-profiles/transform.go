@@ -10,9 +10,9 @@ func ApplyTransform(content []byte, keep any) ([]byte, error) {
 	switch v := keep.(type) {
 	case string:
 		switch v {
-		case "all":
+		case keepAll:
 			return TransformAll(content), nil
-		case "from_first_h1":
+		case keepFromFirstH1:
 			return TransformFromFirstH1(content)
 		default:
 			return nil, fmt.Errorf("unknown keep mode: %q", v)

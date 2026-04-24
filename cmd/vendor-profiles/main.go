@@ -33,8 +33,8 @@ func run(manifestPath, targetDir string, dryRun bool) error {
 	fetcher := &HTTPFetcher{}
 
 	for _, upstream := range manifest {
-		for i := range upstream.Files {
-			upstream.Files[i].ResolveKeep(upstream.KeepDefault)
+		for _, file := range upstream.Files {
+			file.ResolveKeep(upstream.KeepDefault)
 		}
 
 		for _, file := range upstream.Files {

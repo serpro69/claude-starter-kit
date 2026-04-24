@@ -7,13 +7,18 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type Manifest []Upstream
+const (
+	keepAll         = "all"
+	keepFromFirstH1 = "from_first_h1"
+)
+
+type Manifest []*Upstream
 
 type Upstream struct {
-	Repo        string `yaml:"repo"`
-	Ref         string `yaml:"ref"`
-	KeepDefault string `yaml:"keep_default,omitempty"`
-	Files       []File `yaml:"files"`
+	Repo        string  `yaml:"repo"`
+	Ref         string  `yaml:"ref"`
+	KeepDefault string  `yaml:"keep_default,omitempty"` // string-only by design: "all" or "from_first_h1"; headings is per-file
+	Files       []*File `yaml:"files"`
 }
 
 type File struct {
@@ -23,10 +28,6 @@ type File struct {
 	Keep          any    `yaml:"keep,omitempty"`
 	Condition     string `yaml:"condition,omitempty"`
 	EffectiveKeep any    // resolved at runtime, not from YAML
-}
-
-type KeepHeadings struct {
-	Headings []string `yaml:"headings"`
 }
 
 var knownPhases = map[string]bool{
@@ -56,8 +57,8 @@ func ParseManifest(path string) (Manifest, error) {
 		if upstream.Ref == "" {
 			return nil, fmt.Errorf("upstream[%d]: ref is required", i)
 		}
-		if upstream.KeepDefault != "" && upstream.KeepDefault != "all" && upstream.KeepDefault != "from_first_h1" {
-			return nil, fmt.Errorf("upstream[%d] (%s): invalid keep_default %q (must be \"all\" or \"from_first_h1\")", i, upstream.Repo, upstream.KeepDefault)
+		if upstream.KeepDefault != "" && upstream.KeepDefault != keepAll && upstream.KeepDefault != keepFromFirstH1 {
+			return nil, fmt.Errorf("upstream[%d] (%s): invalid keep_default %q (must be %q or %q)", i, upstream.Repo, upstream.KeepDefault, keepAll, keepFromFirstH1)
 		}
 		if len(upstream.Files) == 0 {
 			return nil, fmt.Errorf("upstream[%d] (%s): files is required", i, upstream.Repo)
@@ -90,17 +91,23 @@ func validateKeep(keep any) error {
 	}
 	switch v := keep.(type) {
 	case string:
-		if v != "all" && v != "from_first_h1" {
-			return fmt.Errorf("invalid keep mode %q (must be \"all\" or \"from_first_h1\")", v)
+		if v != keepAll && v != keepFromFirstH1 {
+			return fmt.Errorf("invalid keep mode %q (must be %q or %q)", v, keepAll, keepFromFirstH1)
 		}
 	case map[string]any:
 		headings, ok := v["headings"]
 		if !ok {
 			return fmt.Errorf("keep object missing 'headings' key")
 		}
+		if len(v) > 1 {
+			return fmt.Errorf("keep object has unexpected keys (only 'headings' is allowed)")
+		}
 		list, ok := headings.([]any)
 		if !ok {
 			return fmt.Errorf("headings must be a list of strings")
+		}
+		if len(list) == 0 {
+			return fmt.Errorf("headings list must not be empty")
 		}
 		for i, h := range list {
 			if _, ok := h.(string); !ok {
@@ -122,5 +129,5 @@ func (f *File) ResolveKeep(upstreamDefault string) {
 		f.EffectiveKeep = upstreamDefault
 		return
 	}
-	f.EffectiveKeep = "all"
+	f.EffectiveKeep = keepAll
 }

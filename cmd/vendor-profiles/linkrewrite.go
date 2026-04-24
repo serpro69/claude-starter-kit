@@ -8,7 +8,7 @@ import (
 
 var linkRegex = regexp.MustCompile(`\[([^\]]+)\]\(([^)]+)\)`)
 
-func RewriteLinks(content []byte, sourceFile string, files []File) []byte {
+func RewriteLinks(content []byte, sourceFile string, files []*File) []byte {
 	sourceDir := path.Dir(sourceFile)
 
 	result := linkRegex.ReplaceAllStringFunc(string(content), func(match string) string {
