@@ -1,0 +1,1934 @@
+ ▐▛███▜▌   Claude Code v2.1.119
+▝▜█████▛▘  Opus 4.6 · Claude Team
+  ▘▘ ▝▝    /tmp/tmp.PODCtuQxKI
+
+  Using Opus 4.6 (from .claude/settings.json) · /model to change
+
+❯ We designed and documented a feature for opencode support                     
+  @docs/wip/opencode-support , but I want to pivot to supporting codex now as   
+  another more important feature. Use the opencode-support docs as a baseline,  
+  but focus entirely on supporting codex. We'll document it separately, for now 
+   let's chat about it                                                          
+  ⎿  Listed directory docs/wip/opencode-support/
+
+● Let me read the opencode-support docs to understand the baseline we're working
+   from.
+
+  Read 3 files (ctrl+o to expand)
+
+● Good, I've read through all three docs. Here's my take on the pivot:
+
+  Codex is dramatically simpler than opencode. The opencode design was 80%
+  infrastructure (JS plugin runtime, hook-based context protection, per-turn
+  bootstrap injection, Bun package resolution) and 20% skills. Codex flips that
+  — it's almost entirely about skills + bootstrap via AGENTS.md, with no plugin
+  runtime, no commands surface, no agents surface, no hooks API.
+
+  The big question is: do you still want the full repo restructure (skills to
+  root, klaude-plugin/ → plugins/claude/, provider-neutral SKILL.md files with
+  reference/<provider>.md)? That was the "multi-provider foundation" half of the
+   opencode feature — it's provider-agnostic work. Without it, codex support
+  could be as simple as:
+
+  1. Add reference/codex.md to each skill with codex tool names
+  2. Write an install doc that tells users to symlink or copy skills into
+  ~/.agents/skills/kk
+  3. Ship an AGENTS.md template with provider identity + tool mapping
+
+  With the restructure, it's cleaner long-term but a lot of churn for what might
+   be a "let's see if codex sticks" experiment.
+
+  The other open question is capy. On opencode, hooks enforced capy routing
+  (blocking curl/wget/webfetch). Codex has no hook mechanism — capy routing
+  would be purely instructional (via AGENTS.md bootstrap text), which means it's
+   advisory, not enforced. Is that acceptable, or is capy a hard requirement?
+
+  What's your instinct — full restructure as planned, or lightweight codex-only
+  addition on top of the current layout?
+
+✻ Cogitated for 41s
+
+※ recap: We're pivoting from opencode to codex as the next provider to support, using the opencode design docs as a baseline. I asked whether you want the full repo restructure or a lightweight codex-only addition, and whether capy enforcement (impossible without hooks on codex) is a hard requirement. (disable recaps in /config)
+
+❯ Codex does support hooks (currently experimental, but still -                 
+  https://developers.openai.com/codex/hooks )                                   
+
+● Let me check that documentation to understand codex's hook system.
+
+  Called capy 3 times (ctrl+o to expand)
+
+● Let me grab a few more codex docs to complete the picture.
+
+  Called capy 11 times (ctrl+o to expand)
+
+● OK, I've now read through the codex docs on hooks, skills, plugins, subagents,
+   MCP, and AGENTS.md. My earlier take was wrong — codex is much richer than the
+   opencode design assumed. Here's the revised picture:
+
+  What codex actually has (vs. what the opencode design assumed):
+
+  ┌───────────────┬────────────────────┬────────────────────────────────────┐
+  │    Surface    │  Opencode design   │              Reality               │
+  │               │      assumed       │                                    │
+  ├───────────────┼────────────────────┼────────────────────────────────────┤
+  │ Skills        │ Native at          │ Yes, plus .agents/skills/ at       │
+  │               │ ~/.agents/skills/  │ repo/CWD scope                     │
+  ├───────────────┼────────────────────┼────────────────────────────────────┤
+  │               │                    │ Full plugin system with            │
+  │ Plugins       │ None               │ .codex-plugin/plugin.json,         │
+  │               │                    │ marketplace, bundled skills + MCP  │
+  ├───────────────┼────────────────────┼────────────────────────────────────┤
+  │               │                    │ Experimental hooks.json —          │
+  │ Hooks         │ None               │ SessionStart, PreToolUse,          │
+  │               │                    │ PostToolUse, Stop,                 │
+  │               │                    │ UserPromptSubmit                   │
+  ├───────────────┼────────────────────┼────────────────────────────────────┤
+  │ MCP           │ Not mentioned      │ Full support via config.toml or    │
+  │               │                    │ plugin .mcp.json                   │
+  ├───────────────┼────────────────────┼────────────────────────────────────┤
+  │ Subagents     │ None               │ Native subagent spawning,          │
+  │               │                    │ including CSV batch workflows      │
+  ├───────────────┼────────────────────┼────────────────────────────────────┤
+  │               │                    │ No direct equivalent — skills      │
+  │ Commands      │ None               │ serve this role (invoked via       │
+  │               │                    │ /skills or $mention)               │
+  ├───────────────┼────────────────────┼────────────────────────────────────┤
+  │ Project       │ AGENTS.md only     │ AGENTS.md with directory-walk      │
+  │ instructions  │                    │ inheritance, AGENTS.override.md    │
+  └───────────────┴────────────────────┴────────────────────────────────────┘
+
+  Three things that change the design significantly:
+
+  1. Distribution via plugin, not symlinks. Codex has a plugin system
+  structurally similar to Claude's — .codex-plugin/plugin.json manifest, skills/
+   inside the plugin, marketplace support. So plugins/codex/ with a proper
+  plugin manifest is the right delivery, not the "symlink to ~/.agents/skills/"
+  the opencode design sketched.
+  2. Hooks can enforce capy routing — partially. PreToolUse can block Bash
+  commands via permissionDecision: "deny" in JSON stdout. So
+  curl/wget/inline-HTTP blocking works. But hooks currently only intercept Bash
+  — not Write, WebSearch, or MCP tools. So WebFetch-equivalent blocking is
+  instructional only (via SessionStart context injection).
+  3. SessionStart hook is the bootstrap mechanism. It can inject
+  additionalContext into the session — this is cleaner than relying solely on
+  AGENTS.md. Provider identity + capy routing rules go here.
+
+  The strategic question is still the same: do we do the full repo restructure
+  (skills to root, provider-neutral SKILL.md with reference/<provider>.md) or a
+  lightweight codex-only addition? The restructure is provider-agnostic work —
+  it's the same regardless of whether provider #2 is opencode or codex. But it's
+   a lot of churn if codex is an experiment.
+
+  What's your read — full restructure, or add codex support on top of the
+  current layout first and restructure later if it proves out?
+
+✻ Brewed for 1m 28s
+
+❯ I want minimal restructure and full (as much as codex supports) feature       
+  parity.                                                                       
+  What I'm thinking is, does it make sense to just fork this repo, then name it 
+   codex-toolbox, refactor everything that's codex-specific?                    
+
+● Honest take: forking is the fastest path to a working codex-toolbox, but it's
+  the wrong move if you plan to maintain both.
+
+  The real cost of a fork is skill drift. Skills are the core value of this repo
+   — design, implement, review-code with its profiles, chain-of-verification,
+  etc. They evolve: you tweak detection logic, improve prompts, add profiles,
+  fix workflow ordering bugs. In a fork, every improvement has to be manually
+  ported. That discipline lasts about two weeks before one repo falls behind.
+
+  What a fork actually looks like:
+  - Copy repo, gut .claude/, .claude-plugin/, replace with .codex/,
+  .codex-plugin/
+  - Rewrite every SKILL.md to use codex tool names instead of Claude's
+  - Replace hooks.json (Claude format) with hooks.json (codex format — different
+   schema, different blocking mechanism)
+  - Replace CLAUDE.md with AGENTS.md
+  - Delete commands (codex has no equivalent — skills serve that role)
+  - Rewrite agents as codex subagent definitions
+  - Rewrite all tests
+
+  That's not "refactor," that's a rewrite. And then you maintain two repos where
+   70%+ of the content (skill logic, profiles, shared instructions) is
+  identical.
+
+  The lighter alternative that avoids both forking AND the full opencode-style 
+  restructure:
+
+  1. Move klaude-plugin/skills/ to skills/ at repo root (one git mv, update
+  symlink + marketplace path)
+  2. Keep klaude-plugin/ for all other Claude artifacts (commands, agents,
+  hooks, scripts) — don't rename it
+  3. Add plugins/codex/ with .codex-plugin/plugin.json, codex hooks.json,
+  AGENTS.md template
+  4. Codex plugin's skills/ symlinks to ../../skills/ (or copies at install time
+   if codex doesn't follow symlinks)
+  5. Skip the provider-neutral SKILL.md rewrite entirely — codex's model is
+  smart enough to map tool names if the SessionStart hook injects a mapping
+  table
+
+  Step 5 is the key insight: instead of rewriting every SKILL.md to say "read
+  the file" instead of Read, just inject a tool-name mapping via the
+  SessionStart hook's additionalContext. Codex's model sees "When this skill
+  says Read, use read_file; when it says Bash, use shell" and it works. Impure,
+  but it avoids touching every skill file.
+
+  Total repo changes: one directory move, one new plugins/codex/ tree, zero
+  skill rewrites. Skills stay single-source. What do you think?
+
+✻ Cogitated for 58s
+
+❯ sound like a good alternative                                                 
+
+● Good. Before we formalize anything, a few design decisions we should align on:
+
+  1. Tool-name mapping — what are codex's actual tool names?
+  From the hooks docs I can see Bash is one. But I need to look up what codex
+  calls its read/write/edit/search tools to build the mapping table. The docs
+  mention apply_patch for editing. Want me to dig into that?
+
+  2. Capy enforcement gap. Hooks only intercept Bash today. So we can block
+  curl/wget/inline-HTTP and forbidden file patterns via PreToolUse. But we
+  cannot hook-block the equivalent of WebFetch or non-Bash tools. Capy routing
+  for those is advisory only (via SessionStart context). Is that acceptable, or
+  is it a blocker?
+
+  3. Subagents. Claude ships code-reviewer, spec-reviewer, design-reviewer as
+  custom agents. I didn't find evidence that codex supports user-defined
+  subagent markdown files the way Claude does — subagents seem to be spawned
+  programmatically. Need to verify. If codex can't do custom subagents, the
+  skills that delegate to reviewers would need a different approach (inline the
+  review prompt instead of delegating).
+
+  4. Plugin vs. bare skills delivery. Codex has both: plugin system
+  (.codex-plugin/plugin.json + bundled skills) and bare .agents/skills/
+  directory scanning. Plugin is cleaner for distribution but adds structure.
+  Bare skills are simpler. Which do you prefer?
+
+  Want me to research the tool names and subagent questions now, or do you have
+  a preference on any of these first?
+
+✻ Sautéed for 33s
+
+※ recap: Adding codex support to claude-toolbox with minimal repo restructure by moving skills to a shared root and adding a codex plugin tree with hook-based tool-name mapping. Next step is your call on four open design questions I listed about tool names, capy gaps, subagents, and plugin vs bare delivery. (disable recaps in /config)
+
+❯ 1. yes, need to research first to form a complete picture before we document  
+  the design and implementation                                                 
+  2. it's acceptable since this is the only option (we should document an adr   
+  for this)                                                                     
+  3. it does support subagents - https://developers.openai.com/codex/subagents  
+  4. plugin                                                                     
+                                                                                
+  please research tool name, subagent questions, and most of the codex          
+  documentation (spawn sub-agents for exploration, if you need to, but we need  
+  a complete picture of what codex support and what it does not)                
+                                                                                
+  Also do note that this repo also has "template configs" outside of the plugin 
+   ecosystem. This needs to support codex as well                               
+
+● I'll research codex comprehensively in parallel — tool names, subagents,
+  config surface, and the repo's template configs.
+
+● Agent(Research codex tools and config)
+  ⎿  Backgrounded agent (↓ to manage · ctrl+o to expand)
+
+● Agent(Research codex subagents deeply)
+  ⎿  Backgrounded agent (↓ to manage · ctrl+o to expand)
+
+● Agent(Research codex plugins build system)  ⎿  Backgrounded agent (↓ to manage · ctrl+o to expand)
+
+● Now let me explore the repo's template configs while the agents research codex
+   docs.
+
+● Explore(Explore repo template configs)
+  ⎿  Backgrounded agent (↓ to manage · ctrl+o to expand)
+
+● Four research agents are running in parallel:
+  1. Codex tools & config — tool names, config.toml reference, rules system,
+  permissions model
+  2. Codex subagents — custom definitions, spawning, read-only mode, MCP
+  inheritance
+  3. Codex plugins — build system, manifest schema, distribution, marketplace
+  4. Repo template configs — everything outside klaude-plugin/ that needs a
+  codex equivalent
+
+  I'll synthesize the findings once they come back.
+
+✻ Sautéed for 52s
+
+● Agent "Research codex subagents deeply" completed
+
+● Subagent research is back. Key takeaway: codex uses TOML files (not markdown)
+  for custom agents at .codex/agents/<name>.toml, with sandbox_mode = 
+  "read-only" for reviewers. Spawning is prompt-driven rather than via explicit
+  tool calls. Waiting on the other three agents.
+
+● Agent "Explore repo template configs" completed
+
+● Repo template configs research is back. Key finding: template-sync distributes
+   .claude/settings.json, .claude/CLAUDE.extra.md, .serena/project.yml, and
+  statusline scripts to downstream repos with variable substitution. All of
+  these need codex equivalents. Still waiting on two more agents.
+
+● Agent "Research codex plugins build system" completed
+
+● Plugin research is in. Important finding: plugins cannot ship hooks or 
+  AGENTS.md — those must be user-configured separately. So hooks (capy
+  enforcement) and AGENTS.md (provider bootstrap) are template config concerns,
+  not plugin concerns. One agent still running.
+
+● Agent "Research codex tools and config" completed
+
+● All four research agents are back. Here's the complete picture.
+
+  ---
+  Codex Feature Map — Complete Synthesis
+
+  Tool Name Mapping
+
+  ┌─────────────┬──────────────────────┬───────────────────────────────────┐
+  │ Claude tool │   Codex equivalent   │               Notes               │
+  ├─────────────┼──────────────────────┼───────────────────────────────────┤
+  │ Read        │ read_file            │                                   │
+  ├─────────────┼──────────────────────┼───────────────────────────────────┤
+  │ Write       │ write_file           │                                   │
+  ├─────────────┼──────────────────────┼───────────────────────────────────┤
+  │ Edit        │ apply_patch          │ Unified diff format               │
+  ├─────────────┼──────────────────────┼───────────────────────────────────┤
+  │ Bash        │ shell (unified exec) │                                   │
+  ├─────────────┼──────────────────────┼───────────────────────────────────┤
+  │ Grep        │ No dedicated tool    │ Use shell with grep               │
+  ├─────────────┼──────────────────────┼───────────────────────────────────┤
+  │ Glob        │ No dedicated tool    │ Use shell with find               │
+  ├─────────────┼──────────────────────┼───────────────────────────────────┤
+  │ WebSearch   │ web_search           │ Configurable: disabled | cached | │
+  │             │                      │  live                             │
+  ├─────────────┼──────────────────────┼───────────────────────────────────┤
+  │ WebFetch    │ No equivalent        │ No dedicated fetch tool           │
+  ├─────────────┼──────────────────────┼───────────────────────────────────┤
+  │ Agent /     │ Prompt-driven        │ No explicit spawn_agent tool call │
+  │ Task        │ spawning             │                                   │
+  ├─────────────┼──────────────────────┼───────────────────────────────────┤
+  │ Skill       │ skill tool           │ Invoked via /skills or $mention   │
+  └─────────────┴──────────────────────┴───────────────────────────────────┘
+
+  What codex HAS that maps to our features
+
+  ┌───────────────────┬────────────────────────────┬───────────────────────┐
+  │      Feature      │      Claude mechanism      │    Codex mechanism    │
+  ├───────────────────┼────────────────────────────┼───────────────────────┤
+  │                   │                            │ Plugin skills/ dir OR │
+  │ Skills            │ Plugin skills/ dir         │  .agents/skills/      │
+  │                   │                            │ (same SKILL.md        │
+  │                   │                            │ format)               │
+  ├───────────────────┼────────────────────────────┼───────────────────────┤
+  │ Sub-agents        │ agents/*.md (markdown +    │ .codex/agents/*.toml  │
+  │                   │ frontmatter)               │ (TOML, not markdown)  │
+  ├───────────────────┼────────────────────────────┼───────────────────────┤
+  │                   │                            │ .codex/hooks.json     │
+  │ Hooks             │ hooks in settings.json     │ (experimental,        │
+  │                   │                            │ Bash-only             │
+  │                   │                            │ interception)         │
+  ├───────────────────┼────────────────────────────┼───────────────────────┤
+  │                   │                            │ config.toml           │
+  │ MCP servers       │ .mcp.json                  │ [mcp_servers] or      │
+  │                   │                            │ plugin .mcp.json      │
+  ├───────────────────┼────────────────────────────┼───────────────────────┤
+  │ Project           │                            │ AGENTS.md (with       │
+  │ instructions      │ CLAUDE.md                  │ directory-walk        │
+  │                   │                            │ inheritance)          │
+  ├───────────────────┼────────────────────────────┼───────────────────────┤
+  │ Settings/permissi │ .claude/settings.json      │ .codex/config.toml    │
+  │ ons               │                            │                       │
+  ├───────────────────┼────────────────────────────┼───────────────────────┤
+  │ Command policies  │ Allow/deny lists           │ Starlark .rules files │
+  │                   │                            │  (much more powerful) │
+  ├───────────────────┼────────────────────────────┼───────────────────────┤
+  │ Plugin            │ .claude-plugin/marketplace │ .codex-plugin/plugin. │
+  │ distribution      │ .json                      │ json + marketplace    │
+  ├───────────────────┼────────────────────────────┼───────────────────────┤
+  │ Statusline        │ Shell script               │ tui.status_line       │
+  │                   │                            │ config                │
+  └───────────────────┴────────────────────────────┴───────────────────────┘
+
+  What codex DOESN'T have
+
+  - No commands/slash-commands surface — skills serve this role
+  - No WebFetch equivalent — advisory-only via SessionStart context
+  - Hook interception beyond Bash — PreToolUse only fires for Bash/shell today
+  - No plugin-shipped hooks — hooks must be in .codex/hooks.json (template
+  config)
+  - No plugin-shipped AGENTS.md — must be separate
+
+  Architecture for our codex support
+
+  Given all this, here's how I see it mapping:
+
+  Plugin (plugins/codex/):
+  - .codex-plugin/plugin.json — manifest, points at skills/
+  - skills/ — symlink to ../../skills/ (or copy if symlinks don't survive)
+  - .mcp.json — capy MCP server config
+  - marketplace.json — marketplace entry for distribution
+
+  Template configs (.codex/):
+  - config.toml — model, approval policy, MCP, agent thread limits, feature
+  flags (codex_hooks = true)
+  - hooks.json — SessionStart (provider identity + tool mapping + capy routing),
+   PreToolUse on Bash (curl/wget block + file-path denylist)
+  - agents/code-reviewer.toml — sandbox_mode = "read-only", review instructions
+  - agents/spec-reviewer.toml — same pattern
+  - agents/design-reviewer.toml — same pattern
+  - rules/ — Starlark rules for command policies (equivalent of Claude's
+  permission deny lists)
+
+  Root-level:
+  - AGENTS.md — provider identity block + behavioral instructions (equivalent of
+   CLAUDE.md + CLAUDE.extra.md)
+
+  Template-sync extension:
+  - Sync .codex/ alongside .claude/ to downstream repos
+  - Variable substitution for config.toml and AGENTS.md
+
+  Key design decisions still open
+
+  1. Skills symlink in plugin — does codex's plugin system follow symlinks from
+  plugins/codex/skills/ → ../../skills/? If not, we need a build/copy step. Need
+   to test.
+  2. Starlark rules vs. simple deny lists — Claude uses a flat allow/deny list
+  in settings.json. Codex uses Starlark .rules files with prefix_rule(). Do we
+  ship equivalent rules for the same denied commands (rm, git push --force,
+  etc.)?
+  3. Serena — Codex doesn't use Serena (it has no LSP integration like that). Do
+   we drop .serena/project.yml from codex template configs, or is Serena
+  available as an MCP server on codex too?
+  4. Capy script path — .mcp.json in the plugin needs to point at capy. Same
+  open question as the opencode design: where does capy's launch script live for
+   codex users?
+  5. Statusline — Codex has tui.status_line but different mechanism. Do we port
+  the statusline scripts or skip this?
+
+  ---
+  Want to discuss any of these open points, or are you ready for me to start
+  drafting the design doc?
+
+✻ Sautéed for 58s
+
+※ recap: We're designing codex support for claude-toolbox with minimal repo restructure and full feature parity. All codex research is complete — tools, plugins, hooks, subagents, config, and repo template configs mapped out. Next step: discuss open design decisions or start drafting the design doc. (disable recaps in /config)
+
+❯ 1. let's try symlinks first, but document both options in the design -        
+  implement and test first, if doesn't work use second                          
+  2. equivalent rules at least , but can also expand since .rules are more      
+  powerful                                                                      
+  3. serena is planned for removal completely, so not an issue (serena is an    
+  mcp though, so it should be supported as is)                                  
+  4. in .codes/scripts?                                                         
+  5. port the statusline, preferably with feature-parity                        
+
+● Good, all decisions are locked in. Let me confirm the full picture before
+  drafting:
+
+  Approach: Minimal restructure — move klaude-plugin/skills/ to skills/ at repo
+  root, add plugins/codex/ tree, skip provider-neutral SKILL.md rewrite (use
+  SessionStart tool-mapping instead).
+
+  Delivery:
+  - Plugin at plugins/codex/ — .codex-plugin/plugin.json, skills/ symlink (copy
+  fallback), .mcp.json for capy, marketplace entry
+  - Template configs at .codex/ — config.toml, hooks.json, agents/*.toml,
+  rules/, scripts/capy.sh, statusline scripts
+  - AGENTS.md at project root — provider identity + behavioral instructions
+
+  Feature parity:
+  - Skills: shared via symlink, tool-name mapping via SessionStart hook
+  - Sub-agents: TOML rewrites of code-reviewer, spec-reviewer, design-reviewer
+  with sandbox_mode = "read-only"
+  - Hooks: SessionStart (bootstrap + capy routing) + PreToolUse
+  (curl/wget/file-path denylist, Bash-only — ADR documenting the gap)
+  - Rules: Starlark port of Claude deny lists, with room to expand
+  - MCP: capy via .codex/scripts/capy.sh, Serena still works as MCP if users
+  want it
+  - Statusline: full port with feature parity
+  - Template-sync: extended to handle .codex/ alongside .claude/
+  - No commands surface (skills cover it)
+
+  One thing I want to flag: the skills move (klaude-plugin/skills/ → skills/)
+  affects Claude users too — plugins/claude/skills needs the symlink back,
+  .claude-plugin/marketplace.json source path changes, all klaude-plugin/
+  references in tests/docs/scripts need updating. Same Phase 1 as the opencode
+  design. Are you OK with that churn, or do you want to explore keeping skills
+  in klaude-plugin/skills/ and having the codex plugin symlink point there
+  instead?
+
+❯ looks fine, but do a research about                                           
+  https://developers.openai.com/codex/plugins/build                             
+
+  Called capy 2 times (ctrl+o to expand)
+
+● Good findings. The distribution model is now clear:
+
+  How codex users install our plugin:
+  codex plugin marketplace add serpro69/claude-toolbox
+  This clones the whole repo. Our .agents/plugins/marketplace.json (at repo
+  root) points to ./plugins/codex. Users then browse the codex plugin UI and
+  install kk.
+
+  Key structural detail: The manifest "skills": "./skills/" is a relative path
+  from the plugin root. So plugins/codex/skills/ needs to resolve to actual
+  skill files — whether via symlink to ../../skills/ or a copy. The docs never
+  mention symlinks, which is why we need to test.
+
+  One wrinkle with --sparse: If someone tries codex plugin marketplace add 
+  serpro69/claude-toolbox --sparse .agents/plugins, they'd only get the
+  marketplace JSON but not the actual plugin directory it points to. So sparse
+  checkout won't work for our layout — users install the full repo. Worth
+  documenting.
+
+  Repo layout after this feature:
+  claude-toolbox/
+  ├── .agents/plugins/marketplace.json    # NEW — codex marketplace
+  ├── skills/                             # MOVED from klaude-plugin/skills/
+  ├── plugins/
+  │   └── codex/
+  │       ├── .codex-plugin/plugin.json   # manifest, "skills": "./skills/"
+  │       ├── skills/                     # symlink → ../../skills/ (or copy)
+  │       └── .mcp.json                   # capy MCP config
+  ├── .codex/                             # NEW — template configs
+  │   ├── config.toml
+  │   ├── hooks.json
+  │   ├── agents/*.toml
+  │   ├── rules/
+  │   └── scripts/
+  ├── klaude-plugin/                      # EXISTING minus skills/
+  │   ├── skills → ../skills              # symlink back
+  │   ├── commands/
+  │   ├── agents/
+  │   └── ...
+  ├── .claude-plugin/marketplace.json     # EXISTING — updated source path
+  ├── .claude/                            # EXISTING
+  ├── AGENTS.md                           # NEW — codex project instructions
+  ├── CLAUDE.md                           # EXISTING
+  └── ...
+
+  This is all the research we need. Ready to start the design doc?
+
+✻ Worked for 41s
+
+❯ yes, proceed by loading kk:design and following it                            
+
+● Skill(kk:design)
+  ⎿  Successfully loaded skill
+
+● I'll follow the skill workflow strictly. Starting with loading all
+  instructions before engaging with the subject matter.
+
+  Read 3 files (ctrl+o to expand)
+
+● Now running profile detection for the design phase. Let me check which
+  profiles have design signals relevant to this feature.
+  Ran 1 shell command (ctrl+o to expand)
+
+● No profiles match — this is infrastructure/plugin work, not
+  language/platform-specific. Now let me search for prior design context and
+  read the task template.
+
+  Read 1 file, called capy (ctrl+o to expand)
+
+● Good — no prior design context in capy, no profiles active, and task format is
+   loaded.
+
+  Steps 1-3 were completed in our conversation: we explored the codebase,
+  researched codex docs thoroughly (tools, hooks, plugins, subagents, config,
+  rules, AGENTS.md), and refined the design with all open questions resolved.
+  Moving to Step 4 — presenting the design section by section.
+
+  ---
+  Section 1: Overview & Goals
+
+  This feature adds first-class OpenAI Codex support to claude-toolbox with
+  minimal repo restructure. Today the repo is Claude-only; after this feature,
+  Codex users get the same skills, equivalent sub-agents, capy
+  context-protection (within codex's current hook limitations), MCP wiring, and
+  template configs.
+
+  The approach avoids the full multi-provider rewrite (provider-neutral SKILL.md
+   files with reference/<provider>.md). Instead, skills are shared as-is and a
+  tool-name mapping table injected via Codex's SessionStart hook tells the model
+   how to translate Claude tool names it encounters in skill files.
+
+  Goals:
+  1. A Codex user installs the plugin via codex plugin marketplace add 
+  serpro69/claude-toolbox and immediately has all workflow skills available
+  2. Skills are authored once and shared between Claude and Codex via a single
+  canonical skills/ directory at repo root
+  3. Codex-specific artifacts (agents, hooks, config, rules) live under .codex/
+  and plugins/codex/ — isolated from Claude's side
+  4. Template-sync distributes .codex/ configs to downstream repos alongside
+  .claude/
+  5. Capy enforcement works via hooks where codex supports it (Bash
+  interception), with advisory-only coverage documented for gaps
+
+  Non-goals:
+  - Not rewriting SKILL.md files to be provider-neutral
+  - Not supporting codex's --sparse checkout for plugin installation (our layout
+   requires the full repo)
+  - Not replacing Serena — codex users can configure it as an MCP server if they
+   want
+
+  Does this section look right?
+
+✻ Worked for 1m 5s
+
+❯ yes                                                                           
+
+● Section 2: Repository Layout Changes
+
+  The restructure is minimal — one directory move and two new trees:
+
+  Move: klaude-plugin/skills/ → skills/ (repo root). Every skill directory
+  becomes a child of the new top-level skills/. The Claude plugin gets a
+  relative symlink klaude-plugin/skills → ../skills so existing Claude consumers
+   see no change. .claude-plugin/marketplace.json is unchanged (still points at
+  ./klaude-plugin).
+
+  New — plugins/codex/:
+  plugins/codex/
+  ├── .codex-plugin/plugin.json    # manifest: name "kk", "skills": "./skills/"
+  ├── skills/                      # symlink → ../../skills/ (copy fallback)
+  └── .mcp.json                    # capy MCP server config
+
+  New — .codex/ (template configs):
+  .codex/
+  ├── config.toml                  # model, approval policy, agent threads,
+  feature flags
+  ├── hooks.json                   # SessionStart + PreToolUse hooks
+  ├── agents/
+  │   ├── code-reviewer.toml       # sandbox_mode = "read-only"
+  │   ├── spec-reviewer.toml
+  │   └── design-reviewer.toml
+  ├── rules/
+  │   └── default.rules            # Starlark command policies
+  └── scripts/
+      ├── capy.sh                  # capy MCP launcher (same as
+  .claude/scripts/capy.sh)
+      └── statusline.sh            # codex statusline port
+
+  New — root-level files:
+  - .agents/plugins/marketplace.json — codex marketplace pointing at
+  ./plugins/codex
+  - AGENTS.md — codex project instructions (provider identity + behavioral
+  instructions equivalent to CLAUDE.md + CLAUDE.extra.md)
+
+  Unchanged: klaude-plugin/ (minus skills, plus symlink back), .claude/,
+  .claude-plugin/, .serena/, docs/, test/.
+
+  Does this look right?
+
+❯ why a discrepancy between plugin directories? why not both under plugins/ ?   
+
+● Fair point — that's inconsistent. Let me revise: rename klaude-plugin/ →
+  plugins/claude/ so both providers live under plugins/. This was already
+  planned in the opencode design and the churn is bounded:
+
+  - .claude-plugin/marketplace.json source changes from ./klaude-plugin to
+  ./plugins/claude
+  - plugins/claude/skills symlinks to ../../skills/
+  - All klaude-plugin/ references in tests, docs, scripts, CLAUDE.md get updated
+  - Template-sync's run_plugin_migration keeps the old klaude-plugin path in its
+   dirs_to_remove (per CLAUDE.md convention — those are historical cleanup paths
+   for downstream repos)
+
+  Revised layout:
+
+  claude-toolbox/
+  ├── skills/                          # MOVED from klaude-plugin/skills/
+  ├── plugins/
+  │   ├── claude/                      # RENAMED from klaude-plugin/
+  │   │   ├── skills → ../../skills    # symlink
+  │   │   ├── commands/
+  │   │   ├── agents/
+  │   │   ├── hooks/
+  │   │   ├── scripts/
+  │   │   ├── profiles/
+  │   │   └── .claude-plugin/plugin.json
+  │   └── codex/
+  │       ├── .codex-plugin/plugin.json
+  │       ├── skills → ../../skills    # symlink (copy fallback)
+  │       └── .mcp.json
+  ├── .agents/plugins/marketplace.json # codex marketplace
+  ├── .claude-plugin/marketplace.json  # updated source → ./plugins/claude
+  ├── .codex/                          # template configs
+  ├── .claude/                         # unchanged
+  ├── AGENTS.md                        # codex project instructions
+  ├── CLAUDE.md                        # updated paths
+  └── ...
+
+  Cleaner. Does this version look right?
+
+❯ yes                                                                           
+
+● Section 3: Plugin Distribution & Installation
+
+  Codex users install via the marketplace system. The repo ships
+  .agents/plugins/marketplace.json at the root:
+
+  {
+    "name": "claude-toolbox",
+    "interface": {
+      "displayName": "Claude Toolbox"
+    },
+    "plugins": [{
+      "name": "kk",
+      "source": { "source": "local", "path": "./plugins/codex" },
+      "policy": { "installation": "AVAILABLE" },
+      "category": "Productivity"
+    }]
+  }
+
+  Install flow:
+  1. codex plugin marketplace add serpro69/claude-toolbox — clones the repo and
+  registers the marketplace
+  2. User opens /plugins in codex, browses the marketplace, installs kk
+  3. Plugin manifest at plugins/codex/.codex-plugin/plugin.json declares
+  "skills": "./skills/" — codex discovers all SKILL.md files
+  4. Plugin .mcp.json registers capy MCP server
+
+  Symlink question: The manifest's "skills": "./skills/" points at a symlink
+  (plugins/codex/skills/ → ../../skills/). If codex's plugin loader follows
+  symlinks, skills resolve correctly. If not, the fallback is a build/copy step
+  — a small script that copies skills/ into plugins/codex/skills/ before
+  distribution. Design documents both; implementation tests symlinks first.
+
+  No --sparse support: codex plugin marketplace add serpro69/claude-toolbox 
+  --sparse .agents/plugins would only checkout the marketplace JSON, missing the
+   actual plugin directory and skills. Users must install the full repo.
+  Documented in the plugin README.
+
+  Update flow: codex plugin marketplace upgrade claude-toolbox pulls the latest
+  from git.
+
+  Does this look right?
+
+❯ yes                                                                           
+
+● Section 4: Provider Bootstrap via SessionStart Hook
+
+  Instead of rewriting every SKILL.md to be provider-neutral, the SessionStart
+  hook injects a tool-name mapping table into the session context. This is the
+  cheapest path to skill compatibility — zero skill file changes.
+
+  The hook lives at .codex/hooks.json and fires on every session start. It runs
+  a script that emits JSON with additionalContext containing:
+
+  Provider identity block:
+  Provider: Codex.
+  When skill instructions reference Claude Code tool names, apply this mapping:
+  - Read → read_file
+  - Write → write_file
+  - Edit → apply_patch
+  - Bash → shell
+  - Grep → use shell with grep
+  - Glob → use shell with find
+  - WebSearch → web_search
+  - WebFetch → no equivalent; use capy_fetch_and_index via MCP
+  - Agent/Task → spawn subagents via natural language
+  - Skill → use the skill tool ($mention or /skills)
+
+  Capy routing rules (condensed version of .claude/capy/CLAUDE.md):
+  - Blocked: curl/wget in shell, inline HTTP patterns
+  - Redirected: shell commands producing >20 lines of output → capy sandbox
+  - Tool hierarchy: capy_batch_execute → capy_search → capy_execute →
+  capy_fetch_and_index
+
+  Sub-agent roster listing the three custom agents available: code-reviewer,
+  spec-reviewer, design-reviewer.
+
+  The hook script is a small shell script at .codex/scripts/session-start.sh
+  that outputs the JSON structure codex expects. It's static content — no
+  runtime discovery needed since the agent roster and tool mapping are known at
+  authoring time.
+
+  Does this look right?
+
+❯ yes                                                                           
+
+● Section 5: Capy Enforcement via PreToolUse Hooks
+
+  Claude enforces capy routing in two independent mechanisms: validate-bash.sh
+  (file-path denylist) and .claude/capy/CLAUDE.md (HTTP/output routing injected
+  as context). Codex reproduces both via PreToolUse hooks in .codex/hooks.json,
+  with a documented enforcement gap.
+
+  What we CAN enforce (PreToolUse on Bash):
+
+  The hook script receives the shell command on stdin as tool_input.command. It
+  checks two categories and blocks by emitting permissionDecision: "deny" JSON
+  on stdout:
+
+  1. File-path denylist (port of validate-bash.sh): blocks access to .env,
+  .ansible/, .terraform/, build/, dist/, node_modules, __pycache__, .git/,
+  venv/, .pyc, .csv, .log. Same FORBIDDEN_PATTERNS array, ported to the hook
+  script.
+  2. Capy HTTP routing: blocks curl/wget commands and inline-HTTP patterns
+  (fetch('http, requests.get(, requests.post(, http.get(, http.request(). Deny
+  reason directs to capy equivalents.
+
+  What we CANNOT enforce (documented gap — ADR required):
+
+  Codex's PreToolUse currently only intercepts Bash/shell. It cannot intercept
+  read_file, write_file, apply_patch, web_search, or MCP tool calls. This means:
+
+  - File-path denylist on read_file is advisory only (via SessionStart context)
+  - WebFetch-equivalent blocking is advisory only (codex has no web_fetch tool,
+  but web_search can't be hooked)
+  - MCP tool interception is not possible
+
+  This is codex's current limitation (PreToolUse docs explicitly say "Work in
+  progress"). The ADR documents: the gap exists, it's acceptable because it's
+  the only option, and when codex expands hook coverage we can add enforcement.
+  The SessionStart context provides the advisory layer for everything hooks
+  can't enforce.
+
+  Does this look right?
+
+❯ Clarification - capy routing is not enforced via validate-bash.sh, that has   
+  no relation to capy whatsoever.                                               
+  .claude/capy/CLAUDE.md is created by capy. We can replicate it for codex for  
+  now explicitly, until capy adds proper support for codex. Same applies to     
+  capy-related hook configs - they're generated and appended by capy setup      
+  command.                                                                      
+  Everything else looks correct.                                                
+  Do document the ADR as part of the overall documentation task, along with     
+  design and implementation docs and task list, while you have fresh context    
+  from this session.                                                            
+
+● Got it, important distinction. Two independent concerns:
+
+  1. validate-bash.sh — standalone security file-path denylist, nothing to do
+  with capy
+  2. Capy routing — .claude/capy/CLAUDE.md and capy hook configs are generated 
+  by capy's setup command, not hand-authored
+
+  For codex: we replicate the capy routing rules manually (in SessionStart
+  context + PreToolUse hook) until capy ships native codex support. And
+  validate-bash.sh's file-path denylist is ported independently as its own
+  PreToolUse check.
+
+  ADR noted — I'll include it in Step 5 alongside design/implementation docs.
+
+  Moving on.
+
+  Section 6: Sub-agents
+
+  Claude ships three custom sub-agents as markdown files in
+  plugins/claude/agents/: code-reviewer.md, spec-reviewer.md,
+  design-reviewer.md. These are read-only reviewers with restricted tool access.
+
+  Codex defines custom agents as TOML files at .codex/agents/<name>.toml. The
+  port creates three equivalent files:
+
+  # .codex/agents/code-reviewer.toml
+  name = "code-reviewer"
+  description = "Independent code reviewer. Reviews diffs for SOLID violations, 
+  security risks, and code quality."
+  sandbox_mode = "read-only"
+  model = "gpt-5.5"
+  model_reasoning_effort = "high"
+
+  Each agent gets sandbox_mode = "read-only" — codex's native equivalent of
+  Claude's tools: { write: false, edit: false, bash: false }. The
+  developer_instructions field carries the review prompt body, adapted from the
+  Claude agent files with tool names adjusted per the SessionStart mapping.
+
+  Codex spawns sub-agents via natural-language prompting ("spawn the
+  code-reviewer agent"), not an explicit spawn_agent tool call. Skills that
+  reference sub-agents in their workflow already use neutral phrasing like
+  "invoke a sub-agent" — no skill changes needed.
+
+  Per-agent MCP: Sub-agents inherit the parent's sandbox policy. If capy is
+  configured at session level, sub-agents can access capy MCP tools. Agents can
+  also declare their own mcp_servers block for additive configuration.
+
+  Concurrency: agents.max_threads (default 6) caps concurrent agents.
+  agents.max_depth (default 1) limits nesting.
+
+  Does this look right?
+
+❯ There are 5 agents, not three.                                                
+
+  Listed 1 directory (ctrl+o to expand)
+
+● Five agents — I missed eval-grader.md and profile-resolver.md. Corrected:
+
+  The port creates five TOML agent files under .codex/agents/:
+
+  ┌───────────────────────┬──────────────┬───────────────────────────────────┐
+  │         Agent         │ sandbox_mode │              Purpose              │
+  ├───────────────────────┼──────────────┼───────────────────────────────────┤
+  │                       │              │ Reviews diffs for SOLID           │
+  │ code-reviewer.toml    │ read-only    │ violations, security risks, code  │
+  │                       │              │ quality                           │
+  ├───────────────────────┼──────────────┼───────────────────────────────────┤
+  │ spec-reviewer.toml    │ read-only    │ Compares implementation against   │
+  │                       │              │ design docs                       │
+  ├───────────────────────┼──────────────┼───────────────────────────────────┤
+  │ design-reviewer.toml  │ read-only    │ Evaluates design docs for         │
+  │                       │              │ completeness and soundness        │
+  ├───────────────────────┼──────────────┼───────────────────────────────────┤
+  │ eval-grader.toml      │ read-only    │ Grades skill eval assertions      │
+  │                       │              │ against reviewer output           │
+  ├───────────────────────┼──────────────┼───────────────────────────────────┤
+  │                       │              │ Resolves active profiles and      │
+  │ profile-resolver.toml │ read-only    │ checklist-load decisions for a    │
+  │                       │              │ diff                              │
+  └───────────────────────┴──────────────┴───────────────────────────────────┘
+
+  All five are read-only — none need write/edit/shell access. The
+  developer_instructions field in each carries the prompt body adapted from the
+  Claude markdown agents.
+
+  Does this corrected version look right?
+
+❯ yes                                                                           
+
+● Section 7: Starlark Rules (Command Policies)
+
+  Claude uses flat allow/deny lists in .claude/settings.json for permission
+  control. Codex uses Starlark .rules files — a more powerful mechanism with
+  pattern matching, justifications, and inline test cases.
+
+  The port creates .codex/rules/default.rules translating Claude's deny list
+  into prefix_rule() calls:
+
+  # Destructive operations
+  prefix_rule(
+      pattern = ["rm"],
+      decision = "deny",
+      justification = "Destructive file deletion blocked by policy",
+      match = ["rm -rf /tmp/build"],
+      not_match = ["rmdir empty-dir"],
+  )
+
+  prefix_rule(
+      pattern = ["git", "push", "--force"],
+      decision = "deny",
+      justification = "Force push blocked by policy",
+  )
+
+  What gets ported from Claude's deny list: rm, git push --force, git reset 
+  --hard, and any other destructive commands currently denied in
+  .claude/settings.json. Each becomes a prefix_rule with decision = "deny".
+
+  What gets ported as "prompt": Commands that Claude marks as "ask" — operations
+   that aren't blocked but require user confirmation. These map to decision = 
+  "prompt" in Starlark, which surfaces an approval prompt in codex's UI.
+
+  Expansion opportunity: Since Starlark is more expressive than flat lists, we
+  can add rules Claude can't express — e.g., denying git push to main/master
+  specifically while allowing pushes to other branches. This is a future
+  enhancement; the initial port matches Claude's deny list 1:1.
+
+  Testing: Rules can be validated offline with codex execpolicy check --pretty 
+  --rules .codex/rules/default.rules -- <command>, which emits JSON showing the
+  matched rule and decision. This goes into the verification steps.
+
+  Does this look right?
+
+❯ yes                                                                           
+
+● Section 8: Template Configs & Template-Sync
+
+  The repo serves as a starter template. .github/scripts/template-sync.sh
+  distributes configs to downstream repos via sparse-clone + variable
+  substitution. Today it syncs .claude/ and .serena/. This feature extends it to
+   sync .codex/ as well.
+
+  Codex template configs (synced to downstream):
+
+  ┌─────────────────────────────────┬─────────────────────┬─────────────────┐
+  │              File               │     Variables       │      Notes      │
+  │                                 │     substituted     │                 │
+  ├─────────────────────────────────┼─────────────────────┼─────────────────┤
+  │                                 │ PROJECT_NAME,       │ Model, approval │
+  │ .codex/config.toml              │ LANGUAGES,          │  policy, agent  │
+  │                                 │ CC_EFFORT_LEVEL →   │ config, feature │
+  │                                 │ codex equivalents   │  flags          │
+  ├─────────────────────────────────┼─────────────────────┼─────────────────┤
+  │                                 │                     │ SessionStart +  │
+  │ .codex/hooks.json               │ None (static)       │ PreToolUse hook │
+  │                                 │                     │  definitions    │
+  ├─────────────────────────────────┼─────────────────────┼─────────────────┤
+  │                                 │                     │ All five        │
+  │ .codex/agents/*.toml            │ None (static)       │ sub-agent       │
+  │                                 │                     │ definitions     │
+  ├─────────────────────────────────┼─────────────────────┼─────────────────┤
+  │                                 │                     │ Starlark        │
+  │ .codex/rules/default.rules      │ None (static)       │ command         │
+  │                                 │                     │ policies        │
+  ├─────────────────────────────────┼─────────────────────┼─────────────────┤
+  │ .codex/scripts/statusline.sh    │ None (static)       │ Statusline port │
+  ├─────────────────────────────────┼─────────────────────┼─────────────────┤
+  │ .codex/scripts/session-start.sh │ None (static)       │ SessionStart    │
+  │                                 │                     │ hook script     │
+  ├─────────────────────────────────┼─────────────────────┼─────────────────┤
+  │                                 │                     │ Provider        │
+  │ AGENTS.md                       │ PROJECT_NAME        │ identity +      │
+  │                                 │                     │ behavioral      │
+  │                                 │                     │ instructions    │
+  └─────────────────────────────────┴─────────────────────┴─────────────────┘
+
+  Not synced (per-repo, same pattern as Claude side):
+  - .codex/scripts/capy.sh — generated by capy setup
+  - Capy-related hook entries in hooks.json — generated by capy setup. The
+  synced hooks.json contains only the non-capy hooks (file-path denylist,
+  session bootstrap). Capy's setup command appends its own entries.
+
+  Template-sync changes:
+
+  template-sync.sh needs three modifications:
+  1. Add .codex/ to the sparse-clone file list (alongside .claude/ and .serena/)
+  2. Add AGENTS.md to the root-level files list
+  3. Add variable substitution mappings for .codex/config.toml and AGENTS.md —
+  reusing existing manifest variables where possible, adding codex-specific ones
+   (e.g., CODEX_MODEL, CODEX_APPROVAL_POLICY) only where Claude equivalents
+  don't map
+
+  Downstream manifest (.github/template-state.json) gains optional
+  codex-specific variables. Existing downstream repos that don't use codex
+  simply don't set them — sync skips codex files gracefully or uses sensible
+  defaults.
+
+  Does this look right?
+
+❯ yes                                                                           
+
+● Section 9: Statusline Port
+
+  Claude's statusline is driven by two shell scripts
+  (.claude/scripts/statusline.sh and statusline_enhanced.sh) that read JSON from
+   stdin, extract model name, context window size, and current usage, then
+  format a compact status string with optional theming (Catppuccin, etc.). The
+  statusline is configured via settings.json's statusLine.command field and env
+  vars (CLAUDE_STATUSLINE_MODE, CLAUDE_STATUSLINE_THEME).
+
+  Codex has tui.status_line in config.toml — a different mechanism but the same
+  concept. The port creates .codex/scripts/statusline.sh that:
+
+  1. Reads codex's status input format (needs investigation during
+  implementation — codex docs don't fully document the statusline input
+  contract)
+  2. Extracts equivalent fields: model, context usage, token counts
+  3. Formats using the same Catppuccin theming logic from Claude's
+  statusline_enhanced.sh
+  4. Outputs a compact status string
+
+  config.toml wires it via the tui section, and env vars are mapped:
+  CLAUDE_STATUSLINE_MODE → CODEX_STATUSLINE_MODE, CLAUDE_STATUSLINE_THEME →
+  CODEX_STATUSLINE_THEME.
+
+  Implementation risk: Codex's statusline input format isn't fully documented.
+  The implementation task needs to investigate what data codex passes to the
+  statusline command — it may differ significantly from Claude's JSON structure.
+   If the input format is incompatible or undocumented, the statusline port may
+  need to start minimal and expand as codex documents the interface. This risk
+  is documented as an open question in the design, not a blocker.
+
+  Does this look right?
+
+❯ yes                                                                           
+● Section 10: MCP Configuration, AGENTS.md, and Testing
+
+  MCP — Capy server registration:
+
+  The plugin ships .mcp.json at plugins/codex/.mcp.json for capy. Separately,
+  users can configure MCP servers in .codex/config.toml:
+
+  [mcp_servers.capy]
+  command = "bash"
+  args = [".codex/scripts/capy.sh", "serve"]
+
+  The plugin's .mcp.json is a convenience for plugin-bundled MCP; the
+  config.toml entry is the template config equivalent. Both point at the same
+  capy launcher script. Capy's own setup command may override these — same
+  pattern as Claude side.
+
+  Serena is not shipped as part of this feature but works as a user-configured
+  MCP server on codex if desired — no special handling needed.
+
+  AGENTS.md — Project instructions:
+
+  Codex's equivalent of CLAUDE.md. Contains:
+  - Provider identity statement (redundant with SessionStart hook but serves as
+  static fallback)
+  - Behavioral instructions (ported from .claude/CLAUDE.extra.md — independent
+  thinking, fail-loud, exploration-first, deferred work documentation)
+  - Capy routing rules (replicated from .claude/capy/CLAUDE.md until capy ships
+  native codex support)
+
+  Template-sync substitutes PROJECT_NAME in the file. Codex discovers it via
+  directory-walk inheritance from repo root.
+
+  Testing:
+
+  Extend test/test-plugin-structure.sh and add new test scripts:
+  - Update EXPECTED_* arrays and path assertions for plugins/claude/ rename
+  - Assert plugins/codex/.codex-plugin/plugin.json exists and validates as JSON
+  - Assert .codex/config.toml exists and has required sections
+  - Assert .codex/hooks.json validates as JSON
+  - Assert all five .codex/agents/*.toml files exist
+  - Assert .codex/rules/default.rules exists
+  - Assert .agents/plugins/marketplace.json exists with the kk plugin entry
+  - Assert plugins/codex/skills resolves (symlink or directory)
+  - Assert AGENTS.md exists at repo root
+
+  Does this look right?
+
+❯ yes                                                                           
+
+● All 10 sections approved. Moving to Step 5 — documenting the design,
+  implementation plan, and ADR. Let me check what exists and find the next ADR
+  number.
+
+  Listed 1 directory, ran 1 shell command (ctrl+o to expand)
+
+● Now writing all three documents. Starting with the design doc.
+
+● Write(docs/wip/codex-support/design.md)
+  ⎿  Wrote 478 lines to docs/wip/codex-support/design.md
+       1 # Design: Codex Support
+       2 
+       4 > Created: 2026-04-24
+       5 
+       6 ## 1. Overview
+       8 Add first-class OpenAI Codex support to `claude-toolbox` with mi
+         nimal repo
+       9 restructure. Today the repo is Claude-only; after this feature, 
+      10 get the same skills, equivalent sub-agents, capy context-protect
+         ion (within
+     … +587 lines (ctrl+o to expand)
+
+● Now the implementation plan.
+
+● Write(docs/wip/codex-support/implementation.md)
+  ⎿  Wrote 418 lines to docs/wip/codex-support/implementation.md
+       1 # Implementation Plan: Codex Support
+       2 
+       4 > Status: draft
+       5 > Created: 2026-04-24
+       6 
+         tarlark
+       8 developer, comfortable with Claude Code's plugin system, and wil
+         ling to
+         or specific
+      10 API surfaces. Zero project-specific context is assumed.
+     … +497 lines (ctrl+o to expand)
+
+● Now the ADR.
+
+● Write(docs/adr/0005-codex-hook-enforcement-gap.md)
+  ⎿  Wrote 79 lines to docs/adr/0005-codex-hook-enforcement-gap.md
+       1 # ADR 0005: Codex Hook Enforcement Gap
+       2 
+       3 ## Status
+       5 Accepted
+       6 
+       7 ## Context
+       8 
+       9 Claude Code enforces capy routing and file-path security policie
+      10 mechanisms: PreToolUse hooks (which intercept tool calls before 
+         execution)
+     … +98 lines (ctrl+o to expand)
+
+● Now the task list.
+
+● Write(docs/wip/codex-support/tasks.md)
+  ⎿  Wrote 135 lines to docs/wip/codex-support/tasks.md
+       1 # Tasks: Codex Support
+       2 
+       3 > Design: [./design.md](./design.md)
+       4 > Implementation: [./implementation.md](./implementation.md)
+       5 > Status: pending
+       6 > Created: 2026-04-24
+       7 
+       8 ## Task 1: Repository restructure
+       9 - **Status:** pending
+      10 - **Depends on:** —
+     … +245 lines (ctrl+o to expand)
+
+● Now indexing key architecture decisions to capy.
+
+  Called capy (ctrl+o to expand)
+
+● All documents are written. Here's a summary of what was created:
+
+  Design docs:
+  - docs/wip/codex-support/design.md — 15 sections covering overview, goals,
+  layout, plugin distribution, bootstrap, hooks, sub-agents, rules,
+  template-sync, statusline, MCP, AGENTS.md, testing, and risks
+  - docs/wip/codex-support/implementation.md — 11 phases with explicit
+  verification steps for each
+  - docs/wip/codex-support/tasks.md — 11 tasks, 45 subtasks, with dependencies
+  and per-subtask verification
+
+  ADR:
+  - docs/adr/0005-codex-hook-enforcement-gap.md — documents the PreToolUse
+  Bash-only limitation, the two-layer mitigation, and the action item for when
+  codex expands coverage
+
+  Capy indexed: 7 architecture decisions under kk:arch-decisions
+
+  Next step per the workflow would be review-design before implementation. Want
+  me to run that, or do you want to review the docs yourself first?
+
+✻ Churned for 6m 5s
+
+※ recap: Adding Codex support to claude-toolbox. Design doc, implementation plan, task list, and ADR are all written in docs/wip/codex-support/. Next step is running review-design to validate the docs before implementation begins.
+
+❯ Here are my review findigns.                                                  
+                                                                                
+  Design Review: Codex Support                                                  
+                                                                                
+  Scope: design.md + implementation.md                                          
+  Overall assessment: CONCERNS_FOUND                                            
+  Documents:                                                                    
+                                                                                
+  - Design: docs/wip/codex-support/design.md                                    
+  - Implementation: docs/wip/codex-support/implementation.md                    
+                                                                                
+  Summary: 4 findings: 0 critical, 2 high, 1 medium, 1 low                      
+                                                                                
+  ---                                                                           
+  Findings                                                                      
+                                                                                
+  P0 - Critical                                                                 
+                                                                                
+  (none)                                                                        
+                                                                                
+  P1 - High                                                                     
+                                                                                
+  - [INCONSISTENT] Install/update CLI commands are fabricated                   
+    - Section: design.md §2 Goal 1, §5.2, §5.4                                  
+    - Confidence: 9/10 — Exhaustive search of indexed Codex plugin docs         
+  (codex-plugins-docs, codex-plugins-build, codex-plugins-build-docs) returns   
+  zero results for a codex plugin marketplace add <github-repo> CLI command or  
+  a remote/GitHub marketplace source type.                                      
+    - Description: The design presents codex plugin marketplace add             
+  serpro69/claude-toolbox (§5.2 step 1) and codex plugin marketplace upgrade    
+  claude-toolbox (§5.4) as the install/update flow. These commands don't exist  
+  in Codex documentation. Codex marketplaces are local only: marketplace.json   
+  at $REPO_ROOT/.agents/plugins/ with "source": "local" and relative paths.     
+  Plugin browsing/installation happens via /plugins in the TUI. The only        
+  documented source type is "source": "local" with a "path" relative to the     
+  marketplace root — no GitHub, git, or remote source types are documented.     
+    - Evidence:                                                                 
+        - Codex plugin build docs: "Add a marketplace file at                   
+  $REPO_ROOT/.agents/plugins/marketplace.json and store your plugins under      
+  $REPO_ROOT/plugins/" with only "source": "local" examples                     
+      - Codex plugin overview docs: "In Codex CLI, run /plugins" to open plugin 
+   browser — no marketplace add CLI subcommand shown                            
+      - Design §5.2 states as fact: "codex plugin marketplace add               
+  serpro69/claude-toolbox — clones the repo and registers the marketplace" —    
+  this mechanism doesn't exist                                                  
+    - Recommendation: Rewrite §5.2 and §5.4 to describe the documented flow:    
+  users working in this repo already have the marketplace.json; they open       
+  /plugins in the TUI and enable the kk plugin. For external users, document    
+  that they clone the repo and use it as a local marketplace, or copy the       
+  plugin into their project's plugins/ directory. Remove Goal 1's CLI command   
+  and replace with the TUI-based flow.                                          
+  - [MISSING] ${CLAUDE_PLUGIN_ROOT} variable substitution unaddressed           
+    - Section: design.md §6.2, §3 (Non-Goals)                                   
+    - Confidence: 9/10 — Verified by grepping skills; confirmed 6 of 10 skills  
+  contain ${CLAUDE_PLUGIN_ROOT} references. Codex docs show no equivalent       
+  substitution mechanism.                                                       
+    - Description: The Non-Goals state "Tool-name mapping via SessionStart hook 
+   is sufficient" as justification for not rewriting SKILL.md files. But tool   
+  names are not the only Claude-specific artifact in skills. Six of ten skills  
+  reference ${CLAUDE_PLUGIN_ROOT} for profile paths, agent paths, and shared    
+  instructions: design (1 ref), document (2), implement (3), review-spec (1),   
+  dependency-handling (1), test (2). Claude Code substitutes this variable at   
+  plugin-load time. Codex has no documented equivalent. The model on Codex      
+  would see literal ${CLAUDE_PLUGIN_ROOT} tokens and have no way to resolve     
+  them to actual filesystem paths. Profile-driven skills (review-code uses      
+  profile detection, implement loads profiles) would have broken path           
+  references.                                                                   
+    - Evidence:                                                                 
+        - grep -c 'CLAUDE_PLUGIN_ROOT' klaude-plugin/skills/*/SKILL.md shows 6  
+  skills with references                                                        
+      - CLAUDE.md §"Substitution boundary": "The harness substitutes            
+  ${CLAUDE_PLUGIN_ROOT} at plugin-load time for files the harness loads         
+  directly — SKILL.md, agents/*.md"                                             
+      - Codex plugin/skill docs: no variable substitution mechanism documented  
+      - The parallel opencode-support design (2026-04-13) addresses this via    
+  provider-neutral SKILL.md + reference/<provider>.md approach — the codex      
+  design explicitly rejects this but offers no alternative for path variables   
+    - Recommendation: The design must address how ${CLAUDE_PLUGIN_ROOT}         
+  references in SKILL.md files work on Codex. Options: (a) Add a path-variable  
+  mapping to the SessionStart hook that tells the model the resolved plugin     
+  root path, so it can construct paths at runtime. (b) Move profiles/agents to  
+  a shared location outside any plugin directory (paralleling the skills/       
+  move). (c) Accept this as a known limitation and document which skills are    
+  partially functional on Codex — but this significantly undermines Goal 2      
+  ("Skills are authored once and shared"). Whichever option is chosen, the      
+  Non-Goals assertion that "Tool-name mapping via SessionStart hook is          
+  sufficient" needs qualification.                                              
+                                                                                
+  P2 - Medium                                                                   
+                                                                                
+  - [INCONSISTENT] Starlark rules port instruction overstates scope             
+    - Section: implementation.md Phase 6 §"Source of truth"                     
+    - Confidence: 8/10 — Verified by reading .claude/settings.json deny list    
+  and cross-referencing with Starlark prefix_rule() capabilities.               
+    - Description: Phase 6 instructs: "Read .claude/settings.json               
+  permissions.deny array. For each entry, create a prefix_rule." But the deny   
+  array contains both Bash(...) and Read(...) patterns. Read(...) entries       
+  (e.g., Read(./**/.env), Read(.git/), Read(./**/node_modules/)) — 18 of 21     
+  deny entries — cannot be expressed as Starlark prefix_rule() calls, since     
+  prefix rules only match shell command argv. The instruction "for each entry"  
+  will confuse the implementer when they encounter Read() entries. The design   
+  handles Read denials separately (§7.1 PreToolUse hook for Bash equivalents    
+  like cat .env, §7.3 advisory for read_file) but the Phase 6 instruction       
+  doesn't acknowledge this split.                                               
+    - Evidence:                                                                 
+        - .claude/settings.json deny list: 3 Bash entries, 18 Read entries      
+      - Codex rules docs: prefix_rule(pattern = ["gh", "pr", "view"], ...) —    
+  explicitly shell command matching                                             
+      - Design §7.3 correctly identifies the limitation but §9.1/Phase 6        
+  doesn't reference it                                                          
+    - Recommendation: Narrow Phase 6's source-of-truth instruction to: "Read    
+  .claude/settings.json permissions.deny array. For each Bash(...) entry,       
+  create a prefix_rule. Read(...) entries are handled separately by the         
+  PreToolUse hook (Phase 4) and SessionStart advisory context (Phase 3) — see   
+  design.md §7.3."                                                              
+                                                                                
+  P3 - Low                                                                      
+                                                                                
+  - [INCOMPLETE] Marketplace JSON missing policy.authentication                 
+    - Section: design.md §5.1                                                   
+    - Confidence: 6/10 — Field may default correctly if omitted; Codex docs     
+  show it in examples but don't explicitly mark it required.                    
+    - Description: The design's marketplace.json includes policy.installation   
+  but omits policy.authentication. Every Codex docs example includes            
+  "authentication": "ON_INSTALL" alongside "installation": "AVAILABLE" in the   
+  policy block.                                                                 
+    - Evidence: Codex plugin build docs marketplace example: "policy":          
+  {"installation": "AVAILABLE", "authentication": "ON_INSTALL"}                 
+    - Recommendation: Add "authentication": "ON_INSTALL" to the                 
+  marketplace.json policy block for completeness.                               
+                                                                                
+  ---                                                                           
+  Clean Areas                                                                   
+                                                                                
+  - Plugin manifest format (§5.1): mcpServers confirmed as valid manifest field 
+   per Codex docs ("skills, mcpServers, and apps point to bundled components"). 
+   Structure is correct.                                                        
+  - PreToolUse hook output format (§7.1): Matches Codex docs exactly —          
+  permissionDecision: "deny" with permissionDecisionReason.                     
+  - SessionStart hook output format (§6.3):                                     
+  hookSpecificOutput.additionalContext matches Codex docs.                      
+  - Agent TOML format (§8): Required fields (name, description,                 
+  developer_instructions) match Codex subagent docs. sandbox_mode, model        
+  confirmed as valid optional fields.                                           
+  - Starlark rules syntax (§9): prefix_rule() format with pattern, decision,    
+  justification, match, not_match matches Codex rules docs.                     
+  - Hook enforcement gap analysis (§7.3): Accurately reflects Codex docs:       
+  "Currently PreToolUse only supports Bash tool interception."                  
+  - MCP config.toml format (§12): [mcp_servers.capy] with command/args matches  
+  Codex config reference.                                                       
+  - Repo restructure logic (§4): Symlink strategy is sound; relative symlink    
+  with fallback copy is a reasonable approach.                                  
+  - validate-bash.sh patterns (§7.1): Verified against actual script — pattern  
+  list matches.                                                                 
+  - Template-sync approach (§10): Consistent with existing template-sync        
+  patterns in the codebase.                                                     
+
+● Good review. Let me address each finding.
+
+  P3 (low) — missing policy.authentication: Agreed, easy fix. I'll add it.
+
+  P2 (medium) — Starlark scope overstatement: Agreed. Phase 6 should explicitly
+  say "for each Bash(...) entry only" and note that Read(...) entries are
+  covered by Phase 4 + Phase 3.
+
+  P1 — fabricated CLI commands: I actually disagree with this finding. Our
+  research agent pulled this directly from the codex docs:
+
+  ▎ "Use codex plugin marketplace add when you want Codex to install and track a
+  ▎  marketplace source... Marketplace sources can be GitHub shorthand 
+  ▎ (owner/repo or owner/repo@ref), HTTP or HTTPS Git URLs, SSH Git URLs, or 
+  ▎ local marketplace root directories."
+
+  The command is documented at the "Add a marketplace from the CLI" section of
+  the plugin build docs. The flow is: codex plugin marketplace add 
+  serpro69/claude-toolbox registers the repo as a marketplace source, then users
+   browse /plugins to install. I'll make the two-step nature clearer in the
+  design though.
+
+  P1 — ${CLAUDE_PLUGIN_ROOT} unaddressed: This is a valid and important catch.
+  Six skills reference ${CLAUDE_PLUGIN_ROOT} for profile paths, shared
+  instructions, and agent paths. Claude substitutes this at plugin-load time;
+  codex has no equivalent.
+
+  The main use is profiles at ${CLAUDE_PLUGIN_ROOT}/profiles/<name>/.... I see
+  three options:
+
+  1. Move profiles to repo root alongside skills (profiles/ at root, both
+  plugins symlink). Clean, but more restructure.
+  2. Inject the resolved path via SessionStart — session-start.sh computes the
+  absolute path and tells the model "resolve ${CLAUDE_PLUGIN_ROOT} to
+  /abs/path/plugins/claude". Hacky cross-plugin dependency.
+  3. Accept partial functionality — document which skills work fully on codex
+  and which don't.
+
+  I'd recommend option 1 — it's the same pattern we're already doing for skills
+  and keeps things clean. What's your preference?
+
+✻ Brewed for 1m 9s
+
+❯ agree                                                                         
+
+● Good. Let me apply all fixes — profiles move to repo root, narrowed Starlark
+  scope, clearer install flow, and the missing policy field.
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(docs/wip/codex-support/design.md)
+  ⎿  Added 4 lines, removed 3 lines
+      17  
+      18  ## 2. Goals
+      19  
+      20 -1. A Codex user installs the plugin via                        
+      21 -   `codex plugin marketplace add serpro69/claude-toolbox` and i
+         -mmediately has                                                 
+      22 -   all workflow skills available.                              
+      20 +1. A Codex user registers the marketplace via                  
+      21 +   `codex plugin marketplace add serpro69/claude-toolbox`, then
+         + installs the                                                  
+      22 +   `kk` plugin from the `/plugins` browser — all workflow skill
+         +s are                                                          
+      23 +   immediately available.                                      
+      24  2. Skills are authored once and shared between Claude and Codex
+           via a single
+      25     canonical `skills/` directory at repo root.
+      26  3. Codex-specific artifacts (agents, hooks, config, rules) live
+           under `.codex/`
+
+● Update(docs/wip/codex-support/design.md)
+  ⎿  Added 2 lines, removed 1 line
+      33  ## 3. Non-Goals
+      34  
+      35  - **Not** rewriting SKILL.md files to be provider-neutral. Tool
+          -name mapping
+      36 -  via SessionStart hook is sufficient.                         
+      36 +  and `${CLAUDE_PLUGIN_ROOT}` path resolution via SessionStart 
+         +hook handle                                                    
+      37 +  the provider-specific references (see §6.2).                 
+      38  - **Not** supporting codex's `--sparse` checkout for plugin ins
+          tallation. Our
+      39    layout requires the full repo — the marketplace entry points 
+          at
+      40    `./plugins/codex`, which is outside any sparse path.
+
+● Now updating §4.1 to include profiles move.
+
+● Update(docs/wip/codex-support/design.md)
+  ⎿  Added 22 lines, removed 3 lines
+      47  
+      48  ### 4.1 Restructure
+      49  
+      50 -One directory move and one rename:                             
+      50 +Two directory moves and one rename:                            
+      51  
+      52  - **Move** `klaude-plugin/skills/` → `skills/` (repo root). Eve
+          ry skill
+      53    directory becomes a child of the new top-level `skills/`.
+      54 +- **Move** `klaude-plugin/profiles/` → `profiles/` (repo root).
+         + Same                                                          
+      55 +  pattern as skills — profiles are shared across providers. Six
+         + of ten                                                        
+      56 +  skills reference profiles via `${CLAUDE_PLUGIN_ROOT}/profiles
+         +/...`;                                                         
+      57 +  moving profiles to a canonical location eliminates cross-plug
+         +in path                                                        
+      58 +  dependencies.                                                
+      59  - **Rename** `klaude-plugin/` → `plugins/claude/`. Both provide
+          rs live under
+      60    `plugins/` for consistency.
+      61  
+      57 -The Claude plugin gets a relative symlink `plugins/claude/skill
+         -s` → `../../skills`                                            
+      58 -so existing Claude consumers see no change. `.claude-plugin/mar
+         -ketplace.json`                                                 
+      62 +The Claude plugin gets relative symlinks:                      
+      63 +- `plugins/claude/skills` → `../../skills`                     
+      64 +- `plugins/claude/profiles` → `../../profiles`                 
+      65 +                                                               
+      66 +Existing Claude consumers see no change. `.claude-plugin/market
+         +place.json`                                                    
+      67  source path updates from `./klaude-plugin` to `./plugins/claude
+          `.
+      68  
+      69 +### 4.1.1 `${CLAUDE_PLUGIN_ROOT}` path resolution              
+      70 +                                                               
+      71 +Six skills reference `${CLAUDE_PLUGIN_ROOT}` for profile paths,
+         + shared                                                        
+      72 +instructions, and agent paths. Claude substitutes this variable
+         + at                                                            
+      73 +plugin-load time. Codex has no equivalent substitution mechanis
+         +m.                                                             
+      74 +                                                               
+      75 +With profiles and skills at repo root, the SessionStart hook in
+         +jects a                                                        
+      76 +path-variable mapping (see §6.2) telling the model how to resol
+         +ve                                                             
+      77 +`${CLAUDE_PLUGIN_ROOT}` references. The script computes the abs
+         +olute repo                                                     
+      78 +root at runtime from its own location and constructs the equiva
+         +lent path.                                                     
+      79 +                                                               
+      80  ### 4.2 Target layout
+      81  
+      82  ```
+
+● Now updating the target layout to include profiles.
+
+  Read 1 file (ctrl+o to expand)
+● Update(docs/wip/codex-support/design.md)
+  ⎿  Added 6 lines, removed 1 line
+       84  ├── skills/                              # MOVED from klaude-p
+           lugin/skills/
+       85  │   └── <skill-name>/
+       86  │       └── SKILL.md
+       87 +├── profiles/                            # MOVED from klaude-p
+          +lugin/profiles/                                               
+       88 +│   └── <name>/                                               
+       89 +│       ├── DETECTION.md                                      
+       90 +│       ├── overview.md                                       
+       91 +│       └── <phase>/                                          
+       92  ├── plugins/
+       93  │   ├── claude/                          # RENAMED from klaude
+           -plugin/
+       94  │   │   ├── skills → ../../skills        # symlink
+       95 +│   │   ├── profiles → ../../profiles    # symlink            
+       96  │   │   ├── commands/
+       97  │   │   ├── agents/
+       98  │   │   ├── hooks/
+       99  │   │   ├── scripts/
+       94 -│   │   ├── profiles/                                         
+      100  │   │   └── .claude-plugin/plugin.json
+      101  │   └── codex/                           # NEW
+      102  │       ├── .codex-plugin/plugin.json    # manifest
+
+● Now updating §5.1 marketplace JSON to add policy.authentication and §5.2 to
+  clarify two-step flow.
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(docs/wip/codex-support/design.md)
+  ⎿  Added 2 lines, removed 1 line
+      163          "path": "./plugins/codex"
+      164        },
+      165        "policy": {
+      166 -        "installation": "AVAILABLE"                           
+      166 +        "installation": "AVAILABLE",                          
+      167 +        "authentication": "ON_INSTALL"                        
+      168        },
+      169        "category": "Productivity"
+      170      }
+
+● Now updating §5.2 to clarify the two-step flow.
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(docs/wip/codex-support/design.md)
+  ⎿  Added 15 lines, removed 3 lines
+      174  
+      175  ### 5.2 Install flow
+      176  
+      177 -1. `codex plugin marketplace add serpro69/claude-toolbox` — cl
+          -ones the repo                                                 
+      178 -   and registers the marketplace.                             
+      179 -2. User opens `/plugins` in codex, browses the marketplace, in
+          -stalls `kk`.                                                  
+      177 +The install is a two-step process: register the marketplace so
+          +urce, then                                                    
+      178 +install the plugin from the TUI browser.                      
+      179 +                                                              
+      180 +1. `codex plugin marketplace add serpro69/claude-toolbox` — re
+          +gisters the                                                   
+      181 +   repo as a marketplace source. Codex supports GitHub shortha
+          +nd                                                            
+      182 +   (`owner/repo`), full Git URLs, SSH URLs, and local paths as
+          + marketplace                                                  
+      183 +   sources (documented in codex plugin build docs, "Add a mark
+          +etplace from                                                  
+      184 +   the CLI" section).                                         
+      185 +2. User opens `/plugins` in the codex TUI, selects the "Claude
+          + Toolbox"                                                     
+      186 +   marketplace, and installs the `kk` plugin.                 
+      187  3. Plugin manifest at `plugins/codex/.codex-plugin/plugin.json
+           ` declares
+      188     `"skills": "./skills/"` — codex discovers all SKILL.md file
+           s.
+      189  4. Plugin `.mcp.json` registers capy MCP server.
+      190  
+      191 +**Alternative for users working inside this repo:** The       
+      192 +`.agents/plugins/marketplace.json` is already present at the r
+          +epo root.                                                     
+      193 +They skip step 1 — the marketplace is auto-discovered. They op
+          +en `/plugins`                                                 
+      194 +and install directly.                                         
+      195 +                                                              
+      196  ### 5.3 No sparse checkout
+      197  
+      198  `codex plugin marketplace add serpro69/claude-toolbox --sparse
+            .agents/plugins`
+
+● Now updating §6.2 to include ${CLAUDE_PLUGIN_ROOT} path mapping.
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(docs/wip/codex-support/design.md)
+  ⎿  Added 16 lines
+      242  `code-reviewer`, `spec-reviewer`, `design-reviewer`, `eval-gra
+           der`,
+      243  `profile-resolver`.
+      244  
+      245 +**`${CLAUDE_PLUGIN_ROOT}` path resolution:**                  
+      246 +                                                              
+      247 +Six skills reference `${CLAUDE_PLUGIN_ROOT}` for profile paths
+          +, shared                                                      
+      248 +instructions, and agent paths. Claude substitutes this at plug
+          +in-load time;                                                 
+      249 +codex has no equivalent. The SessionStart hook injects the res
+          +olved path:                                                   
+      250 +                                                              
+      251 +```                                                           
+      252 +When skill instructions reference ${CLAUDE_PLUGIN_ROOT}, resol
+          +ve it to:                                                     
+      253 +<absolute-repo-root>/plugins/claude                           
+      254 +Profiles are at: <absolute-repo-root>/profiles/               
+      255 +```                                                           
+      256 +                                                              
+      257 +The `session-start.sh` script computes `<absolute-repo-root>` 
+          +at runtime                                                    
+      258 +from its own location (`.codex/scripts/session-start.sh` → wal
+          +k up two                                                      
+      259 +levels to repo root).                                         
+      260 +                                                              
+      261  ### 6.3 Implementation
+      262  
+      263  The hook script at `.codex/scripts/session-start.sh` is a smal
+           l shell script
+
+● Now updating the implementation plan — Phase 1 needs profiles move, Phase 6
+  needs Starlark scope narrowing, and Phase 3 needs the path mapping.
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(docs/wip/codex-support/implementation.md)
+  ⎿  Added 9 lines, removed 4 lines
+      16  
+      17  ## Phase 1: Repository restructure {#phase-1-restructure}
+      18  
+      19 -**Goal:** Move skills to repo root, rename `klaude-plugin/` to 
+      19 +**Goal:** Move skills and profiles to repo root, rename `klaude
+         +-plugin/` to                                                   
+      20  `plugins/claude/`, and set up symlinks. No behavioral change ye
+          t.
+      21  
+      22  **Files to touch:**
+      23  
+      24  - Move `klaude-plugin/skills/*/` → `skills/*/` (physical move t
+          o repo root).
+      25 -- Move `klaude-plugin/` → `plugins/claude/`. Preserve all remai
+         -ning                                                           
+      26 -  sub-directories (`commands/`, `agents/`, `hooks/`, `scripts/`
+         -, `profiles/`,                                                 
+      25 +- Move `klaude-plugin/profiles/*/` → `profiles/*/` (physical mo
+         +ve to repo                                                     
+      26 +  root). Six skills reference profiles via `${CLAUDE_PLUGIN_ROO
+         +T}/profiles/`;                                                 
+      27 +  a canonical shared location eliminates cross-plugin path depe
+         +ndencies.                                                      
+      28 +- Move remaining `klaude-plugin/` → `plugins/claude/`. Preserve
+         + all                                                           
+      29 +  sub-directories (`commands/`, `agents/`, `hooks/`, `scripts/`
+         +,                                                              
+      30    `.claude-plugin/plugin.json`, `README.md`).
+      28 -- Create relative symlink `plugins/claude/skills` → `../../skil
+         -ls`.                                                           
+      31 +- Create relative symlinks:                                    
+      32 +  - `plugins/claude/skills` → `../../skills`                   
+      33 +  - `plugins/claude/profiles` → `../../profiles`               
+      34  - Update `.claude-plugin/marketplace.json`: change the `kk` plu
+          gin's
+      35    `source` from `./klaude-plugin` to `./plugins/claude`.
+      36  - Grep the repo for all hard-coded `klaude-plugin/` path refere
+          nces
+
+● Now updating Phase 1 verification to check profiles symlink too.
+
+● Update(docs/wip/codex-support/implementation.md)
+  ⎿  Added 3 lines
+      48    session and confirm skills are discoverable.
+      49  - `git ls-tree HEAD plugins/claude/skills` shows symlink mode `
+          120000`.
+      50    → verify: `file plugins/claude/skills` reports "symbolic link
+          ".
+      51 +- `file plugins/claude/profiles` reports "symbolic link" pointi
+         +ng at                                                          
+      52 +  `../../profiles`.                                            
+      53 +  → verify: `ls profiles/*/DETECTION.md | head` lists profile f
+         +iles.                                                          
+      54  - All tests pass: `for test in test/test-*.sh; do $test; done` 
+          exits 0.
+      55    → verify: exit code 0, no assertion failures.
+      56  
+
+● Now updating Phase 3 to include the ${CLAUDE_PLUGIN_ROOT} path mapping in
+  SessionStart.
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(docs/wip/codex-support/implementation.md)
+  ⎿  Added 4 lines, removed 2 lines
+      114    template-sync substitution.
+      115  - `.codex/scripts/session-start.sh` — shell script that emits 
+           the
+      116    `SessionStart` JSON with `additionalContext` containing: pro
+           vider identity,
+      117 -  tool-name mapping table (design.md §6.2), capy routing rules
+          -, sub-agent                                                   
+      118 -  roster.                                                     
+      117 +  tool-name mapping table (design.md §6.2), `${CLAUDE_PLUGIN_R
+          +OOT}` path                                                    
+      118 +  resolution (compute absolute repo root from script's own loc
+          +ation, map                                                    
+      119 +  `${CLAUDE_PLUGIN_ROOT}` → `<repo-root>/plugins/claude` and p
+          +rofiles →                                                     
+      120 +  `<repo-root>/profiles/`), capy routing rules, sub-agent rost
+          +er.                                                           
+      121  - `.codex/hooks.json` — hook configuration registering the `Se
+           ssionStart`
+      122    event to run `session-start.sh`. Structure:
+      123    ```json
+
+● Now fixing Phase 6 — narrow Starlark scope.
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(docs/wip/codex-support/implementation.md)
+  ⎿  Added 7 lines, removed 1 line
+      230    command from `.claude/settings.json`.
+      231  
+      232  **Source of truth:** Read `.claude/settings.json` `permissions
+           .deny` array.
+      233 -For each entry, create a `prefix_rule` with:                  
+      233 +The array contains both `Bash(...)` and `Read(...)` entries. *
+          +*Only `Bash(...)`                                             
+      234 +entries are ported here** — Starlark `prefix_rule()` matches s
+          +hell command                                                  
+      235 +argv only. `Read(...)` entries are handled separately: by the 
+          +PreToolUse                                                    
+      236 +hook (Phase 4) for shell equivalents like `cat .env`, and by S
+          +essionStart                                                   
+      237 +advisory context (Phase 3) for `read_file` — see design.md §7.
+          +3.                                                            
+      238 +                                                              
+      239 +For each `Bash(...)` entry, create a `prefix_rule` with:      
+      240  - `pattern` — argv prefix array (e.g., `["rm"]`, `["git", "pus
+           h", "--force"]`)
+      241  - `decision` — `"deny"` for blocked, `"prompt"` for ask
+      242  - `justification` — descriptive reason
+
+● Now updating tasks.md — Task 1 needs profiles move subtasks, Task 3 needs path
+   mapping, Task 6 needs scope narrowing.
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(docs/wip/codex-support/tasks.md)
+  ⎿  Added 7 lines, removed 6 lines
+      12  
+      13  ### Subtasks
+      14  - [ ] 1.1 Move every `klaude-plugin/skills/<name>/` to the new 
+          top-level `skills/<name>/`
+      15 -- [ ] 1.2 Move remaining `klaude-plugin/` → `plugins/claude/` p
+         -reserving all contents (`commands/`, `agents/`, `hooks/`, `scri
+         -pts/`, `profiles/`, `.claude-plugin/plugin.json`, `README.md`) 
+      16 -- [ ] 1.3 Create relative symlink `plugins/claude/skills` → `..
+         -/../skills`                                                    
+      17 -- [ ] 1.4 Update `.claude-plugin/marketplace.json`: change the 
+         -`kk` plugin's `source` from `./klaude-plugin` to `./plugins/cla
+         -ude`                                                           
+      18 -- [ ] 1.5 Grep the repo for all hard-coded `klaude-plugin/` pat
+         -h references in scripts, docs, tests, CLAUDE.md, ADRs; update e
+         -ach to `plugins/claude/`. **Exception:** `template-sync.sh`'s `
+         -run_plugin_migration` `dirs_to_remove` — keep old names (histor
+         -ical downstream cleanup paths)                                 
+      19 -- [ ] 1.6 Update `CLAUDE.md` — all `klaude-plugin/` references 
+         -become `plugins/claude/`, all `klaude-plugin/skills/` reference
+         -s become `skills/`                                             
+      20 -- [ ] 1.7 Verify: `jq . .claude-plugin/marketplace.json` exits 
+         -0; `file plugins/claude/skills` reports symlink; `for test in t
+         -est/test-*.sh; do $test; done` exits 0                         
+      15 +- [ ] 1.2 Move every `klaude-plugin/profiles/<name>/` to the ne
+         +w top-level `profiles/<name>/` (six skills reference profiles v
+         +ia `${CLAUDE_PLUGIN_ROOT}/profiles/`; shared location eliminate
+         +s cross-plugin path dependencies)                              
+      16 +- [ ] 1.3 Move remaining `klaude-plugin/` → `plugins/claude/` p
+         +reserving all contents (`commands/`, `agents/`, `hooks/`, `scri
+         +pts/`, `.claude-plugin/plugin.json`, `README.md`)              
+      17 +- [ ] 1.4 Create relative symlinks: `plugins/claude/skills` → `
+         +../../skills` and `plugins/claude/profiles` → `../../profiles` 
+      18 +- [ ] 1.5 Update `.claude-plugin/marketplace.json`: change the 
+         +`kk` plugin's `source` from `./klaude-plugin` to `./plugins/cla
+         +ude`                                                           
+      19 +- [ ] 1.6 Grep the repo for all hard-coded `klaude-plugin/` pat
+         +h references in scripts, docs, tests, CLAUDE.md, ADRs; update e
+         +ach to `plugins/claude/`. **Exception:** `template-sync.sh`'s `
+         +run_plugin_migration` `dirs_to_remove` — keep old names (histor
+         +ical downstream cleanup paths)                                 
+      20 +- [ ] 1.7 Update `CLAUDE.md` — all `klaude-plugin/` references 
+         +become `plugins/claude/`, all `klaude-plugin/skills/` reference
+         +s become `skills/`, all `klaude-plugin/profiles/` references be
+         +come `profiles/`                                               
+      21 +- [ ] 1.8 Verify: `jq . .claude-plugin/marketplace.json` exits 
+         +0; `file plugins/claude/skills` and `file plugins/claude/profil
+         +es` both report symlink; `ls profiles/*/DETECTION.md | head` li
+         +sts profiles; `for test in test/test-*.sh; do $test; done` exit
+         +s 0                                                            
+      22  
+      23  ## Task 2: Codex plugin scaffold
+      24  - **Status:** pending
+
+● Now updating Task 3 for ${CLAUDE_PLUGIN_ROOT} path mapping.
+
+● Update(docs/wip/codex-support/tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      41  
+      42  ### Subtasks
+      43  - [ ] 3.1 Create `AGENTS.md` at repo root — provider identity b
+          lock, behavioral instructions (port from `.claude/CLAUDE.extra.
+          md`), capy routing rules (replicate from `.claude/capy/CLAUDE.m
+          d`). Use `%PROJECT_NAME%` placeholder for template-sync substit
+          ution
+      44 -- [ ] 3.2 Create `.codex/scripts/session-start.sh` — shell scri
+         -pt emitting `SessionStart` JSON with `additionalContext` contai
+         -ning: provider identity, tool-name mapping table (Read→read_fil
+         -e, Write→write_file, Edit→apply_patch, Bash→shell, Grep→shell+g
+         -rep, Glob→shell+find, WebSearch→web_search, WebFetch→capy, Agen
+         -t/Task→natural-language subagent spawning, Skill→$mention), cap
+         -y routing rules, sub-agent roster (all five agents)            
+      44 +- [ ] 3.2 Create `.codex/scripts/session-start.sh` — shell scri
+         +pt emitting `SessionStart` JSON with `additionalContext` contai
+         +ning: provider identity, tool-name mapping table (Read→read_fil
+         +e, Write→write_file, Edit→apply_patch, Bash→shell, Grep→shell+g
+         +rep, Glob→shell+find, WebSearch→web_search, WebFetch→capy, Agen
+         +t/Task→natural-language subagent spawning, Skill→$mention), `${
+         +CLAUDE_PLUGIN_ROOT}` path resolution (compute absolute repo roo
+         +t from script location, map to `<repo-root>/plugins/claude` for
+         + plugin refs and `<repo-root>/profiles/` for profile refs), cap
+         +y routing rules, sub-agent roster (all five agents)            
+      45  - [ ] 3.3 Create `.codex/hooks.json` with `SessionStart` event 
+          entry pointing at `session-start.sh`
+      46  - [ ] 3.4 Create `.codex/config.toml` with initial `[features] 
+          codex_hooks = true`
+      47  - [ ] 3.5 Verify: `bash .codex/scripts/session-start.sh < /dev/
+          null | jq .` exits 0 with valid JSON; in a codex session, provi
+          der identity appears
+
+● Now updating Task 6 for Starlark scope narrowing.
+
+● Update(docs/wip/codex-support/tasks.md)
+  ⎿  Added 2 lines, removed 2 lines
+      76  - **Docs:** [implementation.md#phase-6-rules](./implementation.
+          md#phase-6-rules)
+      77  
+      78  ### Subtasks
+      79 -- [ ] 6.1 Read `.claude/settings.json` `permissions.deny` array
+         - to extract all denied commands                                
+      80 -- [ ] 6.2 Create `.codex/rules/default.rules` — one `prefix_rul
+         -e()` per denied command with `decision = "deny"`, `justificatio
+         -n`, and at least one `match`/`not_match` inline test case. Port
+         - "ask" commands as `decision = "prompt"`                       
+      79 +- [ ] 6.1 Read `.claude/settings.json` `permissions.deny` array
+         + to extract denied commands. **Only `Bash(...)` entries are por
+         +ted here** — `Read(...)` entries are handled by PreToolUse hook
+         + (Task 4) and SessionStart advisory context (Task 3); see desig
+         +n.md §7.3                                                      
+      80 +- [ ] 6.2 Create `.codex/rules/default.rules` — one `prefix_rul
+         +e()` per `Bash(...)` denied command with `decision = "deny"`, `
+         +justification`, and at least one `match`/`not_match` inline tes
+         +t case. Port "ask" commands as `decision = "prompt"`           
+      81  - [ ] 6.3 Verify: `codex execpolicy check --pretty --rules .cod
+          ex/rules/default.rules -- rm -rf /tmp/test` shows `deny`; `code
+          x execpolicy check --pretty --rules .codex/rules/default.rules 
+          -- ls` shows `allow`
+      82  
+      83  ## Task 7: Statusline
+
+● Now updating Task 10 to include profiles symlink assertion.
+● Update(docs/wip/codex-support/tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      117  - **Docs:** [implementation.md#phase-10-tests-docs](./implemen
+           tation.md#phase-10-tests-docs)
+      118  
+      119  ### Subtasks
+      120 -- [ ] 10.1 Update `test/test-plugin-structure.sh` — all `klaud
+          -e-plugin/` path references become `plugins/claude/`; update `E
+          -XPECTED_*` arrays; add assertions for `skills/` at repo root  
+      120 +- [ ] 10.1 Update `test/test-plugin-structure.sh` — all `klaud
+          +e-plugin/` path references become `plugins/claude/`; update `E
+          +XPECTED_*` arrays; add assertions for `skills/` and `profiles/
+          +` at repo root                                                
+      121  - [ ] 10.2 Create `test/test-codex-structure.sh` — assert all 
+           codex files exist and validate (plugin.json, config.toml, hook
+           s.json, five agent TOMLs, rules file, marketplace.json, AGENTS
+           .md, skills symlink/dir, claude skills symlink)
+      122  - [ ] 10.3 Update `README.md` — new "Providers" section with i
+           nstall paths for Claude and Codex; "Migration from pre-restruc
+           ture layout" subsection
+      123  - [ ] 10.4 Update `plugins/claude/README.md` — path updates on
+           ly
+
+● Update(docs/wip/codex-support/tasks.md)
+  ⎿  Added 1 line, removed 1 line
+      118  
+      119  ### Subtasks
+      120  - [ ] 10.1 Update `test/test-plugin-structure.sh` — all `klaud
+           e-plugin/` path references become `plugins/claude/`; update `E
+           XPECTED_*` arrays; add assertions for `skills/` and `profiles/
+           ` at repo root
+      121 -- [ ] 10.2 Create `test/test-codex-structure.sh` — assert all 
+          -codex files exist and validate (plugin.json, config.toml, hook
+          -s.json, five agent TOMLs, rules file, marketplace.json, AGENTS
+          -.md, skills symlink/dir, claude skills symlink)               
+      121 +- [ ] 10.2 Create `test/test-codex-structure.sh` — assert all 
+          +codex files exist and validate (plugin.json, config.toml, hook
+          +s.json, five agent TOMLs, rules file, marketplace.json, AGENTS
+          +.md, skills symlink/dir, claude skills symlink, claude profile
+          +s symlink)                                                    
+      122  - [ ] 10.3 Update `README.md` — new "Providers" section with i
+           nstall paths for Claude and Codex; "Migration from pre-restruc
+           ture layout" subsection
+      123  - [ ] 10.4 Update `plugins/claude/README.md` — path updates on
+           ly
+      124  - [ ] 10.5 Write `docs/adr/0005-codex-hook-enforcement-gap.md`
+            (already created alongside this task list — verify content is
+            accurate post-implementation)
+
+● All four review findings addressed:
+
+  - P3 (low): Added "authentication": "ON_INSTALL" to marketplace JSON in
+  design.md §5.1
+  - P2 (medium): Narrowed Phase 6/Task 6 to Bash(...) entries only, with
+  explicit note that Read(...) entries are covered by PreToolUse + SessionStart
+  - P1 (install flow): Clarified two-step nature in §5.2, added alternative for
+  in-repo users, kept the documented CLI command with a citation
+  - P1 (${CLAUDE_PLUGIN_ROOT}): Added profiles move to repo root (§4.1, Phase 1,
+   Task 1), added ${CLAUDE_PLUGIN_ROOT} path resolution to SessionStart hook
+  (§4.1.1, §6.2, Phase 3, Task 3), updated target layout, symlink assertions,
+  and all verification steps
+
+  Four files updated: design.md, implementation.md, tasks.md, plus the
+  already-written ADR 0005.

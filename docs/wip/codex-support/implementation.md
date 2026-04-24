@@ -16,16 +16,21 @@ atomic commits (tasks.md defines the exact breakdown).
 
 ## Phase 1: Repository restructure {#phase-1-restructure}
 
-**Goal:** Move skills to repo root, rename `klaude-plugin/` to
+**Goal:** Move skills and profiles to repo root, rename `klaude-plugin/` to
 `plugins/claude/`, and set up symlinks. No behavioral change yet.
 
 **Files to touch:**
 
 - Move `klaude-plugin/skills/*/` → `skills/*/` (physical move to repo root).
-- Move `klaude-plugin/` → `plugins/claude/`. Preserve all remaining
-  sub-directories (`commands/`, `agents/`, `hooks/`, `scripts/`, `profiles/`,
+- Move `klaude-plugin/profiles/*/` → `profiles/*/` (physical move to repo
+  root). Six skills reference profiles via `${CLAUDE_PLUGIN_ROOT}/profiles/`;
+  a canonical shared location eliminates cross-plugin path dependencies.
+- Move remaining `klaude-plugin/` → `plugins/claude/`. Preserve all
+  sub-directories (`commands/`, `agents/`, `hooks/`, `scripts/`,
   `.claude-plugin/plugin.json`, `README.md`).
-- Create relative symlink `plugins/claude/skills` → `../../skills`.
+- Create relative symlinks:
+  - `plugins/claude/skills` → `../../skills`
+  - `plugins/claude/profiles` → `../../profiles`
 - Update `.claude-plugin/marketplace.json`: change the `kk` plugin's
   `source` from `./klaude-plugin` to `./plugins/claude`.
 - Grep the repo for all hard-coded `klaude-plugin/` path references
@@ -43,6 +48,9 @@ atomic commits (tasks.md defines the exact breakdown).
   session and confirm skills are discoverable.
 - `git ls-tree HEAD plugins/claude/skills` shows symlink mode `120000`.
   → verify: `file plugins/claude/skills` reports "symbolic link".
+- `file plugins/claude/profiles` reports "symbolic link" pointing at
+  `../../profiles`.
+  → verify: `ls profiles/*/DETECTION.md | head` lists profile files.
 - All tests pass: `for test in test/test-*.sh; do $test; done` exits 0.
   → verify: exit code 0, no assertion failures.
 
@@ -106,8 +114,10 @@ routing rules, and sub-agent roster injected at session start.
   template-sync substitution.
 - `.codex/scripts/session-start.sh` — shell script that emits the
   `SessionStart` JSON with `additionalContext` containing: provider identity,
-  tool-name mapping table (design.md §6.2), capy routing rules, sub-agent
-  roster.
+  tool-name mapping table (design.md §6.2), `${CLAUDE_PLUGIN_ROOT}` path
+  resolution (compute absolute repo root from script's own location, map
+  `${CLAUDE_PLUGIN_ROOT}` → `<repo-root>/plugins/claude` and profiles →
+  `<repo-root>/profiles/`), capy routing rules, sub-agent roster.
 - `.codex/hooks.json` — hook configuration registering the `SessionStart`
   event to run `session-start.sh`. Structure:
   ```json
@@ -220,7 +230,13 @@ Claude agent body references Claude-specific constructs explicitly (e.g.,
   command from `.claude/settings.json`.
 
 **Source of truth:** Read `.claude/settings.json` `permissions.deny` array.
-For each entry, create a `prefix_rule` with:
+The array contains both `Bash(...)` and `Read(...)` entries. **Only `Bash(...)`
+entries are ported here** — Starlark `prefix_rule()` matches shell command
+argv only. `Read(...)` entries are handled separately: by the PreToolUse
+hook (Phase 4) for shell equivalents like `cat .env`, and by SessionStart
+advisory context (Phase 3) for `read_file` — see design.md §7.3.
+
+For each `Bash(...)` entry, create a `prefix_rule` with:
 - `pattern` — argv prefix array (e.g., `["rm"]`, `["git", "push", "--force"]`)
 - `decision` — `"deny"` for blocked, `"prompt"` for ask
 - `justification` — descriptive reason

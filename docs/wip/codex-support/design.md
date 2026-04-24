@@ -17,9 +17,10 @@ model how to translate Claude tool names it encounters in skill files.
 
 ## 2. Goals
 
-1. A Codex user installs the plugin via
-   `codex plugin marketplace add serpro69/claude-toolbox` and immediately has
-   all workflow skills available.
+1. A Codex user registers the marketplace via
+   `codex plugin marketplace add serpro69/claude-toolbox`, then installs the
+   `kk` plugin from the `/plugins` browser — all workflow skills are
+   immediately available.
 2. Skills are authored once and shared between Claude and Codex via a single
    canonical `skills/` directory at repo root.
 3. Codex-specific artifacts (agents, hooks, config, rules) live under `.codex/`
@@ -32,7 +33,8 @@ model how to translate Claude tool names it encounters in skill files.
 ## 3. Non-Goals
 
 - **Not** rewriting SKILL.md files to be provider-neutral. Tool-name mapping
-  via SessionStart hook is sufficient.
+  and `${CLAUDE_PLUGIN_ROOT}` path resolution via SessionStart hook handle
+  the provider-specific references (see §6.2).
 - **Not** supporting codex's `--sparse` checkout for plugin installation. Our
   layout requires the full repo — the marketplace entry points at
   `./plugins/codex`, which is outside any sparse path.
@@ -45,16 +47,35 @@ model how to translate Claude tool names it encounters in skill files.
 
 ### 4.1 Restructure
 
-One directory move and one rename:
+Two directory moves and one rename:
 
 - **Move** `klaude-plugin/skills/` → `skills/` (repo root). Every skill
   directory becomes a child of the new top-level `skills/`.
+- **Move** `klaude-plugin/profiles/` → `profiles/` (repo root). Same
+  pattern as skills — profiles are shared across providers. Six of ten
+  skills reference profiles via `${CLAUDE_PLUGIN_ROOT}/profiles/...`;
+  moving profiles to a canonical location eliminates cross-plugin path
+  dependencies.
 - **Rename** `klaude-plugin/` → `plugins/claude/`. Both providers live under
   `plugins/` for consistency.
 
-The Claude plugin gets a relative symlink `plugins/claude/skills` → `../../skills`
-so existing Claude consumers see no change. `.claude-plugin/marketplace.json`
+The Claude plugin gets relative symlinks:
+- `plugins/claude/skills` → `../../skills`
+- `plugins/claude/profiles` → `../../profiles`
+
+Existing Claude consumers see no change. `.claude-plugin/marketplace.json`
 source path updates from `./klaude-plugin` to `./plugins/claude`.
+
+### 4.1.1 `${CLAUDE_PLUGIN_ROOT}` path resolution
+
+Six skills reference `${CLAUDE_PLUGIN_ROOT}` for profile paths, shared
+instructions, and agent paths. Claude substitutes this variable at
+plugin-load time. Codex has no equivalent substitution mechanism.
+
+With profiles and skills at repo root, the SessionStart hook injects a
+path-variable mapping (see §6.2) telling the model how to resolve
+`${CLAUDE_PLUGIN_ROOT}` references. The script computes the absolute repo
+root at runtime from its own location and constructs the equivalent path.
 
 ### 4.2 Target layout
 
@@ -63,14 +84,19 @@ claude-toolbox/
 ├── skills/                              # MOVED from klaude-plugin/skills/
 │   └── <skill-name>/
 │       └── SKILL.md
+├── profiles/                            # MOVED from klaude-plugin/profiles/
+│   └── <name>/
+│       ├── DETECTION.md
+│       ├── overview.md
+│       └── <phase>/
 ├── plugins/
 │   ├── claude/                          # RENAMED from klaude-plugin/
 │   │   ├── skills → ../../skills        # symlink
+│   │   ├── profiles → ../../profiles    # symlink
 │   │   ├── commands/
 │   │   ├── agents/
 │   │   ├── hooks/
 │   │   ├── scripts/
-│   │   ├── profiles/
 │   │   └── .claude-plugin/plugin.json
 │   └── codex/                           # NEW
 │       ├── .codex-plugin/plugin.json    # manifest
@@ -137,7 +163,8 @@ The repo ships `.agents/plugins/marketplace.json` at root:
         "path": "./plugins/codex"
       },
       "policy": {
-        "installation": "AVAILABLE"
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
       },
       "category": "Productivity"
     }
@@ -147,12 +174,24 @@ The repo ships `.agents/plugins/marketplace.json` at root:
 
 ### 5.2 Install flow
 
-1. `codex plugin marketplace add serpro69/claude-toolbox` — clones the repo
-   and registers the marketplace.
-2. User opens `/plugins` in codex, browses the marketplace, installs `kk`.
+The install is a two-step process: register the marketplace source, then
+install the plugin from the TUI browser.
+
+1. `codex plugin marketplace add serpro69/claude-toolbox` — registers the
+   repo as a marketplace source. Codex supports GitHub shorthand
+   (`owner/repo`), full Git URLs, SSH URLs, and local paths as marketplace
+   sources (documented in codex plugin build docs, "Add a marketplace from
+   the CLI" section).
+2. User opens `/plugins` in the codex TUI, selects the "Claude Toolbox"
+   marketplace, and installs the `kk` plugin.
 3. Plugin manifest at `plugins/codex/.codex-plugin/plugin.json` declares
    `"skills": "./skills/"` — codex discovers all SKILL.md files.
 4. Plugin `.mcp.json` registers capy MCP server.
+
+**Alternative for users working inside this repo:** The
+`.agents/plugins/marketplace.json` is already present at the repo root.
+They skip step 1 — the marketplace is auto-discovered. They open `/plugins`
+and install directly.
 
 ### 5.3 No sparse checkout
 
@@ -202,6 +241,22 @@ When skill instructions reference Claude Code tool names, apply this mapping:
 **Sub-agent roster:** Lists all five custom agents available:
 `code-reviewer`, `spec-reviewer`, `design-reviewer`, `eval-grader`,
 `profile-resolver`.
+
+**`${CLAUDE_PLUGIN_ROOT}` path resolution:**
+
+Six skills reference `${CLAUDE_PLUGIN_ROOT}` for profile paths, shared
+instructions, and agent paths. Claude substitutes this at plugin-load time;
+codex has no equivalent. The SessionStart hook injects the resolved path:
+
+```
+When skill instructions reference ${CLAUDE_PLUGIN_ROOT}, resolve it to:
+<absolute-repo-root>/plugins/claude
+Profiles are at: <absolute-repo-root>/profiles/
+```
+
+The `session-start.sh` script computes `<absolute-repo-root>` at runtime
+from its own location (`.codex/scripts/session-start.sh` → walk up two
+levels to repo root).
 
 ### 6.3 Implementation
 

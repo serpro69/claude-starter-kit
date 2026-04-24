@@ -12,12 +12,13 @@
 
 ### Subtasks
 - [ ] 1.1 Move every `klaude-plugin/skills/<name>/` to the new top-level `skills/<name>/`
-- [ ] 1.2 Move remaining `klaude-plugin/` → `plugins/claude/` preserving all contents (`commands/`, `agents/`, `hooks/`, `scripts/`, `profiles/`, `.claude-plugin/plugin.json`, `README.md`)
-- [ ] 1.3 Create relative symlink `plugins/claude/skills` → `../../skills`
-- [ ] 1.4 Update `.claude-plugin/marketplace.json`: change the `kk` plugin's `source` from `./klaude-plugin` to `./plugins/claude`
-- [ ] 1.5 Grep the repo for all hard-coded `klaude-plugin/` path references in scripts, docs, tests, CLAUDE.md, ADRs; update each to `plugins/claude/`. **Exception:** `template-sync.sh`'s `run_plugin_migration` `dirs_to_remove` — keep old names (historical downstream cleanup paths)
-- [ ] 1.6 Update `CLAUDE.md` — all `klaude-plugin/` references become `plugins/claude/`, all `klaude-plugin/skills/` references become `skills/`
-- [ ] 1.7 Verify: `jq . .claude-plugin/marketplace.json` exits 0; `file plugins/claude/skills` reports symlink; `for test in test/test-*.sh; do $test; done` exits 0
+- [ ] 1.2 Move every `klaude-plugin/profiles/<name>/` to the new top-level `profiles/<name>/` (six skills reference profiles via `${CLAUDE_PLUGIN_ROOT}/profiles/`; shared location eliminates cross-plugin path dependencies)
+- [ ] 1.3 Move remaining `klaude-plugin/` → `plugins/claude/` preserving all contents (`commands/`, `agents/`, `hooks/`, `scripts/`, `.claude-plugin/plugin.json`, `README.md`)
+- [ ] 1.4 Create relative symlinks: `plugins/claude/skills` → `../../skills` and `plugins/claude/profiles` → `../../profiles`
+- [ ] 1.5 Update `.claude-plugin/marketplace.json`: change the `kk` plugin's `source` from `./klaude-plugin` to `./plugins/claude`
+- [ ] 1.6 Grep the repo for all hard-coded `klaude-plugin/` path references in scripts, docs, tests, CLAUDE.md, ADRs; update each to `plugins/claude/`. **Exception:** `template-sync.sh`'s `run_plugin_migration` `dirs_to_remove` — keep old names (historical downstream cleanup paths)
+- [ ] 1.7 Update `CLAUDE.md` — all `klaude-plugin/` references become `plugins/claude/`, all `klaude-plugin/skills/` references become `skills/`, all `klaude-plugin/profiles/` references become `profiles/`
+- [ ] 1.8 Verify: `jq . .claude-plugin/marketplace.json` exits 0; `file plugins/claude/skills` and `file plugins/claude/profiles` both report symlink; `ls profiles/*/DETECTION.md | head` lists profiles; `for test in test/test-*.sh; do $test; done` exits 0
 
 ## Task 2: Codex plugin scaffold
 - **Status:** pending
@@ -40,7 +41,7 @@
 
 ### Subtasks
 - [ ] 3.1 Create `AGENTS.md` at repo root — provider identity block, behavioral instructions (port from `.claude/CLAUDE.extra.md`), capy routing rules (replicate from `.claude/capy/CLAUDE.md`). Use `%PROJECT_NAME%` placeholder for template-sync substitution
-- [ ] 3.2 Create `.codex/scripts/session-start.sh` — shell script emitting `SessionStart` JSON with `additionalContext` containing: provider identity, tool-name mapping table (Read→read_file, Write→write_file, Edit→apply_patch, Bash→shell, Grep→shell+grep, Glob→shell+find, WebSearch→web_search, WebFetch→capy, Agent/Task→natural-language subagent spawning, Skill→$mention), capy routing rules, sub-agent roster (all five agents)
+- [ ] 3.2 Create `.codex/scripts/session-start.sh` — shell script emitting `SessionStart` JSON with `additionalContext` containing: provider identity, tool-name mapping table (Read→read_file, Write→write_file, Edit→apply_patch, Bash→shell, Grep→shell+grep, Glob→shell+find, WebSearch→web_search, WebFetch→capy, Agent/Task→natural-language subagent spawning, Skill→$mention), `${CLAUDE_PLUGIN_ROOT}` path resolution (compute absolute repo root from script location, map to `<repo-root>/plugins/claude` for plugin refs and `<repo-root>/profiles/` for profile refs), capy routing rules, sub-agent roster (all five agents)
 - [ ] 3.3 Create `.codex/hooks.json` with `SessionStart` event entry pointing at `session-start.sh`
 - [ ] 3.4 Create `.codex/config.toml` with initial `[features] codex_hooks = true`
 - [ ] 3.5 Verify: `bash .codex/scripts/session-start.sh < /dev/null | jq .` exits 0 with valid JSON; in a codex session, provider identity appears
@@ -75,8 +76,8 @@
 - **Docs:** [implementation.md#phase-6-rules](./implementation.md#phase-6-rules)
 
 ### Subtasks
-- [ ] 6.1 Read `.claude/settings.json` `permissions.deny` array to extract all denied commands
-- [ ] 6.2 Create `.codex/rules/default.rules` — one `prefix_rule()` per denied command with `decision = "deny"`, `justification`, and at least one `match`/`not_match` inline test case. Port "ask" commands as `decision = "prompt"`
+- [ ] 6.1 Read `.claude/settings.json` `permissions.deny` array to extract denied commands. **Only `Bash(...)` entries are ported here** — `Read(...)` entries are handled by PreToolUse hook (Task 4) and SessionStart advisory context (Task 3); see design.md §7.3
+- [ ] 6.2 Create `.codex/rules/default.rules` — one `prefix_rule()` per `Bash(...)` denied command with `decision = "deny"`, `justification`, and at least one `match`/`not_match` inline test case. Port "ask" commands as `decision = "prompt"`
 - [ ] 6.3 Verify: `codex execpolicy check --pretty --rules .codex/rules/default.rules -- rm -rf /tmp/test` shows `deny`; `codex execpolicy check --pretty --rules .codex/rules/default.rules -- ls` shows `allow`
 
 ## Task 7: Statusline
@@ -116,8 +117,8 @@
 - **Docs:** [implementation.md#phase-10-tests-docs](./implementation.md#phase-10-tests-docs)
 
 ### Subtasks
-- [ ] 10.1 Update `test/test-plugin-structure.sh` — all `klaude-plugin/` path references become `plugins/claude/`; update `EXPECTED_*` arrays; add assertions for `skills/` at repo root
-- [ ] 10.2 Create `test/test-codex-structure.sh` — assert all codex files exist and validate (plugin.json, config.toml, hooks.json, five agent TOMLs, rules file, marketplace.json, AGENTS.md, skills symlink/dir, claude skills symlink)
+- [ ] 10.1 Update `test/test-plugin-structure.sh` — all `klaude-plugin/` path references become `plugins/claude/`; update `EXPECTED_*` arrays; add assertions for `skills/` and `profiles/` at repo root
+- [ ] 10.2 Create `test/test-codex-structure.sh` — assert all codex files exist and validate (plugin.json, config.toml, hooks.json, five agent TOMLs, rules file, marketplace.json, AGENTS.md, skills symlink/dir, claude skills symlink, claude profiles symlink)
 - [ ] 10.3 Update `README.md` — new "Providers" section with install paths for Claude and Codex; "Migration from pre-restructure layout" subsection
 - [ ] 10.4 Update `plugins/claude/README.md` — path updates only
 - [ ] 10.5 Write `docs/adr/0005-codex-hook-enforcement-gap.md` (already created alongside this task list — verify content is accurate post-implementation)
