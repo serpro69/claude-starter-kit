@@ -3,9 +3,7 @@
     "commit": "",
     "pr": ""
   },
-  "enabledMcpjsonServers": [
-    "capy"
-  ],
+  "enabledMcpjsonServers": ["capy"],
   "enabledPlugins": {
     "skill-creator@claude-plugins-official": true
   },
@@ -95,6 +93,8 @@
   "permissions": {
     "allow": [
       "Bash(cat:*)",
+      "Bash(go build *)",
+      "Bash(go test *)",
       "Bash(grep:*)",
       "Bash(ls:*)",
       "Bash(mkdir:*)",
