@@ -107,7 +107,11 @@
       "mcp__pal__listmodels",
       "WebSearch"
     ],
-    "ask": [],
+    "ask": [
+      "mcp__capy__capy_batch_execute",
+      "mcp__capy__capy_execute",
+      "mcp__capy__capy_execute_file"
+    ],
     "defaultMode": "default",
     "deny": []
   }
