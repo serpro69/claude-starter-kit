@@ -1,0 +1,141 @@
+- repo: samber/cc-skills-golang
+  ref: v1.2.5
+  keep_default: from_first_h1
+  files:
+    # ── review-code/ ─────────────────────────────────────────────
+
+    # Always load
+    - source: skills/golang-security/SKILL.md
+      phase: review-code
+      as: security.md
+
+    - source: skills/golang-security/references/injection.md
+      phase: review-code
+      as: security-injection-ref.md
+      keep: all
+
+    - source: skills/golang-code-style/SKILL.md
+      phase: review-code
+      as: code-style.md
+
+    - source: skills/golang-naming/SKILL.md
+      phase: review-code
+      as: naming.md
+
+    - source: skills/golang-error-handling/SKILL.md
+      phase: review-code
+      as: error-handling.md
+
+    - source: skills/golang-performance/SKILL.md
+      phase: review-code
+      as: performance.md
+
+    # Conditional
+    - source: skills/golang-database/SKILL.md
+      phase: review-code
+      as: database.md
+      condition: "Diff imports database/sql, sqlx, gorm, ent, or pgx"
+
+    - source: skills/golang-concurrency/SKILL.md
+      phase: review-code
+      as: concurrency.md
+      condition: "Diff uses goroutines, channels, or sync package"
+
+    - source: skills/golang-grpc/SKILL.md
+      phase: review-code
+      as: grpc.md
+      condition: "Diff imports google.golang.org/grpc"
+
+    # ── implement/ ───────────────────────────────────────────────
+
+    # Always load
+    - source: skills/golang-design-patterns/SKILL.md
+      phase: implement
+      as: design-patterns.md
+
+    - source: skills/golang-structs-interfaces/SKILL.md
+      phase: implement
+      as: structs-interfaces.md
+
+    - source: skills/golang-error-handling/SKILL.md
+      phase: implement
+      as: error-handling.md
+
+    - source: skills/golang-security/SKILL.md
+      phase: implement
+      as: security.md
+
+    # Conditional
+    - source: skills/golang-concurrency/SKILL.md
+      phase: implement
+      as: concurrency.md
+      condition: "Task involves goroutines, channels, or sync primitives"
+
+    - source: skills/golang-context/SKILL.md
+      phase: implement
+      as: context.md
+      condition: "Task involves context propagation or cancellation"
+
+    - source: skills/golang-data-structures/SKILL.md
+      phase: implement
+      as: data-structures.md
+      condition: "Task involves custom data structures, generics, or collection types"
+
+    - source: skills/golang-database/SKILL.md
+      phase: implement
+      as: database.md
+      condition: "Task involves database access or SQL"
+
+    - source: skills/golang-grpc/SKILL.md
+      phase: implement
+      as: grpc.md
+      condition: "Task involves gRPC services or protobuf"
+
+    - source: skills/golang-dependency-injection/SKILL.md
+      phase: implement
+      as: dependency-injection.md
+      condition: "Task involves dependency injection or wire"
+
+    # ── design/ ──────────────────────────────────────────────────
+
+    # All conditional
+    - source: skills/golang-database/SKILL.md
+      phase: design
+      as: database.md
+      condition: "Design involves database access or SQL"
+
+    - source: skills/golang-grpc/SKILL.md
+      phase: design
+      as: grpc.md
+      condition: "Design involves gRPC services or protobuf"
+
+    - source: skills/golang-observability/SKILL.md
+      phase: design
+      as: observability.md
+      condition: "Design involves logging, metrics, or tracing"
+
+    # ── test/ ────────────────────────────────────────────────────
+
+    # Always load
+    - source: skills/golang-testing/SKILL.md
+      phase: test
+      as: testing.md
+
+    # Conditional
+    - source: skills/golang-benchmark/SKILL.md
+      phase: test
+      as: benchmark.md
+      condition: "Task involves performance benchmarks or profiling"
+
+    # ── document/ ────────────────────────────────────────────────
+
+    # All conditional
+    - source: skills/golang-cli/SKILL.md
+      phase: document
+      as: cli.md
+      condition: "Project includes CLI commands or cobra/urfave setup"
+
+    - source: skills/golang-continuous-integration/SKILL.md
+      phase: document
+      as: continuous-integration.md
+      condition: "Project includes CI/CD pipelines or GitHub Actions"
