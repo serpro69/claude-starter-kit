@@ -30,3 +30,6 @@ logs
 
 !.capy
 !.capy/knowledge.db
+
+# Go build artifacts
+/vendor-profiles

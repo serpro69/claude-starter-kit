@@ -6,16 +6,16 @@
 > Created: 2026-04-23
 
 ## Task 1: Go module and CLI skeleton
-- **Status:** pending
+- **Status:** done
 - **Depends on:** —
 - **Docs:** [implementation.md — Task 1.1](./implementation.md#task-11-initialize-the-go-module-and-cli-skeleton)
 
 ### Subtasks
-- [ ] 1.1 Initialize Go module at repo root if `go.mod` does not exist (or extend existing one)
-- [ ] 1.2 Create `cmd/vendor-profiles/main.go` with `-manifest`, `-target`, and `-dry-run` flags using `flag` package
-- [ ] 1.3 Wire up the top-level pipeline: parse manifest → iterate upstreams → iterate files → fetch → transform → write → update index
-- [ ] 1.4 Define exit codes: 0 success, 1 fatal error
-- [ ] 1.5 Verify: `go build ./cmd/vendor-profiles` succeeds, `-help` prints usage
+- [x] 1.1 Initialize Go module at repo root if `go.mod` does not exist (or extend existing one)
+- [x] 1.2 Create `cmd/vendor-profiles/main.go` with `-manifest`, `-target`, and `-dry-run` flags using `flag` package
+- [x] 1.3 Wire up the top-level pipeline: parse manifest → iterate upstreams → iterate files → fetch → transform → write → update index
+- [x] 1.4 Define exit codes: 0 success, 1 fatal error
+- [x] 1.5 Verify: `go build ./cmd/vendor-profiles` succeeds, `-help` prints usage
 
 ## Task 2: Manifest parsing and validation
 - **Status:** pending
