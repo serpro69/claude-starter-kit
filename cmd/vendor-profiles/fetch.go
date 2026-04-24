@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 )
 
 type Fetcher interface {
@@ -25,4 +27,17 @@ func (f *HTTPFetcher) Fetch(repo, ref, source string) ([]byte, error) {
 	}
 
 	return io.ReadAll(resp.Body)
+}
+
+type LocalFetcher struct {
+	BaseDir string
+}
+
+func (f *LocalFetcher) Fetch(repo, ref, source string) ([]byte, error) {
+	p := filepath.Join(f.BaseDir, source)
+	data, err := os.ReadFile(p)
+	if err != nil {
+		return nil, fmt.Errorf("reading local file %s: %w", p, err)
+	}
+	return data, nil
 }

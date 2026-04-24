@@ -30,15 +30,15 @@
 - [x] 2.5 Write `manifest_test.go`: valid single-upstream, valid multi-upstream, missing required fields error, keep resolution
 
 ## Task 3: Fetch from upstream
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 2
 - **Docs:** [implementation.md — Task 1.3](./implementation.md#task-13-fetch-from-github-raw-urls)
 
 ### Subtasks
-- [ ] 3.1 Define `Fetcher` interface in `cmd/vendor-profiles/fetch.go`: `Fetch(repo, ref, source string) ([]byte, error)`
-- [ ] 3.2 Implement `HTTPFetcher` — construct raw URL `https://raw.githubusercontent.com/<repo>/<ref>/<source>`, GET, fail on non-200 with descriptive error
-- [ ] 3.3 Implement `LocalFetcher` for tests — reads from a base directory, resolving `repo/ref/source` to a local path
-- [ ] 3.4 Verify: HTTPFetcher tested in integration test only; LocalFetcher used in all unit tests
+- [x] 3.1 Define `Fetcher` interface in `cmd/vendor-profiles/fetch.go`: `Fetch(repo, ref, source string) ([]byte, error)`
+- [x] 3.2 Implement `HTTPFetcher` — construct raw URL `https://raw.githubusercontent.com/<repo>/<ref>/<source>`, GET, fail on non-200 with descriptive error
+- [x] 3.3 Implement `LocalFetcher` for tests — reads from a base directory, resolving `repo/ref/source` to a local path
+- [x] 3.4 Verify: HTTPFetcher tested in integration test only; LocalFetcher used in all unit tests
 
 ## Task 4: Keep transforms
 - **Status:** pending
