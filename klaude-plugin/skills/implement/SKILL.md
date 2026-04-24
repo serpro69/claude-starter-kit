@@ -47,7 +47,7 @@ When set, all review checkpoints automatically use isolated variants (`kk:review
 
 ## Workflow
 
-**Mandatory order — understand before executing.** The flow below is strictly sequential. Do not read source files to modify, write code, edit files, run tests, or otherwise act on any task until you have loaded full context (plan documents or problem understanding) and completed profile detection and loaded all resolved profile content. The only early contact with the codebase is the task's target filenames — enough to drive profile detection, not enough to pattern-match implementation. See [ADR 0004](../../../docs/adr/0004-skill-workflow-ordering.md) for the rationale.
+**Mandatory order — understand before executing.** The flow below is strictly sequential. Do not read source files to modify, write code, edit files, run tests, or otherwise act on any task until you have loaded full context (design, implementation plan, task list in **plan mode**, or full problem understanding in **standalone**) and completed profile detection and loaded all resolved profile content. The only early contact with the codebase is the task's target filenames — enough to drive profile detection, not enough to pattern-match implementation. See [ADR 0004](../../../docs/adr/0004-skill-workflow-ordering.md) for the rationale.
 
 ## The Process
 
@@ -69,7 +69,7 @@ After completing the mode's entry procedure, continue with Step 2.
 3. **Dependency-handling (pre-write).** Whenever the task introduces or changes a dependency — new import, version bump, unfamiliar call, **and per the widened trigger also: a Kubernetes API version, a CRD, a Helm chart or chart dependency, or a container image tag/digest** — apply the `dependency-handling` skill BEFORE writing the call. Do not guess signatures, API versions, or configuration; look them up via capy/context7 per that skill's rules. Per-profile lookup cascades live in each profile's `overview.md` (e.g., `${CLAUDE_PLUGIN_ROOT}/profiles/k8s/overview.md` §Looking up Kubernetes dependencies).
 4. Make the changes. (Plan mode: follow the plan exactly.)
 5. (Plan mode only) Check off subtasks (`- [x]`) in `tasks.md` as you complete them.
-6. Run verifications; use `test` skill.
+6. Run verifications; run `kk:test` skill.
 
 ### Step 3: Report and Review
 
@@ -82,7 +82,15 @@ After completing the mode's entry procedure, continue with Step 2.
 - Based on user and code-review feedback: apply changes if needed and finalize
 - (Plan mode only) Update `tasks.md`: set the task's status to `done`
 
-**After finalizing**, verify all items in the **Required Outputs** section above. If any item is unchecked, go back and complete it.
+**After finalizing**, verify all items in the **Required Outputs** section above:
+
+- [ ] Implementation addresses the requirement (plan mode: implementation matches plan)
+- [ ] Verification/tests pass, `kk:test` completed
+- [ ] Code review completed (via `review-code` — which owns indexing its own `kk:review-findings`)
+- [ ] New project conventions indexed as `kk:project-conventions` (skip if none established)
+- [ ] (Plan mode only) `tasks.md` updated to `done`
+
+If any item is unchecked, go back and complete it. Do NOT proceed to the next task with incomplete outputs.
 
 ### Step 4: Continue (plan mode only)
 
@@ -98,7 +106,7 @@ Follow the completion procedure in [plan-mode.md](plan-mode.md) — final valida
 
 - Hit a blocker (missing dependency, test fails, instruction unclear)
 - (Plan mode) Plan has critical gaps preventing starting
-- You don't understand a requirement
+- You don't understand a requirement or instruction is ambiguous
 - Verification fails repeatedly
 
 **IMPORTANT! Always ask for clarification rather than guessing.**
@@ -114,7 +122,9 @@ Follow the completion procedure in [plan-mode.md](plan-mode.md) — final valida
 
 ## Remember
 
-- Understand the problem before writing code
+- Review plan critically first
+- Follow plan steps exactly
 - Don't skip verifications
-- Use skills when applicable (dependency-handling, test, review-code)
+- Use skills when applicable (dependency-handling, test, review-code) (Plan mode: also when the plan says to do so)
+- Between batches: just report and wait
 - Stop when blocked, don't guess
