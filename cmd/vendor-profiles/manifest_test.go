@@ -204,6 +204,37 @@ func TestParseManifest_UnknownPhase(t *testing.T) {
 	}
 }
 
+func TestParseManifest_AsPathTraversal(t *testing.T) {
+	cases := []struct {
+		name string
+		as   string
+	}{
+		{"slash", "sub/file.md"},
+		{"backslash", "sub\\file.md"},
+		{"parent traversal", "../evil.md"},
+		{"deep traversal", "../../../evil.md"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			path := writeManifest(t, fmt.Sprintf(`
+- repo: foo/bar
+  ref: v1.0.0
+  files:
+    - source: foo.md
+      phase: review-code
+      as: %s
+`, tc.as))
+			_, err := ParseManifest(path)
+			if err == nil {
+				t.Fatal("expected error, got nil")
+			}
+			if !strings.Contains(err.Error(), "plain filename") {
+				t.Errorf("error = %q, want containing %q", err, "plain filename")
+			}
+		})
+	}
+}
+
 func TestParseManifest_AllValidPhases(t *testing.T) {
 	for _, phase := range []string{"review-code", "implement", "design", "test", "document", "review-spec"} {
 		t.Run(phase, func(t *testing.T) {

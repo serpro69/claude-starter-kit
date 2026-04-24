@@ -68,6 +68,12 @@ design → review-design → implement → review-code → test → document
 |------|---------|-------------|
 | Bash validation | `PreToolUse` on `Bash` | Blocks commands touching `.env`, `.git/`, `node_modules`, `build/`, `dist/`, `venv/`, and other sensitive paths |
 
+## Profiles
+
+The plugin ships per-domain profiles under `profiles/` (e.g., `go`, `k8s`, `python`). Profiles provide language- and framework-specific content to every workflow skill — review checklists, implementation gotchas, design prompts, test validators, and doc rubrics.
+
+Some profiles vendor content from external upstream repositories. The Go profile, for example, vendors from [samber/cc-skills-golang](https://github.com/samber/cc-skills-golang) via a manifest-driven pipeline (`make vendor-go`). See the **Vendored profile content** section of [`CLAUDE.md`](../CLAUDE.md) for the workflow, and the **Profile Conventions** section for the full authoring contract.
+
 ## Upgrading from Template-Managed Skills
 
 If you're upgrading from a version before the plugin system (< v0.5.0):
