@@ -18,16 +18,16 @@
 - [x] 1.5 Verify: `go build ./cmd/vendor-profiles` succeeds, `-help` prints usage
 
 ## Task 2: Manifest parsing and validation
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1
 - **Docs:** [implementation.md — Task 1.2](./implementation.md#task-12-manifest-parsing)
 
 ### Subtasks
-- [ ] 2.1 Define Go types: `Manifest` (alias for `[]Upstream`), `Upstream`, `File`, `KeepHeadings` in `cmd/vendor-profiles/manifest.go`
-- [ ] 2.2 Implement `ParseManifest(path string) (Manifest, error)` — read YAML, unmarshal, validate required fields
-- [ ] 2.3 Validate `phase` against known phase names (`review-code`, `implement`, `design`, `test`, `document`, `review-spec`)
-- [ ] 2.4 Resolve effective keep: file-level `keep` overrides upstream `keep_default`, fallback to `"all"`
-- [ ] 2.5 Write `manifest_test.go`: valid single-upstream, valid multi-upstream, missing required fields error, keep resolution
+- [x] 2.1 Define Go types: `Manifest` (alias for `[]Upstream`), `Upstream`, `File`, `KeepHeadings` in `cmd/vendor-profiles/manifest.go`
+- [x] 2.2 Implement `ParseManifest(path string) (Manifest, error)` — read YAML, unmarshal, validate required fields
+- [x] 2.3 Validate `phase` against known phase names (`review-code`, `implement`, `design`, `test`, `document`, `review-spec`)
+- [x] 2.4 Resolve effective keep: file-level `keep` overrides upstream `keep_default`, fallback to `"all"`
+- [x] 2.5 Write `manifest_test.go`: valid single-upstream, valid multi-upstream, missing required fields error, keep resolution
 
 ## Task 3: Fetch from upstream
 - **Status:** pending

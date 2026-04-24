@@ -56,6 +56,9 @@ func ParseManifest(path string) (Manifest, error) {
 		if upstream.Ref == "" {
 			return nil, fmt.Errorf("upstream[%d]: ref is required", i)
 		}
+		if upstream.KeepDefault != "" && upstream.KeepDefault != "all" && upstream.KeepDefault != "from_first_h1" {
+			return nil, fmt.Errorf("upstream[%d] (%s): invalid keep_default %q (must be \"all\" or \"from_first_h1\")", i, upstream.Repo, upstream.KeepDefault)
+		}
 		if len(upstream.Files) == 0 {
 			return nil, fmt.Errorf("upstream[%d] (%s): files is required", i, upstream.Repo)
 		}
@@ -72,10 +75,42 @@ func ParseManifest(path string) (Manifest, error) {
 			if file.As == "" {
 				return nil, fmt.Errorf("upstream[%d] (%s) file[%d]: as is required", i, upstream.Repo, j)
 			}
+			if err := validateKeep(file.Keep); err != nil {
+				return nil, fmt.Errorf("upstream[%d] (%s) file[%d]: %w", i, upstream.Repo, j, err)
+			}
 		}
 	}
 
 	return manifest, nil
+}
+
+func validateKeep(keep any) error {
+	if keep == nil {
+		return nil
+	}
+	switch v := keep.(type) {
+	case string:
+		if v != "all" && v != "from_first_h1" {
+			return fmt.Errorf("invalid keep mode %q (must be \"all\" or \"from_first_h1\")", v)
+		}
+	case map[string]any:
+		headings, ok := v["headings"]
+		if !ok {
+			return fmt.Errorf("keep object missing 'headings' key")
+		}
+		list, ok := headings.([]any)
+		if !ok {
+			return fmt.Errorf("headings must be a list of strings")
+		}
+		for i, h := range list {
+			if _, ok := h.(string); !ok {
+				return fmt.Errorf("headings[%d] must be a string, got %T", i, h)
+			}
+		}
+	default:
+		return fmt.Errorf("unsupported keep type: %T", keep)
+	}
+	return nil
 }
 
 func (f *File) ResolveKeep(upstreamDefault string) {
