@@ -64,16 +64,16 @@
 - [x] 5.4 Write `linkrewrite_test.go`: external URL preserved, co-vendored rewrite, cross-skill stripping, non-vendored stripping
 
 ## Task 6: index.md injection
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 2
 - **Docs:** [implementation.md — Task 1.6](./implementation.md#task-16-indexmd-injection)
 
 ### Subtasks
-- [ ] 6.1 Implement marker detection and content replacement in `cmd/vendor-profiles/index.go`
-- [ ] 6.2 Handle three cases: new file (create with heading + markers), existing with markers (replace between), existing without markers (append markers)
-- [ ] 6.3 Generate always-load entries (no condition) under `## Always load`, conditional entries under `## Conditional` with `**Load if:**` clause
-- [ ] 6.4 Extract one-line description from transformed file content (first non-empty non-heading line, truncated to 120 chars, fallback to filename)
-- [ ] 6.5 Write `index_test.go`: new file generation, marker replacement preserving outside content, always-load vs conditional formatting, description extraction
+- [x] 6.1 Implement marker detection and content replacement in `cmd/vendor-profiles/index.go`
+- [x] 6.2 Handle three cases: new file (create with heading + markers), existing with markers (replace between), existing without markers (append markers)
+- [x] 6.3 Generate always-load entries (no condition) under `## Always load`, conditional entries under `## Conditional` with `**Load if:**` clause
+- [x] 6.4 Extract one-line description from transformed file content (first non-empty non-heading line, truncated to 120 chars, fallback to filename)
+- [x] 6.5 Write `index_test.go`: new file generation, marker replacement preserving outside content, always-load vs conditional formatting, description extraction
 
 ## Task 7: Integration test and Makefile
 - **Status:** pending

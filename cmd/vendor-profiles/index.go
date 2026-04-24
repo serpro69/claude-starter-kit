@@ -29,9 +29,9 @@ func UpdateIndex(targetDir, phase string, files []phaseFile) error {
 		beginIdx := strings.Index(content, beginMarker)
 		endIdx := strings.Index(content, endMarker)
 		if beginIdx >= 0 && endIdx >= 0 {
-			output = content[:beginIdx+len(beginMarker)] + "\n" + vendored + content[endIdx:]
+			output = content[:beginIdx+len(beginMarker)] + "\n" + vendored + "\n" + content[endIdx:]
 		} else {
-			output = content + "\n" + beginMarker + "\n" + vendored + endMarker + "\n"
+			output = content + "\n" + beginMarker + "\n" + vendored + "\n" + endMarker + "\n"
 		}
 	}
 
@@ -63,7 +63,7 @@ func generateVendoredSection(files []phaseFile) string {
 		parts = append(parts, strings.Join(conditional, "\n"))
 	}
 
-	return strings.Join(parts, "\n") + "\n"
+	return strings.Join(parts, "\n")
 }
 
 func extractDescription(contentPath, fallbackName string) string {
