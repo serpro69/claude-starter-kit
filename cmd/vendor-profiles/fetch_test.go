@@ -2,11 +2,27 @@ package main
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 )
+
+var _ Fetcher = (*LocalFetcher)(nil)
+
+type LocalFetcher struct {
+	BaseDir string
+}
+
+func (f *LocalFetcher) Fetch(repo, ref, source string) ([]byte, error) {
+	p := filepath.Join(f.BaseDir, source)
+	data, err := os.ReadFile(p)
+	if err != nil {
+		return nil, fmt.Errorf("reading local file %s: %w", p, err)
+	}
+	return data, nil
+}
 
 func TestLocalFetcher_ReadsFromBaseDir(t *testing.T) {
 	dir := t.TempDir()
@@ -49,6 +65,9 @@ func TestLocalFetcher_IgnoresRepoAndRef(t *testing.T) {
 	if !bytes.Equal(got1, got2) {
 		t.Error("expected same content regardless of repo/ref")
 	}
+	if !bytes.Equal(got1, content) {
+		t.Errorf("content mismatch: got %q, want %q", got1, content)
+	}
 }
 
 func TestLocalFetcher_FileNotFound(t *testing.T) {
@@ -59,15 +78,8 @@ func TestLocalFetcher_FileNotFound(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}
-	if !strings.Contains(err.Error(), "reading local file") {
-		t.Errorf("error = %q, want containing %q", err, "reading local file")
+	var pathErr *os.PathError
+	if !errors.As(err, &pathErr) {
+		t.Errorf("expected *os.PathError, got %T: %v", err, err)
 	}
-}
-
-func TestHTTPFetcher_ImplementsFetcher(t *testing.T) {
-	var _ Fetcher = &HTTPFetcher{}
-}
-
-func TestLocalFetcher_ImplementsFetcher(t *testing.T) {
-	var _ Fetcher = &LocalFetcher{}
 }
