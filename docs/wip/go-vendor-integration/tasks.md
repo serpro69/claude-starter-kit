@@ -100,16 +100,16 @@
 - [x] 8.5 Spot-check vendored files: no frontmatter, no persona, links rewritten, content starts at H1
 
 ## Task 9: Delete replaced files and update profile docs
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 8
 - **Docs:** [implementation.md — Task 2.3, Task 2.4, Task 2.5](./implementation.md#task-23-delete-replaced-hand-written-files)
 
 ### Subtasks
-- [ ] 9.1 Delete `klaude-plugin/profiles/go/review-code/security-checklist.md` and `code-quality-checklist.md`
-- [ ] 9.2 Update the hand-written section of `review-code/index.md` — remove references to deleted files, keep `solid-checklist.md` and `removal-plan.md`
-- [ ] 9.3 Update `klaude-plugin/profiles/go/overview.md` — list all populated phases, remove "not populated" statement
-- [ ] 9.4 Add `## Design signals` section to `klaude-plugin/profiles/go/DETECTION.md` with tokens: Go, Golang, goroutine, go module, go.mod
-- [ ] 9.5 Verify: `test/test-plugin-structure.sh` passes — no orphans, no broken links, all invariants green
+- [x] 9.1 Delete `klaude-plugin/profiles/go/review-code/security-checklist.md` and `code-quality-checklist.md`
+- [x] 9.2 Update the hand-written section of `review-code/index.md` — remove references to deleted files, keep `solid-checklist.md` and `removal-plan.md`
+- [x] 9.3 Update `klaude-plugin/profiles/go/overview.md` — list all populated phases, remove "not populated" statement
+- [x] 9.4 Add `## Design signals` section to `klaude-plugin/profiles/go/DETECTION.md` with tokens: Go, Golang, goroutine, go module, go.mod
+- [x] 9.5 Verify: `test/test-plugin-structure.sh` passes — no orphans, no broken links, all invariants green (155/155 assertions)
 
 ## Task 10: Final verification
 - **Status:** pending

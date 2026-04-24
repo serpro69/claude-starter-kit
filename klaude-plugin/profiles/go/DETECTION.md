@@ -13,3 +13,13 @@ _None._ Go detection is extension-based, not filename-based.
 ## Content signals
 
 A file activates the Go profile if its extension is `.go`. The extension match is authoritative; no byte-level content inspection is required.
+
+## Design signals
+
+display_name: Go
+tokens:
+  - Go
+  - Golang
+  - goroutine
+  - go module
+  - go.mod

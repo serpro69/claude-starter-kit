@@ -10,9 +10,13 @@ Any file with a `.go` extension in scope. See [DETECTION.md](DETECTION.md) for t
 
 ## Populated phases
 
-- `review-code/` — checklists consumed by `review-code` (security, SOLID, code-quality, removal-plan).
+- `review-code/` — hand-written (SOLID, removal-plan) + vendored (security, code-style, naming, error-handling, performance, database, concurrency, grpc).
+- `implement/` — vendored pre-write gotchas (design-patterns, structs-interfaces, error-handling, security, concurrency, context, data-structures, database, grpc, dependency-injection).
+- `design/` — vendored conditional content (database, grpc, observability).
+- `test/` — vendored testing guidance (testing, benchmark).
+- `document/` — vendored conditional content (cli, continuous-integration).
 
-Other phase subdirectories (`design/`, `test/`, `implement/`, `document/`, `review-spec/`) are not populated for this profile: the generic per-phase behavior is sufficient.
+`review-spec/` is not populated — spec conformance checking does not require Go-specific rules.
 
 ## Looking up Go dependencies
 
