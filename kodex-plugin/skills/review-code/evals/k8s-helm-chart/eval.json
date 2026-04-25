@@ -1,0 +1,25 @@
+{
+  "id": 3,
+  "name": "k8s-helm-chart",
+  "description": "A Helm chart diff (Chart.yaml + values.yaml + templated Deployment + _helpers.tpl) activates the k8s profile, helm-checklist, and reliability-checklist.",
+  "skills": ["review-code"],
+  "prompt": "I've staged the following changes. Run `/kk:review-code` against them.",
+  "trap": "Model doesn't recognize templates as Kubernetes manifests because `{{ }}` placeholders make them technically invalid YAML, or misses the `values.yaml` / `Chart.yaml` adjacency rule, or spuriously loads `kustomize-checklist.md` alongside helm.",
+  "files": [
+    "test-files/Chart.yaml",
+    "test-files/values.yaml",
+    "test-files/templates/deployment.yaml",
+    "test-files/templates/_helpers.tpl"
+  ],
+  "assertions": [
+    { "id": "3.1", "text": "Resolver — Active profiles: `Chart.yaml` row has `profile=k8s` and `signal type=filename` with `triggered_by` citing the exact `Chart.yaml` name match." },
+    { "id": "3.2", "text": "Resolver — Active profiles: `values.yaml` row has `profile=k8s` with `triggered_by` citing `values*.yaml` filename + sibling `Chart.yaml` adjacency in the same directory." },
+    { "id": "3.3", "text": "Resolver — Active profiles: `templates/deployment.yaml` and `templates/_helpers.tpl` rows have `profile=k8s` with `triggered_by` citing `.yaml`/`.tpl` under a `templates/` directory whose direct-sibling parent contains `Chart.yaml`." },
+    { "id": "3.4", "text": "Resolver — Loaded checklists: contains the four always-load `(k8s, ...)` checklists." },
+    { "id": "3.5", "text": "Resolver — Loaded checklists: contains `(k8s, helm-checklist.md)` with a Load-if reason citing `Chart.yaml` in the diff." },
+    { "id": "3.6", "text": "Resolver — Loaded checklists: contains `(k8s, reliability-checklist.md)` with a Load-if reason citing a `kind: Deployment` present in a templated manifest." },
+    { "id": "3.7", "text": "Resolver — NOT loaded: contains `(k8s, kustomize-checklist.md)` with a reason citing absence of Kustomize filename signals." },
+    { "id": "3.8", "text": "Reviewer — output uses the P0/P1/P2/P3 severity headings with `**[file:line]** Brief title` per finding." },
+    { "id": "3.9", "text": "Reviewer — emits at least one finding matching the fixture's intentional violations. Candidates: mutable `image.tag: latest` in `values.yaml`, missing `Chart.lock` despite pinned `postgresql` dependency in `Chart.yaml`, missing `resources` on the templated container, missing `securityContext` on the templated container. A run that routes correctly but emits zero such findings does NOT satisfy this eval." }
+  ]
+}

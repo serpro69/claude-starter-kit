@@ -1,0 +1,21 @@
+{
+  "id": 5,
+  "name": "k8s-monorepo-false-positive",
+  "description": "A monorepo with a root-level Chart.yaml plus an unrelated docs/templates/ subtree must not spuriously flag the docs templates as Helm templates. Regression guard for the tightened ancestor-search rule.",
+  "skills": ["review-code"],
+  "prompt": "I've staged the following changes in a monorepo that ships an umbrella Helm chart at the repository root and also contains an unrelated docs site. Run `/kk:review-code` against them.",
+  "trap": "Model applies the depth-unbounded Helm-template ancestor search: sees the root-level `Chart.yaml` and concludes that every `templates/` directory anywhere in the tree — including `docs/templates/` — is a Helm template. Consequence: `helm-checklist.md` gets applied to `docs/templates/reference.yaml` (a docs-site config, not a Helm template), producing noisy, irrelevant findings. The tightened rule requires the `templates/` directory itself to be a direct sibling of a `Chart.yaml`; `docs/` does not contain a `Chart.yaml`, so `docs/templates/reference.yaml` is not a Helm template.",
+  "files": [
+    "test-files/Chart.yaml",
+    "test-files/templates/service.yaml",
+    "test-files/docs/templates/reference.yaml"
+  ],
+  "assertions": [
+    { "id": "5.1", "text": "Resolver — Active profiles: `Chart.yaml` row has `profile=k8s` and `signal type=filename` with `triggered_by` citing the exact `Chart.yaml` name match." },
+    { "id": "5.2", "text": "Resolver — Active profiles: `templates/service.yaml` row has `profile=k8s` with `triggered_by` citing `.yaml` under `templates/` whose direct-sibling parent (`./`) contains `Chart.yaml`." },
+    { "id": "5.3", "text": "Resolver — Active profiles: `docs/templates/reference.yaml` row has `profile=none` AND `signal type=none` (the explicit `none` token per the resolver's Output Format — NOT an em-dash, hyphen, empty cell, or other placeholder), with `triggered_by` explaining that `docs/` does not contain `Chart.yaml` so the direct-sibling rule does not apply, AND that the file content has no `apiVersion:` + `kind:` at zero indent to trigger the content signal." },
+    { "id": "5.4", "text": "Resolver — `docs/templates/reference.yaml` is NOT attributed to `k8s` anywhere in the Active profiles table. No row with that filename has `profile=k8s`." },
+    { "id": "5.5", "text": "Resolver — Loaded checklists: contains `(k8s, helm-checklist.md)` (Chart.yaml is present in the diff). Reviewer — no finding references `docs/templates/reference.yaml` under a helm-checklist concern; helm findings target only `Chart.yaml` and `templates/service.yaml`." },
+    { "id": "5.6", "text": "Reviewer — output uses the P0/P1/P2/P3 severity structure. `docs/templates/reference.yaml` is either absent from findings or mentioned only under generic (non-k8s) commentary, never under a k8s helm- or reliability-checklist finding." }
+  ]
+}

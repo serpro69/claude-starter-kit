@@ -1,0 +1,1 @@
+../_shared/profile-detection.md

@@ -1,0 +1,23 @@
+{
+  "id": 1,
+  "name": "k8s-workload-full",
+  "description": "A plain Kubernetes workload diff (Deployment + Service + ConfigMap) activates the k8s profile with always-load checklists plus reliability-checklist.",
+  "skills": ["review-code"],
+  "prompt": "I've staged the following changes. Run `/kk:review-code` against them.",
+  "trap": "Model skips the `k8s` profile and applies only generic SOLID/security/quality checks, or spuriously loads `helm-checklist.md` / `kustomize-checklist.md` despite their triggers not firing, or forgets to load `reliability-checklist.md` even though `kind: Deployment` is in the diff.",
+  "files": [
+    "test-files/deployment.yaml",
+    "test-files/service.yaml",
+    "test-files/configmap.yaml"
+  ],
+  "assertions": [
+    { "id": "1.1", "text": "Resolver — Active profiles: all three YAML files (`deployment.yaml`, `service.yaml`, `configmap.yaml`) have rows with `profile=k8s` and `signal type=content`, and `triggered_by` cites `apiVersion:` + `kind:` at zero indent." },
+    { "id": "1.2", "text": "Resolver — Loaded checklists: contains `(k8s, security-checklist.md)`, `(k8s, architecture-checklist.md)`, `(k8s, quality-checklist.md)`, `(k8s, removal-plan.md)`, each marked `always`." },
+    { "id": "1.3", "text": "Resolver — Loaded checklists: contains `(k8s, reliability-checklist.md)` with a conditional Load-if reason naming a workload kind (e.g., `kind: Deployment`) present in the diff." },
+    { "id": "1.4", "text": "Resolver — NOT loaded: contains `(k8s, helm-checklist.md)` with a reason citing absence of `Chart.yaml` and no `templates/` directory whose sibling contains `Chart.yaml`." },
+    { "id": "1.5", "text": "Resolver — NOT loaded: contains `(k8s, kustomize-checklist.md)` with a reason citing absence of `kustomization.yaml`/`kustomization.yml`/`Kustomization` and no `bases/`/`overlays/` path." },
+    { "id": "1.6", "text": "Resolver — Active profiles: no row attributes a file to a programming-language profile (`go`, `python`, `js_ts`, `java`, `kotlin`). Only `k8s` appears in the `profile` column." },
+    { "id": "1.7", "text": "Reviewer — output uses the P0/P1/P2/P3 severity headings specified by the `kk:code-reviewer` Output Format, and each finding follows `**[file:line]** Brief title` with description, confidence, and suggested fix." },
+    { "id": "1.8", "text": "Reviewer — emits at least one finding matching the fixture's intentional violations. Candidates: mutable `:latest` image tag in `deployment.yaml`, missing `resources.requests`/`limits`, missing dedicated `serviceAccountName`, missing `securityContext.runAsNonRoot` / `readOnlyRootFilesystem`, absent `PodDisruptionBudget` for the Deployment. A run that routes correctly but emits zero such findings does NOT satisfy this eval." }
+  ]
+}

@@ -1,0 +1,36 @@
+source_plugin: klaude-plugin
+target_plugin: kodex-plugin
+
+skills:
+  include_all: true
+  overrides: []
+  transforms:
+    - type: plugin_root_resolve
+      replacement_base: "../klaude-plugin"
+    - type: inject_header
+      content: |
+        <!-- codex: tool-name mapping applied. See .codex/scripts/session-start.sh -->
+  shared:
+    copy: true
+
+agents:
+  target_dir: ".codex/agents"
+  sandbox_mode: "read-only"
+  model: "gpt-5.5"
+  model_reasoning_effort: "high"
+  transforms:
+    - type: plugin_root_resolve
+      replacement_base: "../../klaude-plugin"
+
+manifest:
+  name: "kk"
+  version_from: "klaude-plugin/.claude-plugin/plugin.json"
+  extra_fields:
+    skills: "./skills/"
+    mcpServers: "./.mcp.json"
+
+mcp:
+  servers:
+    capy:
+      command: "bash"
+      args: [".codex/scripts/capy.sh", "serve"]

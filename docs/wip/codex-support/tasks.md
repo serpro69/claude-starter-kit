@@ -7,7 +7,7 @@
 > Updated: 2026-04-25
 
 ## Task 0: Revert repository restructure
-- **Status:** pending
+- **Status:** done
 - **Depends on:** —
 - **Docs:** [implementation.md#phase-0-revert](./implementation.md#phase-0-revert)
 - **Note:** User will perform this revert manually.
@@ -19,22 +19,22 @@
 - [ ] 0.4 Verify all existing tests pass: `for test in test/test-*.sh; do $test; done` exits 0
 
 ## Task 1: Generation tool (`cmd/generate-kodex/`)
-- **Status:** pending
+- **Status:** in-progress
 - **Depends on:** Task 0
 - **Docs:** [implementation.md#phase-1-generate-tool](./implementation.md#phase-1-generate-tool)
 
 ### Subtasks
-- [ ] 1.1 Create `cmd/generate-kodex/manifest.go` — YAML manifest parsing with schema matching design.md §5.2 (source_plugin, target_plugin, skills transforms, shared handling, agents config, manifest generation config, MCP config)
-- [ ] 1.2 Create `cmd/generate-kodex/transforms.go` — transform implementations: `plugin_root_resolve` (replace `${CLAUDE_PLUGIN_ROOT}` with relative path from target to source plugin), `inject_header` (prepend content to files)
-- [ ] 1.3 Create `cmd/generate-kodex/skills.go` — skill generation: copy entire skill directories from `klaude-plugin/skills/*/` to `kodex-plugin/skills/*/`, apply transform pipeline to SKILL.md, copy auxiliary files (process docs, isolated workflow files, evals) as-is (verified: no `${CLAUDE_PLUGIN_ROOT}` in auxiliary files)
-- [ ] 1.4 Create `cmd/generate-kodex/shared.go` — copy `klaude-plugin/skills/_shared/` to `kodex-plugin/skills/_shared/`. Handle per-skill symlinks to `_shared/` (preserve if they survive codex cache testing, otherwise resolve to copies)
-- [ ] 1.5 Create `cmd/generate-kodex/agents.go` — agent generation: read each `klaude-plugin/agents/*.md`, extract markdown body (strip frontmatter), apply `plugin_root_resolve` transform, wrap in TOML structure (`name`, `description`, `sandbox_mode = "read-only"`, `model`, `model_reasoning_effort`, `developer_instructions`), write to `.codex/agents/*.toml`
-- [ ] 1.6 Create `cmd/generate-kodex/manifest_gen.go` — generate `kodex-plugin/.codex-plugin/plugin.json` from source plugin manifest + overrides from generation manifest
-- [ ] 1.7 Create `cmd/generate-kodex/mcp.go` — generate `kodex-plugin/.mcp.json` from manifest config
-- [ ] 1.8 Create `cmd/generate-kodex/main.go` — CLI entry point with flags: `-manifest` (required), `-target` (default: `kodex-plugin`), `-dry-run`
-- [ ] 1.9 Create `scripts/kodex-generate-manifest.yml` — generation manifest declaring all skills, transforms, agent config, manifest config, MCP config
-- [ ] 1.10 Create tests: `cmd/generate-kodex/*_test.go` with testdata fixtures. Cover: manifest parsing, each transform, skill generation, shared dir copy, agent generation (.md → .toml), manifest generation, MCP generation, end-to-end with dry-run
-- [ ] 1.11 Run generation and verify: `kodex-plugin/skills/` contains all SKILL.md files; `.codex/agents/` contains all five TOML files; no `${CLAUDE_PLUGIN_ROOT}` literals in generated output; `.codex-plugin/plugin.json` and `.mcp.json` validate as JSON; each TOML parses cleanly
+- [x] 1.1 Create `cmd/generate-kodex/manifest.go` — YAML manifest parsing with schema matching design.md §5.2 (source_plugin, target_plugin, skills transforms, shared handling, agents config, manifest generation config, MCP config)
+- [x] 1.2 Create `cmd/generate-kodex/transforms.go` — transform implementations: `plugin_root_resolve` (replace `${CLAUDE_PLUGIN_ROOT}` with relative path from target to source plugin), `inject_header` (prepend content to files)
+- [x] 1.3 Create `cmd/generate-kodex/skills.go` — skill generation: copy entire skill directories from `klaude-plugin/skills/*/` to `kodex-plugin/skills/*/`, apply transform pipeline to SKILL.md, copy auxiliary files (process docs, isolated workflow files, evals) as-is (verified: no `${CLAUDE_PLUGIN_ROOT}` in auxiliary files)
+- [x] 1.4 Create `cmd/generate-kodex/shared.go` — copy `klaude-plugin/skills/_shared/` to `kodex-plugin/skills/_shared/`. Handle per-skill symlinks to `_shared/` (preserve if they survive codex cache testing, otherwise resolve to copies)
+- [x] 1.5 Create `cmd/generate-kodex/agents.go` — agent generation: read each `klaude-plugin/agents/*.md`, extract markdown body (strip frontmatter), apply `plugin_root_resolve` transform, wrap in TOML structure (`name`, `description`, `sandbox_mode = "read-only"`, `model`, `model_reasoning_effort`, `developer_instructions`), write to `.codex/agents/*.toml`
+- [x] 1.6 Create `cmd/generate-kodex/manifest_gen.go` — generate `kodex-plugin/.codex-plugin/plugin.json` from source plugin manifest + overrides from generation manifest
+- [x] 1.7 Create `cmd/generate-kodex/mcp.go` — generate `kodex-plugin/.mcp.json` from manifest config
+- [x] 1.8 Create `cmd/generate-kodex/main.go` — CLI entry point with flags: `-manifest` (required), `-target` (default: `kodex-plugin`), `-dry-run`
+- [x] 1.9 Create `scripts/kodex-generate-manifest.yml` — generation manifest declaring all skills, transforms, agent config, manifest config, MCP config
+- [x] 1.10 Create tests: `cmd/generate-kodex/*_test.go` with testdata fixtures. Cover: manifest parsing, each transform, skill generation, shared dir copy, agent generation (.md → .toml), manifest generation, MCP generation, end-to-end with dry-run
+- [x] 1.11 Run generation and verify: `kodex-plugin/skills/` contains all SKILL.md files; `.codex/agents/` contains all five TOML files; no `${CLAUDE_PLUGIN_ROOT}` literals in generated output; `.codex-plugin/plugin.json` and `.mcp.json` validate as JSON; each TOML parses cleanly
 - [ ] 1.12 Commit generated `kodex-plugin/` and `.codex/agents/` output
 
 ## Task 2: Makefile integration

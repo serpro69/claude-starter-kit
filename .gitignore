@@ -26,6 +26,9 @@ logs
 !.claude
 !.claude-plugin
 !klaude-plugin/.claude-plugin
+!.codex
+!.agents
+!kodex-plugin/.codex-plugin
 .capy/**
 
 !.capy

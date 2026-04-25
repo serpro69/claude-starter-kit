@@ -1,0 +1,35 @@
+source_plugin: testdata/source-plugin
+target_plugin: WILL_BE_OVERRIDDEN
+
+skills:
+  include_all: true
+  overrides: []
+  transforms:
+    - type: plugin_root_resolve
+      replacement_base: "../source-plugin"
+    - type: inject_header
+      content: |
+        <!-- codex: generated -->
+  shared:
+    copy: true
+
+agents:
+  target_dir: WILL_BE_OVERRIDDEN
+  sandbox_mode: "read-only"
+  model: "test-model"
+  model_reasoning_effort: "high"
+  transforms:
+    - type: plugin_root_resolve
+      replacement_base: "../../source-plugin"
+
+manifest:
+  name: "kk"
+  version_from: "testdata/source-plugin/.claude-plugin/plugin.json"
+  extra_fields:
+    skills: "./skills/"
+
+mcp:
+  servers:
+    capy:
+      command: "bash"
+      args: ["capy.sh", "serve"]

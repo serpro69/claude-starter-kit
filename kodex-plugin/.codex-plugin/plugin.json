@@ -1,0 +1,6 @@
+{
+  "mcpServers": "./.mcp.json",
+  "name": "kk",
+  "skills": "./skills/",
+  "version": "0.11.1"
+}

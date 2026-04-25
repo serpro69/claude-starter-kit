@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: myapp-config
+data:
+  LOG_LEVEL: debug
+  API_URL: "http://api.internal:8080"

@@ -1,0 +1,86 @@
+### Workflow
+
+Copy this checklist and check off items as you complete them:
+
+```
+Task Progress:
+- [ ] Step 1: Understand the current state of the project
+- [ ] Step 2: Check the documentation
+- [ ] Step 3: Help refine the idea/feature
+- [ ] Step 4: Describe the design
+- [ ] Step 5: Document the design
+- [ ] Step 6: Create the task list
+```
+
+**Step 1: Understand the current state of the project**
+
+To properly refine the idea into a fully-formed design you need to **understand the existing code** in our working directory to know where we're starting off.
+
+**Step 2: Check the documentation**
+
+In order to gain a better understanding of the project, **check the contributing guidelines and any relevant documentation**. For example, take a look at `CONTRIBUTING.md` and `docs` directory.
+
+**Capy search:** Before refining the idea, search `kk:arch-decisions` and `kk:project-conventions` for prior design context related to the feature area being discussed.
+
+**Step 3: Help refine the idea/feature**
+
+Once you've become familiar with the project and code, you can start asking me questions, one at a time, to **help refine the idea**.
+
+**Detect active profiles before refining.** The design phase runs before any code exists, so file-based detection is impossible. Run the design interaction pattern from [shared-profile-detection.md §The `design` interaction pattern](shared-profile-detection.md) — it iterates all profiles with `## Design signals`, matches their declared tokens against the idea prose, and handles confirmation prompts. Never auto-activate a profile silently.
+
+For each active profile, use the `Read` tool on `<plugin_root>/profiles/<name>/design/index.md` — where `<plugin_root>` is the absolute plugin-root path you already know from SKILL.md context. Skip silently if absent; not every profile populates a `design/` subdirectory. Load every file listed under **Always load**; a profile's `questions.md` (when present) seeds the refinement question pool. Integrate the profile's questions into the flow below — one question per message, as always.
+
+Ideally, the questions would be multiple choice, but open-ended questions are OK too.
+
+Don't forget: only one question per message!
+
+**Step 4: Describe the design**
+
+Once you believe you understand what we're trying to achieve, stop and **describe the whole design** to me, **in sections of 200-300 words at a time**, **asking after each section whether it looks right so far**.
+
+**If the design recommends a specific library, SDK, framework, or API** — especially one not already in use in this project — apply the `dependency-handling` skill BEFORE committing to that recommendation. Verifying behavior against context7 at design time prevents proposing something that doesn't actually work the way you assumed.
+
+**Step 5: Document the design**
+
+Document in .md files the entire design and write a comprehensive implementation plan.
+
+Feel free to break out the design/implementation documents into multi-part files, if necessary.
+
+**For each active profile** (from Step 3), re-consult `<plugin_root>/profiles/<name>/design/index.md` (using the same resolved plugin-root path you used in Step 3) and apply every always-load entry whose content shapes the final design document. Profile-contributed `sections.md` (when present) names required sections the design document must cover. Do not drop a required section silently; if a section genuinely does not apply, state so explicitly with a one-line justification.
+
+When creating documentation, follow this approach:
+
+- IF this is this a completely new feature - document it in in `/docs/wip/[feature-title]/{design,implementation}.md`.
+- ELSE this an improvement or an addition to an existing feature:
+  - If the feature is still WIP (documented under `/docs/wip`) - ask the user if you should update the existing design/implementation documents, or create new ones in a sub-directory of the existing feature.
+  - Else the feature is completed (documented under root of `/docs`) - create new design/implementation documents in a sub-directory of the existing feature.
+
+**When documenting design and implementation plan**:
+
+- Assume the developer who is going to implement the feature is an experienced and highly-skilled %LANGUAGE% developer, but has zero context for our codebase, and knows almost nothing about our problem domain. Basically - a first-time contributor with a lot of programming experience in %LANGUAGE%.
+- **Document everything the developer may need to know**: which files to touch for each task, code structure to be aware of, testing approaches, any potential docs they might need to check. Give them the whole plan as bite-sized tasks.
+- **Make sure the plan is unambiguous, detailed and comprehensive** so the developer can adhere to DRY, YAGNI, TDD, atomic/self-contained commits principles when following this plan.
+- **Pair each step with an explicit verification.** Every implementation step should name *how the developer will know it worked* — a specific test to run, a command whose output to check, or an observable behavior. Use the form `Step → verify: <check>`. Steps without a verification are a smell: either the step is too vague, or the work isn't really done when the step is.
+
+But, of course, **DO NOT:**
+
+- **DO NOT add complete code examples**. The documentation should be a guideline that gives the developer all the information they may need when writing the actual code, not copy-paste code chunks.
+- **DO NOT add commit message templates** to tasks, that the developer should use when committing the changes.
+- **DO NOT add other small, generic details that do not bring value** and/or are not specifically relevant to this particular feature. For example, adding something like "to run tests, execute: 'go test ./...'" to a task does not bring value. Remember, the developer is experienced and skilled!
+
+**Capy index:** After documenting the design, index key architecture decisions and trade-offs as `kk:arch-decisions`. Only index non-obvious rationale — skip if the decisions are self-evident from the docs themselves.
+
+**Step 6: Create the task list**
+
+Based on the implementation plan documented in Step 5, create a `tasks.md` file in the same `/docs/wip/[feature-title]/` directory.
+
+Follow the structure and conventions in the [example task file](./example-tasks.md). Key points:
+
+- **Header metadata** links back to design/implementation docs and tracks overall feature status
+- **One H2 per task** with status, dependencies, and a link to the relevant docs section
+- **Checkbox subtasks** are concrete, actionable implementation steps — specific enough that a developer with no project context can follow them
+- **Subtask descriptions** name the file/function/component being touched and what to do with it — not vague ("implement auth") but precise ("create `internal/auth/token.go` with `GenerateToken` and `ValidateToken` functions")
+- **Dependencies** reference other tasks by number when ordering matters
+- **Status values:** `pending`, `in-progress`, `done`, `blocked` (with reason)
+- Tasks should map roughly 1:1 to atomic, self-contained commits
+- **Always include a final verification task** that depends on all other tasks — it should invoke `test` to run the full test suite, `document` to update any relevant docs, `review-code` with project's language input to review the code, and `review-spec` to verify the implementation matches the design and implementation docs
