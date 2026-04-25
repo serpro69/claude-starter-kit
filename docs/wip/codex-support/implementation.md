@@ -51,8 +51,8 @@ pattern.
   (required), `-target` (default: `kodex-plugin`), `-dry-run`.
 - `cmd/generate-kodex/manifest.go` — YAML manifest parsing. Schema mirrors
   design.md §5.2.
-- `cmd/generate-kodex/skills.go` — Skill generation: iterate source skills,
-  apply transforms, write to target.
+- `cmd/generate-kodex/skills.go` — Skill generation: copy entire skill
+  directories, apply transforms to SKILL.md, copy auxiliary files as-is.
 - `cmd/generate-kodex/transforms.go` — Transform implementations:
   `plugin_root_resolve` (replace `${CLAUDE_PLUGIN_ROOT}` with relative
   path), `inject_header` (prepend content).
