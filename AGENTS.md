@@ -8,11 +8,20 @@ This is a starter template repository providing a complete development environme
 
 ## Architecture
 
-Three integrated components:
+Four integrated components:
 
 1. **Codex config** (`.codex/`): Project settings (`config.toml`), hooks, rules, scripts, and sub-agent definitions
 2. **kk plugin** (`kodex-plugin/`): Skills generated from `klaude-plugin/` — the canonical source of truth
-3. **Profiles and shared instructions** (`klaude-plugin/profiles/`, `klaude-plugin/skills/_shared/`): Referenced at runtime via absolute paths
+3. **Claude Code** (`.claude/`): Claude-side settings, statusline, sync infrastructure
+4. **Profiles and shared instructions** (`klaude-plugin/profiles/`, `klaude-plugin/skills/_shared/`): Referenced at runtime via absolute paths
+
+### Generation Workflow
+
+`klaude-plugin/` is canonical. After editing skills there, run `make generate-kodex` to regenerate `kodex-plugin/` and `.codex/agents/`. Hand-authored codex files: `config.toml`, `hooks.json`, `rules/default.rules`, `scripts/`, `AGENTS.extra.md`.
+
+### Hook Enforcement Gap
+
+Codex's PreToolUse hooks only intercept `shell` commands. `read_file`, `write_file`, `apply_patch`, `web_search`, and MCP calls cannot be hooked — advisory-only coverage via SessionStart context injection. See `docs/adr/0005-codex-hook-enforcement-gap.md`.
 
 ## Tool-Name Mapping
 
@@ -47,11 +56,13 @@ All agents run in read-only sandbox mode.
 
 ## Testing
 
-Tests for the template-sync feature are in `test/`. Run with:
+Tests are in `test/`. Run with:
 
 ```bash
 for test in test/test-*.sh; do $test; done
 ```
+
+Key suites: `test-plugin-structure.sh` (klaude-plugin + kodex-plugin), `test-codex-structure.sh` (codex config, hooks, agents, rules).
 
 ## Behavioral Instructions
 

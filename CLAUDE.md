@@ -8,23 +8,35 @@ This is a starter template repository providing a complete development environme
 
 ## Architecture
 
-Three integrated components:
+Four integrated components:
 
 1. **Claude Code** (`.claude/`): Project settings (`settings.json`), statusline scripts, and sync infrastructure
-2. **kk plugin** (`klaude-plugin/`): Skills, commands, hooks, and utility scripts — distributed via the Claude Code plugin system
-3. **Serena** (`.serena/`): Semantic code analysis via LSP — language detection, gitignore integration, tool exclusions (`project.yml`)
+2. **Codex** (`.codex/`, `kodex-plugin/`): Codex-equivalent config, hooks, rules, agents, and generated plugin. See §Codex Support below
+3. **kk plugin** (`klaude-plugin/`): Skills, commands, hooks, and utility scripts — the canonical source of truth, distributed via the Claude Code plugin system
+4. **Serena** (`.serena/`): Semantic code analysis via LSP — language detection, gitignore integration, tool exclusions (`project.yml`)
 
 For API keys and MCP server setup, see the "MCP Server Configuration" section in `README.md`.
 
+### Codex Support
+
+`klaude-plugin/` is the canonical source. A Go generation tool (`cmd/generate-kodex/`) produces:
+
+- `kodex-plugin/` — transformed skills for Codex (resolves `${CLAUDE_PLUGIN_ROOT}`, injects headers)
+- `.codex/agents/*.toml` — sub-agent definitions (converted from `klaude-plugin/agents/*.md`)
+
+Hand-authored codex files (not generated): `.codex/config.toml`, `.codex/hooks.json`, `.codex/rules/default.rules`, `.codex/scripts/`, `.codex/AGENTS.extra.md`, `AGENTS.md`.
+
+**Developer workflow:** After editing skills in `klaude-plugin/`, run `make generate-kodex` to regenerate. CI checks freshness via `make generate-kodex && git diff --exit-code kodex-plugin/ .codex/agents/`.
+
 ## Testing
 
-Tests for the template-sync feature are in `test/`. Run with:
+Tests are in `test/`. Run with:
 
 ```bash
 for test in test/test-*.sh; do $test; done
 ```
 
-Tests use shared utilities from `test/helpers.sh`. See that file for available assertions and helpers.
+Key test suites: `test-plugin-structure.sh` (klaude-plugin + kodex-plugin generated output), `test-codex-structure.sh` (codex config, hooks, agents, rules), `test-template-sync.sh` (sync infrastructure). Tests use shared utilities from `test/helpers.sh`.
 
 ## Troubleshooting
 

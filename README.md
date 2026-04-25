@@ -46,6 +46,24 @@ Out of the box you get:
 **Just want the skills?** Install the kk plugin — all 10 skills, commands, and hooks in one command. No template needed.
 → [Plugin-Only Setup](#plugin-only-setup)
 
+## Providers
+
+claude-toolbox supports two AI coding providers:
+
+| | Claude Code | Codex (OpenAI) |
+|---|---|---|
+| **Skills** | `klaude-plugin/` (authored) | `kodex-plugin/` (generated) |
+| **Sub-agents** | `klaude-plugin/agents/*.md` | `.codex/agents/*.toml` (generated) |
+| **Project instructions** | `CLAUDE.md` | `AGENTS.md` |
+| **Behavioral instructions** | `.claude/CLAUDE.extra.md` | `.codex/AGENTS.extra.md` |
+| **Config** | `.claude/settings.json` | `.codex/config.toml` |
+| **Hooks** | `klaude-plugin/hooks/` | `.codex/hooks.json` |
+| **Rules/Permissions** | `.claude/settings.json` | `.codex/rules/default.rules` (Starlark) |
+| **Plugin install** | `/plugin install kk@claude-toolbox` | `codex plugin marketplace add serpro69/claude-toolbox` |
+| **Template sync** | Full support | `.codex/` + `AGENTS.extra.md` synced |
+
+`klaude-plugin/` is the canonical source of truth. The `generate-kodex` tool produces `kodex-plugin/` and `.codex/agents/` with all necessary transformations. See [ADR 0005](docs/adr/0005-codex-hook-enforcement-gap.md) for known hook enforcement limitations on the Codex side.
+
 ## Requirements
 
 - **[Claude Code](https://docs.anthropic.com/en/docs/claude-code)** — the AI coding assistant this toolbox extends
@@ -272,7 +290,7 @@ Alongside `skills/`, `commands/`, `agents/`, and `hooks/`, the plugin ships a to
 - **template-cleanup** — GitHub Action or local CLI script to initialize a new repo from this template
 - **template-sync** workflow — pull upstream configuration updates into your project via PR
 - **Sync exclusions** — prevent specific files from being re-added during sync
-- **Test suite** — 157 tests across 5 suites covering the plugin structure, sync/cleanup infrastructure
+- **Test suite** — tests across 8 suites covering plugin structure, codex structure, sync/cleanup infrastructure
 
 ## Recommended Settings
 
@@ -345,7 +363,7 @@ Repos created from this template can pull configuration updates via the **Templa
 
 ### What Gets Synced
 
-**Updated:** `.claude/` (settings, CLAUDE.extra.md, statusline scripts), `.serena/`, and the sync infrastructure itself. Skills, commands, and hooks are managed by the plugin system — not template sync.
+**Updated:** `.claude/` (settings, CLAUDE.extra.md, statusline scripts), `.codex/` (config.toml, AGENTS.extra.md, hooks, rules, scripts, agents), `.serena/`, and the sync infrastructure itself. Skills, commands, and hooks are managed by the plugin system — not template sync.
 
 **Preserved:** Project-specific values (name, language, prompts), `settings.local.json`, gitignored files
 
@@ -487,47 +505,66 @@ You don't need to create a repo from this template to use the full configuration
 
 ### Running Tests
 
-Tests across 5 suites cover the plugin structure, template sync/cleanup infrastructure:
+Tests across 8 suites cover plugin structure, codex configuration, and template sync/cleanup infrastructure:
 
 ```bash
 # Run all test suites
 for test in test/test-*.sh; do $test; done
 
 # Run individual suites
-./test/test-plugin-structure.sh  # Plugin manifest, skills, commands, hooks validation
+./test/test-plugin-structure.sh  # Plugin manifest, skills, commands, hooks, kodex-plugin validation
+./test/test-codex-structure.sh   # Codex marketplace, config, hooks, agents, rules, scripts
 ./test/test-template-sync.sh     # template-sync.sh function tests + plugin migration
 ./test/test-template-cleanup.sh  # generate_manifest() tests
 ./test/test-claude-extra.sh      # CLAUDE.extra.md detection and auto-import
 ./test/test-manifest-jq.sh       # jq JSON pattern tests
 ```
 
-| Test Suite               | Coverage                                                           |
-| ------------------------ | ------------------------------------------------------------------ |
-| test-plugin-structure.sh | Plugin/marketplace manifests, skills, commands, hooks, cross-refs  |
-| test-template-sync.sh    | CLI parsing, manifest validation, substitutions, plugin migration  |
-| test-template-cleanup.sh | Manifest generation, variable capture, git tag/SHA detection       |
-| test-claude-extra.sh     | CLAUDE.extra.md existence, compare_files detection, auto-import    |
-| test-manifest-jq.sh      | JSON generation, special character handling, round-trip validation |
+| Test Suite               | Coverage                                                                     |
+| ------------------------ | ---------------------------------------------------------------------------- |
+| test-plugin-structure.sh | Plugin/marketplace manifests, skills, commands, hooks, cross-refs, kodex gen  |
+| test-codex-structure.sh  | Codex marketplace, config.toml, hooks.json, agents, rules, scripts, AGENTS.md |
+| test-template-sync.sh    | CLI parsing, manifest validation, substitutions, plugin migration            |
+| test-template-cleanup.sh | Manifest generation, variable capture, git tag/SHA detection                 |
+| test-claude-extra.sh     | CLAUDE.extra.md existence, compare_files detection, auto-import              |
+| test-manifest-jq.sh      | JSON generation, special character handling, round-trip validation            |
 
 ## Repository Structure
 
 ```
-klaude-plugin/                   # kk plugin (distributed via plugin system)
+klaude-plugin/                   # kk plugin — Claude (canonical source of truth)
 ├── .claude-plugin/plugin.json   # Plugin manifest
 ├── skills/                      # 10 development workflow skills
 ├── commands/                    # 4 slash commands
-├── agents/                      # Sub-agents (code-reviewer, spec-reviewer, design-reviewer)
+├── agents/                      # Sub-agents (code-reviewer, spec-reviewer, design-reviewer, ...)
 ├── profiles/                    # Per-domain content (languages, IaC DSLs) — see CLAUDE.md
 ├── hooks/hooks.json             # Bash validation hook config
 └── scripts/validate-bash.sh     # Hook script
 
-.claude-plugin/marketplace.json  # Marketplace catalog
+kodex-plugin/                    # kk plugin — Codex (GENERATED from klaude-plugin/)
+├── .codex-plugin/plugin.json    # Generated plugin manifest
+├── skills/                      # Generated skills (transformed SKILL.md files)
+└── .mcp.json                    # Capy MCP config
+
+.claude-plugin/marketplace.json  # Claude marketplace catalog
+.agents/plugins/marketplace.json # Codex marketplace catalog
+
+CLAUDE.md                        # Claude project instructions (this repo)
+AGENTS.md                        # Codex project instructions (this repo)
 
 .claude/
-├── CLAUDE.extra.md              # Always-loaded instructions
+├── CLAUDE.extra.md              # Behavioral instructions (synced downstream)
 ├── settings.json                # Upstream-managed: permissions baseline, env, model, plugins
 ├── settings.local.json          # Per-repo: hooks, MCP enables, additional permissions
 └── scripts/                     # statusline.sh, statusline_enhanced.sh, sync-workflow.sh
+
+.codex/
+├── AGENTS.extra.md              # Behavioral instructions (synced downstream, codex equivalent)
+├── config.toml                  # Codex settings: model, approval policy, features, MCP
+├── hooks.json                   # SessionStart + PreToolUse hook definitions
+├── rules/default.rules          # Starlark command policies (ported from Claude deny list)
+├── agents/                      # 5 sub-agent TOML files (generated from klaude-plugin/agents/)
+└── scripts/                     # session-start.sh, pretooluse-bash.sh
 
 .serena/
 └── project.yml                  # Serena LSP configuration
@@ -537,9 +574,13 @@ klaude-plugin/                   # kk plugin (distributed via plugin system)
 ├── workflows/                   # template-cleanup, template-sync
 └── template-state.json          # Sync manifest and variables
 
+cmd/
+├── vendor-profiles/             # Profile vendoring tool
+└── generate-kodex/              # Codex plugin generation tool
+
 test/
 ├── helpers.sh                   # Shared test utilities and assertions
-├── test-*.sh                    # 5 test suites
+├── test-*.sh                    # 8 test suites
 └── fixtures/                    # Test manifests and templates
 ```
 

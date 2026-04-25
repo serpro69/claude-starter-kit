@@ -143,17 +143,19 @@
 
 ## Task 10: Tests and documentation
 
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1, Task 2, Task 3, Task 4, Task 5, Task 6, Task 7, Task 8, Task 9
 - **Docs:** [implementation.md#phase-10-tests-docs](./implementation.md#phase-10-tests-docs)
 
 ### Subtasks
 
-- [ ] 10.1 Update `test/test-plugin-structure.sh` — add assertions for `kodex-plugin/` generated output: skills exist and match source count, manifest validates, no `${CLAUDE_PLUGIN_ROOT}` literals in generated skills, no dangling symlinks
-- [ ] 10.2 Create `test/test-codex-structure.sh` — assert all codex files exist and validate (plugin.json, config.toml, hooks.json, five agent TOMLs, rules file, marketplace.json, AGENTS.md)
-- [ ] 10.3 Update `README.md` — new "Providers" section with install paths for Claude and Codex
-- [ ] 10.4 Verify `docs/adr/0005-codex-hook-enforcement-gap.md` is up to date with v2 design (ADR already exists with "Accepted" status from v1 — check section references and content accuracy)
-- [ ] 10.5 Verify: `for test in test/test-*.sh; do $test; done` exits 0
+- [x] 10.1 Update `test/test-plugin-structure.sh` — Section 11 added: kodex-plugin manifest validation, skill count matching, no CLAUDE_PLUGIN_ROOT literals, no dangling symlinks (7 new assertions)
+- [x] 10.2 Create `test/test-codex-structure.sh` — 15 test cases, 26 assertions: marketplace, config.toml, hooks.json, 5 agent TOMLs, rules, scripts, session-start JSON output, AGENTS.md, AGENTS.extra.md. Uses portable TOML validation (tomllib → tomli → virtualenv fallback)
+- [x] 10.3 Update `README.md` — Providers comparison table, updated repo structure with codex files, updated What Gets Synced, updated test suite docs
+- [x] 10.4 Verified `docs/adr/0005-codex-hook-enforcement-gap.md` — accurate for v2 design, section references match, no updates needed
+- [x] 10.5 All 8 test suites pass with zero failures
+- [x] 10.6 (extra) Updated `CLAUDE.md` — Architecture section expanded with Codex Support subsection, testing section updated
+- [x] 10.7 (extra) Updated `AGENTS.md` — Architecture expanded with generation workflow, hook enforcement gap note, testing section updated
 
 ## Task 11: Final verification
 

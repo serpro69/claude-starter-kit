@@ -362,6 +362,55 @@ else
 fi
 
 # =============================================================================
+# Section 11: Kodex plugin (generated output)
+# =============================================================================
+
+log_section "Section 11: Kodex plugin (generated output)"
+
+log_test "kodex-plugin/.codex-plugin/plugin.json exists and is valid JSON"
+if [[ -f "$REPO_ROOT/kodex-plugin/.codex-plugin/plugin.json" ]]; then
+  log_pass "kodex-plugin plugin.json exists"
+  kodex_plugin_json=$(cat "$REPO_ROOT/kodex-plugin/.codex-plugin/plugin.json")
+  assert_json_valid "$kodex_plugin_json" "kodex plugin.json is valid JSON"
+else
+  log_fail "kodex-plugin/.codex-plugin/plugin.json missing"
+fi
+
+log_test "kodex-plugin/.mcp.json exists and is valid JSON"
+if [[ -f "$REPO_ROOT/kodex-plugin/.mcp.json" ]]; then
+  log_pass "kodex-plugin .mcp.json exists"
+  kodex_mcp_json=$(cat "$REPO_ROOT/kodex-plugin/.mcp.json")
+  assert_json_valid "$kodex_mcp_json" "kodex .mcp.json is valid JSON"
+else
+  log_fail "kodex-plugin/.mcp.json missing"
+fi
+
+log_test "kodex-plugin skills match klaude-plugin skills (generation completeness)"
+# Count SKILL.md files in both plugins (excluding _shared)
+klaude_count=$(find "$REPO_ROOT/klaude-plugin/skills" -maxdepth 2 -name SKILL.md -not -path "*/_shared/*" | wc -l)
+kodex_count=$(find "$REPO_ROOT/kodex-plugin/skills" -maxdepth 2 -name SKILL.md -not -path "*/_shared/*" 2>/dev/null | wc -l)
+if [[ "$klaude_count" -eq "$kodex_count" && "$klaude_count" -gt 0 ]]; then
+  log_pass "Skill count matches: $klaude_count in both plugins"
+else
+  log_fail "Skill count mismatch: klaude=$klaude_count kodex=$kodex_count"
+fi
+
+log_test "No \${CLAUDE_PLUGIN_ROOT} literals in generated kodex-plugin skills"
+if grep -r 'CLAUDE_PLUGIN_ROOT' "$REPO_ROOT/kodex-plugin/skills/" &>/dev/null; then
+  log_fail "Found \${CLAUDE_PLUGIN_ROOT} literals in kodex-plugin/skills/"
+else
+  log_pass "No CLAUDE_PLUGIN_ROOT literals in generated skills"
+fi
+
+log_test "No dangling symlinks in kodex-plugin"
+dangling=$(find "$REPO_ROOT/kodex-plugin" -type l ! -exec test -e {} \; -print 2>/dev/null)
+if [[ -z "$dangling" ]]; then
+  log_pass "No dangling symlinks in kodex-plugin"
+else
+  log_fail "Dangling symlinks found: $dangling"
+fi
+
+# =============================================================================
 # Summary
 # =============================================================================
 
