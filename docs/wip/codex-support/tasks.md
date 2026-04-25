@@ -119,14 +119,14 @@
 
 ## Task 8: Config.toml finalization and statusline
 
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 4, Task 5
 - **Docs:** [implementation.md#phase-8-config](./implementation.md#phase-8-config)
 
 ### Subtasks
 
-- [ ] 8.1 Finalize `.codex/config.toml` with all sections: top-level settings (`model`, `model_reasoning_effort`, `approval_policy`, `sandbox_mode`) before any `[table]` header, then `[features]`, `[agents]`, `[tui]`, `[mcp_servers.capy]`. Add template-sync variable placeholders
-- [ ] 8.2 Verify: TOML parses cleanly (`python3 -c "import tomllib; ..."` exits 0)
+- [x] 8.1 Finalize `.codex/config.toml` with all sections: top-level settings (`model`, `model_reasoning_effort`, `approval_policy`, `sandbox_mode`) before any `[table]` header, then `[features]`, `[agents]`, `[tui]`, `[mcp_servers.capy]`. Template-sync placeholders: `%CODEX_MODEL%`, `%CODEX_APPROVAL_POLICY%`
+- [x] 8.2 Verify: TOML parses cleanly (validated with `tomli` — Python 3.10 in default venv lacks `tomllib`)
 
 ## Task 9: Template-sync extension
 

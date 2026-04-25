@@ -1,2 +1,18 @@
+model = "%CODEX_MODEL%"
+model_reasoning_effort = "high"
+approval_policy = "%CODEX_APPROVAL_POLICY%"
+sandbox_mode = "workspace-write"
+
 [features]
 codex_hooks = true
+
+[agents]
+max_threads = 6
+max_depth = 1
+
+[tui]
+status_line = ["model-with-reasoning", "current-dir"]
+
+[mcp_servers.capy]
+command = "bash"
+args = [".codex/scripts/capy.sh", "serve"]
