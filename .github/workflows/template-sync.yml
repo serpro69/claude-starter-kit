@@ -26,9 +26,6 @@ jobs:
     name: Sync Template
     runs-on: ubuntu-latest
     if: github.event.repository.name != 'claude-toolbox'
-    permissions:
-      contents: write
-      pull-requests: write
     outputs:
       has_changes: ${{ steps.sync.outputs.has_changes }}
       old_version: ${{ steps.manifest.outputs.old_version }}
@@ -154,12 +151,19 @@ jobs:
     needs: sync
     if: needs.sync.outputs.has_changes == 'true' && inputs.dry_run == false
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
     steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        if: ${{ vars.CLAUDE_TOOLBOX_APP_ID != '' || vars.JEAN_CLAWDER_APP_ID != '' }}
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.CLAUDE_TOOLBOX_APP_ID || vars.JEAN_CLAWDER_APP_ID }}
+          private-key: ${{ secrets.CLAUDE_TOOLBOX_APP_KEY || secrets.JEAN_CLAWDER_APP_KEY }}
+
       - name: Checkout Repository
         uses: actions/checkout@v6
+        with:
+          token: ${{ steps.app-token.outputs.token || github.token }}
 
       - name: Download Staged Changes
         uses: actions/download-artifact@v7
@@ -281,12 +285,13 @@ jobs:
             echo "existing_pr=$EXISTING_PR" >> "$GITHUB_OUTPUT"
           fi
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
 
       - name: Create Pull Request
         id: create-pr
         uses: peter-evans/create-pull-request@v8
         with:
+          token: ${{ steps.app-token.outputs.token || github.token }}
           branch: template-sync/${{ needs.sync.outputs.new_version }}
           delete-branch: true
           title: "chore: sync template ${{ needs.sync.outputs.old_version }} → ${{ needs.sync.outputs.new_version }}"
