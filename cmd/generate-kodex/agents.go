@@ -67,7 +67,10 @@ func generateAgent(src, dst string, cfg AgentsConfig) error {
 		return fmt.Errorf("parsing frontmatter: %w", err)
 	}
 
-	body = ApplyTransforms(body, cfg.Transforms)
+	body, err = ApplyTransforms(body, cfg.Transforms)
+	if err != nil {
+		return fmt.Errorf("transforming agent body: %w", err)
+	}
 
 	toml := formatAgentTOML(fm, string(body), cfg)
 

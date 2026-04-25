@@ -56,8 +56,9 @@ pattern.
 - `cmd/generate-kodex/transforms.go` — Transform implementations:
   `plugin_root_resolve` (replace `${CLAUDE_PLUGIN_ROOT}` with relative
   path), `inject_header` (prepend content).
-- `cmd/generate-kodex/shared.go` — Copy `_shared/` directory. Handle
-  intra-skill symlinks (copy or resolve based on testing).
+- `cmd/generate-kodex/skills.go` also contains `GenerateShared` — copy
+  `_shared/` directory. Handle intra-skill symlinks (copy or resolve based
+  on testing). (Originally planned as `shared.go`, merged into `skills.go`.)
 - `cmd/generate-kodex/agents.go` — Agent generation: read each
   `klaude-plugin/agents/*.md`, extract body, apply transforms, wrap in
   TOML structure, write to `.codex/agents/*.toml`.

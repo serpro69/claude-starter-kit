@@ -6,7 +6,7 @@
 set -euo pipefail
 
 INPUT=$(cat)
-COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+COMMAND=$(printf '%s' "$INPUT" | jq -r '.tool_input.command // empty')
 
 if [ -z "$COMMAND" ]; then
   exit 0
@@ -36,18 +36,18 @@ FORBIDDEN_PATTERNS=(
 )
 
 for pattern in "${FORBIDDEN_PATTERNS[@]}"; do
-  if echo "$COMMAND" | grep -qE "$pattern"; then
+  if printf '%s' "$COMMAND" | grep -qE "$pattern"; then
     deny "Access to '$pattern' is blocked by security policy"
   fi
 done
 
 # --- Capy HTTP routing (block curl/wget and inline HTTP patterns) ---
 
-if echo "$COMMAND" | grep -qE '\bcurl\b'; then
+if printf '%s' "$COMMAND" | grep -qE '\bcurl\b'; then
   deny "curl is blocked. Use capy_fetch_and_index(url, source) or capy_execute() instead"
 fi
 
-if echo "$COMMAND" | grep -qE '\bwget\b'; then
+if printf '%s' "$COMMAND" | grep -qE '\bwget\b'; then
   deny "wget is blocked. Use capy_fetch_and_index(url, source) or capy_execute() instead"
 fi
 
@@ -60,7 +60,7 @@ INLINE_HTTP_PATTERNS=(
 )
 
 for pattern in "${INLINE_HTTP_PATTERNS[@]}"; do
-  if echo "$COMMAND" | grep -qF "$pattern"; then
+  if printf '%s' "$COMMAND" | grep -qF "$pattern"; then
     deny "Inline HTTP ('$pattern') is blocked. Use capy_execute(language, code) instead"
   fi
 done

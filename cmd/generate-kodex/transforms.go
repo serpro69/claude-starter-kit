@@ -2,11 +2,10 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"strings"
 )
 
-func ApplyTransforms(content []byte, transforms []TransformConfig) []byte {
+func ApplyTransforms(content []byte, transforms []TransformConfig) ([]byte, error) {
 	result := content
 	for _, t := range transforms {
 		switch t.Type {
@@ -15,10 +14,10 @@ func ApplyTransforms(content []byte, transforms []TransformConfig) []byte {
 		case "inject_header":
 			result = applyInjectHeader(result, t.Content)
 		default:
-			fmt.Fprintf(os.Stderr, "warning: unknown transform type %q\n", t.Type)
+			return nil, fmt.Errorf("unknown transform type %q", t.Type)
 		}
 	}
-	return result
+	return result, nil
 }
 
 func applyPluginRootResolve(content []byte, replacementBase string) []byte {

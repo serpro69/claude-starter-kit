@@ -104,7 +104,11 @@ func copyFile(src, dst, rel string, transforms []TransformConfig, mode fs.FileMo
 	}
 
 	if filepath.Base(rel) == "SKILL.md" {
-		content = ApplyTransforms(content, transforms)
+		var err error
+		content, err = ApplyTransforms(content, transforms)
+		if err != nil {
+			return fmt.Errorf("transforming %s: %w", rel, err)
+		}
 	}
 
 	return os.WriteFile(dst, content, mode)
