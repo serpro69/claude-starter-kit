@@ -225,6 +225,24 @@ jobs:
             echo "Applied changes to .github/scripts/"
           fi
 
+          # Ensure .codex is not gitignored in downstream repos
+          # Many repos use ".*" to ignore all dotdirs; without "!.codex" the synced files are silently dropped
+          if [[ -d "$STAGING_DIR/codex" && -f ".gitignore" ]]; then
+            if git check-ignore -q .codex 2>/dev/null; then
+              if ! grep -q '^!\.codex' .gitignore; then
+                # Find the right place: after existing !.claude or !.serena lines
+                if grep -q '^!\.claude' .gitignore; then
+                  sed -i '/^!\.claude$/a !.codex' .gitignore
+                elif grep -q '^!\.serena' .gitignore; then
+                  sed -i '/^!\.serena$/a !.codex' .gitignore
+                else
+                  printf '!.codex\n' >> .gitignore
+                fi
+                echo "Added !.codex to .gitignore (was excluded by .* pattern)"
+              fi
+            fi
+          fi
+
           # Auto-append @import reference for CLAUDE.extra.md on first sync
           # If the file was just added and CLAUDE.md exists but doesn't reference it, add the import
           if [[ -f "$STAGING_DIR/claude/CLAUDE.extra.md" && -f "CLAUDE.md" ]]; then
