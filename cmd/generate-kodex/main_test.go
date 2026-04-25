@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -78,7 +79,9 @@ func TestParseManifest_Missing(t *testing.T) {
 func TestParseManifest_InvalidYAML(t *testing.T) {
 	tmp := t.TempDir()
 	path := filepath.Join(tmp, "bad.yml")
-	os.WriteFile(path, []byte("{{invalid yaml"), 0o644)
+	if err := os.WriteFile(path, []byte("{{invalid yaml"), 0o644); err != nil {
+		t.Fatalf("writing test file: %v", err)
+	}
 
 	_, err := ParseManifest(path)
 	if err == nil {
@@ -89,7 +92,9 @@ func TestParseManifest_InvalidYAML(t *testing.T) {
 func TestParseManifest_MissingRequired(t *testing.T) {
 	tmp := t.TempDir()
 	path := filepath.Join(tmp, "empty.yml")
-	os.WriteFile(path, []byte("target_plugin: x\n"), 0o644)
+	if err := os.WriteFile(path, []byte("target_plugin: x\n"), 0o644); err != nil {
+		t.Fatalf("writing test file: %v", err)
+	}
 
 	_, err := ParseManifest(path)
 	if err == nil {
@@ -376,6 +381,17 @@ func TestParseFrontmatter(t *testing.T) {
 			t.Error("expected error for missing name")
 		}
 	})
+
+	t.Run("trailing --- at eof", func(t *testing.T) {
+		input := []byte("---\nname: x\n---")
+		fm, _, err := parseFrontmatter(input)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if fm.Name != "x" {
+			t.Errorf("name = %q, want x", fm.Name)
+		}
+	})
 }
 
 func TestEscapeTomlMultiline(t *testing.T) {
@@ -398,18 +414,27 @@ func TestEscapeTomlMultiline(t *testing.T) {
 func snapshotDir(t *testing.T, root string) map[string]string {
 	t.Helper()
 	files := make(map[string]string)
-	filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		if err != nil || info.IsDir() {
+	filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
 			return err
 		}
-		if info.Mode()&os.ModeSymlink != 0 {
-			target, _ := os.Readlink(path)
+		if d.Type()&os.ModeSymlink != 0 {
+			target, err := os.Readlink(path)
+			if err != nil {
+				return err
+			}
 			rel, _ := filepath.Rel(root, path)
 			files[rel] = "symlink:" + target
 			return nil
 		}
+		if d.IsDir() {
+			return nil
+		}
 		rel, _ := filepath.Rel(root, path)
-		data, _ := os.ReadFile(path)
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
 		files[rel] = string(data)
 		return nil
 	})

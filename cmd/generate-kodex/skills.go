@@ -5,7 +5,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 func GenerateSkills(m *Manifest, dryRun bool) error {
@@ -78,7 +77,12 @@ func copySkillDir(srcDir, dstDir string, transforms []TransformConfig) error {
 			return os.MkdirAll(dst, 0o755)
 		}
 
-		return copyFile(path, dst, rel, transforms)
+		info, err := d.Info()
+		if err != nil {
+			return err
+		}
+
+		return copyFile(path, dst, rel, transforms, info.Mode())
 	})
 }
 
@@ -87,22 +91,23 @@ func copySymlink(src, dst string) error {
 	if err != nil {
 		return fmt.Errorf("reading symlink: %w", err)
 	}
-	// Remove existing destination if it exists (symlink or file)
-	os.Remove(dst)
+	if err := os.Remove(dst); err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("removing existing symlink: %w", err)
+	}
 	return os.Symlink(target, dst)
 }
 
-func copyFile(src, dst, rel string, transforms []TransformConfig) error {
+func copyFile(src, dst, rel string, transforms []TransformConfig, mode fs.FileMode) error {
 	content, err := os.ReadFile(src)
 	if err != nil {
 		return fmt.Errorf("reading %s: %w", src, err)
 	}
 
-	if strings.ToUpper(filepath.Base(rel)) == "SKILL.MD" {
+	if filepath.Base(rel) == "SKILL.md" {
 		content = ApplyTransforms(content, transforms)
 	}
 
-	return os.WriteFile(dst, content, 0o644)
+	return os.WriteFile(dst, content, mode)
 }
 
 func GenerateShared(m *Manifest, dryRun bool) error {
@@ -122,26 +127,8 @@ func GenerateShared(m *Manifest, dryRun bool) error {
 		return nil
 	}
 
-	if err := os.MkdirAll(dstShared, 0o755); err != nil {
-		return fmt.Errorf("creating _shared directory: %w", err)
-	}
-
-	entries, err := os.ReadDir(srcShared)
-	if err != nil {
-		return fmt.Errorf("reading _shared directory: %w", err)
-	}
-
-	for _, entry := range entries {
-		src := filepath.Join(srcShared, entry.Name())
-		dst := filepath.Join(dstShared, entry.Name())
-
-		content, err := os.ReadFile(src)
-		if err != nil {
-			return fmt.Errorf("reading %s: %w", entry.Name(), err)
-		}
-		if err := os.WriteFile(dst, content, 0o644); err != nil {
-			return fmt.Errorf("writing %s: %w", entry.Name(), err)
-		}
+	if err := copySkillDir(srcShared, dstShared, nil); err != nil {
+		return fmt.Errorf("copying _shared directory: %w", err)
 	}
 
 	fmt.Println("generated _shared/")

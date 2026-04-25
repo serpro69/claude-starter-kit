@@ -25,7 +25,7 @@ func GenerateAgents(m *Manifest, dryRun bool) error {
 
 	if dryRun {
 		for _, entry := range entries {
-			if !strings.HasSuffix(entry.Name(), ".md") {
+			if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
 				continue
 			}
 			name := strings.TrimSuffix(entry.Name(), ".md")
@@ -39,7 +39,7 @@ func GenerateAgents(m *Manifest, dryRun bool) error {
 	}
 
 	for _, entry := range entries {
-		if !strings.HasSuffix(entry.Name(), ".md") {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
 			continue
 		}
 
@@ -112,7 +112,7 @@ func formatAgentTOML(fm AgentFrontmatter, body string, cfg AgentsConfig) string 
 
 	desc := strings.TrimSpace(fm.Description)
 	if strings.Contains(desc, "\n") {
-		fmt.Fprintf(&b, "description = \"\"\"\n%s\"\"\"\n", desc)
+		fmt.Fprintf(&b, "description = \"\"\"\n%s\n\"\"\"\n", escapeTomlMultiline(desc))
 	} else {
 		fmt.Fprintf(&b, "description = %q\n", desc)
 	}

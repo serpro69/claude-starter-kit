@@ -1,6 +1,10 @@
 package main
 
-import "strings"
+import (
+	"fmt"
+	"os"
+	"strings"
+)
 
 func ApplyTransforms(content []byte, transforms []TransformConfig) []byte {
 	result := content
@@ -10,6 +14,8 @@ func ApplyTransforms(content []byte, transforms []TransformConfig) []byte {
 			result = applyPluginRootResolve(result, t.ReplacementBase)
 		case "inject_header":
 			result = applyInjectHeader(result, t.Content)
+		default:
+			fmt.Fprintf(os.Stderr, "warning: unknown transform type %q\n", t.Type)
 		}
 	}
 	return result
