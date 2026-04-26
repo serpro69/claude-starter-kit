@@ -109,18 +109,20 @@ Task tracking uses simple markdown files co-located with feature design docs:
 The full workflow: `design` (design + create tasks) → `review-design` → `implement` (execute tasks + `review-code`/`test`/`document` at the end of each task) → `test` (verify) → `document` (document)
 EOF
 
-AGENTS_CAPY_MD=$(cat "${REPO_ROOT/.claude/capy/CLAUDE.md}")
+AGENTS_CAPY_MD=$(cat "${REPO_ROOT}/.claude/capy/CLAUDE.md")
+
+CONTEXT="${CONTEXT}
+
+${AGENTS_EXTRA_MD}
+
+${AGENTS_CAPY_MD}"
 
 # Emit the JSON structure codex expects
 printf '%s\n' "$(jq -n \
   --arg ctx "$CONTEXT" \
-  --arg extra "$AGENTS_EXTRA_MD" \
-  --arg capy "$AGENTS_CAPY_MD" \
   '{
     hookSpecificOutput: {
       hookEventName: "SessionStart",
-      additionalContext: $ctx,
-      extraAgentsMd: $extra,
-      capyRulesMd: $capy
+      additionalContext: $ctx
     }
   }')"
