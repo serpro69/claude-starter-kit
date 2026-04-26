@@ -84,7 +84,7 @@
         "CODEX_MODEL": {
           "type": "string",
           "description": "Codex model name. Substituted into .codex/config.toml (model field).",
-          "default": "o3",
+          "default": "gpt-5.5",
           "examples": ["o3", "gpt-5.4", "o4-mini"]
         },
         "CODEX_APPROVAL_POLICY": {

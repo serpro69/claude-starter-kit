@@ -9,7 +9,7 @@
     "CC_MODEL": "sonnet",
     "SERENA_INITIAL_PROMPT": "",
     "CC_STATUSLINE": "enhanced",
-    "CODEX_MODEL": "o3",
+    "CODEX_MODEL": "gpt-5.5",
     "CODEX_APPROVAL_POLICY": "on-request"
   }
 }

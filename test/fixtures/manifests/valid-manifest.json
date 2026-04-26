@@ -10,7 +10,7 @@
     "CC_EFFORT_LEVEL": "high",
     "CC_PERMISSION_MODE": "default",
     "SERENA_INITIAL_PROMPT": "",
-    "CODEX_MODEL": "o3",
+    "CODEX_MODEL": "gpt-5.5",
     "CODEX_APPROVAL_POLICY": "on-request"
   }
 }

@@ -76,7 +76,7 @@ GENERATED=$(jq -n \
   --arg cc_model "sonnet" \
   --arg cc_statusline "enhanced" \
   --arg serena_prompt "" \
-  --arg codex_model "o3" \
+  --arg codex_model "gpt-5.5" \
   --arg codex_approval "on-request" \
   '{
     schema_version: $schema,
