@@ -85,7 +85,7 @@ BUILTIN_EXCLUSIONS=(
   ".claude/settings.local.json"
   ".claude/capy/*"
   ".claude/scripts/capy.sh"
-  ".codex/scripts/capy.sh"
+  # ".codex/scripts/capy.sh" # NOTE: this should actually be excluded, but commented out until capy adds support for codex
 )
 
 # Resolved version (for reporting)
