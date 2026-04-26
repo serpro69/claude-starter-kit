@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a starter template repository providing a complete development environment for Claude Code with pre-configured MCP servers and tools. It is a **configuration-only repository** with no application code.
+This is a repository providing a complete development environment for agentic tools like Claude Code and Codex, with tool configs, pre-configured MCP servers, and plugins. It provides opinionated configurations and installable plugins for claude-code and codex.
 
 ## Architecture
 
