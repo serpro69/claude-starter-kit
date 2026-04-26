@@ -69,16 +69,25 @@ jobs:
       - name: Validate Version is Newer
         run: |
           NEW_SEMVER="${{ steps.validate.outputs.semver }}"
-          CURRENT_VERSION=$(jq -r '.version' klaude-plugin/.claude-plugin/plugin.json)
+          KLAUDE_CURRENT_VERSION=$(jq -r '.version' klaude-plugin/.claude-plugin/plugin.json)
+          KODEX_CURRENT_VERSION=$(jq -r '.version' kodex-plugin/.codex-plugin/plugin.json)
 
-          echo "Current version: $CURRENT_VERSION"
+          echo "Klaude Current version: $KLAUDE_CURRENT_VERSION"
+          echo "Kodex Current version: $KODEX_CURRENT_VERSION"
           echo "New version: $NEW_SEMVER"
 
-          RESULT=$(bash .github/scripts/semver-compare.sh "$CURRENT_VERSION" "$NEW_SEMVER")
+          RESULT=$(bash .github/scripts/semver-compare.sh "$KLAUDE_CURRENT_VERSION" "$NEW_SEMVER")
           case "$RESULT" in
-            lt)  echo "Version bump: $CURRENT_VERSION -> $NEW_SEMVER" ;;
+            lt)  echo "Version bump: $KLAUDE_CURRENT_VERSION -> $NEW_SEMVER" ;;
             eq)  echo "::error::New version $NEW_SEMVER is the same as the current version."; exit 1 ;;
-            gt)  echo "::error::New version $NEW_SEMVER is not newer than current version $CURRENT_VERSION."; exit 1 ;;
+            gt)  echo "::error::New version $NEW_SEMVER is not newer than current version $KLAUDE_CURRENT_VERSION."; exit 1 ;;
+          esac
+
+          RESULT=$(bash .github/scripts/semver-compare.sh "$KODEX_CURRENT_VERSION" "$NEW_SEMVER")
+          case "$RESULT" in
+            lt)  echo "Version bump: $KODEX_CURRENT_VERSION -> $NEW_SEMVER" ;;
+            eq)  echo "::error::New version $NEW_SEMVER is the same as the current version."; exit 1 ;;
+            gt)  echo "::error::New version $NEW_SEMVER is not newer than current version $KODEX_CURRENT_VERSION."; exit 1 ;;
           esac
 
       - name: Dry Run Summary
@@ -86,15 +95,18 @@ jobs:
         run: |
           VERSION="${{ steps.validate.outputs.version }}"
           SEMVER="${{ steps.validate.outputs.semver }}"
-          CURRENT_VERSION=$(jq -r '.version' klaude-plugin/.claude-plugin/plugin.json)
+          KLAUDE_CURRENT_VERSION=$(jq -r '.version' klaude-plugin/.claude-plugin/plugin.json)
+          KODEX_CURRENT_VERSION=$(jq -r '.version' kodex-plugin/.codex-plugin/plugin.json)
 
           echo "### Dry Run — Release Preview" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**Version:** $VERSION" >> "$GITHUB_STEP_SUMMARY"
-          echo "**Plugin version:** $CURRENT_VERSION → $SEMVER" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Claude Plugin version:** $KLAUDE_CURRENT_VERSION → $SEMVER" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Codex Plugin version:** $KODEX_CURRENT_VERSION → $SEMVER" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**Actions that would be performed:**" >> "$GITHUB_STEP_SUMMARY"
-          echo "1. Update \`klaude-plugin/.claude-plugin/plugin.json\` version to \`$SEMVER\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "1.1 Update \`klaude-plugin/.claude-plugin/plugin.json\` version to \`$SEMVER\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "1.2 Update \`kodex-plugin/.codex-plugin/plugin.json\` version to \`$SEMVER\`" >> "$GITHUB_STEP_SUMMARY"
           echo "2. Commit: \`Release $VERSION\`" >> "$GITHUB_STEP_SUMMARY"
           echo "3. Tag: \`$VERSION\`" >> "$GITHUB_STEP_SUMMARY"
           echo "4. Push commit and tag" >> "$GITHUB_STEP_SUMMARY"
@@ -118,6 +130,8 @@ jobs:
           SEMVER="${{ steps.validate.outputs.semver }}"
           jq --arg v "$SEMVER" '.version = $v' klaude-plugin/.claude-plugin/plugin.json > klaude-plugin/.claude-plugin/plugin.json.tmp
           mv klaude-plugin/.claude-plugin/plugin.json.tmp klaude-plugin/.claude-plugin/plugin.json
+          jq --arg v "$SEMVER" '.version = $v' kodex-plugin/.codex-plugin/plugin.json > kodex-plugin/.codex-plugin/plugin.json.tmp
+          mv kodex-plugin/.codex-plugin/plugin.json.tmp kodex-plugin/.codex-plugin/plugin.json
           echo "Updated plugin.json version to $SEMVER"
 
       - name: Commit and Tag
@@ -127,6 +141,7 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add klaude-plugin/.claude-plugin/plugin.json
+          git add kodex-plugin/.codex-plugin/plugin.json
           git commit -m "Release $VERSION"
           git tag "$VERSION"
           echo "Created commit and tag $VERSION"
