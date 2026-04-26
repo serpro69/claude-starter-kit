@@ -80,6 +80,19 @@
           "description": "Initial prompt/context for Serena MCP server. Substituted into .serena/project.yml (initial_prompt field). Only applied if non-empty.",
           "default": "",
           "examples": ["", "You are working on a TypeScript project"]
+        },
+        "CODEX_MODEL": {
+          "type": "string",
+          "description": "Codex model name. Substituted into .codex/config.toml (model field).",
+          "default": "o3",
+          "examples": ["o3", "gpt-5.4", "o4-mini"]
+        },
+        "CODEX_APPROVAL_POLICY": {
+          "type": "string",
+          "description": "Codex approval policy. Substituted into .codex/config.toml (approval_policy field).",
+          "default": "on-request",
+          "enum": ["untrusted", "on-failure", "on-request", "granular", "never"],
+          "examples": ["on-request", "never"]
         }
       }
     },

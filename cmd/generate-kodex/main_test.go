@@ -165,14 +165,21 @@ func TestGenerateSkills(t *testing.T) {
 		}
 	})
 
-	t.Run("symlinks preserved", func(t *testing.T) {
-		link := filepath.Join(targetDir, "skills", "test-skill", "shared-foo.md")
-		target, err := os.Readlink(link)
+	t.Run("symlinks resolved to copies", func(t *testing.T) {
+		copied := filepath.Join(targetDir, "skills", "test-skill", "shared-foo.md")
+		info, err := os.Lstat(copied)
 		if err != nil {
-			t.Fatalf("readlink: %v", err)
+			t.Fatalf("shared-foo.md not found: %v", err)
 		}
-		if target != "../_shared/foo.md" {
-			t.Errorf("symlink target = %q, want ../_shared/foo.md", target)
+		if info.Mode()&os.ModeSymlink != 0 {
+			t.Errorf("shared-foo.md is still a symlink, expected a regular file")
+		}
+		content, err := os.ReadFile(copied)
+		if err != nil {
+			t.Fatalf("reading shared-foo.md: %v", err)
+		}
+		if len(content) == 0 {
+			t.Errorf("shared-foo.md is empty, expected content from _shared/foo.md")
 		}
 	})
 

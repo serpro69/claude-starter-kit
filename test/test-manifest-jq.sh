@@ -56,8 +56,8 @@ assert_equals "my-project" "$PROJECT_NAME" "PROJECT_NAME = $PROJECT_NAME"
 
 log_test "Extract all variable keys"
 VAR_KEYS=$(jq -r '.variables | keys[]' "$EXAMPLE_MANIFEST" | sort | tr '\n' ',')
-EXPECTED_KEYS="CC_MODEL,CC_STATUSLINE,LANGUAGES,PROJECT_NAME,SERENA_INITIAL_PROMPT,"
-assert_equals "$EXPECTED_KEYS" "$VAR_KEYS" "All 5 variable keys present"
+EXPECTED_KEYS="CC_MODEL,CC_STATUSLINE,CODEX_APPROVAL_POLICY,CODEX_MODEL,LANGUAGES,PROJECT_NAME,SERENA_INITIAL_PROMPT,"
+assert_equals "$EXPECTED_KEYS" "$VAR_KEYS" "All 7 variable keys present"
 
 # =============================================================================
 # Section 3: jq Patterns for Manifest Generation (for cleanup script)
@@ -76,6 +76,8 @@ GENERATED=$(jq -n \
   --arg cc_model "sonnet" \
   --arg cc_statusline "enhanced" \
   --arg serena_prompt "" \
+  --arg codex_model "o3" \
+  --arg codex_approval "on-request" \
   '{
     schema_version: $schema,
     upstream_repo: $upstream,
@@ -86,7 +88,9 @@ GENERATED=$(jq -n \
       LANGUAGES: $language,
       CC_MODEL: $cc_model,
       CC_STATUSLINE: $cc_statusline,
-      SERENA_INITIAL_PROMPT: $serena_prompt
+      SERENA_INITIAL_PROMPT: $serena_prompt,
+      CODEX_MODEL: $codex_model,
+      CODEX_APPROVAL_POLICY: $codex_approval
     }
   }')
 

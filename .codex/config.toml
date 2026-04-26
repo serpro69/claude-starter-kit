@@ -1,5 +1,7 @@
+#:schema https://developers.openai.com/codex/config-schema.json
 model = "gpt-5.5"
 model_reasoning_effort = "xhigh"
+model_auto_compact_token_limit = 1000000
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 

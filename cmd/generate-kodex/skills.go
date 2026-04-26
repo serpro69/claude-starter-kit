@@ -87,14 +87,21 @@ func copySkillDir(srcDir, dstDir string, transforms []TransformConfig) error {
 }
 
 func copySymlink(src, dst string) error {
-	target, err := os.Readlink(src)
+	// Resolve symlink and copy file contents instead of recreating the link.
+	// Codex plugin cache may strip symlinks, so copies are safer.
+	resolved, err := filepath.EvalSymlinks(src)
 	if err != nil {
-		return fmt.Errorf("reading symlink: %w", err)
+		return fmt.Errorf("resolving symlink %s: %w", src, err)
 	}
-	if err := os.Remove(dst); err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("removing existing symlink: %w", err)
+	content, err := os.ReadFile(resolved)
+	if err != nil {
+		return fmt.Errorf("reading resolved symlink target %s: %w", resolved, err)
 	}
-	return os.Symlink(target, dst)
+	info, err := os.Stat(resolved)
+	if err != nil {
+		return fmt.Errorf("stat %s: %w", resolved, err)
+	}
+	return os.WriteFile(dst, content, info.Mode())
 }
 
 func copyFile(src, dst, rel string, transforms []TransformConfig, mode fs.FileMode) error {

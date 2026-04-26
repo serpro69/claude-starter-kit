@@ -18,3 +18,4 @@ generate-all: vendor-profiles generate-kodex
 
 test-structure:
 	bash test/test-plugin-structure.sh
+	bash test/test-codex-structure.sh

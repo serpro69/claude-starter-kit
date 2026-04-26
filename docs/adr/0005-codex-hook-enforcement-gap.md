@@ -2,7 +2,19 @@
 
 ## Status
 
-Accepted
+Accepted — partially superseded (see Update 2026-04-26)
+
+## Update 2026-04-26
+
+Codex PreToolUse now intercepts **Bash, `apply_patch`, and MCP tool calls**
+(https://developers.openai.com/codex/hooks#pretooluse). Matchers for
+`apply_patch` can use aliases `Edit` or `Write`. MCP tools are matched by
+their `tool_name` (e.g., `mcp__fs__read`). `WebSearch` and `read_file` are
+still NOT interceptable.
+
+The original gap is narrower than described below. TODO: add `apply_patch`
+and relevant MCP matchers to `.codex/hooks.json` with corresponding hook
+scripts.
 
 ## Context
 
@@ -11,27 +23,15 @@ mechanisms: PreToolUse hooks (which intercept tool calls before execution)
 and context injection (which provides advisory guidance). Both mechanisms
 cover all tool types — Bash, Read, Write, Edit, WebFetch, etc.
 
-Codex's hook system (experimental, behind `[features] codex_hooks = true`)
-supports PreToolUse hooks, but with a significant limitation documented in
-the Codex docs:
+Codex's hook system (behind `[features] codex_hooks = true`) supports
+PreToolUse hooks with coverage for Bash, `apply_patch`, and MCP tool calls.
+Remaining gaps:
 
-> Currently `PreToolUse` only supports Bash tool interception. The model can
-> still work around this by writing its own script to disk and then running
-> that script with Bash, so treat this as a useful guardrail rather than a
-> complete enforcement boundary.
-
-This means:
-
-- `read_file`, `write_file`, `apply_patch`, `web_search`, and MCP tool
-  calls **cannot be intercepted** by hooks.
+- `read_file` and `web_search` **cannot be intercepted** by hooks.
 - File-path denylist enforcement on `read_file` is not possible via hooks.
-- WebFetch-equivalent blocking is moot (codex has no `web_fetch` tool),
-  but `web_search` cannot be hooked either.
-- MCP tool routing (e.g., blocking direct capy tool misuse) cannot be
-  enforced.
-
-The Codex docs explicitly mark this as "Work in progress" — expanded tool
-coverage is expected in future releases.
+- The docs note this is "still a guardrail rather than a complete
+  enforcement boundary because Codex can often perform equivalent work
+  through another supported tool path."
 
 ## Decision
 
@@ -74,6 +74,9 @@ We do NOT:
   hard enforcement on all tools; codex users have hard enforcement on
   Bash only. This should be documented prominently so users understand
   the difference.
-- **Action item:** When codex expands PreToolUse to cover `read_file`,
-  `write_file`, `apply_patch`, and `web_search`, add corresponding hook
-  entries to `.codex/hooks.json` and update this ADR's status.
+- **Action item (done for apply_patch/MCP):** Codex now covers `apply_patch`
+  and MCP tools. Add hook entries for these to `.codex/hooks.json` with
+  scripts that enforce file-path denylist on patches and capy routing on
+  MCP calls.
+- **Action item (pending):** When codex expands PreToolUse to cover
+  `read_file` and `web_search`, add corresponding hook entries.
