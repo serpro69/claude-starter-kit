@@ -13,7 +13,15 @@ max_threads = 6
 max_depth = 1
 
 [tui]
-status_line = ["model-with-reasoning", "current-dir"]
+status_line = [
+  "model-with-reasoning",
+  "current-dir",
+  "context-usage",
+  "used-tokens",
+  "five-hour-limit",
+  "weekly-limit",
+]
+terminal_title = ["project", "git-branch", "status", "thread", "task-progress"]
 
 [mcp_servers.capy]
 command = "bash"
