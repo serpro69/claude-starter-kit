@@ -3,7 +3,9 @@
     "commit": "",
     "pr": ""
   },
-  "enabledMcpjsonServers": ["capy"],
+  "enabledMcpjsonServers": [
+    "capy"
+  ],
   "enabledPlugins": {
     "skill-creator@claude-plugins-official": true
   },
