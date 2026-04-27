@@ -93,6 +93,13 @@
           "default": "on-request",
           "enum": ["untrusted", "on-failure", "on-request", "granular", "never"],
           "examples": ["on-request", "never"]
+        },
+        "SKIP_CAPY": {
+          "type": "string",
+          "description": "When 'true', template-sync strips the capy MCP server entry from .codex/config.toml. Useful for downstream repos that don't use capy.",
+          "default": "false",
+          "enum": ["true", "false"],
+          "examples": ["false", "true"]
         }
       }
     },

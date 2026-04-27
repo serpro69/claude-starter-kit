@@ -31,6 +31,9 @@ CC_EFFORT_LEVEL="high"
 CC_PERMISSION_MODE="default"
 SERENA_INITIAL_PROMPT=""
 CC_STATUSLINE="enhanced"
+CODEX_MODEL="gpt-5.5"
+CODEX_APPROVAL_POLICY="on-request"
+SKIP_CAPY="false"
 NO_COMMIT=false
 SKIP_CONFIRM=false
 INTERACTIVE_MODE=false
@@ -46,6 +49,9 @@ load_env_vars() {
   CC_STATUSLINE="${CC_STATUSLINE:-enhanced}"
   LANGUAGES="${LANGUAGES:-}"
   SERENA_INITIAL_PROMPT="${SERENA_INITIAL_PROMPT:-}"
+  CODEX_MODEL="${CODEX_MODEL:-gpt-5.5}"
+  CODEX_APPROVAL_POLICY="${CODEX_APPROVAL_POLICY:-on-request}"
+  SKIP_CAPY="${SKIP_CAPY:-false}"
 }
 
 # Color output
@@ -322,6 +328,9 @@ show_config_summary() {
   echo "  Effort Level:       $CC_EFFORT_LEVEL"
   echo "  Permission Mode:    $CC_PERMISSION_MODE"
   echo "  Statusline:         $CC_STATUSLINE"
+  echo "  Codex Model:        $CODEX_MODEL"
+  echo "  Codex Approval:     $CODEX_APPROVAL_POLICY"
+  echo "  Skip Capy:          $SKIP_CAPY"
   echo "  Languages:          $LANGUAGES"
   if [[ -n "$SERENA_INITIAL_PROMPT" ]]; then
     echo "  Serena Prompt:      $SERENA_INITIAL_PROMPT"
@@ -387,6 +396,9 @@ generate_manifest() {
     --arg CC_PERMISSION_MODE "$CC_PERMISSION_MODE" \
     --arg CC_STATUSLINE "$CC_STATUSLINE" \
     --arg SERENA_INITIAL_PROMPT "$SERENA_INITIAL_PROMPT" \
+    --arg CODEX_MODEL "$CODEX_MODEL" \
+    --arg CODEX_APPROVAL_POLICY "$CODEX_APPROVAL_POLICY" \
+    --arg SKIP_CAPY "$SKIP_CAPY" \
     '{
       schema_version: $schema_version,
       upstream_repo: $upstream_repo,
@@ -399,7 +411,10 @@ generate_manifest() {
         CC_EFFORT_LEVEL: $CC_EFFORT_LEVEL,
         CC_PERMISSION_MODE: $CC_PERMISSION_MODE,
         CC_STATUSLINE: $CC_STATUSLINE,
-        SERENA_INITIAL_PROMPT: $SERENA_INITIAL_PROMPT
+        SERENA_INITIAL_PROMPT: $SERENA_INITIAL_PROMPT,
+        CODEX_MODEL: $CODEX_MODEL,
+        CODEX_APPROVAL_POLICY: $CODEX_APPROVAL_POLICY,
+        SKIP_CAPY: $SKIP_CAPY
       }
     }' >.github/template-state.json
 

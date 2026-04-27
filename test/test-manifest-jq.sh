@@ -56,8 +56,8 @@ assert_equals "my-project" "$PROJECT_NAME" "PROJECT_NAME = $PROJECT_NAME"
 
 log_test "Extract all variable keys"
 VAR_KEYS=$(jq -r '.variables | keys[]' "$EXAMPLE_MANIFEST" | sort | tr '\n' ',')
-EXPECTED_KEYS="CC_MODEL,CC_STATUSLINE,CODEX_APPROVAL_POLICY,CODEX_MODEL,LANGUAGES,PROJECT_NAME,SERENA_INITIAL_PROMPT,"
-assert_equals "$EXPECTED_KEYS" "$VAR_KEYS" "All 7 variable keys present"
+EXPECTED_KEYS="CC_EFFORT_LEVEL,CC_MODEL,CC_PERMISSION_MODE,CC_STATUSLINE,CODEX_APPROVAL_POLICY,CODEX_MODEL,LANGUAGES,PROJECT_NAME,SERENA_INITIAL_PROMPT,SKIP_CAPY,"
+assert_equals "$EXPECTED_KEYS" "$VAR_KEYS" "All 10 variable keys present"
 
 # =============================================================================
 # Section 3: jq Patterns for Manifest Generation (for cleanup script)
@@ -74,10 +74,13 @@ GENERATED=$(jq -n \
   --arg project "my-project" \
   --arg language "typescript" \
   --arg cc_model "sonnet" \
+  --arg cc_effort "high" \
+  --arg cc_permission "default" \
   --arg cc_statusline "enhanced" \
   --arg serena_prompt "" \
   --arg codex_model "gpt-5.5" \
   --arg codex_approval "on-request" \
+  --arg skip_capy "false" \
   '{
     schema_version: $schema,
     upstream_repo: $upstream,
@@ -87,10 +90,13 @@ GENERATED=$(jq -n \
       PROJECT_NAME: $project,
       LANGUAGES: $language,
       CC_MODEL: $cc_model,
+      CC_EFFORT_LEVEL: $cc_effort,
+      CC_PERMISSION_MODE: $cc_permission,
       CC_STATUSLINE: $cc_statusline,
       SERENA_INITIAL_PROMPT: $serena_prompt,
       CODEX_MODEL: $codex_model,
-      CODEX_APPROVAL_POLICY: $codex_approval
+      CODEX_APPROVAL_POLICY: $codex_approval,
+      SKIP_CAPY: $skip_capy
     }
   }')
 

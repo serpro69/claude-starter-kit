@@ -274,7 +274,7 @@ jobs:
           fi
 
           # Backfill missing optional variables with defaults
-          DEFAULTS='{"CC_STATUSLINE":"enhanced","CC_EFFORT_LEVEL":"high","CC_PERMISSION_MODE":"default","CODEX_MODEL":"gpt-5.5","CODEX_APPROVAL_POLICY":"on-request"}'
+          DEFAULTS='{"CC_STATUSLINE":"enhanced","CC_EFFORT_LEVEL":"high","CC_PERMISSION_MODE":"default","CODEX_MODEL":"gpt-5.5","CODEX_APPROVAL_POLICY":"on-request","SKIP_CAPY":"false"}'
           for key in $(echo "$DEFAULTS" | jq -r 'keys[]'); do
             if [[ "$(jq -r ".variables.$key // \"__MISSING__\"" .github/template-state.json)" == "__MISSING__" ]]; then
               default_val=$(echo "$DEFAULTS" | jq -r ".$key")
