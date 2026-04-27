@@ -43,7 +43,7 @@ Out of the box you get:
 **Existing project, want the full setup?** Adopt the configuration, plugin, and sync infrastructure without creating from the template.
 → [Adopting into Existing Repositories](#adopting-into-existing-repositories)
 
-**Just want the skills?** Install the kk plugin — all 10 skills, commands, and hooks in one command. No template needed.
+**Just want the skills?** Install the kk plugin — no template needed.
 → [Plugin-Only Setup](#plugin-only-setup)
 
 ## Providers
@@ -62,7 +62,13 @@ claude-toolbox supports two AI coding providers:
 | **Plugin install**          | `/plugin install kk@claude-toolbox` | `codex plugin marketplace add serpro69/claude-toolbox` |
 | **Template sync**           | Full support                        | `.codex/` synced                                       |
 
-`klaude-plugin/` is the canonical source of truth. The `generate-kodex` tool produces `kodex-plugin/` and `.codex/agents/` with all necessary transformations. See [ADR 0005](docs/adr/0005-codex-hook-enforcement-gap.md) for known hook enforcement limitations on the Codex side.
+`klaude-plugin/` is the canonical source of truth. The `generate-kodex` tool produces `kodex-plugin/` and `.codex/agents/` with all necessary transformations.
+
+> [!IMPORTANT]
+> **Codex known limitations:**
+> - **Plugin-only installs** provide skills and profile content only — hooks, sub-agents, rules, and project config require [template setup](#template-setup) or [adopting into an existing repo](#adopting-into-existing-repositories).
+> - **PreToolUse hooks** are only wired for Bash commands. `apply_patch` and MCP tool hooks are documented in [ADR 0005](docs/adr/0005-codex-hook-enforcement-gap.md) but not yet implemented.
+> - **MCP servers** (Context7, Serena, Pal) must be configured at the user level — they are not packaged in the plugin. See [Codex MCP Setup](#codex-mcp-setup).
 
 ## Requirements
 
@@ -192,7 +198,7 @@ codex mcp add pal \
   -- sh -c "$HOME/.local/bin/uvx --from git+https://github.com/serpro69/pal-mcp-server.git pal-mcp-server"
 ```
 
-Or manually add below to your `~/.condex/config.toml` file:
+Or manually add to your `~/.codex/config.toml` file:
 
 
 <details>
@@ -281,21 +287,30 @@ Interactive mode walks you through each option. Run with `--help` for all flags,
 
 ## Plugin-Only Setup
 
-Already have a project? Install just the kk plugin to get all skills, commands, and hooks:
+Already have a project? Install just the plugin to get all 10 workflow skills.
+
+#### Claude Code
 
 ```
 /plugin install kk@claude-toolbox
 ```
 
-That's it. All 10 skills are now available as `/kk:(skill-name)` (annotated with `(kk)` in the slash command menu). See the [kk plugin documentation](./klaude-plugin/README.md) for details.
+Skills are available as `/kk:(skill-name)` (annotated with `(kk)` in the slash command menu). The Claude plugin also includes commands, hooks (Bash validation), and sub-agents. See the [kk plugin documentation](./klaude-plugin/README.md) for details.
 
 > [!TIP]
 > Want the full configuration too (settings, statusline, Serena, sync infrastructure)? See [Adopting into Existing Repositories](#adopting-into-existing-repositories).
 > For MCP servers, see [MCP Server Configuration](#mcp-server-configuration).
 
-### Codex
+#### Codex
 
-From `v0.12.0` codex is also supported, same skills, same workflow, offload reviewing to codex, or run it through the whole pipeline. See [kodex-plugin](./kodex-plugin/README.md) for details.
+```
+codex plugin marketplace add serpro69/claude-toolbox
+```
+
+The Codex plugin includes skills and language-specific profile content (review checklists, implementation gotchas, etc.). See [kodex-plugin](./kodex-plugin/README.md) for details.
+
+> [!NOTE]
+> The Codex plugin provides **skills and profiles only** — it does not include hooks, sub-agents, Starlark rules, or project configuration. For the full Codex experience (SessionStart/PreToolUse hooks, sub-agents, config, rules), use the [template setup](#template-setup) or [adopt into an existing repo](#adopting-into-existing-repositories).
 
 For MCP servers (Serena, Context7, Pal), see [Codex MCP Setup](#codex-mcp-setup).
 
@@ -336,7 +351,7 @@ Without Capy, each session starts fresh — all skills still work, they just don
 
 ### kk Plugin ([`klaude-plugin/`](./klaude-plugin/README.md))
 
-The **kk** plugin contains all development workflow functionality — 10 skills, 4 commands, and hooks — distributed via the Claude Code plugin system. Skills are invoked as `/skill-name`, commands as `/kk:dir:command`.
+The **kk** plugin contains all development workflow functionality — 10 skills, 4 commands, and hooks — distributed via the Claude Code plugin system (see [kodex-plugin](./kodex-plugin/README.md) for the Codex variant). Skills are invoked as `/kk:skill-name`, commands as `/kk:dir:command`.
 
 Includes: **design**, **implement**, **test**, **document**, **development-guidelines**, **review-code**, **review-spec**, **review-design**, **merge-docs**, **chain-of-verification**. Plus commands for CoVe, implementation review, design review, Task Master migration, and sync workflow updates. See the [plugin README](./klaude-plugin/README.md) for full details.
 
@@ -552,7 +567,13 @@ You don't need to create a repo from this template to use the full configuration
        "PROJECT_NAME": "my-cool-project",
        "LANGUAGES": "go",
        "CC_MODEL": "default",
-       "SERENA_INITIAL_PROMPT": ""
+       "CC_EFFORT_LEVEL": "high",
+       "CC_PERMISSION_MODE": "default",
+       "CC_STATUSLINE": "enhanced",
+       "SERENA_INITIAL_PROMPT": "",
+       "CODEX_MODEL": "gpt-5.5",
+       "CODEX_APPROVAL_POLICY": "on-request",
+       "SKIP_CAPY": "false"
      }
    }
    ```
@@ -652,7 +673,7 @@ Examples of actual Claude Code workflows executed using this template's configs,
 
 ## Contributing
 
-Feel free to open new PRs/issues. Any contributions you make are greatly appreciated.
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines, [Architecture](docs/contributing/ARCHITECTURE.md) for how components fit together, and [Testing](docs/contributing/TESTING.md) for test conventions.
 
 ## License
 

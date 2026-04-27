@@ -2,6 +2,15 @@
 
 Development workflow skills generated from [klaude-plugin/](../klaude-plugin/) (the Claude Code source of truth).
 
+## What's Included
+
+The Codex plugin packages **skills and profile content**:
+
+- **10 workflow skills** — the same pipeline as the Claude Code plugin (`design` → `implement` → `review-code` → `test` → `document` and utilities)
+- **Language-specific profiles** — review checklists, implementation gotchas, design prompts, test validators, and doc rubrics for Go, Java, JS/TS, Kotlin, Kubernetes, and Python
+
+The plugin does **not** include hooks, sub-agents, Starlark rules, or project configuration (`.codex/config.toml`, `AGENTS.md`, etc.). For the full Codex experience, use the [template setup](../README.md#template-setup) or [adopt into an existing repo](../README.md#adopting-into-existing-repositories).
+
 ## Installation
 
 ```bash
@@ -35,10 +44,9 @@ codex plugin marketplace upgrade claude-toolbox
 
 ## How It Works
 
-Skills are authored once in `klaude-plugin/skills/` and generated into this directory by `cmd/generate-kodex/`. The generation tool resolves `${CLAUDE_PLUGIN_ROOT}` references and copies auxiliary files. Run `make generate-kodex` after editing source skills to regenerate.
+Skills are authored once in `klaude-plugin/skills/` and generated into this directory by `cmd/generate-kodex/`. The generation tool resolves `${CLAUDE_PLUGIN_ROOT}` references and copies auxiliary files (including profiles). Run `make generate-kodex` after editing source skills to regenerate.
 
 ## Troubleshooting
 
 - **Skills not appearing:** Ensure the plugin is installed via the marketplace browser, not manually copied.
-- **Profile paths not resolving:** Profiles only work when the full toolbox repo is checked out (local development). Marketplace-only installs don't have access to `klaude-plugin/profiles/` — skills still function, but without language-specific review checklists.
 - **Stale output:** Run `make generate-kodex` and check `git diff kodex-plugin/` to see if regeneration is needed.
