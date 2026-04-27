@@ -109,7 +109,10 @@ Task tracking uses simple markdown files co-located with feature design docs:
 The full workflow: `design` (design + create tasks) → `review-design` → `implement` (execute tasks + `review-code`/`test`/`document` at the end of each task) → `test` (verify) → `document` (document)
 EOF
 
-AGENTS_CAPY_MD=$(cat "${REPO_ROOT}/.capy/AGENTS.md")
+AGENTS_CAPY_MD=""
+if [[ -f "${REPO_ROOT}/.capy/AGENTS.md" ]]; then
+  AGENTS_CAPY_MD=$(cat "${REPO_ROOT}/.capy/AGENTS.md")
+fi
 
 CONTEXT="${CONTEXT}
 
