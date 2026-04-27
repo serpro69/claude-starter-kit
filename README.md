@@ -55,12 +55,12 @@ claude-toolbox supports two AI coding providers:
 | **Skills**                  | `klaude-plugin/` (authored)         | `kodex-plugin/` (generated)                            |
 | **Sub-agents**              | `klaude-plugin/agents/*.md`         | `.codex/agents/*.toml` (generated)                     |
 | **Project instructions**    | `CLAUDE.md`                         | `AGENTS.md`                                            |
-| **Behavioral instructions** | `.claude/CLAUDE.extra.md`           | `.codex/AGENTS.extra.md`                               |
+| **Behavioral instructions** | `.claude/CLAUDE.extra.md`           | `.codex/scripts/session-start.sh`                      |
 | **Config**                  | `.claude/settings.json`             | `.codex/config.toml`                                   |
 | **Hooks**                   | `klaude-plugin/hooks/`              | `.codex/hooks.json`                                    |
 | **Rules/Permissions**       | `.claude/settings.json`             | `.codex/rules/default.rules` (Starlark)                |
 | **Plugin install**          | `/plugin install kk@claude-toolbox` | `codex plugin marketplace add serpro69/claude-toolbox` |
-| **Template sync**           | Full support                        | `.codex/` + `AGENTS.extra.md` synced                   |
+| **Template sync**           | Full support                        | `.codex/` synced                                       |
 
 `klaude-plugin/` is the canonical source of truth. The `generate-kodex` tool produces `kodex-plugin/` and `.codex/agents/` with all necessary transformations. See [ADR 0005](docs/adr/0005-codex-hook-enforcement-gap.md) for known hook enforcement limitations on the Codex side.
 
@@ -426,7 +426,7 @@ Repos created from this template can pull configuration updates via the **Templa
 
 ### What Gets Synced
 
-**Updated:** `.claude/` (settings, CLAUDE.extra.md, statusline scripts), `.codex/` (config.toml, AGENTS.extra.md, hooks, rules, scripts, agents), `.serena/`, and the sync infrastructure itself. Skills, commands, and hooks are managed by the plugin system — not template sync.
+**Updated:** `.claude/` (settings, CLAUDE.extra.md, statusline scripts), `.codex/` (config.toml, hooks, rules, scripts, agents), `.serena/`, and the sync infrastructure itself. Skills, commands, and hooks are managed by the plugin system — not template sync.
 
 **Preserved:** Project-specific values (name, language, prompts), `settings.local.json`, gitignored files
 
@@ -607,7 +607,7 @@ klaude-plugin/                   # kk plugin — Claude (canonical source of tru
 kodex-plugin/                    # kk plugin — Codex (GENERATED from klaude-plugin/)
 ├── .codex-plugin/plugin.json    # Generated plugin manifest
 ├── skills/                      # Generated skills (transformed SKILL.md files)
-└── .mcp.json                    # Capy MCP config
+└── profiles/                    # Per-domain content (languages, IaC DSLs) — see AGENTS.md
 
 .claude-plugin/marketplace.json  # Claude marketplace catalog
 .agents/plugins/marketplace.json # Codex marketplace catalog
@@ -622,7 +622,6 @@ AGENTS.md                        # Codex project instructions (this repo)
 └── scripts/                     # statusline.sh, statusline_enhanced.sh, sync-workflow.sh
 
 .codex/
-├── AGENTS.extra.md              # Behavioral instructions (synced downstream, codex equivalent)
 ├── config.toml                  # Codex settings: model, approval policy, features, MCP
 ├── hooks.json                   # SessionStart + PreToolUse hook definitions
 ├── rules/default.rules          # Starlark command policies (ported from Claude deny list)

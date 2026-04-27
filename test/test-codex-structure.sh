@@ -142,10 +142,6 @@ log_section "Section 7: Root-level files"
 log_test "AGENTS.md exists at repo root"
 assert_file_exists "$REPO_ROOT/AGENTS.md" "AGENTS.md exists"
 
-# NOTE: this is part of codex session-start.sh hook script
-# log_test "AGENTS.extra.md exists in .codex/"
-# assert_file_exists "$REPO_ROOT/.codex/AGENTS.extra.md" "AGENTS.extra.md exists"
-
 # =============================================================================
 # Summary
 # =============================================================================

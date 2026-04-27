@@ -24,7 +24,7 @@ For API keys and MCP server setup, see the "MCP Server Configuration" section in
 - `kodex-plugin/` — transformed skills for Codex (resolves `${CLAUDE_PLUGIN_ROOT}`, injects headers)
 - `.codex/agents/*.toml` — sub-agent definitions (converted from `klaude-plugin/agents/*.md`)
 
-Hand-authored codex files (not generated): `.codex/config.toml`, `.codex/hooks.json`, `.codex/rules/default.rules`, `.codex/scripts/`, `.codex/AGENTS.extra.md`, `AGENTS.md`.
+Hand-authored codex files (not generated): `.codex/config.toml`, `.codex/hooks.json`, `.codex/rules/default.rules`, `.codex/scripts/`, `AGENTS.md`.
 
 **Developer workflow:** After editing skills in `klaude-plugin/`, run `make generate-kodex` to regenerate. CI checks freshness via `make generate-kodex && git diff --exit-code kodex-plugin/ .codex/agents/`.
 
