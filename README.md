@@ -78,9 +78,7 @@ claude-toolbox supports two AI coding providers:
 
 ### MCP Server Configuration
 
-> [!NOTE]
-> MCP servers must be configured in `~/.claude.json` (not in the repo) to keep API keys safe.
-> These configs are generic enough to reuse across all your projects.
+MCP servers are configured at the user level (not in the repo) to keep API keys safe. These configs are generic enough to reuse across all your projects.
 
 You don't need all servers to get started. Add them incrementally:
 
@@ -88,6 +86,11 @@ You don't need all servers to get started. Add them incrementally:
 2. **Context7** (needs API key) — up-to-date library documentation and code examples.
 3. **Pal** (needs API key) — multi-model AI integration for code review, debugging, planning, and security audit.
 4. [**Capy**](https://github.com/serpro69/capy) (optional, auto-configured by bootstrap) — persistent knowledge base across sessions. Install with `brew install serpro69/tap/capy`.
+
+#### Claude Code
+
+> [!NOTE]
+> Add MCP servers to `~/.claude.json` under the `mcpServers` key.
 
 <details>
 <summary>Example <code>mcpServers</code> configuration</summary>
@@ -166,6 +169,60 @@ See [Pal configuration docs](https://github.com/serpro69/pal-mcp-server/blob/mai
 > You also may want to look into your `env` settings for the given mcp server, especially the `PATH` variable, and make sure you're not adding anything custom that may not be avaiable in the image.
 > This may cause the mcp server to fail to connect.
 
+#### Codex MCP Setup
+
+> [!NOTE]
+> MCP servers are added via `codex mcp add` and stored in `~/.codex/config.toml`.
+> Capy is already configured at the project level in `.codex/config.toml` — no user setup needed.
+
+```bash
+# Context7 — streamable HTTP, no API key env var needed (key is in the URL header)
+codex mcp add context7 --url "https://mcp.context7.com/mcp"
+
+# Serena — stdio server via uvx
+codex mcp add serena -- uvx --from "git+https://github.com/oraios/serena" serena start-mcp-server --context ide-assistant --project .
+
+# Pal — stdio server via uvx, with env vars for model config
+codex mcp add pal \
+  --env "PATH=/usr/local/bin:/usr/bin:/bin:$HOME/.local/bin" \
+  --env "DEFAULT_MODEL=auto" \
+  --env "DEFAULT_THINKING_MODE_THINKDEEP=high" \
+  --env "GEMINI_API_KEY=YOUR_GEMINI_API_KEY" \
+  --env "GOOGLE_ALLOWED_MODELS=gemini-3.1-pro-preview,gemini-3-flash-preview" \
+  -- sh -c "$HOME/.local/bin/uvx --from git+https://github.com/serpro69/pal-mcp-server.git pal-mcp-server"
+```
+
+Or manually add below to your `~/.condex/config.toml` file:
+
+
+<details>
+<summary>Example <code>mcpServers</code> configuration</summary>
+
+```toml
+[mcp_servers.context7]
+url = "https://mcp.context7.com/mcp"
+http_headers = { "CONTEXT7_API_KEY" = "YOUR_CONTEXT7_API_KEY" }
+
+[mcp_servers.serena]
+command = "uvx"
+args = ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--context", "ide-assistant", "--project", "."]
+
+[mcp_servers.pal]
+command = "sh"
+args = ["-c", "$HOME/.local/bin/uvx --from git+https://github.com/serpro69/pal-mcp-server.git pal-mcp-server"]
+
+[mcp_servers.pal.env]
+DEFAULT_MODEL = "auto"
+DEFAULT_THINKING_MODE_THINKDEEP = "high"
+GEMINI_API_KEY = "YOUR_GEMINI_API_KEY"
+GOOGLE_ALLOWED_MODELS = "gemini-3.1-pro-preview,gemini-3-flash-preview"
+PATH = "/usr/local/bin:/usr/bin:/bin:/home/sergio/.local/bin"
+```
+
+</details>
+
+Verify with `codex mcp list`. See [Pal configuration docs](https://github.com/serpro69/pal-mcp-server/blob/main/docs/configuration.md) for model and thinking mode options.
+
 ## Template Setup
 
 1. [Create a new project from this template](https://github.com/new?template_name=claude-toolbox&template_owner=serpro69) using the **Use this template** button.
@@ -234,11 +291,13 @@ That's it. All 10 skills are now available as `/kk:(skill-name)` (annotated with
 
 > [!TIP]
 > Want the full configuration too (settings, statusline, Serena, sync infrastructure)? See [Adopting into Existing Repositories](#adopting-into-existing-repositories).
-> For MCP servers, see [MCP Server Configuration](#mcp-server-configuration) and add the configs you want to `~/.claude.json`.
+> For MCP servers, see [MCP Server Configuration](#mcp-server-configuration).
 
 ### Codex
 
 From `v0.12.0` codex is also supported, same skills, same workflow, offload reviewing to codex, or run it through the whole pipeline. See [kodex-plugin](./kodex-plugin/README.md) for details.
+
+For MCP servers (Serena, Context7, Pal), see [Codex MCP Setup](#codex-mcp-setup).
 
 ## Try It
 
