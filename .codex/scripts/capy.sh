@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
 
 # Wrapper that locates and runs the capy binary.
-# Used as a Codex MCP server launcher — must always exit 0 to avoid phantom errors.
-
-# NOTE: copied manually from .claude/scripts until capy adds support for codes
-# after that 'capy setup' should handle the same
-# TODO: !!! UPDATE THE TEMPLATE-SYNC.SH SCRIPT TO EXLUDE THIS FILE FROM SYNC ONCE CAPY HAS SUPPORT FOR CODEX AND GENERATES THIS FILE VIA 'CAPY SETUP'
+# Used as a Claude Code hook — must always exit 0 to avoid phantom hook errors.
+# See: https://github.com/serpro69/claude-toolbox/issues/57
 
 set -uo pipefail
 
@@ -16,5 +13,7 @@ for p in "$(command -v capy 2>/dev/null || true)" "$HOME/.local/bin/capy" "/opt/
   fi
 done
 
-echo "capy binary not found" >&2
-exit 1
+# capy not found — deny tool use
+jq -n --arg reason "capy binary not found" \
+	'{hookSpecificOutput: {hookEventName: "PreToolUse", permissionDecision: "deny", permissionDecisionReason: $reason}}'
+exit 0

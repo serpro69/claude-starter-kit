@@ -285,4 +285,4 @@ Architecture decisions that span more than one feature live at `docs/adr/NNNN-sl
 
 # capy — MANDATORY routing rules
 
-@.claude/capy/CLAUDE.md
+@.capy/AGENTS.md

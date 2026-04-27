@@ -38,3 +38,4 @@ logs
 # Go build artifacts
 /vendor-profiles
 /generate-kodex
+!.capy/AGENTS.md
