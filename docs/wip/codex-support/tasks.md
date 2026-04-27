@@ -168,4 +168,4 @@
 - [x] 11.2 Run `make generate-kodex` and verify `git diff --exit-code kodex-plugin/ .codex/agents/` (output is fresh)
 - [x] 11.3 Run `review-code` on new Go code, shell scripts, TOML, Starlark
 - [x] 11.4 Run `review-spec` to verify implementation matches design.md and implementation.md
-- [ ] 11.5 Smoke test from codex session: install plugin via marketplace, verify skills discoverable, SessionStart hook works, PreToolUse blocks forbidden commands, sub-agents spawnable, capy MCP callable
+- [x] 11.5 Smoke test from codex session: install plugin via marketplace, verify skills discoverable, SessionStart hook works, PreToolUse blocks forbidden commands, sub-agents spawnable, capy MCP callable
