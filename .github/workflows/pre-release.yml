@@ -100,6 +100,11 @@ jobs:
             gt)  echo "::error::New version $NEW_SEMVER is not newer than current version $KODEX_CURRENT_VERSION."; exit 1 ;;
           esac
 
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
       - name: Dry Run Summary
         if: inputs.dry_run == true
         run: |
@@ -115,12 +120,13 @@ jobs:
           echo "**Codex Plugin version:** $KODEX_CURRENT_VERSION → $SEMVER" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**Actions that would be performed:**" >> "$GITHUB_STEP_SUMMARY"
-          echo "1.1 Update \`klaude-plugin/.claude-plugin/plugin.json\` version to \`$SEMVER\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "1.2 Update \`kodex-plugin/.codex-plugin/plugin.json\` version to \`$SEMVER\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "2. Commit: \`Release $VERSION\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "3. Tag: \`$VERSION\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "4. Push commit and tag" >> "$GITHUB_STEP_SUMMARY"
-          echo "5. Create GitHub release with auto-generated notes" >> "$GITHUB_STEP_SUMMARY"
+          echo "1. Regenerate kodex plugin artifacts from klaude-plugin source" >> "$GITHUB_STEP_SUMMARY"
+          echo "2.1 Update \`klaude-plugin/.claude-plugin/plugin.json\` version to \`$SEMVER\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "2.2 Update \`kodex-plugin/.codex-plugin/plugin.json\` version to \`$SEMVER\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "3. Commit: \`Release $VERSION\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "4. Tag: \`$VERSION\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "5. Push commit and tag" >> "$GITHUB_STEP_SUMMARY"
+          echo "6. Create GitHub release with auto-generated notes" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**Commits since last tag:**" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
@@ -133,6 +139,12 @@ jobs:
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "Dry run complete. No changes were made."
+
+      - name: Regenerate Kodex Artifacts
+        if: inputs.dry_run != true
+        run: |
+          go run ./cmd/generate-kodex -manifest scripts/kodex-generate-manifest.yml
+          echo "Regenerated kodex-plugin/ and .codex/agents/ from klaude-plugin source"
 
       - name: Update Plugin Version
         if: inputs.dry_run != true
@@ -151,8 +163,7 @@ jobs:
           BOT_USER="${BOT_SLUG}[bot]"
           git config --local user.name "${BOT_USER}"
           git config --local user.email "${BOT_USER}@users.noreply.github.com"
-          git add klaude-plugin/.claude-plugin/plugin.json
-          git add kodex-plugin/.codex-plugin/plugin.json
+          git add -A
           git commit -m "Release $VERSION"
           git tag "$VERSION"
           echo "Created commit and tag $VERSION"
