@@ -7,9 +7,12 @@
     "PROJECT_NAME": "my-project",
     "LANGUAGES": "typescript",
     "CC_MODEL": "sonnet",
-    "SERENA_INITIAL_PROMPT": "",
+    "CC_EFFORT_LEVEL": "high",
+    "CC_PERMISSION_MODE": "default",
     "CC_STATUSLINE": "enhanced",
+    "SERENA_INITIAL_PROMPT": "",
     "CODEX_MODEL": "gpt-5.5",
-    "CODEX_APPROVAL_POLICY": "on-request"
+    "CODEX_APPROVAL_POLICY": "on-request",
+    "SKIP_CAPY": "false"
   }
 }
