@@ -2,10 +2,10 @@
 
 [![Mentioned in Awesome Claude Code](https://awesome.re/mentioned-badge-flat.svg)](https://github.com/hesreallyhim/awesome-claude-code)
 
-claude-toolbox is a collection of "tools" for all your Claude Code workflows — pre-configured MCP servers, skills, sub-agents, commands, hooks, statuslines with themes, and more - everything you need for AI-powered development workflows, used and battle-tested daily on many of my own projects.
+claude-toolbox is a collection of "tools" for all your agentic workflows (**currently supports claude-code and codex!**) — pre-configured MCP servers, skills, sub-agents, commands, hooks, statuslines with themes, and more - everything you need for AI-powered development workflows, used and battle-tested daily on many of my own projects.
 
 > [!IMPORTANT]
-> This project was created with the help of Claude-Code. Is it, however, reviewed, tested, and reworked with a human-in-the-loop.
+> This project was created with the help of Claude-Code. Is it, however, always reviewed, tested, and reworked with a human-in-the-loop.
 >
 > No AI slop here. Purely AI-made skills are hot garbage, and that's putting it mildly.
 >
@@ -15,11 +15,11 @@ claude-toolbox is a collection of "tools" for all your Claude Code workflows —
 
 ## Why claude-toolbox?
 
-Claude Code is powerful on its own, but it doesn't know your development workflow. This project started as a way for me to streamline claude configurations across all my projects without needing to copy-paste things. With time, patterns and re-curring prompts evolved into skills and agents. Currently, claude-toolbox gives you two things:
+Tools like Claude Code and Codex are powerful on their own, but LLMs don't know your development workflow. This project started as a way for me to streamline claude configurations across all my projects without needing to copy-paste things. With time, patterns and re-curring prompts evolved into skills and agents. Currently, claude-toolbox gives you two things:
 
-**A minimal, opinionated Claude Code configuration** — sensible permission baselines, a rich statusline, Serena LSP integration, MCP server wiring, and sync infrastructure to keep it all up to date across your projects. Think of it as a dotfiles repo for Claude Code.
+**A minimal, opinionated Claude Code and Codex configuration** — sensible permission baselines, a rich statusline, Serena LSP integration, MCP server wiring, and sync infrastructure to keep it all up to date across your projects. Think of it as a dotfiles repo for Claude Code and Codex.
 
-**A structured development pipeline** — 10 workflow skills that take you from idea through design, implementation, code review, testing, to documentation, with persistent knowledge that carries across sessions.
+**A structured development pipeline** — 10 workflow skills with explicit multi-language support that take you from idea through design, implementation, code review, testing, to documentation, with persistent knowledge that carries across sessions.
 
 ```
 /design → /review-design → /implement → /review-code → /test → /document
@@ -27,8 +27,8 @@ Claude Code is powerful on its own, but it doesn't know your development workflo
 
 Out of the box you get:
 
-- **10 workflow skills** — a complete development pipeline invoked as `/skill-name`
-- **Multi-language support** — precise and distinct instructions from implementation to testing to review for: go, java, js/ts, kotlin, python
+- **10 workflow skills** — a complete development pipeline invoked as `/kk:<skill-name>`, with many skills integrated with each other.
+- **Multi-language support** — precise and distinct instructions from design, to implementation, to testing, to review for: go, java, js/ts, kotlin, kubernetes, and python
 - **Multi-model code review** — independent reviewers using sub-agents and external models (Gemini, etc.)
 - **Semantic code analysis** — LSP-powered symbol navigation and reference tracking via Serena
 - **Persistent knowledge base** — findings, decisions, and conventions that survive across sessions via Capy
@@ -50,17 +50,17 @@ Out of the box you get:
 
 claude-toolbox supports two AI coding providers:
 
-| | Claude Code | Codex (OpenAI) |
-|---|---|---|
-| **Skills** | `klaude-plugin/` (authored) | `kodex-plugin/` (generated) |
-| **Sub-agents** | `klaude-plugin/agents/*.md` | `.codex/agents/*.toml` (generated) |
-| **Project instructions** | `CLAUDE.md` | `AGENTS.md` |
-| **Behavioral instructions** | `.claude/CLAUDE.extra.md` | `.codex/AGENTS.extra.md` |
-| **Config** | `.claude/settings.json` | `.codex/config.toml` |
-| **Hooks** | `klaude-plugin/hooks/` | `.codex/hooks.json` |
-| **Rules/Permissions** | `.claude/settings.json` | `.codex/rules/default.rules` (Starlark) |
-| **Plugin install** | `/plugin install kk@claude-toolbox` | `codex plugin marketplace add serpro69/claude-toolbox` |
-| **Template sync** | Full support | `.codex/` + `AGENTS.extra.md` synced |
+|                             | Claude Code                         | Codex (OpenAI)                                         |
+| --------------------------- | ----------------------------------- | ------------------------------------------------------ |
+| **Skills**                  | `klaude-plugin/` (authored)         | `kodex-plugin/` (generated)                            |
+| **Sub-agents**              | `klaude-plugin/agents/*.md`         | `.codex/agents/*.toml` (generated)                     |
+| **Project instructions**    | `CLAUDE.md`                         | `AGENTS.md`                                            |
+| **Behavioral instructions** | `.claude/CLAUDE.extra.md`           | `.codex/AGENTS.extra.md`                               |
+| **Config**                  | `.claude/settings.json`             | `.codex/config.toml`                                   |
+| **Hooks**                   | `klaude-plugin/hooks/`              | `.codex/hooks.json`                                    |
+| **Rules/Permissions**       | `.claude/settings.json`             | `.codex/rules/default.rules` (Starlark)                |
+| **Plugin install**          | `/plugin install kk@claude-toolbox` | `codex plugin marketplace add serpro69/claude-toolbox` |
+| **Template sync**           | Full support                        | `.codex/` + `AGENTS.extra.md` synced                   |
 
 `klaude-plugin/` is the canonical source of truth. The `generate-kodex` tool produces `kodex-plugin/` and `.codex/agents/` with all necessary transformations. See [ADR 0005](docs/adr/0005-codex-hook-enforcement-gap.md) for known hook enforcement limitations on the Codex side.
 
@@ -230,23 +230,27 @@ Already have a project? Install just the kk plugin to get all skills, commands, 
 /plugin install kk@claude-toolbox
 ```
 
-That's it. All 10 skills are now available as `/skill-name` (annotated with `(kk)` in the slash command menu). See the [kk plugin documentation](./klaude-plugin/README.md) for details.
+That's it. All 10 skills are now available as `/kk:(skill-name)` (annotated with `(kk)` in the slash command menu). See the [kk plugin documentation](./klaude-plugin/README.md) for details.
 
 > [!TIP]
 > Want the full configuration too (settings, statusline, Serena, sync infrastructure)? See [Adopting into Existing Repositories](#adopting-into-existing-repositories).
 > For MCP servers, see [MCP Server Configuration](#mcp-server-configuration) and add the configs you want to `~/.claude.json`.
 
+### Codex
+
+From `v0.12.0` codex is also supported, same skills, same workflow, offload reviewing to codex, or run it through the whole pipeline. See [kodex-plugin](./kodex-plugin/README.md) for details.
+
 ## Try It
 
 After setup, try the core workflow:
 
-1. **Start with an idea.** Type `/design` and describe a feature you want to build. Claude will ask you refinement questions one at a time, then produce design docs and a task list in `docs/wip/`.
+1. **Start with an idea.** Type `/kk:design` and describe a feature you want to build. Claude will ask you refinement questions one at a time, then produce design docs and a task list in `docs/wip/`.
 
-2. **Review the design.** Run `/review-design your-feature` to catch gaps before writing code.
+2. **Review the design.** Run `/kk:review-design your-feature` to catch gaps before writing code.
 
-3. **Build it.** Type `/implement` — Claude executes the task list with code review checkpoints between batches.
+3. **Build it.** Type `/kk:implement` — Claude executes the task list with code review checkpoints between batches.
 
-4. **Review the code.** `/review-code` checks for SOLID violations, security risks, and quality issues. Use `/review-code:isolated` for independent sub-agent reviewers with zero authorship bias.
+4. **Review the code.** `/kk:review-code` checks for SOLID violations, security risks, and quality issues. Use `/kk:review-code:isolated` for independent sub-agent reviewers with zero authorship bias.
 
 This is the core loop. See the [kk plugin README](./klaude-plugin/README.md) for all available skills and the full workflow pipeline.
 
@@ -256,12 +260,12 @@ This is the core loop. See the [kk plugin README](./klaude-plugin/README.md) for
 
 Four servers provide complementary capabilities:
 
-| Server                                                          | Purpose                                                                                |
-| --------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| **[Context7](https://context7.com/)**                           | Up-to-date library documentation and code examples                                     |
-| **[Serena](https://github.com/oraios/serena)**                  | Semantic code analysis via LSP — symbol navigation, reference tracking, targeted reads |
+| Server                                                | Purpose                                                                                |
+| ----------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| **[Context7](https://context7.com/)**                 | Up-to-date library documentation and code examples                                     |
+| **[Serena](https://github.com/oraios/serena)**        | Semantic code analysis via LSP — symbol navigation, reference tracking, targeted reads |
 | **[Pal](https://github.com/serpro69/pal-mcp-server)** | Multi-model AI integration — chat, debugging, code review, planning, security audit    |
-| **[Capy](https://github.com/serpro69/capy)**                    | Persistent knowledge base — cross-session project memory with FTS5 search              |
+| **[Capy](https://github.com/serpro69/capy)**          | Persistent knowledge base — cross-session project memory with FTS5 search              |
 
 ### Knowledge Base (Capy)
 
@@ -520,13 +524,13 @@ for test in test/test-*.sh; do $test; done
 ./test/test-manifest-jq.sh       # jq JSON pattern tests
 ```
 
-| Test Suite               | Coverage                                                                     |
-| ------------------------ | ---------------------------------------------------------------------------- |
+| Test Suite               | Coverage                                                                      |
+| ------------------------ | ----------------------------------------------------------------------------- |
 | test-plugin-structure.sh | Plugin/marketplace manifests, skills, commands, hooks, cross-refs, kodex gen  |
 | test-codex-structure.sh  | Codex marketplace, config.toml, hooks.json, agents, rules, scripts, AGENTS.md |
-| test-template-sync.sh    | CLI parsing, manifest validation, substitutions, plugin migration            |
-| test-template-cleanup.sh | Manifest generation, variable capture, git tag/SHA detection                 |
-| test-claude-extra.sh     | CLAUDE.extra.md existence, compare_files detection, auto-import              |
+| test-template-sync.sh    | CLI parsing, manifest validation, substitutions, plugin migration             |
+| test-template-cleanup.sh | Manifest generation, variable capture, git tag/SHA detection                  |
+| test-claude-extra.sh     | CLAUDE.extra.md existence, compare_files detection, auto-import               |
 | test-manifest-jq.sh      | JSON generation, special character handling, round-trip validation            |
 
 ## Repository Structure
