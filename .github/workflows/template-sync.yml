@@ -93,15 +93,20 @@ jobs:
             fi
           fi
 
-          echo "Fetching template-sync.sh from $UPSTREAM_REPO @ $VERSION"
-          SCRIPT_URL="https://raw.githubusercontent.com/$UPSTREAM_REPO/$VERSION/.github/scripts/template-sync.sh"
-          if curl -fsSL "$SCRIPT_URL" -o .github/scripts/template-sync.sh.new 2>/dev/null; then
-            mv .github/scripts/template-sync.sh.new .github/scripts/template-sync.sh
-            chmod +x .github/scripts/template-sync.sh
-            echo "Updated template-sync.sh to $VERSION"
-          else
-            echo "::warning::Could not fetch upstream template-sync.sh, using local version"
-          fi
+          echo "Fetching sync scripts from $UPSTREAM_REPO @ $VERSION"
+          BASE_URL="https://raw.githubusercontent.com/$UPSTREAM_REPO/$VERSION/.github/scripts"
+          FETCH_OK=true
+          for script in template-sync.sh semver-compare.sh; do
+            if curl -fsSL "$BASE_URL/$script" -o ".github/scripts/${script}.new" 2>/dev/null; then
+              mv ".github/scripts/${script}.new" ".github/scripts/$script"
+              chmod +x ".github/scripts/$script"
+              echo "Updated $script to $VERSION"
+            else
+              rm -f ".github/scripts/${script}.new"
+              echo "::warning::Could not fetch upstream $script, using local version"
+              FETCH_OK=false
+            fi
+          done
 
       - name: Run Template Sync
         id: sync
