@@ -4,7 +4,7 @@ This document describes how claude-toolbox components fit together. For conventi
 
 ## Overview
 
-claude-toolbox provides a development environment for two AI coding providers (Claude Code and Codex) through four integrated components:
+claude-toolbox provides a development environment for two AI coding providers (Claude Code and Codex) through three integrated components:
 
 ```
 klaude-plugin/          (canonical source)
@@ -14,7 +14,6 @@ klaude-plugin/          (canonical source)
     |
 .claude/                (Claude Code config)
 .codex/                 (Codex config — hand-authored)
-.serena/                (LSP config)
 .github/                (template sync infrastructure)
 ```
 
@@ -68,10 +67,6 @@ Generated (by `cmd/generate-kodex/`):
 - **`template-sync.sh` / `template-sync.yml`** — Pulls upstream config updates into downstream repos via PR
 - **`template-state.json`** — Sync manifest tracking version, variables, and exclusions
 
-### Serena (`.serena/`)
-
-- **`project.yml`** — LSP configuration for semantic code analysis (language detection, gitignore, tool exclusions)
-
 ## Installation Modes
 
 Users interact with claude-toolbox through three distinct modes, each providing a different subset of functionality:
@@ -85,7 +80,6 @@ Users interact with claude-toolbox through three distinct modes, each providing 
 | Sub-agents                   |  Y (Claude) |        Y        |         Y          |
 | Config (settings/rules)      |             |        Y        |         Y          |
 | Statusline                   |             |        Y        |         Y          |
-| Serena config                |             |        Y        |         Y          |
 | Template sync infrastructure |             |        Y        |         Y          |
 | Generation tools / tests     |             |                 |         Y          |
 
@@ -116,7 +110,7 @@ User invokes /kk:review-code
 Downstream repo triggers sync workflow
   → Sparse-clones upstream at specified version
   → Reads .github/template-state.json for variables and exclusions
-  → Copies .claude/, .codex/, .serena/ to staging
+  → Copies .claude/, .codex/ to staging
   → Applies variable substitutions (CC_MODEL, CODEX_MODEL, etc.)
   → Smart-merges settings.json (new keys added, existing preserved)
   → Creates PR with changes

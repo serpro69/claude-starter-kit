@@ -13,8 +13,7 @@
 #   --model <model>           Claude Code model (default: default)
 #   --effort-level <level>    Claude Code effort level (default: high)
 #   --permission-mode <mode>  Claude Code permission mode (default: default)
-#   --languages <langs>       Programming languages for Serena (comma-separated, required)
-#   --serena-prompt <prompt>  Initial prompt for Serena semantic analysis
+#   --languages <langs>       Programming languages (comma-separated, for profile detection)
 #   --statusline <style>      Statusline style: enhanced (default) or basic
 #   --no-commit               Skip git commit and push
 #   --ci                      CI mode: read from env vars, skip interactive prompts
@@ -29,7 +28,6 @@ set -euo pipefail
 CC_MODEL="default"
 CC_EFFORT_LEVEL="high"
 CC_PERMISSION_MODE="default"
-SERENA_INITIAL_PROMPT=""
 CC_STATUSLINE="enhanced"
 CODEX_MODEL="gpt-5.5"
 CODEX_APPROVAL_POLICY="on-request"
@@ -48,7 +46,6 @@ load_env_vars() {
   CC_PERMISSION_MODE="${CC_PERMISSION_MODE:-default}"
   CC_STATUSLINE="${CC_STATUSLINE:-enhanced}"
   LANGUAGES="${LANGUAGES:-}"
-  SERENA_INITIAL_PROMPT="${SERENA_INITIAL_PROMPT:-}"
   CODEX_MODEL="${CODEX_MODEL:-gpt-5.5}"
   CODEX_APPROVAL_POLICY="${CODEX_APPROVAL_POLICY:-on-request}"
   SKIP_CAPY="${SKIP_CAPY:-false}"
@@ -111,13 +108,10 @@ Options:
   --permission-mode <mode>  Claude Code permissions default mode (default: default)
                             Options: default, plan, bypassPermissions
                             'default' keeps the standard permission prompts.
-  --languages <langs>       Programming languages for Serena semantic analysis (required)
+  --languages <langs>       Programming languages (comma-separated, for profile detection)
                             Comma-separated list, e.g.: python,typescript or just: python
                             Primary: python, typescript, java, go, rust, csharp, cpp, ruby
                             Additional: bash, elixir, kotlin, scala, haskell, lua, php, swift, zig...
-                            Note: For C use 'cpp', for JavaScript use 'typescript'
-                            Docs: https://oraios.github.io/serena/01-about/020_programming-languages.html
-  --serena-prompt <prompt>  Initial prompt/context for Serena semantic analysis
   --statusline <style>      Statusline style (default: enhanced)
                             Options: enhanced (rich multi-line with rate limits, git, session timer)
                                      basic (simple one-line: model + context %)
@@ -137,8 +131,8 @@ Examples:
   # Setup with multiple languages
   ./.github/scripts/template-cleanup.sh --languages python,typescript,bash -y
 
-  # Full setup with custom model and serena prompt
-  ./.github/scripts/template-cleanup.sh --model sonnet --languages python --serena-prompt "Focus on API code" -y
+  # Full setup with custom model
+  ./.github/scripts/template-cleanup.sh --model sonnet --languages python -y
 EOF
 }
 
@@ -260,20 +254,13 @@ run_interactive() {
 
   echo ""
 
-  # Language selection
-  # Sources:
-  #   https://oraios.github.io/serena/01-about/020_programming-languages.html
-  #   https://github.com/oraios/serena/blob/main/.serena/project.yml
-  echo -e "${YELLOW}Serena Language Support:${NC}"
+  # Language selection (used for profile detection in skills)
+  echo -e "${YELLOW}Language Selection:${NC}"
   echo -e "  Primary languages: python, typescript, java, go, rust, csharp, cpp, ruby"
-  echo -e "  40+ additional: bash, elixir, kotlin, scala, haskell, lua, php, swift, zig..."
-  echo -e "  ${CYAN}Notes:${NC}"
-  echo -e "    - For C, use 'cpp'. For JavaScript, use 'typescript'"
-  echo -e "    - csharp requires a .sln file in the project"
-  echo -e "    - Multiple languages supported (comma-separated)"
-  echo -e "  ${CYAN}Docs:${NC} https://oraios.github.io/serena/01-about/020_programming-languages.html"
+  echo -e "  Additional: bash, elixir, kotlin, scala, haskell, lua, php, swift, zig..."
+  echo -e "  ${CYAN}Note:${NC} Multiple languages supported (comma-separated)"
   echo ""
-  prompt_select "Select primary language for Serena (required)" "" LANGUAGES \
+  prompt_select "Select primary language (required)" "" LANGUAGES \
     "python" "typescript" "java" "go" "rust" "csharp" "cpp" "ruby"
 
   # Allow custom/additional languages
@@ -289,16 +276,8 @@ run_interactive() {
 
   # Validate LANGUAGES is not empty
   if [[ -z "$LANGUAGES" ]]; then
-    log_error "At least one language is required for Serena"
+    log_error "At least one language is required"
     exit 1
-  fi
-
-  echo ""
-
-  # Advanced options
-  if prompt_confirm "Configure advanced options?" "n"; then
-    echo ""
-    prompt_input "Serena initial prompt/context" "" SERENA_INITIAL_PROMPT
   fi
 
   echo ""
@@ -332,9 +311,6 @@ show_config_summary() {
   echo "  Codex Approval:     $CODEX_APPROVAL_POLICY"
   echo "  Skip Capy:          $SKIP_CAPY"
   echo "  Languages:          $LANGUAGES"
-  if [[ -n "$SERENA_INITIAL_PROMPT" ]]; then
-    echo "  Serena Prompt:      $SERENA_INITIAL_PROMPT"
-  fi
   echo ""
   echo -e "${CYAN}Options:${NC}"
   echo "  Commit changes:     $(if $NO_COMMIT; then echo "No"; else echo "Yes"; fi)"
@@ -343,7 +319,7 @@ show_config_summary() {
   echo ""
   echo -e "${YELLOW}Actions that will be performed:${NC}"
   echo "  1. Substitute template values with project-specific configuration"
-  echo "  2. Remove existing .claude/, .serena/ directories"
+  echo "  2. Remove existing .claude/ directory"
   echo "  3. Deploy configured templates to project root"
   echo "  4. Remove all template-specific files (README, docs, workflows, etc.)"
   echo "  5. Generate template state manifest (.github/template-state.json)"
@@ -395,7 +371,6 @@ generate_manifest() {
     --arg CC_EFFORT_LEVEL "$CC_EFFORT_LEVEL" \
     --arg CC_PERMISSION_MODE "$CC_PERMISSION_MODE" \
     --arg CC_STATUSLINE "$CC_STATUSLINE" \
-    --arg SERENA_INITIAL_PROMPT "$SERENA_INITIAL_PROMPT" \
     --arg CODEX_MODEL "$CODEX_MODEL" \
     --arg CODEX_APPROVAL_POLICY "$CODEX_APPROVAL_POLICY" \
     --arg SKIP_CAPY "$SKIP_CAPY" \
@@ -411,7 +386,6 @@ generate_manifest() {
         CC_EFFORT_LEVEL: $CC_EFFORT_LEVEL,
         CC_PERMISSION_MODE: $CC_PERMISSION_MODE,
         CC_STATUSLINE: $CC_STATUSLINE,
-        SERENA_INITIAL_PROMPT: $SERENA_INITIAL_PROMPT,
         CODEX_MODEL: $CODEX_MODEL,
         CODEX_APPROVAL_POLICY: $CODEX_APPROVAL_POLICY,
         SKIP_CAPY: $SKIP_CAPY
@@ -454,19 +428,6 @@ execute_cleanup() {
     .extraKnownMarketplaces."claude-toolbox".source = { "source": "github", "repo": $repo }
     ' "$cc_settings_file" >"${cc_settings_file}.tmp" && mv "${cc_settings_file}.tmp" "$cc_settings_file"
 
-  # Serena MCP Settings
-  local serena_settings_file=".serena/project.yml"
-  # Project name - always substitute with repo name
-  yq -i ".project_name = \"$name\"" "$serena_settings_file"
-  # Languages - convert comma-separated string to YAML array via jq
-  local lang_json
-  lang_json=$(echo "$LANGUAGES" | jq -R 'split(",") | map(gsub("^\\s+|\\s+$"; ""))')
-  yq -i ".languages = $lang_json" "$serena_settings_file"
-  # Serena initial prompt - only substitute if provided
-  if [ -n "$SERENA_INITIAL_PROMPT" ]; then
-    yq -i ".initial_prompt = \"$SERENA_INITIAL_PROMPT\"" "$serena_settings_file"
-  fi
-
   if [[ -f .github/scripts/bootstrap.sh ]]; then
     cp .github/scripts/bootstrap.sh .
     rm -f .github/scripts/bootstrap.sh
@@ -491,7 +452,6 @@ execute_cleanup() {
     ! -name '.gitignore' \
     ! -name '.github' \
     ! -name '.claude' \
-    ! -name '.serena' \
     ! -name 'bootstrap.sh' \
     -exec rm -rf {} +
 
@@ -554,10 +514,6 @@ while [[ $# -gt 0 ]]; do
     LANGUAGES="$2"
     shift 2
     ;;
-  --serena-prompt)
-    SERENA_INITIAL_PROMPT="$2"
-    shift 2
-    ;;
   --statusline)
     CC_STATUSLINE="$2"
     shift 2
@@ -610,8 +566,8 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   cd "$REPO_ROOT"
 
   # Check if config directories exist
-  if [[ ! -d ".claude" || ! -d ".serena" ]]; then
-    log_error "Config directories .claude/ and .serena/ not found"
+  if [[ ! -d ".claude" ]]; then
+    log_error "Config directory .claude/ not found"
     log_error "Are you sure this is a claude-toolbox based repository?"
     exit 1
   fi

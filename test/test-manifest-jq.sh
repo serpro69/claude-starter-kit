@@ -56,8 +56,8 @@ assert_equals "my-project" "$PROJECT_NAME" "PROJECT_NAME = $PROJECT_NAME"
 
 log_test "Extract all variable keys"
 VAR_KEYS=$(jq -r '.variables | keys[]' "$EXAMPLE_MANIFEST" | sort | tr '\n' ',')
-EXPECTED_KEYS="CC_EFFORT_LEVEL,CC_MODEL,CC_PERMISSION_MODE,CC_STATUSLINE,CODEX_APPROVAL_POLICY,CODEX_MODEL,LANGUAGES,PROJECT_NAME,SERENA_INITIAL_PROMPT,SKIP_CAPY,"
-assert_equals "$EXPECTED_KEYS" "$VAR_KEYS" "All 10 variable keys present"
+EXPECTED_KEYS="CC_EFFORT_LEVEL,CC_MODEL,CC_PERMISSION_MODE,CC_STATUSLINE,CODEX_APPROVAL_POLICY,CODEX_MODEL,LANGUAGES,PROJECT_NAME,SKIP_CAPY,"
+assert_equals "$EXPECTED_KEYS" "$VAR_KEYS" "All 9 variable keys present"
 
 # =============================================================================
 # Section 3: jq Patterns for Manifest Generation (for cleanup script)
@@ -77,7 +77,6 @@ GENERATED=$(jq -n \
   --arg cc_effort "high" \
   --arg cc_permission "default" \
   --arg cc_statusline "enhanced" \
-  --arg serena_prompt "" \
   --arg codex_model "gpt-5.5" \
   --arg codex_approval "on-request" \
   --arg skip_capy "false" \
@@ -93,7 +92,6 @@ GENERATED=$(jq -n \
       CC_EFFORT_LEVEL: $cc_effort,
       CC_PERMISSION_MODE: $cc_permission,
       CC_STATUSLINE: $cc_statusline,
-      SERENA_INITIAL_PROMPT: $serena_prompt,
       CODEX_MODEL: $codex_model,
       CODEX_APPROVAL_POLICY: $codex_approval,
       SKIP_CAPY: $skip_capy
@@ -150,9 +148,9 @@ assert_equals "my-project_v2.0" "$EXTRACTED" "Special characters in project name
 
 log_test "Handle empty strings correctly"
 MANIFEST_WITH_EMPTY=$(jq -n \
-  --arg prompt "" \
-  '{SERENA_INITIAL_PROMPT: $prompt}')
-EXTRACTED=$(echo "$MANIFEST_WITH_EMPTY" | jq -r '.SERENA_INITIAL_PROMPT')
+  --arg val "" \
+  '{CC_MODEL: $val}')
+EXTRACTED=$(echo "$MANIFEST_WITH_EMPTY" | jq -r '.CC_MODEL')
 assert_equals "" "$EXTRACTED" "Empty strings handled correctly"
 
 # =============================================================================
@@ -171,7 +169,6 @@ ROUND_TRIP_MANIFEST=$(jq -n \
   --arg project "test-project" \
   --arg language "python" \
   --arg cc_model "opus" \
-  --arg serena_prompt "Test prompt with \"quotes\"" \
   '{
     schema_version: $schema,
     upstream_repo: $upstream,
@@ -180,22 +177,21 @@ ROUND_TRIP_MANIFEST=$(jq -n \
     variables: {
       PROJECT_NAME: $project,
       LANGUAGES: $language,
-      CC_MODEL: $cc_model,
-      SERENA_INITIAL_PROMPT: $serena_prompt
+      CC_MODEL: $cc_model
     }
   }')
 
 # Parse it back and verify
 RT_PROJECT=$(echo "$ROUND_TRIP_MANIFEST" | jq -r '.variables.PROJECT_NAME')
-RT_SERENA=$(echo "$ROUND_TRIP_MANIFEST" | jq -r '.variables.SERENA_INITIAL_PROMPT')
+RT_CC_MODEL=$(echo "$ROUND_TRIP_MANIFEST" | jq -r '.variables.CC_MODEL')
 
 if [[ "$RT_PROJECT" == "test-project" ]] &&
-  [[ "$RT_SERENA" == 'Test prompt with "quotes"' ]]; then
-  log_pass "Round-trip preserves all values including special characters"
+  [[ "$RT_CC_MODEL" == "opus" ]]; then
+  log_pass "Round-trip preserves all values"
 else
   log_fail "Round-trip failed"
   echo "PROJECT_NAME: $RT_PROJECT"
-  echo "SERENA_INITIAL_PROMPT: $RT_SERENA"
+  echo "CC_MODEL: $RT_CC_MODEL"
 fi
 
 # =============================================================================

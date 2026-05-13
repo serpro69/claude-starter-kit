@@ -8,12 +8,11 @@ This is a repository providing a complete development environment for agentic to
 
 ## Architecture
 
-Four integrated components:
+Three integrated components:
 
 1. **Claude Code** (`.claude/`): Project settings (`settings.json`), statusline scripts, and sync infrastructure
 2. **Codex** (`.codex/`, `kodex-plugin/`): Codex-equivalent config, hooks, rules, agents, and generated plugin. See §Codex Support below
 3. **kk plugin** (`klaude-plugin/`): Skills, commands, hooks, and utility scripts — the canonical source of truth, distributed via the Claude Code plugin system
-4. **Serena** (`.serena/`): Semantic code analysis via LSP — language detection, gitignore integration, tool exclusions (`project.yml`)
 
 For API keys and MCP server setup, see the "MCP Server Configuration" section in `README.md`.
 
@@ -40,7 +39,7 @@ Key test suites: `test-plugin-structure.sh` (klaude-plugin + kodex-plugin genera
 
 ## Troubleshooting
 
-See `README.md` for detailed troubleshooting of MCP connection issues, Serena language detection, and template sync problems.
+See `README.md` for detailed troubleshooting of MCP connection issues and template sync problems.
 
 ## Skill & Command Naming Conventions
 

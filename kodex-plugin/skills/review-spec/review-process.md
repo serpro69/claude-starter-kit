@@ -38,7 +38,7 @@ Build and present a checklist of tasks that will be reviewed.
 For each in-scope task:
 
 1. **Read the spec section** — follow the `Docs:` link in the task to the specific section of `implementation.md` or `design.md`
-2. **Read the code** — use `serena` MCP (semantic code analysis), `grep`, and `Read` to find and examine the implemented code. Follow file paths and function names mentioned in the task subtasks.
+2. **Read the code** — use `grep` and `Read` to find and examine the implemented code. Follow file paths and function names mentioned in the task subtasks.
 3. **Compare systematically:**
    - For each subtask marked `[x]`: verify the code actually does what the subtask describes
    - For each requirement in the linked doc section: verify code implements it

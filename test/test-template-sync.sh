@@ -199,8 +199,7 @@ cat >"$MANIFEST_PATH" <<'EOF'
   "variables": {
     "PROJECT_NAME": "test-proj",
     "LANGUAGES": "bash",
-    "CC_MODEL": "sonnet",
-    "SERENA_INITIAL_PROMPT": ""
+    "CC_MODEL": "sonnet"
   }
 }
 EOF
@@ -221,8 +220,7 @@ cat >"$MANIFEST_PATH" <<'EOF'
   "variables": {
     "PROJECT_NAME": "test-proj",
     "LANGUAGES": "bash",
-    "CC_MODEL": "sonnet",
-    "SERENA_INITIAL_PROMPT": ""
+    "CC_MODEL": "sonnet"
   }
 }
 EOF
@@ -243,8 +241,7 @@ cat >"$MANIFEST_PATH" <<'EOF'
   "variables": {
     "PROJECT_NAME": "test-proj",
     "LANGUAGES": "bash",
-    "CC_MODEL": "sonnet",
-    "SERENA_INITIAL_PROMPT": ""
+    "CC_MODEL": "sonnet"
   }
 }
 EOF
@@ -270,8 +267,7 @@ cat >"$MANIFEST_PATH" <<'EOF'
     "CC_MODEL": "sonnet",
     "CC_EFFORT_LEVEL": "low",
     "CC_PERMISSION_MODE": "plan",
-    "CC_STATUSLINE": "basic",
-    "SERENA_INITIAL_PROMPT": ""
+    "CC_STATUSLINE": "basic"
   }
 }
 EOF
@@ -294,8 +290,7 @@ cat >"$MANIFEST_PATH" <<'EOF'
     "PROJECT_NAME": "test-proj",
     "LANGUAGES": "bash",
     "CC_MODEL": "sonnet",
-    "SKIP_CAPY": "true",
-    "SERENA_INITIAL_PROMPT": ""
+    "SKIP_CAPY": "true"
   }
 }
 EOF
@@ -307,44 +302,6 @@ assert_equals "true" "$(jq -r '.variables.SKIP_CAPY' "$MANIFEST_PATH")" "Existin
 # =============================================================================
 
 log_section "Section 4: Substitution Application"
-
-log_test "apply_substitutions substitutes PROJECT_NAME in serena config"
-reset_globals
-test_dir=$(create_temp_dir "subst-test")
-
-# Create a test manifest
-MANIFEST_PATH="$test_dir/manifest.json"
-cat >"$MANIFEST_PATH" <<'EOF'
-{
-  "schema_version": "1",
-  "upstream_repo": "test/repo",
-  "template_version": "v1.0.0",
-  "synced_at": "2025-01-27T10:00:00Z",
-  "variables": {
-    "PROJECT_NAME": "my-custom-project",
-    "LANGUAGES": "python",
-    "CC_MODEL": "opus",
-    "SERENA_INITIAL_PROMPT": ""
-  }
-}
-EOF
-
-# Create template directory with fixtures
-mkdir -p "$test_dir/templates/serena"
-cat >"$test_dir/templates/serena/project.yml" <<'EOF'
-project_name: "PLACEHOLDER"
-languages:
-  - bash
-initial_prompt: ""
-EOF
-
-# Apply substitutions
-output_dir="$test_dir/output"
-apply_substitutions "$test_dir/templates" "$output_dir" 2>/dev/null
-
-# Check result
-result=$(grep 'project_name' "$output_dir/serena/project.yml")
-assert_output_contains "my-custom-project" "echo '$result'" "PROJECT_NAME substituted in serena config"
 
 log_test "apply_substitutions handles CC_MODEL=default (removes model line)"
 reset_globals
@@ -360,8 +317,7 @@ cat >"$MANIFEST_PATH" <<'EOF'
   "variables": {
     "PROJECT_NAME": "test-proj",
     "LANGUAGES": "bash",
-    "CC_MODEL": "default",
-    "SERENA_INITIAL_PROMPT": ""
+    "CC_MODEL": "default"
   }
 }
 EOF
@@ -400,8 +356,7 @@ cat >"$MANIFEST_PATH" <<'EOF'
   "variables": {
     "PROJECT_NAME": "test-proj",
     "LANGUAGES": "bash",
-    "CC_MODEL": "claude-opus",
-    "SERENA_INITIAL_PROMPT": ""
+    "CC_MODEL": "claude-opus"
   }
 }
 EOF
@@ -437,8 +392,7 @@ cat >"$MANIFEST_PATH" <<'EOF'
     "PROJECT_NAME": "test-proj",
     "LANGUAGES": "bash",
     "CC_MODEL": "sonnet",
-    "CC_EFFORT_LEVEL": "medium",
-    "SERENA_INITIAL_PROMPT": ""
+    "CC_EFFORT_LEVEL": "medium"
   }
 }
 EOF
@@ -474,8 +428,7 @@ cat >"$MANIFEST_PATH" <<'EOF'
     "PROJECT_NAME": "test-proj",
     "LANGUAGES": "bash",
     "CC_MODEL": "sonnet",
-    "CC_EFFORT_LEVEL": "default",
-    "SERENA_INITIAL_PROMPT": ""
+    "CC_EFFORT_LEVEL": "default"
   }
 }
 EOF
@@ -513,8 +466,7 @@ cat >"$MANIFEST_PATH" <<'EOF'
   "variables": {
     "PROJECT_NAME": "test-proj",
     "LANGUAGES": "bash",
-    "CC_MODEL": "sonnet",
-    "SERENA_INITIAL_PROMPT": ""
+    "CC_MODEL": "sonnet"
   }
 }
 EOF
@@ -550,8 +502,7 @@ cat >"$MANIFEST_PATH" <<'EOF'
     "PROJECT_NAME": "test-proj",
     "LANGUAGES": "bash",
     "CC_MODEL": "sonnet",
-    "CC_PERMISSION_MODE": "plan",
-    "SERENA_INITIAL_PROMPT": ""
+    "CC_PERMISSION_MODE": "plan"
   }
 }
 EOF
@@ -586,8 +537,7 @@ cat >"$MANIFEST_PATH" <<'EOF'
   "variables": {
     "PROJECT_NAME": "test-proj",
     "LANGUAGES": "bash",
-    "CC_MODEL": "sonnet",
-    "SERENA_INITIAL_PROMPT": ""
+    "CC_MODEL": "sonnet"
   }
 }
 EOF
@@ -625,8 +575,7 @@ cat >"$MANIFEST_PATH" <<'EOF'
     "PROJECT_NAME": "test-proj",
     "LANGUAGES": "bash",
     "CC_MODEL": "sonnet",
-    "SKIP_CAPY": "true",
-    "SERENA_INITIAL_PROMPT": ""
+    "SKIP_CAPY": "true"
   }
 }
 EOF
@@ -674,8 +623,7 @@ cat >"$MANIFEST_PATH" <<'EOF'
     "PROJECT_NAME": "test-proj",
     "LANGUAGES": "bash",
     "CC_MODEL": "sonnet",
-    "SKIP_CAPY": "false",
-    "SERENA_INITIAL_PROMPT": ""
+    "SKIP_CAPY": "false"
   }
 }
 EOF
@@ -713,8 +661,7 @@ cat >"$MANIFEST_PATH" <<'EOF'
   "variables": {
     "PROJECT_NAME": "test-proj",
     "LANGUAGES": "bash",
-    "CC_MODEL": "sonnet",
-    "SERENA_INITIAL_PROMPT": ""
+    "CC_MODEL": "sonnet"
   }
 }
 EOF
@@ -757,8 +704,7 @@ create_merge_test_manifest() {
   "variables": {
     "PROJECT_NAME": "test-proj",
     "LANGUAGES": "bash",
-    "CC_MODEL": "$cc_model",
-    "SERENA_INITIAL_PROMPT": ""
+    "CC_MODEL": "$cc_model"
   }
 }
 EOF
@@ -1478,7 +1424,7 @@ assert_equals "0" "$exit_code" "Glob * matches across directory separators"
 
 log_test "is_excluded handles multiple patterns (second pattern matches)"
 reset_globals
-SYNC_EXCLUSIONS=(".serena/project.yml" ".claude/commands/chain-of-verification/*")
+SYNC_EXCLUSIONS=(".codex/config.toml" ".claude/commands/chain-of-verification/*")
 set +e
 is_excluded ".claude/commands/chain-of-verification/default.md"
 exit_code=$?
@@ -1882,8 +1828,7 @@ cat > "$test_dir/manifest.json" <<'JSON'
   "variables": {
     "PROJECT_NAME": "my-project",
     "LANGUAGES": "typescript",
-    "CC_MODEL": "sonnet",
-    "SERENA_INITIAL_PROMPT": ""
+    "CC_MODEL": "sonnet"
   }
 }
 JSON
@@ -1921,8 +1866,7 @@ cat > "$test_dir/manifest.json" <<'JSON'
   "variables": {
     "PROJECT_NAME": "my-project",
     "LANGUAGES": "typescript",
-    "CC_MODEL": "sonnet",
-    "SERENA_INITIAL_PROMPT": ""
+    "CC_MODEL": "sonnet"
   }
 }
 JSON
@@ -1956,8 +1900,7 @@ cat > "$test_dir/project/.github/template-state.json" <<'JSON'
   "variables": {
     "PROJECT_NAME": "test",
     "LANGUAGES": "bash",
-    "CC_MODEL": "default",
-    "SERENA_INITIAL_PROMPT": ""
+    "CC_MODEL": "default"
   }
 }
 JSON
@@ -1995,8 +1938,7 @@ cat > "$test_dir2/project/.github/template-state.json" <<'JSON'
   "variables": {
     "PROJECT_NAME": "test",
     "LANGUAGES": "bash",
-    "CC_MODEL": "default",
-    "SERENA_INITIAL_PROMPT": ""
+    "CC_MODEL": "default"
   }
 }
 JSON
@@ -2041,8 +1983,7 @@ cat > "$test_dir/.github/template-state.json" <<'JSON'
   "variables": {
     "PROJECT_NAME": "test",
     "LANGUAGES": "bash",
-    "CC_MODEL": "default",
-    "SERENA_INITIAL_PROMPT": ""
+    "CC_MODEL": "default"
   }
 }
 JSON

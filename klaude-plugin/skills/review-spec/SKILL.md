@@ -96,7 +96,7 @@ Each finding gets a confidence score (1–10) with **mandatory reasoning** expla
 
 ## Workflow
 
-**Mandatory order — spec before code.** The flow below is strictly sequential. Do not read implementation code, run `grep`/`serena` against the codebase, or form spec-deviation findings until you have loaded the feature's design/implementation docs AND completed profile detection and loaded all resolved `review-spec/` profile content. The only early contact with the implementation is a feature-directory listing (filenames only) — enough to drive profile detection, not enough to pattern-match deviations.
+**Mandatory order — spec before code.** The flow below is strictly sequential. Do not read implementation code, run `grep` against the codebase, or form spec-deviation findings until you have loaded the feature's design/implementation docs AND completed profile detection and loaded all resolved `review-spec/` profile content. The only early contact with the implementation is a feature-directory listing (filenames only) — enough to drive profile detection, not enough to pattern-match deviations.
 
 See [review-process.md](./review-process.md) for the detailed step-by-step process.
 

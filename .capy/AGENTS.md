@@ -71,7 +71,7 @@ Every indexed entry has a **kind** that controls its lifecycle and search visibi
 
 **Anti-patterns — do NOT do this:**
 - `capy_execute_file` to grep section headings, then `Read` the file anyway to Edit it. The Read makes the capy call pure overhead.
-- `capy_execute_file` on a code file to "explore structure." Use Serena's `get_symbols_overview` / `find_symbol` — purpose-built and cheaper.
+- `capy_execute_file` on a code file to "explore structure." Use `grep`, `find`, or language-specific tools instead.
 - `capy_execute_file` on a small/medium file (<2k lines) "to save context." The savings don't exist; you're adding latency.
 - `capy_index` on instruction files (skill definitions, checklists, plugin configs, review profiles). These documents must be `Read` and internalized whole — BM25 returns ranked fragments, which destroys structural relationships between sections. A checklist item saying "check X, but only if Y" becomes meaningless when Y landed in a different search result.
 - `capy_index` on files outside the project directory (e.g. plugin caches under `~/.claude/`, tool configs, system paths). These are instructions or configuration the LLM needs to follow, not project data to query.
