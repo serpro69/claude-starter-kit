@@ -2145,6 +2145,47 @@ else
 fi
 popd >/dev/null
 
+log_test "run_serena_removal respects sync_exclusions for .serena/"
+reset_globals
+test_dir=$(create_temp_dir "serena-excluded")
+mkdir -p "$test_dir/.serena"
+echo "project_name: test" > "$test_dir/.serena/project.yml"
+MANIFEST_PATH="$test_dir/manifest.json"
+cat >"$MANIFEST_PATH" <<'EOF'
+{
+  "schema_version": "1",
+  "upstream_repo": "serpro69/claude-toolbox",
+  "template_version": "v1.0.0",
+  "synced_at": "2025-01-27T10:00:00Z",
+  "variables": {
+    "PROJECT_NAME": "test",
+    "LANGUAGES": "bash",
+    "CC_MODEL": "sonnet",
+    "SERENA_INITIAL_PROMPT": ""
+  },
+  "sync_exclusions": [".serena/*"]
+}
+EOF
+read_manifest
+# Load exclusions the same way validate_manifest does
+mapfile -t SYNC_EXCLUSIONS < <(jq -r '.sync_exclusions[]' "$MANIFEST_PATH")
+pushd "$test_dir" >/dev/null
+run_serena_removal 2>/dev/null
+
+if [[ -d ".serena" ]]; then
+  log_pass ".serena/ preserved when in sync_exclusions"
+else
+  log_fail ".serena/ should have been preserved (matched sync_exclusions)"
+fi
+
+# Manifest variable should still be cleaned even when dir is excluded
+if jq -e '.variables.SERENA_INITIAL_PROMPT' "$MANIFEST_PATH" &>/dev/null 2>&1; then
+  log_fail "SERENA_INITIAL_PROMPT should still be removed from manifest"
+else
+  log_pass "SERENA_INITIAL_PROMPT removed from manifest even when dir excluded"
+fi
+popd >/dev/null
+
 # =============================================================================
 # Summary
 # =============================================================================

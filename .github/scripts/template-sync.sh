@@ -633,30 +633,35 @@ needs_serena_removal() {
 run_serena_removal() {
   log_step "Removing Serena artifacts (no longer in upstream defaults)"
 
-  if [[ -d ".serena" ]]; then
-    rm -rf ".serena"
-    DELETED_FILES+=(".serena/")
-    log_info "Removed .serena/"
-  fi
+  # Respect sync_exclusions — if .serena/ is excluded, skip directory removal
+  if is_excluded ".serena/project.yml"; then
+    log_info "Skipping .serena/ removal (matched sync_exclusions)"
+  else
+    if [[ -d ".serena" ]]; then
+      rm -rf ".serena"
+      DELETED_FILES+=(".serena/")
+      log_info "Removed .serena/"
+    fi
 
-  # Remove !.serena from .gitignore if present
-  if [[ -f ".gitignore" ]] && grep -q '^!\.serena' .gitignore; then
-    sed -i '/^!\.serena$/d' .gitignore
-    MODIFIED_FILES+=(".gitignore")
-    log_info "Removed !.serena from .gitignore"
-  fi
+    # Remove !.serena from .gitignore if present
+    if [[ -f ".gitignore" ]] && grep -q '^!\.serena' .gitignore; then
+      sed -i '/^!\.serena$/d' .gitignore
+      MODIFIED_FILES+=(".gitignore")
+      log_info "Removed !.serena from .gitignore"
+    fi
 
-  # Remove mcp__serena__* from settings.local.json permissions if present
-  local local_settings=".claude/settings.local.json"
-  if [[ -f "$local_settings" ]] && jq -e '.permissions.allow | any(startswith("mcp__serena__"))' "$local_settings" &>/dev/null 2>&1; then
-    local tmp
-    tmp=$(mktemp "/tmp/settings-serena.XXXXXX")
-    if jq '.permissions.allow |= map(select(startswith("mcp__serena__") | not))' "$local_settings" >"$tmp"; then
-      mv "$tmp" "$local_settings"
-      MODIFIED_FILES+=("$local_settings")
-      log_info "Removed mcp__serena__* from $local_settings permissions"
-    else
-      rm -f "$tmp"
+    # Remove mcp__serena__* from settings.local.json permissions if present
+    local local_settings=".claude/settings.local.json"
+    if [[ -f "$local_settings" ]] && jq -e '.permissions.allow | any(startswith("mcp__serena__"))' "$local_settings" &>/dev/null 2>&1; then
+      local tmp
+      tmp=$(mktemp "/tmp/settings-serena.XXXXXX")
+      if jq '.permissions.allow |= map(select(startswith("mcp__serena__") | not))' "$local_settings" >"$tmp"; then
+        mv "$tmp" "$local_settings"
+        MODIFIED_FILES+=("$local_settings")
+        log_info "Removed mcp__serena__* from $local_settings permissions"
+      else
+        rm -f "$tmp"
+      fi
     fi
   fi
 

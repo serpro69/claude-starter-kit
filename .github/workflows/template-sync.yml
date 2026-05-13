@@ -199,17 +199,22 @@ jobs:
             echo "No Serena artifacts to remove"
             exit 0
           fi
-          echo "Removing Serena artifacts (no longer in upstream defaults)..."
-          # Remove .serena/ directory
-          rm -rf .serena
-          # Remove !.serena from .gitignore
-          if [[ -f .gitignore ]] && grep -q '^!\.serena' .gitignore; then
-            sed -i '/^!\.serena$/d' .gitignore
+          # Check sync_exclusions — respect .serena/* if excluded
+          SERENA_EXCLUDED=false
+          if jq -e '.sync_exclusions[]' .github/template-state.json 2>/dev/null | grep -q '\.serena'; then
+            SERENA_EXCLUDED=true
+            echo "Skipping .serena/ removal (matched sync_exclusions)"
           fi
-          # Remove mcp__serena__* from settings.local.json permissions
-          if [[ -f .claude/settings.local.json ]] && jq -e '.permissions.allow | any(startswith("mcp__serena__"))' .claude/settings.local.json &>/dev/null 2>&1; then
-            jq '.permissions.allow |= map(select(startswith("mcp__serena__") | not))' .claude/settings.local.json > .claude/settings.local.json.tmp
-            mv .claude/settings.local.json.tmp .claude/settings.local.json
+          if ! $SERENA_EXCLUDED; then
+            echo "Removing Serena artifacts (no longer in upstream defaults)..."
+            rm -rf .serena
+            if [[ -f .gitignore ]] && grep -q '^!\.serena' .gitignore; then
+              sed -i '/^!\.serena$/d' .gitignore
+            fi
+            if [[ -f .claude/settings.local.json ]] && jq -e '.permissions.allow | any(startswith("mcp__serena__"))' .claude/settings.local.json &>/dev/null 2>&1; then
+              jq '.permissions.allow |= map(select(startswith("mcp__serena__") | not))' .claude/settings.local.json > .claude/settings.local.json.tmp
+              mv .claude/settings.local.json.tmp .claude/settings.local.json
+            fi
           fi
           # Remove SERENA_INITIAL_PROMPT from manifest
           if jq -e '.variables.SERENA_INITIAL_PROMPT' .github/template-state.json &>/dev/null 2>&1; then
