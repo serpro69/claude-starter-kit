@@ -192,6 +192,32 @@ jobs:
           mv .github/template-state.json.tmp .github/template-state.json
           echo "Plugin migration complete"
 
+      - name: Remove Serena Artifacts
+        run: |
+          # Detect by manifest variable — only runs if repo was set up with Serena defaults
+          if ! jq -e '.variables.SERENA_INITIAL_PROMPT' .github/template-state.json &>/dev/null 2>&1; then
+            echo "No Serena artifacts to remove"
+            exit 0
+          fi
+          echo "Removing Serena artifacts (no longer in upstream defaults)..."
+          # Remove .serena/ directory
+          rm -rf .serena
+          # Remove !.serena from .gitignore
+          if [[ -f .gitignore ]] && grep -q '^!\.serena' .gitignore; then
+            sed -i '/^!\.serena$/d' .gitignore
+          fi
+          # Remove mcp__serena__* from settings.local.json permissions
+          if [[ -f .claude/settings.local.json ]] && jq -e '.permissions.allow | any(startswith("mcp__serena__"))' .claude/settings.local.json &>/dev/null 2>&1; then
+            jq '.permissions.allow |= map(select(startswith("mcp__serena__") | not))' .claude/settings.local.json > .claude/settings.local.json.tmp
+            mv .claude/settings.local.json.tmp .claude/settings.local.json
+          fi
+          # Remove SERENA_INITIAL_PROMPT from manifest
+          if jq -e '.variables.SERENA_INITIAL_PROMPT' .github/template-state.json &>/dev/null 2>&1; then
+            jq 'del(.variables.SERENA_INITIAL_PROMPT)' .github/template-state.json > .github/template-state.json.tmp
+            mv .github/template-state.json.tmp .github/template-state.json
+          fi
+          echo "Serena removal complete"
+
       - name: Apply Staged Changes
         run: |
           STAGING_DIR=".github/sync-artifacts/sync-staging/substituted"

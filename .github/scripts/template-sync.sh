@@ -1395,6 +1395,23 @@ generate_markdown_summary() {
     echo "2. Commands are now namespaced: \`/project:command\` → \`/kk:dir:command\` (skills remain unprefixed)"
     echo ""
   fi
+
+  local serena_deleted=false
+  for file in "${DELETED_FILES[@]}"; do
+    if [[ "$file" == ".serena/"* || "$file" == ".serena/" ]]; then
+      serena_deleted=true
+      break
+    fi
+  done
+  if $serena_deleted; then
+    echo "### Serena Removed"
+    echo ""
+    echo "Serena MCP has been removed from the template defaults."
+    echo "The \`.serena/\` directory and \`SERENA_INITIAL_PROMPT\` manifest variable have been cleaned up."
+    echo ""
+    echo "If you still want to use Serena, configure it at the user level in \`~/.claude.json\`."
+    echo ""
+  fi
 }
 
 # =============================================================================
@@ -1570,7 +1587,7 @@ main() {
     run_plugin_migration
   fi
 
-  # Remove Serena artifacts if still present (upstream dropped Serena in v0.13.0)
+  # Remove Serena artifacts if still present (upstream dropped Serena)
   if needs_serena_removal; then
     run_serena_removal
   fi
