@@ -17,7 +17,7 @@ claude-toolbox is a collection of "tools" for all your agentic workflows (**curr
 
 Tools like Claude Code and Codex are powerful on their own, but LLMs don't know your development workflow. This project started as a way for me to streamline claude configurations across all my projects without needing to copy-paste things. With time, patterns and re-curring prompts evolved into skills and agents. Currently, claude-toolbox gives you two things:
 
-**A minimal, opinionated Claude Code and Codex configuration** — sensible permission baselines, a rich statusline, Serena LSP integration, MCP server wiring, and sync infrastructure to keep it all up to date across your projects. Think of it as a dotfiles repo for Claude Code and Codex.
+**A minimal, opinionated Claude Code and Codex configuration** — sensible permission baselines, a rich statusline, MCP server wiring, and sync infrastructure to keep it all up to date across your projects. Think of it as a dotfiles repo for Claude Code and Codex.
 
 **A structured development pipeline** — 10 workflow skills with explicit multi-language support that take you from idea through design, implementation, code review, testing, to documentation, with persistent knowledge that carries across sessions.
 
@@ -30,7 +30,6 @@ Out of the box you get:
 - **10 workflow skills** — a complete development pipeline invoked as `/kk:<skill-name>`, with many skills integrated with each other.
 - **Multi-language support** — precise and distinct instructions from design, to implementation, to testing, to review for: go, java, js/ts, kotlin, kubernetes, and python
 - **Multi-model code review** — independent reviewers using sub-agents and external models (Gemini, etc.)
-- **Semantic code analysis** — LSP-powered symbol navigation and reference tracking via Serena
 - **Persistent knowledge base** — findings, decisions, and conventions that survive across sessions via Capy
 - **Up-to-date library docs** — always-current documentation lookup via Context7
 - **Battle-tested configuration** — permissions, statusline themes, hooks, sensible defaults
@@ -68,13 +67,13 @@ claude-toolbox supports two AI coding providers:
 > **Codex known limitations:**
 > - **Plugin-only installs** provide skills and profile content only — hooks, sub-agents, rules, and project config require [template setup](#template-setup) or [adopting into an existing repo](#adopting-into-existing-repositories).
 > - **PreToolUse hooks** are only wired for Bash commands. `apply_patch` and MCP tool hooks are documented in [ADR 0005](docs/adr/0005-codex-hook-enforcement-gap.md) but not yet implemented.
-> - **MCP servers** (Context7, Serena, Pal) must be configured at the user level — they are not packaged in the plugin. See [Codex MCP Setup](#codex-mcp-setup).
+> - **MCP servers** (Context7, Pal) must be configured at the user level — they are not packaged in the plugin. See [Codex MCP Setup](#codex-mcp-setup).
 
 ## Requirements
 
 - **[Claude Code](https://docs.anthropic.com/en/docs/claude-code)** — the AI coding assistant this toolbox extends
 - **[npm](https://www.npmjs.com/package/npm)** — used by some MCP server installations
-- **[uv](https://docs.astral.sh/uv/)** — Python package runner for Serena and Pal MCP servers
+- **[uv](https://docs.astral.sh/uv/)** — Python package runner for Pal MCP server
 - **[jq](https://jqlang.github.io/jq/)** — JSON processor, required for template-cleanup
 
 ### API Keys
@@ -88,10 +87,9 @@ MCP servers are configured at the user level (not in the repo) to keep API keys 
 
 You don't need all servers to get started. Add them incrementally:
 
-1. **Serena** (no API key needed) — semantic code analysis via LSP. Works immediately after setup.
-2. **Context7** (needs API key) — up-to-date library documentation and code examples.
-3. **Pal** (needs API key) — multi-model AI integration for code review, debugging, planning, and security audit.
-4. [**Capy**](https://github.com/serpro69/capy) (optional, auto-configured by bootstrap) — persistent knowledge base across sessions. Install with `brew install serpro69/tap/capy`.
+1. **Context7** (needs API key) — up-to-date library documentation and code examples.
+2. **Pal** (needs API key) — multi-model AI integration for code review, debugging, planning, and security audit.
+3. [**Capy**](https://github.com/serpro69/capy) (optional, auto-configured by bootstrap) — persistent knowledge base across sessions. Install with `brew install serpro69/tap/capy`.
 
 #### Claude Code
 
@@ -109,21 +107,6 @@ You don't need all servers to get started. Add them incrementally:
     "headers": {
       "CONTEXT7_API_KEY": "YOUR_CONTEXT7_API_KEY"
     }
-  },
-  "serena": {
-    "type": "stdio",
-    "command": "uvx",
-    "args": [
-      "--from",
-      "git+https://github.com/oraios/serena",
-      "serena",
-      "start-mcp-server",
-      "--context",
-      "ide-assistant",
-      "--project",
-      "."
-    ],
-    "env": {}
   },
   "pal": {
     "command": "sh",
@@ -153,18 +136,6 @@ See [Pal configuration docs](https://github.com/serpro69/pal-mcp-server/blob/mai
 > If you're using my [claude-in-docker](https://github.com/serpro69/claude-in-docker) images, consider replacing `npx` and `uvx` calls with direct tool invocations. The images come shipped with all of the above MCP tools pre-installed, and you will avoid downloading dependencies every time you launch claude cli.
 >
 > ```json
->   "serena": {
->     "type": "stdio",
->     "command": "serena",
->     "args": [
->       "start-mcp-server",
->       "--context",
->       "ide-assistant",
->       "--project",
->       "."
->     ],
->     "env": {}
->   },
 >   "pal": {
 >     "command": "pal-mcp-server",
 >     "args": [],
@@ -184,9 +155,6 @@ See [Pal configuration docs](https://github.com/serpro69/pal-mcp-server/blob/mai
 ```bash
 # Context7 — streamable HTTP, no API key env var needed (key is in the URL header)
 codex mcp add context7 --url "https://mcp.context7.com/mcp"
-
-# Serena — stdio server via uvx
-codex mcp add serena -- uvx --from "git+https://github.com/oraios/serena" serena start-mcp-server --context ide-assistant --project .
 
 # Pal — stdio server via uvx, with env vars for model config
 codex mcp add pal \
@@ -208,10 +176,6 @@ Or manually add to your `~/.codex/config.toml` file:
 [mcp_servers.context7]
 url = "https://mcp.context7.com/mcp"
 http_headers = { "CONTEXT7_API_KEY" = "YOUR_CONTEXT7_API_KEY" }
-
-[mcp_servers.serena]
-command = "uvx"
-args = ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--context", "ide-assistant", "--project", "."]
 
 [mcp_servers.pal]
 command = "sh"
@@ -239,12 +203,7 @@ Verify with `codex mcp list`. See [Pal configuration docs](https://github.com/se
 
    Go to your new repo's **Actions** tab → **Template Cleanup** → **Run workflow**. Provide:
    - `LANGUAGES` (required) — programming languages, comma-separated (e.g., `python`, `python,typescript`).
-     See [supported languages](https://github.com/oraios/serena?tab=readme-ov-file#programming-language-support--semantic-analysis-capabilities).
-   - `SERENA_INITIAL_PROMPT` — initial prompt given to the LLM on project activation
    - Other inputs are optional with sensible defaults.
-
-> [!TIP]
-> Take a look at serena [project.yaml](./.serena/project.yml) configuration file for more details.
 
 **Option B: Run locally**
 
@@ -266,8 +225,7 @@ Interactive mode walks you through each option. Run with `--help` for all flags,
    │ Manage MCP servers                                                 │
    │                                                                    │
    │ ❯ 1. context7                  ✔ connected · Enter to view details │
-   │   2. serena                    ✔ connected · Enter to view details │
-   │   3. pal                       ✔ connected · Enter to view details │
+   │   2. pal                       ✔ connected · Enter to view details │
    ╰────────────────────────────────────────────────────────────────────╯
    ```
 
@@ -298,7 +256,7 @@ Already have a project? Install just the plugin to get all 10 workflow skills.
 Skills are available as `/kk:(skill-name)` (annotated with `(kk)` in the slash command menu). The Claude plugin also includes commands, hooks (Bash validation), and sub-agents. See the [kk plugin documentation](./klaude-plugin/README.md) for details.
 
 > [!TIP]
-> Want the full configuration too (settings, statusline, Serena, sync infrastructure)? See [Adopting into Existing Repositories](#adopting-into-existing-repositories).
+> Want the full configuration too (settings, statusline, sync infrastructure)? See [Adopting into Existing Repositories](#adopting-into-existing-repositories).
 > For MCP servers, see [MCP Server Configuration](#mcp-server-configuration).
 
 #### Codex
@@ -312,7 +270,7 @@ The Codex plugin includes skills and language-specific profile content (review c
 > [!NOTE]
 > The Codex plugin provides **skills and profiles only** — it does not include hooks, sub-agents, Starlark rules, or project configuration. For the full Codex experience (SessionStart/PreToolUse hooks, sub-agents, config, rules), use the [template setup](#template-setup) or [adopt into an existing repo](#adopting-into-existing-repositories).
 
-For MCP servers (Serena, Context7, Pal), see [Codex MCP Setup](#codex-mcp-setup).
+For MCP servers (Context7, Pal), see [Codex MCP Setup](#codex-mcp-setup).
 
 ## Try It
 
@@ -332,12 +290,11 @@ This is the core loop. See the [kk plugin README](./klaude-plugin/README.md) for
 
 ### MCP Servers
 
-Four servers provide complementary capabilities:
+Three servers provide complementary capabilities:
 
 | Server                                                | Purpose                                                                                |
 | ----------------------------------------------------- | -------------------------------------------------------------------------------------- |
 | **[Context7](https://context7.com/)**                 | Up-to-date library documentation and code examples                                     |
-| **[Serena](https://github.com/oraios/serena)**        | Semantic code analysis via LSP — symbol navigation, reference tracking, targeted reads |
 | **[Pal](https://github.com/serpro69/pal-mcp-server)** | Multi-model AI integration — chat, debugging, code review, planning, security audit    |
 | **[Capy](https://github.com/serpro69/capy)**          | Persistent knowledge base — cross-session project memory with FTS5 search              |
 
@@ -361,7 +318,6 @@ Alongside `skills/`, `commands/`, `agents/`, and `hooks/`, the plugin ships a to
 
 - **Permission allowlist/denylist** (`.claude/settings.json`) — baseline permissions: auto-approves safe bash commands and WebSearch while blocking dangerous patterns. Per-repo MCP tool permissions go in `settings.local.json`.
 - **Status line** (`.claude/scripts/statusline_enhanced.sh`) — rich statusline with model, context %, git branch, session duration, thinking mode, and rate limits. Themes: set `CLAUDE_STATUSLINE_THEME` to `darcula`, `nord`, or `catppuccin`, and `CLAUDE_STATUSLINE_MODE` to `dark` (default) or `light` to match your terminal background
-- **Serena config** (`.serena/project.yml`) — language detection, gitignore integration, encoding settings
 
 ### Template Infrastructure
 
@@ -441,7 +397,7 @@ Repos created from this template can pull configuration updates via the **Templa
 
 ### What Gets Synced
 
-**Updated:** `.claude/` (settings, CLAUDE.extra.md, statusline scripts), `.codex/` (config.toml, hooks, rules, scripts, agents), `.serena/`, and the sync infrastructure itself (see [Syncing Workflow Files](#syncing-workflow-files) for permission requirements). Skills, commands, and hooks are managed by the plugin system — not template sync.
+**Updated:** `.claude/` (settings, CLAUDE.extra.md, statusline scripts), `.codex/` (config.toml, hooks, rules, scripts, agents), and the sync infrastructure itself (see [Syncing Workflow Files](#syncing-workflow-files) for permission requirements). Skills, commands, and hooks are managed by the plugin system — not template sync.
 
 **Preserved:** Project-specific values (name, language, prompts), `settings.local.json`, gitignored files
 
@@ -476,7 +432,7 @@ Edit `.github/template-state.json` and add a `sync_exclusions` array:
 
 - Patterns use glob syntax where `*` matches any characters including directory separators
 - Patterns are matched against project-relative paths (e.g., `.claude/settings.json`)
-- Common patterns: `.claude/CLAUDE.extra.md` (single file), `.serena/*` (entire directory)
+- Common patterns: `.claude/CLAUDE.extra.md` (single file), `.codex/*` (entire directory)
 
 **Behavior:**
 
@@ -609,7 +565,6 @@ You don't need to create a repo from this template to use the full configuration
        "CC_EFFORT_LEVEL": "high",
        "CC_PERMISSION_MODE": "default",
        "CC_STATUSLINE": "enhanced",
-       "SERENA_INITIAL_PROMPT": "",
        "CODEX_MODEL": "gpt-5.5",
        "CODEX_APPROVAL_POLICY": "on-request",
        "SKIP_CAPY": "false"
@@ -619,7 +574,7 @@ You don't need to create a repo from this template to use the full configuration
 
    Copy `.github/workflows/template-sync.yml` and `.github/scripts/template-sync.sh` from the [template repository](https://github.com/serpro69/claude-toolbox).
 
-3. **Run Template Sync** from your repo's Actions tab to pull in the configuration (settings, Serena config, statusline, permissions). Review and merge the PR.
+3. **Run Template Sync** from your repo's Actions tab to pull in the configuration (settings, statusline, permissions). Review and merge the PR.
 
 > [!TIP]
 > Step 1 works standalone if you only want the skills. Steps 2-3 add the opinionated configuration and keep it in sync with upstream improvements.
@@ -687,9 +642,6 @@ AGENTS.md                        # Codex project instructions (this repo)
 ├── rules/default.rules          # Starlark command policies (ported from Claude deny list)
 ├── agents/                      # 5 sub-agent TOML files (generated from klaude-plugin/agents/)
 └── scripts/                     # session-start.sh, pretooluse-bash.sh
-
-.serena/
-└── project.yml                  # Serena LSP configuration
 
 .github/
 ├── scripts/                     # template-cleanup.sh, template-sync.sh, bootstrap.sh

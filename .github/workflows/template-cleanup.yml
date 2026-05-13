@@ -46,15 +46,9 @@ on:
           - bypassPermissions
       LANGUAGES:
         description: |
-          Programming languages for Serena semantic analysis (required).
+          Programming languages (required, for profile detection).
           Comma-separated list (e.g., "python", "python,typescript", "java,kotlin").
-          See Serena docs for supported languages.
         required: true
-        type: string
-      SERENA_INITIAL_PROMPT:
-        description: Initial prompt/context for Serena semantic analysis.
-        required: false
-        default: ""
         type: string
 
 jobs:
@@ -83,7 +77,6 @@ jobs:
           CC_EFFORT_LEVEL: ${{ github.event.inputs.CC_EFFORT_LEVEL }}
           CC_PERMISSION_MODE: ${{ github.event.inputs.CC_PERMISSION_MODE }}
           LANGUAGES: ${{ github.event.inputs.LANGUAGES }}
-          SERENA_INITIAL_PROMPT: ${{ github.event.inputs.SERENA_INITIAL_PROMPT }}
         run: |
           chmod +x .github/scripts/template-cleanup.sh
           ./.github/scripts/template-cleanup.sh --ci --no-commit

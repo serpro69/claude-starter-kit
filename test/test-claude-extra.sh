@@ -47,13 +47,6 @@ else
   log_fail "Should contain '## Behavioral Instructions'"
 fi
 
-log_test "CLAUDE.extra.md contains Serena best practices"
-if grep -q "## Serena Best Practices" "$REPO_ROOT/.claude/CLAUDE.extra.md"; then
-  log_pass "Contains Serena best practices section"
-else
-  log_fail "Should contain '## Serena Best Practices'"
-fi
-
 log_test "CLAUDE.extra.md contains task tracking"
 if grep -q "## Task Tracking" "$REPO_ROOT/.claude/CLAUDE.extra.md"; then
   log_pass "Contains task tracking section"
@@ -86,13 +79,6 @@ if grep -q "### Independent Thinking" "$REPO_ROOT/CLAUDE.md"; then
   log_fail "CLAUDE.md should not contain 'Independent Thinking' (migrated to CLAUDE.extra.md)"
 else
   log_pass "Behavioral instructions correctly removed from CLAUDE.md"
-fi
-
-log_test "CLAUDE.md does not contain migrated Serena section"
-if grep -q "## Serena Best Practices" "$REPO_ROOT/CLAUDE.md"; then
-  log_fail "CLAUDE.md should not contain 'Serena Best Practices' (migrated to CLAUDE.extra.md)"
-else
-  log_pass "Serena best practices correctly removed from CLAUDE.md"
 fi
 
 log_test "CLAUDE.md retains project-specific sections"

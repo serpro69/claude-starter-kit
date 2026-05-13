@@ -350,7 +350,7 @@ validate_manifest() {
   fi
 
   # Verify all required variables exist (can be empty but must be present)
-  local required_vars=("PROJECT_NAME" "LANGUAGES" "CC_MODEL" "SERENA_INITIAL_PROMPT")
+  local required_vars=("PROJECT_NAME" "LANGUAGES" "CC_MODEL")
   for var in "${required_vars[@]}"; do
     if [[ "$(get_manifest_value ".variables.$var // \"__MISSING__\"")" == "__MISSING__" ]]; then
       log_error "Missing required variable in manifest: $var"
@@ -781,13 +781,13 @@ fetch_upstream_templates() {
   if ! git sparse-checkout init --cone --quiet 2>/dev/null; then
     log_warn "Sparse-checkout init failed, continuing with full checkout"
   fi
-  if ! git sparse-checkout set .claude .serena .codex .github/workflows/template-sync.yml .github/scripts/template-sync.sh docs/update.sh klaude-plugin/.claude-plugin/plugin.json --quiet 2>/dev/null; then
+  if ! git sparse-checkout set .claude .codex .github/workflows/template-sync.yml .github/scripts/template-sync.sh docs/update.sh klaude-plugin/.claude-plugin/plugin.json --quiet 2>/dev/null; then
     log_warn "Sparse-checkout set failed, config dirs may not exist at this version"
   fi
 
   cd - >/dev/null
 
-  # Build a staging structure with claude/ and serena/ subdirs (without dot prefix)
+  # Build a staging structure with claude/ subdirs (without dot prefix)
   # so the downstream substitution and comparison pipeline works unchanged.
   FETCHED_TEMPLATES_PATH="$work_dir/fetched"
   mkdir -p "$FETCHED_TEMPLATES_PATH"
@@ -801,17 +801,14 @@ fetch_upstream_templates() {
     rm -rf "$FETCHED_TEMPLATES_PATH/claude/capy"
     rm -f "$FETCHED_TEMPLATES_PATH/claude/scripts/capy.sh"
   fi
-  if [[ -d "$upstream_root/.serena" ]]; then
-    cp -rp "$upstream_root/.serena" "$FETCHED_TEMPLATES_PATH/serena"
-  fi
   if [[ -d "$upstream_root/.codex" ]]; then
     cp -rp "$upstream_root/.codex" "$FETCHED_TEMPLATES_PATH/codex"
     rm -f "$FETCHED_TEMPLATES_PATH/codex/scripts/capy.sh"
   fi
-  if [[ ! -d "$FETCHED_TEMPLATES_PATH/claude" && ! -d "$FETCHED_TEMPLATES_PATH/serena" ]]; then
+  if [[ ! -d "$FETCHED_TEMPLATES_PATH/claude" ]]; then
     log_error "Config directories not found in upstream at version: $version"
-    log_error "Expected .claude/ and/or .serena/ in the upstream repository."
-    log_error "The upstream repository may not have these directories at this version,"
+    log_error "Expected .claude/ in the upstream repository."
+    log_error "The upstream repository may not have this directory at this version,"
     log_error "or the repository structure has changed."
     exit 1
   fi
@@ -836,7 +833,6 @@ fetch_upstream_templates() {
 #
 # Substitutions applied:
 #   - Claude Code settings: CC_MODEL, CC_EFFORT_LEVEL, CC_PERMISSION_MODE
-#   - Serena settings: PROJECT_NAME, LANGUAGES, SERENA_INITIAL_PROMPT
 #
 # Side effects:
 #   Creates output directory and copies/modifies template files
@@ -852,7 +848,7 @@ apply_substitutions() {
   cp -rp "$template_dir"/* "$output_dir/"
 
   # Read all variables from manifest
-  local project_name languages cc_model cc_effort_level cc_permission_mode cc_statusline serena_prompt
+  local project_name languages cc_model cc_effort_level cc_permission_mode cc_statusline
 
   project_name=$(get_manifest_value '.variables.PROJECT_NAME')
   languages=$(get_manifest_value '.variables.LANGUAGES')
@@ -860,7 +856,6 @@ apply_substitutions() {
   cc_effort_level=$(get_manifest_value '.variables.CC_EFFORT_LEVEL // "high"')
   cc_permission_mode=$(get_manifest_value '.variables.CC_PERMISSION_MODE // "default"')
   cc_statusline=$(get_manifest_value '.variables.CC_STATUSLINE // "enhanced"')
-  serena_prompt=$(get_manifest_value '.variables.SERENA_INITIAL_PROMPT')
 
   # --- Claude Code Settings (claude/settings.json) ---
   local cc_settings_file="$output_dir/claude/settings.json"
@@ -920,24 +915,6 @@ apply_substitutions() {
       ' "$cc_settings_file" >"${cc_settings_file}.tmp" && mv "${cc_settings_file}.tmp" "$cc_settings_file"
 
     log_info "Applied Claude Code settings"
-  fi
-
-  # --- Serena Settings (serena/project.yml) ---
-  local serena_settings_file="$output_dir/serena/project.yml"
-  if [[ -f "$serena_settings_file" ]]; then
-    # Project name - always substitute
-    yq -i ".project_name = \"$project_name\"" "$serena_settings_file"
-
-    # Languages - convert comma-separated string to YAML array via jq
-    local lang_json
-    lang_json=$(echo "$languages" | jq -R 'split(",") | map(gsub("^\\s+|\\s+$"; ""))')
-    yq -i ".languages = $lang_json" "$serena_settings_file"
-
-    # Initial prompt - only substitute if provided
-    if [[ -n "$serena_prompt" ]]; then
-      yq -i ".initial_prompt = \"$serena_prompt\"" "$serena_settings_file"
-    fi
-    log_info "Applied Serena settings"
   fi
 
   # --- Codex Settings (codex/config.toml) ---
@@ -1038,7 +1015,6 @@ copy_sync_files() {
 #
 # Directories compared:
 #   staging/claude    -> .claude/
-#   staging/serena    -> .serena/
 compare_files() {
   local staging_dir="$1"
 
@@ -1054,7 +1030,6 @@ compare_files() {
   # Directories to compare (staging subdir -> project dir)
   local -A dir_map=(
     ["claude"]=".claude"
-    ["serena"]=".serena"
     ["codex"]=".codex"
     ["workflows"]=".github/workflows"
     ["scripts"]=".github/scripts"
@@ -1230,8 +1205,6 @@ generate_diff_report() {
         # Map project path back to staging path
         if [[ "$file" == ".claude/"* ]]; then
           staging_file="$staging_dir/claude/${file#.claude/}"
-        elif [[ "$file" == ".serena/"* ]]; then
-          staging_file="$staging_dir/serena/${file#.serena/}"
         else
           staging_file="$staging_dir/$file"
         fi

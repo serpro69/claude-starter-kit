@@ -202,12 +202,6 @@ jobs:
             echo "Applied changes to .claude/"
           fi
 
-          # Copy serena config files
-          if [[ -d "$STAGING_DIR/serena" ]]; then
-            cp -r "$STAGING_DIR/serena/"* .serena/ 2>/dev/null || true
-            echo "Applied changes to .serena/"
-          fi
-
           # Copy codex config files
           if [[ -d "$STAGING_DIR/codex" ]]; then
             mkdir -p .codex
@@ -234,11 +228,9 @@ jobs:
           if [[ -d "$STAGING_DIR/codex" && -f ".gitignore" ]]; then
             if git check-ignore -q .codex 2>/dev/null; then
               if ! grep -q '^!\.codex' .gitignore; then
-                # Find the right place: after existing !.claude or !.serena lines
+                # Find the right place: after existing !.claude line
                 if grep -q '^!\.claude' .gitignore; then
                   sed -i '/^!\.claude$/a !.codex' .gitignore
-                elif grep -q '^!\.serena' .gitignore; then
-                  sed -i '/^!\.serena$/a !.codex' .gitignore
                 else
                   printf '!.codex\n' >> .gitignore
                 fi

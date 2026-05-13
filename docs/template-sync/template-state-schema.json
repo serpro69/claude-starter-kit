@@ -39,13 +39,13 @@
       "properties": {
         "PROJECT_NAME": {
           "type": "string",
-          "description": "Repository name, derived from $(basename \"$REPO_ROOT\") during cleanup. Substituted into .serena/project.yml (project_name).",
+          "description": "Repository name, derived from $(basename \"$REPO_ROOT\") during cleanup.",
           "minLength": 1,
           "examples": ["my-project", "claude-toolbox"]
         },
         "LANGUAGES": {
           "type": "string",
-          "description": "Serena language identifiers for semantic code analysis (required). Comma-separated list converted to YAML array in .serena/project.yml (languages field). See Serena docs for supported values.",
+          "description": "Programming language identifiers (required). Comma-separated list used for profile detection in workflow skills.",
           "minLength": 1,
           "examples": ["typescript", "python,typescript", "go,bash"]
         },
@@ -74,12 +74,6 @@
           "default": "enhanced",
           "enum": ["enhanced", "basic"],
           "examples": ["enhanced", "basic"]
-        },
-        "SERENA_INITIAL_PROMPT": {
-          "type": "string",
-          "description": "Initial prompt/context for Serena MCP server. Substituted into .serena/project.yml (initial_prompt field). Only applied if non-empty.",
-          "default": "",
-          "examples": ["", "You are working on a TypeScript project"]
         },
         "CODEX_MODEL": {
           "type": "string",

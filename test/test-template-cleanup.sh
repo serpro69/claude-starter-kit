@@ -32,7 +32,7 @@ CC_MODEL="sonnet"
 CC_EFFORT_LEVEL="high"
 CC_PERMISSION_MODE="default"
 CC_STATUSLINE="enhanced"
-SERENA_INITIAL_PROMPT=""
+
 
 generate_manifest "test-project" >/dev/null 2>&1
 
@@ -48,7 +48,7 @@ LANGUAGES="bash"
 CC_MODEL=""
 CC_EFFORT_LEVEL="high"
 CC_STATUSLINE="enhanced"
-SERENA_INITIAL_PROMPT=""
+
 
 generate_manifest "test-project" >/dev/null 2>&1
 
@@ -74,7 +74,7 @@ LANGUAGES="bash"
 CC_MODEL=""
 CC_EFFORT_LEVEL="high"
 CC_STATUSLINE="enhanced"
-SERENA_INITIAL_PROMPT=""
+
 
 generate_manifest "test-project" >/dev/null 2>&1
 
@@ -91,7 +91,7 @@ LANGUAGES="bash"
 CC_MODEL=""
 CC_EFFORT_LEVEL="high"
 CC_STATUSLINE="enhanced"
-SERENA_INITIAL_PROMPT=""
+
 unset UPSTREAM_REPO 2>/dev/null || true
 
 generate_manifest "test-project" >/dev/null 2>&1
@@ -109,7 +109,7 @@ LANGUAGES="bash"
 CC_MODEL=""
 CC_EFFORT_LEVEL="high"
 CC_STATUSLINE="enhanced"
-SERENA_INITIAL_PROMPT=""
+
 # Use a valid GitHub repo to test UPSTREAM_REPO is captured correctly
 UPSTREAM_REPO="serpro69/claude-toolbox"
 
@@ -129,7 +129,7 @@ LANGUAGES="bash"
 CC_MODEL=""
 CC_EFFORT_LEVEL="high"
 CC_STATUSLINE="enhanced"
-SERENA_INITIAL_PROMPT=""
+
 
 generate_manifest "test-project" >/dev/null 2>&1
 
@@ -157,7 +157,7 @@ LANGUAGES="bash"
 CC_MODEL=""
 CC_EFFORT_LEVEL="high"
 CC_STATUSLINE="enhanced"
-SERENA_INITIAL_PROMPT=""
+
 
 generate_manifest "my-awesome-project" >/dev/null 2>&1
 
@@ -165,7 +165,7 @@ project_name=$(jq -r '.variables.PROJECT_NAME' .github/template-state.json)
 assert_equals "my-awesome-project" "$project_name" "PROJECT_NAME captured correctly"
 cd "$REPO_ROOT"
 
-log_test "Manifest captures all 7 variables"
+log_test "Manifest captures all 6 variables"
 test_dir=$(create_temp_git_repo "v1.0.0")
 cd "$test_dir"
 
@@ -175,7 +175,6 @@ CC_MODEL="opus"
 CC_EFFORT_LEVEL="medium"
 CC_PERMISSION_MODE="plan"
 CC_STATUSLINE="enhanced"
-SERENA_INITIAL_PROMPT="hello"
 
 generate_manifest "test" >/dev/null 2>&1
 
@@ -186,7 +185,6 @@ assert_equals "opus" "$(jq -r '.variables.CC_MODEL' .github/template-state.json)
 assert_equals "medium" "$(jq -r '.variables.CC_EFFORT_LEVEL' .github/template-state.json)" "CC_EFFORT_LEVEL"
 assert_equals "plan" "$(jq -r '.variables.CC_PERMISSION_MODE' .github/template-state.json)" "CC_PERMISSION_MODE"
 assert_equals "enhanced" "$(jq -r '.variables.CC_STATUSLINE' .github/template-state.json)" "CC_STATUSLINE"
-assert_equals "hello" "$(jq -r '.variables.SERENA_INITIAL_PROMPT' .github/template-state.json)" "SERENA_INITIAL_PROMPT"
 cd "$REPO_ROOT"
 
 log_test "Manifest handles empty string values for optional fields"
@@ -198,7 +196,7 @@ LANGUAGES="bash" # LANGUAGES is now required, use valid value
 CC_MODEL=""
 CC_EFFORT_LEVEL="high"
 CC_STATUSLINE="enhanced"
-SERENA_INITIAL_PROMPT=""
+
 
 generate_manifest "test" >/dev/null 2>&1
 
@@ -216,55 +214,6 @@ cd "$REPO_ROOT"
 
 log_section "Section 4: Special Characters"
 
-log_test "Manifest handles double quotes in prompts"
-test_dir=$(create_temp_git_repo "v1.0.0")
-cd "$test_dir"
-
-PROJECT_NAME="test"
-LANGUAGES="bash"
-CC_MODEL=""
-CC_STATUSLINE="enhanced"
-SERENA_INITIAL_PROMPT='Say "hello" to the world'
-
-generate_manifest "test" >/dev/null 2>&1
-
-serena_prompt=$(jq -r '.variables.SERENA_INITIAL_PROMPT' .github/template-state.json)
-assert_equals 'Say "hello" to the world' "$serena_prompt" "Double quotes preserved in prompt"
-cd "$REPO_ROOT"
-
-log_test "Manifest handles backslashes in prompts"
-test_dir=$(create_temp_git_repo "v1.0.0")
-cd "$test_dir"
-
-PROJECT_NAME="test"
-LANGUAGES="bash"
-CC_MODEL=""
-CC_STATUSLINE="enhanced"
-SERENA_INITIAL_PROMPT='Path: C:\Users\test'
-
-generate_manifest "test" >/dev/null 2>&1
-
-serena_prompt=$(jq -r '.variables.SERENA_INITIAL_PROMPT' .github/template-state.json)
-assert_equals 'Path: C:\Users\test' "$serena_prompt" "Backslashes preserved in prompt"
-cd "$REPO_ROOT"
-
-log_test "Manifest handles newlines in prompts"
-test_dir=$(create_temp_git_repo "v1.0.0")
-cd "$test_dir"
-
-PROJECT_NAME="test"
-LANGUAGES="bash"
-CC_MODEL=""
-CC_STATUSLINE="enhanced"
-SERENA_INITIAL_PROMPT=$'Line 1\nLine 2'
-
-generate_manifest "test" >/dev/null 2>&1
-
-serena_prompt=$(jq -r '.variables.SERENA_INITIAL_PROMPT' .github/template-state.json)
-expected=$'Line 1\nLine 2'
-assert_equals "$expected" "$serena_prompt" "Newlines preserved in prompt"
-cd "$REPO_ROOT"
-
 log_test "Manifest handles hyphens and underscores in project name"
 test_dir=$(create_temp_git_repo "v1.0.0")
 cd "$test_dir"
@@ -274,7 +223,7 @@ LANGUAGES="bash"
 CC_MODEL=""
 CC_EFFORT_LEVEL="high"
 CC_STATUSLINE="enhanced"
-SERENA_INITIAL_PROMPT=""
+
 
 generate_manifest "my-project_v2.0" >/dev/null 2>&1
 
@@ -301,7 +250,7 @@ LANGUAGES="bash"
 CC_MODEL=""
 CC_EFFORT_LEVEL="high"
 CC_STATUSLINE="enhanced"
-SERENA_INITIAL_PROMPT=""
+
 unset UPSTREAM_REPO 2>/dev/null || true
 
 # This requires network access to the actual upstream repo
@@ -329,7 +278,7 @@ LANGUAGES="bash"
 CC_MODEL=""
 CC_EFFORT_LEVEL="high"
 CC_STATUSLINE="enhanced"
-SERENA_INITIAL_PROMPT=""
+
 UPSTREAM_REPO="serpro69/claude-toolbox"
 
 if generate_manifest "test" >/dev/null 2>&1; then
@@ -364,7 +313,7 @@ CC_MODEL="sonnet"
 CC_EFFORT_LEVEL="high"
 CC_PERMISSION_MODE="default"
 CC_STATUSLINE="enhanced"
-SERENA_INITIAL_PROMPT=""
+
 
 generate_manifest "schema-test" >/dev/null 2>&1
 
@@ -396,7 +345,7 @@ LANGUAGES="bash"
 CC_MODEL=""
 CC_EFFORT_LEVEL="high"
 CC_STATUSLINE="enhanced"
-SERENA_INITIAL_PROMPT=""
+
 
 generate_manifest "test" >/dev/null 2>&1
 
@@ -415,7 +364,7 @@ LANGUAGES="bash"
 CC_MODEL=""
 CC_EFFORT_LEVEL="high"
 CC_STATUSLINE="enhanced"
-SERENA_INITIAL_PROMPT=""
+
 
 generate_manifest "new-project" >/dev/null 2>&1
 

@@ -5,7 +5,6 @@
   "variables": {
     "PROJECT_NAME": "my-project",
     "LANGUAGES": "typescript",
-    "CC_MODEL": "sonnet",
-    "SERENA_INITIAL_PROMPT": ""
+    "CC_MODEL": "sonnet"
   }
 }
