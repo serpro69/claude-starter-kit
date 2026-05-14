@@ -26,7 +26,7 @@ No new skill is needed. The existing pipeline handles the workflow — `implemen
 ### Three-tier knowledge model
 
 1. **Universal (always-load)** — skill-authoring principles that apply across all providers: progressive disclosure, workflow ordering, description effectiveness, resource organization, evaluation design.
-2. **Provider-specific (conditional)** — Claude Code's `${CLAUDE_PLUGIN_ROOT}` substitution boundary, hooks integration, command variants. Codex TOML format and rules files. Loaded when provider-specific signals appear in the diff.
+2. **Provider-specific (conditional)** — Claude Code's `${CLAUDE_PLUGIN_ROOT}` substitution boundary, hooks integration, command variants. Loaded when provider-specific signals appear in the diff. (Codex TOML format and rules files are a planned addition — see [addendum.md §Codex provider checklist](./addendum.md#codex-provider-checklist) — deferred from initial scope.)
 3. **kk-plugin-specific (conditional)** — shared instruction symlinks, bidirectional index invariant, profile conventions, `make generate-kodex`, test updates. Loaded when working within a `klaude-plugin/` directory structure.
 
 ### Detection
@@ -42,6 +42,12 @@ No new skill is needed. The existing pipeline handles the workflow — `implemen
 **Design signals:**
 - `display_name`: Agent Skills
 - `tokens`: skill, SKILL.md, agent skill, slash command, skill description, skill trigger
+
+**Edge cases and non-triggers:**
+- **Ancestor-walk scoping.** The walk stops at the *first* directory containing `SKILL.md`. A `SKILL.md` at the repo root does NOT claim every file in the repository — files in subdirectories that have their own `SKILL.md` are scoped to that nearer ancestor. Files outside any `SKILL.md`-containing ancestor do not activate.
+- **Test-fixture SKILL.md files.** A `SKILL.md` inside an eval's `test-files/` directory (e.g., `evals/skill-test/test-files/SKILL.md`) is a legitimate detection target — it *is* a skill file, even if it's a fixture. The ancestor walk scopes it correctly: files adjacent to the fixture `SKILL.md` are part of that fixture skill, not the parent skill's eval.
+- **Generic markdown outside a skill root.** Files like `docs/design.md`, `README.md`, or `CONTRIBUTING.md` that have no `SKILL.md` in any ancestor directory do NOT activate the profile, regardless of their content or frontmatter.
+- **Markdown with name/description frontmatter but no SKILL.md ancestor.** Agent definitions (`agents/*.md`) and other files with skill-like frontmatter do NOT activate the profile unless they are in a directory tree rooted at a `SKILL.md`. The profile detects on file location, not content.
 
 **Multi-profile behavior:** Additive. A Go skill activates both `go` and `skill-md`.
 

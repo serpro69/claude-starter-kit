@@ -25,7 +25,7 @@ Deferred from initial scope (see design.md §Phases):
 - **`document/`** — documentation rubric for skill README/overview content.
 - **`review-spec/`** — spec conformance checks between skill design docs and implemented SKILL.md.
 
-## Codex provider checklist
+## Codex provider checklist {#codex-provider-checklist}
 
 The current conditional checklists cover Claude Code and kk-plugin specifics. A `codex-gotchas.md` / `codex-checklist.md` conditional pair would cover:
 - TOML agent format (`.toml` with `developer_instructions`)
