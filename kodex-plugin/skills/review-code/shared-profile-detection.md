@@ -54,6 +54,7 @@ An explicit list is boring, deterministic, and unambiguous; runtime filesystem e
 - `kotlin`
 - `k8s`
 - `k8s-operator`
+- `skill-md`
 
 ### Algorithm
 
