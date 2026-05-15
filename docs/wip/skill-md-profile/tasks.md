@@ -6,16 +6,16 @@
 > Created: 2026-05-14
 
 ## Task 1: Profile skeleton and registration
-- **Status:** pending
+- **Status:** done
 - **Depends on:** —
 - **Docs:** [implementation.md#skeleton](./implementation.md#skeleton)
 
 ### Subtasks
-- [ ] 1.1 Create `klaude-plugin/profiles/skill-md/DETECTION.md` — three mandatory headings (Path signals empty, Filename signals with `SKILL.md` exact + skill-root adjacency rule via nearest-ancestor walk, Content signals empty) plus `## Design signals` with `display_name: Agent Skills` and token list
-- [ ] 1.2 Create `klaude-plugin/profiles/skill-md/overview.md` — profile summary, activation conditions, agentskills.io reference, dependency-lookup targets
-- [ ] 1.3 Append `skill-md` to `EXPECTED_PROFILES` in `test/test-plugin-structure.sh`
-- [ ] 1.4 Append `skill-md` to the Known Profiles list in `klaude-plugin/skills/_shared/profile-detection.md`
-- [ ] 1.5 Verify: `bash test/test-plugin-structure.sh` passes
+- [x] 1.1 Create `klaude-plugin/profiles/skill-md/DETECTION.md` — three mandatory headings (Path signals empty, Filename signals with `SKILL.md` exact + skill-root adjacency rule via nearest-ancestor walk, Content signals empty) plus `## Design signals` with `display_name: Agent Skills` and token list
+- [x] 1.2 Create `klaude-plugin/profiles/skill-md/overview.md` — profile summary, activation conditions, agentskills.io reference, dependency-lookup targets
+- [x] 1.3 Append `skill-md` to `EXPECTED_PROFILES` in `test/test-plugin-structure.sh`
+- [x] 1.4 Append `skill-md` to the Known Profiles list in `klaude-plugin/skills/_shared/profile-detection.md`
+- [x] 1.5 Verify: `bash test/test-plugin-structure.sh` passes
 
 ## Task 2: Reference content
 - **Status:** pending
