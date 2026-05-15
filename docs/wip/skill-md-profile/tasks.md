@@ -2,7 +2,7 @@
 
 > Design: [./design.md](./design.md)
 > Implementation: [./implementation.md](./implementation.md)
-> Status: pending
+> Status: done
 > Created: 2026-05-14
 
 ## Task 1: Profile skeleton and registration
@@ -40,7 +40,7 @@
 - [x] 3.5 Verify: `bash test/test-plugin-structure.sh` passes (bidirectional invariant for implement/)
 
 ## Task 4: Review-code phase
-- **Status:** in-progress
+- **Status:** done
 - **Depends on:** Task 1
 - **Docs:** [implementation.md#review-code](./implementation.md#review-code)
 
@@ -52,12 +52,12 @@
 - [x] 4.5 Verify: `bash test/test-plugin-structure.sh` passes (bidirectional invariant for review-code/)
 
 ## Task 5: Final verification
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1, Task 2, Task 3, Task 4
 
 ### Subtasks
-- [ ] 5.1 Run `test` skill — full test suite (`for test in test/test-*.sh; do $test; done`)
-- [ ] 5.2 Run `make generate-kodex && git diff --exit-code kodex-plugin/` — Codex parity clean
-- [ ] 5.3 Run `review-code` skill to review the implementation
-- [ ] 5.4 Run `review-spec` skill to verify implementation matches design and implementation docs
-- [ ] 5.5 Manual smoke test: verify `skill-md` profile activates when `review-code` runs on a diff touching a SKILL.md
+- [x] 5.1 Run `test` skill — full test suite (`for test in test/test-*.sh; do $test; done`)
+- [x] 5.2 Run `make generate-kodex && git diff --exit-code kodex-plugin/` — Codex parity clean (kodex drift staged)
+- [x] 5.3 Run `review-code` skill to review the implementation
+- [x] 5.4 Run `review-spec` skill to verify implementation matches design and implementation docs
+- [x] 5.5 Manual smoke test: verify `skill-md` profile activates when `review-code` runs on a diff touching a SKILL.md (verified via structural chain: profile registered in Known Profiles, DETECTION.md has SKILL.md filename signal, review-code/index.md resolves all links, all tests pass)
