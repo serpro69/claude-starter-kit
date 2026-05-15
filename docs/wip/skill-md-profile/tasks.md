@@ -18,14 +18,14 @@
 - [x] 1.5 Verify: `bash test/test-plugin-structure.sh` passes
 
 ## Task 2: Reference content
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1
 - **Docs:** [implementation.md#references](./implementation.md#references)
 
 ### Subtasks
-- [ ] 2.1 Fetch and review the Anthropic skill-building guide PDF and the indexed `claude-skill-best-practices` capy content
-- [ ] 2.2 Create `klaude-plugin/profiles/skill-md/references/skill-building-guide.md` — distill source material by topic (progressive disclosure, triggering, descriptions, scripts, evals, anti-patterns). Under 300 lines; add TOC if approaching limit.
-- [ ] 2.3 Verify: file is self-contained, examples are concrete, no dead links
+- [x] 2.1 Fetch and review the Anthropic skill-building guide PDF and the indexed `claude-skill-best-practices` capy content
+- [x] 2.2 Create `klaude-plugin/profiles/skill-md/references/skill-building-guide.md` — distill source material by topic (progressive disclosure, triggering, descriptions, scripts, evals, anti-patterns). Under 300 lines; add TOC if approaching limit.
+- [x] 2.3 Verify: file is self-contained, examples are concrete, no dead links
 
 ## Task 3: Implement phase
 - **Status:** pending
