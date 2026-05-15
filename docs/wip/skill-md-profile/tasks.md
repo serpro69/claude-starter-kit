@@ -28,7 +28,7 @@
 - [x] 2.3 Verify: file is self-contained, examples are concrete, no dead links
 
 ## Task 3: Implement phase
-- **Status:** in-progress
+- **Status:** done
 - **Depends on:** Task 1
 - **Docs:** [implementation.md#implement](./implementation.md#implement)
 
