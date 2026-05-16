@@ -61,6 +61,17 @@ Generated (by `cmd/generate-kodex/`):
 
 - **`agents/*.toml`** — Sub-agent definitions
 
+### Documentation Site (`docs/`, `mkdocs.yml`)
+
+MkDocs Material site with a custom Tokyo Night color scheme, deployed to GitHub Pages via [mike](https://github.com/jimporter/mike) for versioned documentation.
+
+- **`mkdocs.yml`** — Site config: Tokyo Night theme (`tokyonight:dark`/`tokyonight:light`), tabs nav, pymdownx extensions, mike versioning
+- **`docs/`** — Content pages (getting-started, user-guide, providers, contributing, about) alongside internal docs (adr, wip, done — excluded from search)
+- **`docs/overrides/`** — Template overrides: `main.html` (base with Space Mono font, OG tags), `home.html` (custom landing page with scroll-pinned hero→pipeline transition and matrix rain effect)
+- **`docs/assets/`** — `stylesheets/tokyonight.css` (color scheme), `stylesheets/extra.css` (site-wide tweaks), `javascripts/terminal.js` (placeholder for future non-homepage JS)
+- **`requirements.txt`** — Python deps (mkdocs-material, mike, mkdocs-minify-plugin, mkdocs-panzoom-plugin)
+- **`.github/workflows/docs.yml`** — CI: builds and deploys via mike on master push or version tags
+
 ### Template Infrastructure (`.github/`)
 
 - **`template-cleanup.sh`** — Initializes a new repo from the template (interactive or CI)
@@ -120,6 +131,18 @@ Downstream repo triggers sync workflow
   → Applies variable substitutions (CC_MODEL, CODEX_MODEL, etc.)
   → Smart-merges settings.json (new keys added, existing preserved)
   → Creates PR with changes
+```
+
+### Documentation publishing
+
+```
+Push tag v0.14.0 (or push to master)
+  → .github/workflows/docs.yml triggers
+  → Installs Python deps from requirements.txt
+  → Tag push: mike deploy --push "0.14" (extracts major.minor)
+  → Master push: mike deploy --push latest
+  → mike pushes built site to gh-pages branch
+  → GitHub Pages serves from gh-pages
 ```
 
 ### Codex generation

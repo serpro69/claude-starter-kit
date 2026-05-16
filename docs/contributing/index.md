@@ -1,57 +1,34 @@
-# Contributing
+--8<-- "CONTRIBUTING.md"
 
-Thanks for your interest in contributing to claude-toolbox!
+## Documentation Site
 
-See [Architecture](architecture.md) for how the components fit together and [Testing](testing.md) for test conventions. The authoritative reference for all conventions is [`CLAUDE.md`](https://github.com/serpro69/claude-toolbox/blob/master/CLAUDE.md) — this guide summarizes the most important rules for quick orientation.
+The docs site uses MkDocs Material with mike for versioned publishing.
 
-## Getting Started
-
-1. Fork and clone the repo
-2. Run the test suite to make sure everything works: `for test in test/test-*.sh; do $test; done`
-3. Create a feature branch from `master`
-
-## Key Workflows
-
-- **Editing skills:** Edit in `klaude-plugin/skills/`, then run `make generate-kodex` to regenerate the Codex variant.
-- **Editing profiles:** Edit in `klaude-plugin/profiles/`, then run `make generate-kodex`. Vendored profiles (e.g., Go) use `make vendor-profiles` instead.
-- **Adding a profile:** Follow the "Adding a new profile" checklist in [Plugin Development](plugin-development.md#profiles).
-- **Editing codex config:** Hand-authored files live in `.codex/` (config.toml, hooks.json, rules, scripts). Generated files (agents, kodex-plugin) should not be edited directly.
-
-## Commit Conventions
-
-- Use imperative mood in commit messages ("Add feature" not "Added feature")
-- Keep the first line under 72 characters
-- Include a blank line + body for non-trivial changes explaining the "why"
-
-## Development
-
-### Running Tests
-
-Tests across 8 suites cover plugin structure, codex configuration, and template sync/cleanup infrastructure:
+**Local preview:**
 
 ```bash
-# Run all test suites
-for test in test/test-*.sh; do $test; done
-
-# Run individual suites
-./test/test-plugin-structure.sh  # Plugin manifest, skills, commands, hooks, kodex-plugin validation
-./test/test-codex-structure.sh   # Codex marketplace, config, hooks, agents, rules, scripts
-./test/test-template-sync.sh     # template-sync.sh function tests + plugin migration
-./test/test-template-cleanup.sh  # generate_manifest() tests
-./test/test-claude-extra.sh      # CLAUDE.extra.md detection and auto-import
-./test/test-manifest-jq.sh       # jq JSON pattern tests
+make docs-serve    # serves at http://localhost:8000
 ```
 
-| Test Suite | Coverage |
-|------------|----------|
-| test-plugin-structure.sh | Plugin/marketplace manifests, skills, commands, hooks, cross-refs, kodex gen |
-| test-codex-structure.sh | Codex marketplace, config.toml, hooks.json, agents, rules, scripts, AGENTS.md |
-| test-template-sync.sh | CLI parsing, manifest validation, substitutions, plugin migration |
-| test-template-cleanup.sh | Manifest generation, variable capture, git tag/SHA detection |
-| test-claude-extra.sh | CLAUDE.extra.md existence, compare_files detection, auto-import |
-| test-manifest-jq.sh | JSON generation, special character handling, round-trip validation |
+**Build without serving:**
 
-### Repository Structure
+```bash
+make docs-build
+```
+
+**How publishing works:**
+
+- Push to `master` → deploys as `latest` via mike
+- Push tag `v0.14.0` → deploys as `0.14` (major.minor) via mike
+- GitHub Actions workflow at `.github/workflows/docs.yml` handles both
+- Mike pushes to the `gh-pages` branch; GitHub Pages serves from there
+- First deploy requires one-time setup: `mike set-default latest` and enabling GitHub Pages on the `gh-pages` branch in repo Settings
+
+**Content structure:** Pages live in `docs/` alongside internal design docs (`wip/`, `done/`, `adr/`). Internal dirs are excluded from search via `exclude_docs` in `mkdocs.yml` but remain accessible by direct URL. The landing page is a custom template at `docs/overrides/home.html`.
+
+**Python deps:** Install via `pip install -r requirements.txt` (mkdocs-material, mike, minify, panzoom).
+
+## Repository Structure
 
 ```
 klaude-plugin/                   # kk plugin — Claude (canonical source of truth)
@@ -89,8 +66,23 @@ AGENTS.md                        # Codex project instructions (this repo)
 
 .github/
 ├── scripts/                     # template-cleanup.sh, template-sync.sh, bootstrap.sh
-├── workflows/                   # template-cleanup, template-sync
+├── workflows/                   # template-cleanup, template-sync, docs
 └── template-state.json          # Sync manifest and variables
+
+docs/                            # MkDocs site + internal design docs
+├── overrides/                   # Template overrides (home.html, main.html)
+├── assets/                      # CSS (tokyonight.css, extra.css), JS
+├── getting-started/             # Setup guides
+├── user-guide/                  # Skills, profiles, MCP, config, sync
+├── providers/                   # Claude Code and Codex specifics
+├── contributing/                # ARCHITECTURE.md, TESTING.md, plugin dev
+├── about/                       # License, changelog
+├── adr/                         # Architecture decision records
+├── wip/                         # In-progress feature design docs (excluded from search)
+└── done/                        # Completed feature docs (excluded from search)
+
+mkdocs.yml                       # MkDocs Material config
+requirements.txt                 # Python deps for docs site
 
 cmd/
 ├── vendor-profiles/             # Profile vendoring tool
@@ -101,21 +93,3 @@ test/
 ├── test-*.sh                    # 8 test suites
 └── fixtures/                    # Test manifests and templates
 ```
-
-## Pull Requests
-
-- One logical change per PR
-- All test suites must pass: `for test in test/test-*.sh; do $test; done`
-- If you edited `klaude-plugin/`, verify `make generate-kodex && git diff --exit-code kodex-plugin/ .codex/agents/` shows no drift
-- Update documentation if your change affects user-facing behavior
-
-## Sections
-
-- [Architecture](architecture.md) — component overview and data flows
-- [Plugin Development](plugin-development.md) — skills, commands, agents, hooks, profiles
-- [Testing](testing.md) — test suites and conventions
-- [ADRs](adrs.md) — architecture decision records
-
-## License
-
-By contributing, you agree that your contributions will be licensed under the ELv2 License.

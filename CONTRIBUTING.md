@@ -2,6 +2,8 @@
 
 Thanks for your interest in contributing to claude-toolbox!
 
+> **Full documentation** lives in [`docs/contributing/`](docs/contributing/) — architecture overview, plugin development guide, testing conventions, and documentation workflow. This file covers the essentials for quick orientation.
+
 ## Getting Started
 
 1. Fork and clone the repo
