@@ -1,39 +1,16 @@
 # Try It
 
-Run the full pipeline in under 5 minutes. Assumes you've installed the plugin ([Plugin-Only](plugin-only.md) or [Template Setup](template-setup.md)).
+After setup, try the core workflow:
 
-## 1. Design a Feature
+1. **Start with an idea.** Type `/kk:design` and describe a feature you want to build. Claude will ask you refinement questions one at a time, then produce design docs and a task list in `docs/wip/`.
 
-```
-/kk:design "add a health check endpoint"
-```
+2. **Review the design.** Run `/kk:review-design your-feature` to catch gaps before writing code.
 
-This creates design docs, an implementation plan, and a task list in `docs/wip/`.
+3. **Build it.** Type `/kk:implement` — Claude executes the task list with code review checkpoints between batches.
 
-## 2. Implement It
+4. **Review the code.** `/kk:review-code` checks for SOLID violations, security risks, and quality issues. Use `/kk:review-code:isolated` for independent sub-agent reviewers with zero authorship bias.
 
-```
-/kk:implement "work on task 1"
-```
-
-Executes the first task with automatic code review checkpoints between batches.
-
-## 3. Review the Code
-
-```
-/kk:review-code
-```
-
-Reviews your changes for SOLID violations, security risks, and code quality issues. Language-aware — automatically detects Go, Python, TypeScript, etc.
-
-## 4. Test and Document
-
-```
-/kk:test
-/kk:document
-```
-
-Generates tests following project conventions, then updates architecture docs and records any ADRs.
+This is the core loop. See the [kk plugin README](https://github.com/serpro69/claude-toolbox/tree/master/klaude-plugin) for all available skills and the full workflow pipeline.
 
 ## What Just Happened?
 
@@ -41,11 +18,12 @@ Each skill produced artifacts the next one consumed:
 
 | Skill | Input | Output |
 |-------|-------|--------|
-| `/design` | Your idea | `design.md`, `tasks.md` |
-| `/implement` | Task list | Code changes, review checkpoints |
-| `/review-code` | Git diff | Findings, fix suggestions |
-| `/test` | Code changes | Test files, coverage report |
-| `/document` | All of the above | Updated `ARCHITECTURE.md`, ADRs |
+| `/kk:design` | Your idea | `design.md`, `tasks.md` |
+| `/kk:review-design` | Design docs | Review findings, gap analysis |
+| `/kk:implement` | Task list | Code changes, review checkpoints |
+| `/kk:review-code` | Git diff | Findings, fix suggestions |
+| `/kk:test` | Code changes | Test files, coverage report |
+| `/kk:document` | All of the above | Updated `ARCHITECTURE.md`, ADRs |
 
 ## Next Steps
 

@@ -6,7 +6,7 @@ Codex (OpenAI) is supported as a secondary provider. Skills are generated from t
 
 1. Install [Codex](https://openai.com/index/codex/)
 2. Install the plugin: `codex plugin marketplace add serpro69/claude-toolbox`
-3. Configure [MCP servers](../user-guide/mcp-servers.md) at the user level
+3. Configure [MCP servers](../user-guide/mcp-servers.md#codex) at the user level
 
 ## Configuration Files
 
@@ -25,8 +25,8 @@ Codex (OpenAI) is supported as a secondary provider. Skills are generated from t
 !!! warning "Current limitations"
 
     - **Plugin-only installs** provide skills and profile content only — hooks, sub-agents, rules, and project config require [template setup](../getting-started/template-setup.md) or [adopting into an existing repo](../getting-started/adopting.md).
-    - **PreToolUse hooks** are only wired for Bash commands. `apply_patch` and MCP tool hooks are not yet implemented.
-    - **MCP servers** (Context7, Pal) must be configured at the user level — they are not packaged in the plugin.
+    - **PreToolUse hooks** are only wired for Bash commands. `apply_patch` and MCP tool hooks are documented in [ADR 0005](../adr/0005-codex-hook-enforcement-gap.md) but not yet implemented.
+    - **MCP servers** (Context7, Pal) must be configured at the user level — they are not packaged in the plugin. See [Codex MCP Setup](../user-guide/mcp-servers.md#codex).
 
 ## Generation Pipeline
 

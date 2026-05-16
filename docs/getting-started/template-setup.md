@@ -4,36 +4,54 @@ Use the GitHub template to create a new project with the full claude-toolbox con
 
 ## Steps
 
-1. **Create from template**: Go to [serpro69/claude-toolbox](https://github.com/serpro69/claude-toolbox), click **Use this template** → **Create a new repository**
+1. **Create from template**: [Create a new project from this template](https://github.com/new?template_name=claude-toolbox&template_owner=serpro69) using the **Use this template** button.
 
-2. **Run template cleanup** (removes toolbox-specific files, keeps your config):
+2. **Initialize the template** — choose one method:
 
-    === "GitHub Actions (recommended)"
+    === "Option A: GitHub Actions (recommended)"
 
-        The `template-cleanup.yml` workflow runs automatically on first push. Check the Actions tab for status.
+        Go to your new repo's **Actions** tab → **Template Cleanup** → **Run workflow**. Provide:
 
-    === "Local"
+        - `LANGUAGES` (required) — programming languages, comma-separated (e.g., `python`, `python,typescript`)
+        - Other inputs are optional with sensible defaults
+
+    === "Option B: Run locally"
 
         ```bash
-        bash .github/scripts/template-cleanup.sh
+        ./.github/scripts/template-cleanup.sh
         ```
 
-3. **Install MCP servers** — add to `~/.claude.json` (Claude Code) or user-level config (Codex). See [MCP Servers](../user-guide/mcp-servers.md) for details.
+        Interactive mode walks you through each option. Run with `--help` for all flags, or pass them directly:
 
-4. **Set API keys** in your shell profile:
+        ```bash
+        ./.github/scripts/template-cleanup.sh --languages python,typescript -y
+        ```
+
+3. **Clone your repo** (if using Option A) and **verify MCP servers**:
+
+    ```
+    > /mcp
+    ╭────────────────────────────────────────────────────────────────────╮
+    │ Manage MCP servers                                                 │
+    │                                                                    │
+    │ ❯ 1. context7                  ✔ connected · Enter to view details │
+    │   2. pal                       ✔ connected · Enter to view details │
+    ╰────────────────────────────────────────────────────────────────────╯
+    ```
+
+    The kk plugin (skills, commands, hooks) is available via the claude-toolbox marketplace configured in `.claude/settings.json`.
+
+4. **Finalize initialization**:
 
     ```bash
-    export CONTEXT7_API_KEY="your-key"
-    export GEMINI_API_KEY="your-key"
+    chmod +x .github/scripts/bootstrap.sh && ./.github/scripts/bootstrap.sh
     ```
 
-5. **Install the plugin** (Claude Code):
+    This installs the kk plugin, wires up the Capy knowledge base (if installed), and commits the configuration.
 
-    ```
-    /plugin install kk@claude-toolbox
-    ```
+5. **Recommended:** Run `/config` in Claude Code and **disable Auto-compact**. This prevents Claude from compacting context mid-task, which degrades quality significantly. See [Recommended Settings](../user-guide/configuration.md#recommended-settings) for the full config.
 
-6. **Verify**: Run `/kk:design "hello world feature"` to test the pipeline.
+6. [Try it out!](quickstart.md)
 
 ## What You Get
 
@@ -46,3 +64,4 @@ Use the GitHub template to create a new project with the full claude-toolbox con
 
 - [Try It](quickstart.md) — run the pipeline in 5 minutes
 - [Template Sync](../user-guide/template-sync.md) — how to receive upstream updates
+- [MCP Servers](../user-guide/mcp-servers.md) — configure Context7, Pal, Capy
