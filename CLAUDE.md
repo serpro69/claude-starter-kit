@@ -191,7 +191,7 @@ klaude-plugin/profiles/<name>/
   review-spec/
 ```
 
-Not every profile populates every phase — a programming-language profile may only need `review-code/`; an IaC profile like `k8s` populates all six. A phase subdirectory contains only its `index.md` and the files the index references; human-facing authoring notes belong in `overview.md` or a sibling file at the profile root.
+Not every profile populates every phase — a programming-language profile may only need `review-code/`; an IaC profile like `k8s` populates all six; a tooling profile like `skill-md` populates only the phases where domain-specific guidance adds value. A phase subdirectory contains only its `index.md` and the files the index references; human-facing authoring notes belong in `overview.md` or a sibling file at the profile root.
 
 ### `DETECTION.md` — schema
 
