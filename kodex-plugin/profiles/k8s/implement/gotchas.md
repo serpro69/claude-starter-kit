@@ -65,3 +65,18 @@ When in doubt about an API field, version, CRD schema, Helm chart behavior, or c
 - `kustomization.yaml` patches are applied in list order. Strategic-merge patches merge; JSON 6902 patches target by path. Using the wrong `patches[].patch` type is the common source of "the patch didn't do anything".
 - `commonLabels` are applied to every resource **and to selectors**, which can collide with the workload's own selector and trigger the immutable-selector failure above. Prefer the `labels:` transformer with `labels[].pairs` and `includeSelectors: false` — but this requires **Kustomize ≥ 4.1** (run `kustomize version` to check; older `kubectl kustomize` bundles may predate this field). On older toolchains you are stuck with `commonLabels` — audit every workload selector against the labels you inject.
 - `namePrefix` / `nameSuffix` also mutate references (`configMapRef.name`, etc.), but only those Kustomize knows how to follow. Raw string references inside annotations or CR spec fields are **not** rewritten — check the rendered output (`kustomize build`) before committing.
+
+## yaml-language-server schema comments
+
+Add a `# yaml-language-server: $schema=<url>` comment as the first line of every plain YAML manifest. Editors with YAML Language Server support (VS Code, Neovim, etc.) use this for autocompletion, inline validation, and hover docs — catching field typos and type errors before `kubectl apply`. Helm templates are excluded — `{{ }}` directives invalidate the YAML and the language server cannot parse them.
+
+Schema source by resource category:
+
+- **Core Kubernetes** (Deployment, Service, ConfigMap, etc.) — `yannh/kubernetes-json-schema`. URL: `https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v{VERSION}-standalone-strict/{kind-lower}.json`. Use `standalone-strict` — it rejects unknown fields (catches typos) and inlines all `$ref`s. Pin `{VERSION}` to the target cluster minor (e.g., `v1.30.0`); if the design does not name one, use the latest stable minor. This parallels the API-version pinning rule above.
+- **Kustomize** — SchemaStore. URL: `https://json.schemastore.org/kustomization`.
+- **Flux CD** (HelmRelease, Kustomization, GitRepository, etc.) — `fluxcd-community/flux2-schemas`. URL: `https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/{kind-lower}-{group}-{version}.json`.
+- **CRDs** (cert-manager, external-secrets, ArgoCD, Prometheus Operator, etc.) — `datreeio/CRDs-catalog`. URL: `https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{group}/{kind-lower}_{version}.json`. This repository aggregates schemas from many projects; check it first before searching for project-specific schema sources. For **ArgoCD version-pinned** schemas (when validating against a specific ArgoCD release), `kevinnitrog/argocd-json-schema` provides per-release `standalone-strict` schemas at `https://raw.githubusercontent.com/kevinnitrog/argocd-json-schema/master/schemas/v{ARGOCD_VERSION}/standalone-strict/{type}.json`.
+
+Multi-document YAML (`---`-separated): each document needs its own `# yaml-language-server` comment immediately preceding it. The comment applies only to the document that follows.
+
+When unsure which schema URL to use for a CRD, check `datreeio/CRDs-catalog` first. If not cataloged there, check whether the upstream project publishes its own JSON schema. Do not invent schema URLs — invoke the `dependency-handling` skill to look up the correct one.

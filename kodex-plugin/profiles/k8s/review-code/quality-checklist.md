@@ -10,6 +10,7 @@ Idiomatic manifest quality signals. Applied whenever the `k8s` profile is active
 - Probes
 - Ports, naming, and discoverability
 - Declarative patterns
+- Schema comments
 
 ## Labels and annotations
 
@@ -68,6 +69,23 @@ Deeper probe semantics (startup vs liveness ordering, interaction with disruptio
 - Annotations on `Ingress` for controller-specific features (rewrite rules, timeouts, TLS settings) — keep them consistent within a project, not a mix of controllers' quirks on different ingresses.
 - `Namespace` resources for every environment; avoid `default` namespace for workloads.
 - `Kind: List` wrappers (multi-resource files) are acceptable but consider one resource per file for reviewability; if multi-resource, separate with `---`.
+
+## Schema comments
+
+Every plain YAML manifest (not Helm templates) should have a `# yaml-language-server: $schema=<url>` comment as its first line. Editors with YAML Language Server support use this for autocompletion and inline validation. Missing schema comments are a P3 finding; invented or dead schema URLs are P2 (they cause editor errors).
+
+Schema source by resource category:
+
+- **Core Kubernetes** (Deployment, Service, ConfigMap, etc.) — `yannh/kubernetes-json-schema`. URL: `https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v{VERSION}-standalone-strict/{kind-lower}.json`. Use `standalone-strict` — it rejects unknown fields (catches typos) and inlines all `$ref`s. Pin `{VERSION}` to the target cluster minor (e.g., `v1.30.0`).
+- **Kustomize** — SchemaStore. URL: `https://json.schemastore.org/kustomization`.
+- **Flux CD** (HelmRelease, Kustomization, GitRepository, etc.) — `fluxcd-community/flux2-schemas`. URL: `https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/{kind-lower}-{group}-{version}.json`.
+- **CRDs** (cert-manager, external-secrets, ArgoCD, Prometheus Operator, etc.) — `datreeio/CRDs-catalog`. URL: `https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{group}/{kind-lower}_{version}.json`. Check this repository first before searching for project-specific schema sources. For **ArgoCD version-pinned** schemas, `kevinnitrog/argocd-json-schema` provides per-release `standalone-strict` schemas at `https://raw.githubusercontent.com/kevinnitrog/argocd-json-schema/master/schemas/v{ARGOCD_VERSION}/standalone-strict/{type}.json`.
+
+Additional rules:
+
+- Multi-document files (`---`-separated): each document needs its own schema comment immediately preceding it.
+- Helm templates are excluded — `{{ }}` directives invalidate the YAML; the language server cannot parse them.
+- A schema URL pointing at a non-existent version or kind (404) is worse than no comment — flag as P2.
 
 ## Questions to ask
 
