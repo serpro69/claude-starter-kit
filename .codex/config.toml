@@ -6,7 +6,7 @@ approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 
 [features]
-codex_hooks = true
+hooks = true
 
 [agents]
 max_threads = 6

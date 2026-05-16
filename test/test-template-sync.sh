@@ -586,7 +586,7 @@ model = "gpt-5.5"
 approval_policy = "on-request"
 
 [features]
-codex_hooks = true
+hooks = true
 
 [mcp_servers.capy]
 command = "bash"
