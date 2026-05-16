@@ -54,20 +54,13 @@
   letter-spacing: -0.02em;
   margin-bottom: 4px;
 }
-.lp-prompt-chevron {
-  color: var(--tn-green);
-  opacity: 0.7;
-}
-.lp-prompt-accent {
-  color: var(--tn-blue);
-}
+.lp-prompt-chevron { color: var(--tn-green); opacity: 0.7; }
+.lp-prompt-accent { color: var(--tn-blue); }
 .lp-cursor {
   display: inline-block;
-  width: 0.55em;
-  height: 0.72em;
+  width: 0.55em; height: 0.72em;
   background: var(--tn-blue);
-  margin-left: 2px;
-  vertical-align: baseline;
+  margin-left: 2px; vertical-align: baseline;
   opacity: 0.8;
   animation: lpBlink 1s step-end infinite;
 }
@@ -78,18 +71,15 @@
   font-family: 'Space Mono', monospace;
   font-size: clamp(13px, 2vw, 16px);
   color: var(--tn-comment);
-  margin: 16px 0 8px;
-  letter-spacing: 0.02em;
+  margin: 16px 0 8px; letter-spacing: 0.02em;
 }
 
 /* ── Typewriter ─── */
 .lp-tw {
   font-family: 'Space Mono', monospace;
   font-size: clamp(12px, 1.5vw, 15px);
-  color: var(--tn-cyan);
-  height: 24px;
-  margin: 20px 0 28px;
-  opacity: 0.8;
+  color: var(--tn-cyan); height: 24px;
+  margin: 20px 0 28px; opacity: 0.8;
 }
 
 /* ── Provider badges ─── */
@@ -136,6 +126,65 @@
   text-transform: uppercase; letter-spacing: 0.12em;
   color: var(--md-default-fg-color); opacity: 0.4; margin-top: 6px;
 }
+
+/* ── Scroll-pinned hero → pipeline transition ─── */
+.lp-hero-wrap {
+  position: relative;
+  height: 300vh;
+}
+.lp-pin-stack {
+  position: sticky; top: 0;
+  height: 100vh;
+  display: grid; grid-template-areas: 'stack';
+  overflow: hidden;
+}
+.lp-pin-stack > * { grid-area: stack; }
+
+.lp-hero.lp-hero--pinned {
+  position: relative !important; top: auto;
+  height: 100vh; min-height: 100vh;
+  z-index: 2;
+  --lp-fade: 0;
+  opacity: calc(1 - var(--lp-fade));
+  transition: none;
+  will-change: opacity;
+}
+
+/* Canvas rain overlay — lives in pin-stack, above both hero and pipeline */
+.lp-rain-canvas {
+  width: 100%; height: 100%;
+  pointer-events: none; z-index: 3;
+  opacity: 0;
+  transition: none;
+}
+
+/* Pipeline section: stacked under hero, revealed as hero fades */
+.lp-pipeline-section.lp-pipeline-section--pinned {
+  z-index: 1;
+  height: 100vh; min-height: 100vh;
+  padding: 0 !important;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: var(--md-default-bg-color);
+}
+.lp-pipeline-section--pinned .lp-inner { padding: 0 48px; }
+
+/* Staged reveal for pipeline content */
+.lp-pipeline-section .lp-eyebrow,
+.lp-pipeline-section .lp-h2,
+.lp-pipeline-section .lp-lead,
+.lp-pipeline-section .lp-pipeline,
+.lp-pipeline-section .lp-term {
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 650ms cubic-bezier(0.2, 0.6, 0.2, 1),
+              transform 650ms cubic-bezier(0.2, 0.6, 0.2, 1);
+  will-change: opacity, transform;
+}
+.lp-pipeline-section.is-revealed .lp-eyebrow { opacity: 1; transform: translateY(0); transition-delay: 0ms; }
+.lp-pipeline-section.is-revealed .lp-h2 { opacity: 1; transform: translateY(0); transition-delay: 120ms; }
+.lp-pipeline-section.is-revealed .lp-lead { opacity: 1; transform: translateY(0); transition-delay: 240ms; }
+.lp-pipeline-section.is-revealed .lp-pipeline { opacity: 1; transform: translateY(0); transition-delay: 400ms; }
+.lp-pipeline-section.is-revealed .lp-term { opacity: 1; transform: translateY(0); transition-delay: 560ms; }
 
 /* ── Section commons ─── */
 .lp-section { padding: 96px 0; position: relative; z-index: 1; }
@@ -249,7 +298,7 @@
 }
 .lp-lang-chip:hover { transform: translateY(-2px); }
 
-/* ── Scroll reveal ─── */
+/* ── Scroll reveal (for sections after the pinned transition) ─── */
 .lp-reveal {
   opacity: 0; transform: translateY(24px);
   transition: opacity 600ms cubic-bezier(0.2, 0.6, 0.2, 1),
@@ -298,12 +347,6 @@
   color: var(--tn-fg); opacity: 0.2;
 }
 
-/* ── MkDocs header overrides (homepage) ─── */
-.md-tabs__link {
-  font-family: 'Space Mono', monospace !important;
-  font-size: 12px !important;
-}
-
 /* ── Responsive ─── */
 @media (max-width: 960px) {
   .lp-features { grid-template-columns: 1fr; }
@@ -320,37 +363,54 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .lp-hero-wrap { height: auto; }
+  .lp-pin-stack { position: static; height: auto; display: block; overflow: visible; }
+  .lp-hero.lp-hero--pinned {
+    position: relative !important; height: auto; min-height: calc(100vh - 60px);
+    opacity: 1 !important;
+  }
+  .lp-rain-canvas { display: none; }
+  .lp-pipeline-section.lp-pipeline-section--pinned {
+    height: auto; min-height: 0; padding: 96px 0 !important; display: block;
+  }
+  .lp-pipeline-section .lp-eyebrow,
+  .lp-pipeline-section .lp-h2,
+  .lp-pipeline-section .lp-lead,
+  .lp-pipeline-section .lp-pipeline,
+  .lp-pipeline-section .lp-term {
+    opacity: 1 !important; transform: none !important; transition: none !important;
+  }
   .lp-backdrop { display: none; }
   .lp-cursor { animation: none; opacity: 1; }
   .lp-reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
 }
 </style>
 
-<!-- ══ HERO ══════════════════════════════════════════════════ -->
-<section class="lp-hero">
+<!-- ══ SCROLL-PINNED: HERO → PIPELINE ═══════════════════════ -->
+<div class="lp-hero-wrap" id="lpHeroWrap">
+<div class="lp-pin-stack">
+
+<!-- Rain canvas (z-index 3, above both hero and pipeline) -->
+<canvas class="lp-rain-canvas" id="lpRainCanvas" aria-hidden="true"></canvas>
+
+<!-- Hero (z-index 2, fades out) -->
+<section class="lp-hero lp-hero--pinned">
   <div class="lp-backdrop" id="lpBackdrop"></div>
   <div class="lp-hero-content">
-
     <div class="lp-prompt">
       <span class="lp-prompt-chevron">&gt;</span> claude-<span class="lp-prompt-accent">toolbox</span><span class="lp-cursor"></span>
     </div>
-
     <div class="lp-tagline">a structured AI development pipeline</div>
-
     <div class="lp-tw" id="lpTw"></div>
-
     <div class="lp-badges">
       <span class="lp-badge" style="color:var(--tn-purple);border-color:rgba(187,154,247,0.35)">Claude Code</span>
       <span class="lp-badge" style="color:var(--tn-green);border-color:rgba(158,206,106,0.35)">Codex</span>
     </div>
-
     <div class="lp-actions">
       <a href="{{ config.site_url }}getting-started/overview/" class="lp-btn-p">Get Started</a>
       <a href="{{ config.repo_url }}" target="_blank" class="lp-btn-s">GitHub ↗</a>
     </div>
-
   </div>
-
   <div class="lp-stats">
     <div><div class="lp-stat-val">10</div><div class="lp-stat-label">Skills</div></div>
     <div><div class="lp-stat-val">6</div><div class="lp-stat-label">Languages</div></div>
@@ -359,13 +419,12 @@
   </div>
 </section>
 
-<!-- ══ PIPELINE ═══════════════════════════════════════════════ -->
-<section class="lp-section lp-alt lp-reveal">
+<!-- Pipeline (z-index 1, revealed as hero dissolves) -->
+<section class="lp-section lp-alt lp-pipeline-section lp-pipeline-section--pinned">
   <div class="lp-inner">
     <div class="lp-eyebrow">workflow</div>
     <h2 class="lp-h2">From Idea to <span>Shipped</span></h2>
     <p class="lp-lead">Ten skills chained into a pipeline. Each step produces artifacts the next step consumes — design docs, task lists, code, reviews, tests, documentation.</p>
-
     <div class="lp-pipeline">
       <div class="lp-pipe-step">/design</div>
       <span class="lp-pipe-arrow">→</span>
@@ -379,7 +438,6 @@
       <span class="lp-pipe-arrow">→</span>
       <div class="lp-pipe-step">/document</div>
     </div>
-
     <div class="lp-term">
       <div class="lp-term-bar">
         <div class="lp-term-dot" style="background:var(--tn-red)"></div>
@@ -401,13 +459,15 @@
   </div>
 </section>
 
+</div>
+</div>
+
 <!-- ══ WHAT'S INCLUDED ═══════════════════════════════════════ -->
 <section class="lp-section lp-reveal">
   <div class="lp-inner">
     <div class="lp-eyebrow">batteries included</div>
     <h2 class="lp-h2">Everything You <span>Need</span></h2>
     <p class="lp-lead">An opinionated setup that works out of the box. Install the plugin or adopt the full template — either way, you're productive in minutes.</p>
-
     <div class="lp-features">
       <div class="lp-feat-card">
         <div class="lp-feat-icon" style="background:var(--tn-blue)">kk</div>
@@ -452,7 +512,6 @@
     <div class="lp-eyebrow" style="justify-content:center">profiles</div>
     <h2 class="lp-h2">Language-Aware <span>Everywhere</span></h2>
     <p class="lp-lead" style="margin:0 auto 8px">Every workflow skill adapts — review checklists, implementation gotchas, test validators, and doc rubrics are all language-specific.</p>
-
     <div class="lp-lang-grid">
       <span class="lp-lang-chip" style="color:var(--tn-cyan);border-color:rgba(125,207,255,0.35)">Go</span>
       <span class="lp-lang-chip" style="color:var(--tn-yellow);border-color:rgba(224,175,104,0.35)">Java</span>
@@ -511,6 +570,133 @@
 document.addEventListener('DOMContentLoaded', function() {
   var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // ── MATRIX RAIN CANVAS ────────────────────────────────────
+  var canvas = document.getElementById('lpRainCanvas');
+  var ctx = canvas ? canvas.getContext('2d') : null;
+  var columns = [];
+  var GLYPHS = '/>{$01kK>_|'.split('');
+  var COLORS = ['#7aa2f7','#9ece6a','#7dcfff','#bb9af7','#73daca'];
+  var COL_W = 18;
+  var FONT_SIZE = 14;
+  var rainIntensity = 0;
+
+  function initRain() {
+    if (!canvas) return;
+    canvas.width = canvas.offsetWidth * (window.devicePixelRatio || 1);
+    canvas.height = canvas.offsetHeight * (window.devicePixelRatio || 1);
+    ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+    var nCols = Math.ceil(canvas.offsetWidth / COL_W);
+    columns = [];
+    for (var i = 0; i < nCols; i++) {
+      columns.push({
+        x: i * COL_W,
+        y: Math.random() * -canvas.offsetHeight,
+        speed: 1.5 + Math.random() * 3,
+        color: COLORS[i % COLORS.length],
+        chars: []
+      });
+      for (var j = 0; j < 30; j++) {
+        columns[i].chars.push(GLYPHS[Math.floor(Math.random() * GLYPHS.length)]);
+      }
+    }
+  }
+
+  var rainAnimId = null;
+  function drawRain() {
+    if (!ctx || rainIntensity <= 0) { rainAnimId = null; return; }
+    var w = canvas.offsetWidth;
+    var h = canvas.offsetHeight;
+    ctx.clearRect(0, 0, w, h);
+    ctx.font = FONT_SIZE + 'px "Space Mono", monospace';
+
+    for (var i = 0; i < columns.length; i++) {
+      var col = columns[i];
+      col.y += col.speed * rainIntensity;
+      if (col.y > h + FONT_SIZE * col.chars.length) {
+        col.y = Math.random() * -h * 0.5;
+        col.speed = 1.5 + Math.random() * 3;
+      }
+
+      for (var j = 0; j < col.chars.length; j++) {
+        var cy = col.y + j * FONT_SIZE;
+        if (cy < -FONT_SIZE || cy > h + FONT_SIZE) continue;
+        var alpha = (j === 0 ? 1.0 : Math.max(0.05, 1 - j / col.chars.length)) * rainIntensity;
+        ctx.fillStyle = col.color;
+        ctx.globalAlpha = alpha;
+        ctx.fillText(col.chars[j], col.x, cy);
+        if (Math.random() < 0.02) {
+          col.chars[j] = GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+    rainAnimId = requestAnimationFrame(drawRain);
+  }
+
+  if (canvas && !prefersReduced) {
+    initRain();
+    window.addEventListener('resize', initRain);
+  }
+
+  // ── SCROLL-PINNED HERO TRANSITION (matrix rain dissolve → pipeline reveal) ──
+  var heroWrap = document.getElementById('lpHeroWrap');
+  var hero = heroWrap && heroWrap.querySelector('.lp-hero');
+  var pipelineSection = document.querySelector('.lp-pipeline-section');
+
+  if (prefersReduced && pipelineSection) pipelineSection.classList.add('is-revealed');
+
+  if (heroWrap && hero && !prefersReduced) {
+    var ticking = false;
+    var pipelineRevealed = false;
+    function updateHero() {
+      ticking = false;
+      var rect = heroWrap.getBoundingClientRect();
+      var scrollDistance = rect.height - window.innerHeight;
+      if (scrollDistance <= 0) return;
+      var p = Math.max(0, Math.min(1, -rect.top / scrollDistance));
+
+      // Phase 1 (0–0.25): hero fades out, rain builds up
+      // Phase 2 (0.25–0.45): hero gone, rain at full (the hold)
+      // Phase 3 (0.45–0.70): pipeline fades in, rain fades out
+      // Phase 4 (0.70–1.0): pipeline lingers alone
+
+      var fade, rain;
+      if (p < 0.25) {
+        var t = p / 0.25;
+        fade = t;
+        rain = t;
+      } else if (p < 0.45) {
+        fade = 1;
+        rain = 1;
+      } else if (p < 0.70) {
+        var t2 = (p - 0.45) / 0.25;
+        fade = 1;
+        rain = 1 - t2;
+      } else {
+        fade = 1;
+        rain = 0;
+      }
+
+      hero.style.setProperty('--lp-fade', fade.toFixed(3));
+
+      rainIntensity = rain;
+      if (canvas) canvas.style.opacity = rain.toFixed(3);
+      if (rain > 0 && !rainAnimId) rainAnimId = requestAnimationFrame(drawRain);
+
+      if (pipelineSection && !pipelineRevealed && p > 0.48) {
+        pipelineSection.classList.add('is-revealed');
+        pipelineRevealed = true;
+      }
+    }
+
+    function onScroll() {
+      if (!ticking) { requestAnimationFrame(updateHero); ticking = true; }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    updateHero();
+  }
+
   // ── BACKDROP ──────────────────────────────────────────
   var commands = [
     '/kk:design', '/kk:implement', '/kk:review-code', '/kk:test', '/kk:document',
@@ -568,7 +754,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   tick();
 
-  // ── SCROLL REVEAL ─────────────────────────────────────
+  // ── SCROLL REVEAL (for sections after the pinned transition) ──
   if (!prefersReduced) {
     var reveals = document.querySelectorAll('.lp-reveal');
     var observer = new IntersectionObserver(function(entries) {
