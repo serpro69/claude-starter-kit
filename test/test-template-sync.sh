@@ -28,6 +28,7 @@ reset_globals() {
   DRY_RUN=false
   CI_MODE=false
   TARGET_VERSION="latest"
+  APPLY_MODE=false
   # Reset exclusion tracking arrays
   EXCLUDED_FILES=()
   SYNC_EXCLUSIONS=()
@@ -1989,9 +1990,11 @@ cat > "$test_dir/.github/template-state.json" <<'JSON'
 JSON
 MANIFEST_PATH="$test_dir/.github/template-state.json"
 DELETED_FILES=()
+APPLY_MODE=true
 pushd "$test_dir" >/dev/null
 run_plugin_migration >/dev/null 2>&1
 popd >/dev/null
+APPLY_MODE=false
 
 # Verify deletions
 if [[ ! -d "$test_dir/.claude/skills" ]]; then
@@ -2129,6 +2132,7 @@ cat >"$MANIFEST_PATH" <<'EOF'
 }
 EOF
 read_manifest
+APPLY_MODE=true
 pushd "$test_dir" >/dev/null
 run_serena_removal 2>/dev/null
 
@@ -2144,6 +2148,7 @@ else
   log_pass "SERENA_INITIAL_PROMPT removed from manifest"
 fi
 popd >/dev/null
+APPLY_MODE=false
 
 log_test "run_serena_removal respects sync_exclusions for .serena/"
 reset_globals
@@ -2169,6 +2174,7 @@ EOF
 read_manifest
 # Load exclusions the same way validate_manifest does
 mapfile -t SYNC_EXCLUSIONS < <(jq -r '.sync_exclusions[]' "$MANIFEST_PATH")
+APPLY_MODE=true
 pushd "$test_dir" >/dev/null
 run_serena_removal 2>/dev/null
 
@@ -2185,6 +2191,292 @@ else
   log_pass "SERENA_INITIAL_PROMPT removed from manifest even when dir excluded"
 fi
 popd >/dev/null
+APPLY_MODE=false
+
+# =============================================================================
+# Section: json_update helper
+# =============================================================================
+
+log_section "json_update helper"
+
+log_test "json_update modifies file atomically"
+reset_globals
+test_dir=$(create_temp_dir "json-update-basic")
+echo '{"key": "old"}' > "$test_dir/test.json"
+json_update "$test_dir/test.json" '.key = "new"'
+result=$(jq -r '.key' "$test_dir/test.json")
+assert_equals "new" "$result" "json_update sets value"
+
+log_test "json_update with --arg passes jq arguments"
+reset_globals
+test_dir=$(create_temp_dir "json-update-arg")
+echo '{"name": "placeholder"}' > "$test_dir/test.json"
+json_update "$test_dir/test.json" '.name = $val' --arg val "injected"
+result=$(jq -r '.name' "$test_dir/test.json")
+assert_equals "injected" "$result" "json_update passes --arg to jq"
+
+log_test "json_update returns 1 on invalid expression"
+reset_globals
+test_dir=$(create_temp_dir "json-update-fail")
+echo '{"key": "value"}' > "$test_dir/test.json"
+if json_update "$test_dir/test.json" 'INVALID EXPRESSION' 2>/dev/null; then
+  log_fail "json_update should return 1 for invalid jq expression"
+else
+  log_pass "json_update returns 1 on failure"
+fi
+# File should be unchanged on failure
+result=$(jq -r '.key' "$test_dir/test.json")
+assert_equals "value" "$result" "file unchanged after failed json_update"
+
+# =============================================================================
+# Section: apply_changes
+# =============================================================================
+
+log_section "apply_changes"
+
+log_test "apply_changes copies staged files to working tree"
+reset_globals
+test_dir=$(create_temp_dir "apply-copy")
+# Set up staging dir with substituted files
+mkdir -p "$test_dir/staging/substituted/claude"
+mkdir -p "$test_dir/staging/upstream/klaude-plugin/.claude-plugin"
+echo '{"name": "test-plugin"}' > "$test_dir/staging/upstream/klaude-plugin/.claude-plugin/plugin.json"
+echo "extra-content" > "$test_dir/staging/substituted/claude/CLAUDE.extra.md"
+# Set up project dir
+mkdir -p "$test_dir/.github"
+cat > "$test_dir/.github/template-state.json" <<'JSON'
+{
+  "schema_version": "1",
+  "upstream_repo": "serpro69/claude-toolbox",
+  "template_version": "v0.1.0",
+  "synced_at": "2025-01-01T00:00:00Z",
+  "variables": {
+    "PROJECT_NAME": "test",
+    "LANGUAGES": "bash",
+    "CC_MODEL": "default"
+  }
+}
+JSON
+mkdir -p "$test_dir/.claude"
+MANIFEST_PATH="$test_dir/.github/template-state.json"
+STAGING_DIR="$test_dir/staging"
+APPLY_MODE=true
+read_manifest
+pushd "$test_dir" >/dev/null
+apply_changes "$test_dir/staging/substituted" "v2.0.0" 2>/dev/null
+popd >/dev/null
+APPLY_MODE=false
+
+assert_file_exists "$test_dir/.claude/CLAUDE.extra.md" "staged file copied to .claude/"
+result=$(jq -r '.template_version' "$test_dir/.github/template-state.json")
+assert_equals "v2.0.0" "$result" "manifest version updated"
+# synced_at should be set
+result=$(jq -r '.synced_at' "$test_dir/.github/template-state.json")
+if [[ "$result" != "null" && "$result" != "2025-01-01T00:00:00Z" ]]; then
+  log_pass "synced_at timestamp updated"
+else
+  log_fail "synced_at should be updated to current time"
+fi
+
+log_test "apply_changes auto-imports CLAUDE.extra.md"
+reset_globals
+test_dir=$(create_temp_dir "apply-import")
+mkdir -p "$test_dir/staging/substituted/claude"
+mkdir -p "$test_dir/staging/upstream"
+echo "extra" > "$test_dir/staging/substituted/claude/CLAUDE.extra.md"
+mkdir -p "$test_dir/.github" "$test_dir/.claude"
+cat > "$test_dir/.github/template-state.json" <<'JSON'
+{
+  "schema_version": "1",
+  "upstream_repo": "serpro69/claude-toolbox",
+  "template_version": "v0.1.0",
+  "synced_at": "2025-01-01T00:00:00Z",
+  "variables": { "PROJECT_NAME": "test", "LANGUAGES": "bash", "CC_MODEL": "default" }
+}
+JSON
+echo "# My Project" > "$test_dir/CLAUDE.md"
+MANIFEST_PATH="$test_dir/.github/template-state.json"
+STAGING_DIR="$test_dir/staging"
+APPLY_MODE=true
+read_manifest
+pushd "$test_dir" >/dev/null
+apply_changes "$test_dir/staging/substituted" "v2.0.0" 2>/dev/null
+popd >/dev/null
+APPLY_MODE=false
+
+if grep -q '@.claude/CLAUDE.extra.md' "$test_dir/CLAUDE.md"; then
+  log_pass "CLAUDE.extra.md @import added to CLAUDE.md"
+else
+  log_fail "CLAUDE.extra.md @import should be added to CLAUDE.md"
+fi
+
+log_test "apply_changes skips CLAUDE.extra.md import when already present"
+reset_globals
+test_dir=$(create_temp_dir "apply-import-skip")
+mkdir -p "$test_dir/staging/substituted/claude"
+mkdir -p "$test_dir/staging/upstream"
+echo "extra" > "$test_dir/staging/substituted/claude/CLAUDE.extra.md"
+mkdir -p "$test_dir/.github" "$test_dir/.claude"
+cat > "$test_dir/.github/template-state.json" <<'JSON'
+{
+  "schema_version": "1",
+  "upstream_repo": "serpro69/claude-toolbox",
+  "template_version": "v0.1.0",
+  "synced_at": "2025-01-01T00:00:00Z",
+  "variables": { "PROJECT_NAME": "test", "LANGUAGES": "bash", "CC_MODEL": "default" }
+}
+JSON
+printf '# My Project\n@.claude/CLAUDE.extra.md\n' > "$test_dir/CLAUDE.md"
+MANIFEST_PATH="$test_dir/.github/template-state.json"
+STAGING_DIR="$test_dir/staging"
+APPLY_MODE=true
+read_manifest
+pushd "$test_dir" >/dev/null
+apply_changes "$test_dir/staging/substituted" "v2.0.0" 2>/dev/null
+popd >/dev/null
+APPLY_MODE=false
+
+count=$(grep -c '@.claude/CLAUDE.extra.md' "$test_dir/CLAUDE.md")
+if [[ "$count" -eq 1 ]]; then
+  log_pass "@import not duplicated when already present"
+else
+  log_fail "@import should appear exactly once (found $count)"
+fi
+
+log_test "apply_changes backfills manifest variables"
+reset_globals
+test_dir=$(create_temp_dir "apply-backfill")
+mkdir -p "$test_dir/staging/substituted" "$test_dir/staging/upstream"
+mkdir -p "$test_dir/.github"
+cat > "$test_dir/.github/template-state.json" <<'JSON'
+{
+  "schema_version": "1",
+  "upstream_repo": "serpro69/claude-toolbox",
+  "template_version": "v0.1.0",
+  "synced_at": "2025-01-01T00:00:00Z",
+  "variables": { "PROJECT_NAME": "test", "LANGUAGES": "bash", "CC_MODEL": "default" }
+}
+JSON
+MANIFEST_PATH="$test_dir/.github/template-state.json"
+STAGING_DIR="$test_dir/staging"
+APPLY_MODE=true
+read_manifest
+pushd "$test_dir" >/dev/null
+apply_changes "$test_dir/staging/substituted" "v2.0.0" 2>/dev/null
+popd >/dev/null
+APPLY_MODE=false
+
+result=$(jq -r '.variables.CC_STATUSLINE' "$test_dir/.github/template-state.json")
+assert_equals "enhanced" "$result" "CC_STATUSLINE backfilled"
+result=$(jq -r '.variables.SKIP_CAPY' "$test_dir/.github/template-state.json")
+assert_equals "false" "$result" "SKIP_CAPY backfilled"
+
+# =============================================================================
+# Section: --apply argument parsing
+# =============================================================================
+
+log_section "--apply argument parsing"
+
+log_test "parse_arguments with --apply flag"
+reset_globals
+parse_arguments --apply
+assert_equals "true" "$APPLY_MODE" "--apply sets APPLY_MODE=true"
+
+log_test "parse_arguments without --apply keeps APPLY_MODE=false"
+reset_globals
+parse_arguments --dry-run
+assert_equals "false" "$APPLY_MODE" "APPLY_MODE defaults to false"
+
+log_test "parse_arguments with --apply and --version"
+reset_globals
+parse_arguments --apply --version v3.0.0 --output-dir /tmp/test
+assert_equals "true" "$APPLY_MODE" "--apply with other flags: APPLY_MODE"
+assert_equals "v3.0.0" "$TARGET_VERSION" "--apply with other flags: TARGET_VERSION"
+assert_equals "/tmp/test" "$STAGING_DIR" "--apply with other flags: STAGING_DIR"
+
+# =============================================================================
+# Section: detect-only mode (APPLY_MODE=false)
+# =============================================================================
+
+log_section "detect-only mode"
+
+log_test "run_plugin_migration in detect mode populates DELETED_FILES without mutations"
+reset_globals
+test_dir=$(create_temp_dir "detect-plugin")
+mkdir -p "$test_dir/.claude/skills/cove"
+echo "skill" > "$test_dir/.claude/skills/cove/SKILL.md"
+mkdir -p "$test_dir/.claude/scripts"
+echo "script" > "$test_dir/.claude/scripts/validate-bash.sh"
+mkdir -p "$test_dir/.github"
+cat > "$test_dir/.github/template-state.json" <<'JSON'
+{
+  "schema_version": "1",
+  "upstream_repo": "serpro69/claude-toolbox",
+  "template_version": "v0.4.0",
+  "synced_at": "2025-01-27T10:00:00Z",
+  "variables": { "PROJECT_NAME": "test", "LANGUAGES": "bash", "CC_MODEL": "default" }
+}
+JSON
+MANIFEST_PATH="$test_dir/.github/template-state.json"
+DELETED_FILES=()
+APPLY_MODE=false
+pushd "$test_dir" >/dev/null
+run_plugin_migration >/dev/null 2>&1
+popd >/dev/null
+
+# DELETED_FILES should be populated
+if [[ ${#DELETED_FILES[@]} -gt 0 ]]; then
+  log_pass "DELETED_FILES populated in detect mode (${#DELETED_FILES[@]} entries)"
+else
+  log_fail "DELETED_FILES should be populated even in detect mode"
+fi
+# But files should still exist
+assert_file_exists "$test_dir/.claude/skills/cove/SKILL.md" "skill file preserved in detect mode"
+assert_file_exists "$test_dir/.claude/scripts/validate-bash.sh" "validate-bash.sh preserved in detect mode"
+
+log_test "run_serena_removal in detect mode populates arrays without mutations"
+reset_globals
+test_dir=$(create_temp_dir "detect-serena")
+mkdir -p "$test_dir/.serena"
+echo "project_name: test" > "$test_dir/.serena/project.yml"
+MANIFEST_PATH="$test_dir/manifest.json"
+cat >"$MANIFEST_PATH" <<'EOF'
+{
+  "schema_version": "1",
+  "upstream_repo": "serpro69/claude-toolbox",
+  "template_version": "v1.0.0",
+  "synced_at": "2025-01-27T10:00:00Z",
+  "variables": {
+    "PROJECT_NAME": "test",
+    "LANGUAGES": "bash",
+    "CC_MODEL": "sonnet",
+    "SERENA_INITIAL_PROMPT": ""
+  }
+}
+EOF
+read_manifest
+APPLY_MODE=false
+pushd "$test_dir" >/dev/null
+run_serena_removal 2>/dev/null
+popd >/dev/null
+
+if [[ ${#DELETED_FILES[@]} -gt 0 ]]; then
+  log_pass "DELETED_FILES populated in detect mode"
+else
+  log_fail "DELETED_FILES should be populated even in detect mode"
+fi
+# Directory should still exist
+if [[ -d "$test_dir/.serena" ]]; then
+  log_pass ".serena/ preserved in detect mode"
+else
+  log_fail ".serena/ should be preserved when APPLY_MODE=false"
+fi
+# Manifest should NOT be modified in detect mode
+if jq -e '.variables.SERENA_INITIAL_PROMPT' "$MANIFEST_PATH" &>/dev/null 2>&1; then
+  log_pass "SERENA_INITIAL_PROMPT preserved in manifest (detect mode)"
+else
+  log_fail "SERENA_INITIAL_PROMPT should be preserved in detect mode"
+fi
 
 # =============================================================================
 # Summary

@@ -31,7 +31,6 @@ jobs:
       old_version: ${{ steps.manifest.outputs.old_version }}
       new_version: ${{ steps.sync.outputs.resolved_version }}
       diff_summary: ${{ steps.sync.outputs.diff_summary }}
-      plugin_migrated: ${{ steps.sync.outputs.plugin_migrated }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
@@ -175,149 +174,14 @@ jobs:
           name: sync-diff-report
           path: .github/sync-artifacts
 
-      - name: Run Plugin Migration
-        if: needs.sync.outputs.plugin_migrated == 'true'
+      - name: Apply Changes
         run: |
-          echo "Migrating to kk plugin system..."
-          # Remove template-managed skills, commands, hooks, and validator
-          rm -rf .claude/skills .claude/commands
-          rm -f .claude/scripts/validate-bash.sh
-          # Remove hooks from settings.json (substituted template will provide marketplace config)
-          if [[ -f .claude/settings.json ]] && jq -e '.hooks' .claude/settings.json &>/dev/null; then
-            jq 'del(.hooks)' .claude/settings.json > .claude/settings.json.tmp
-            mv .claude/settings.json.tmp .claude/settings.json
-          fi
-          # Set plugin_migrated flag in manifest
-          jq '.plugin_migrated = true' .github/template-state.json > .github/template-state.json.tmp
-          mv .github/template-state.json.tmp .github/template-state.json
-          echo "Plugin migration complete"
-
-      - name: Remove Serena Artifacts
-        run: |
-          # Detect by manifest variable — only runs if repo was set up with Serena defaults
-          if ! jq -e '.variables.SERENA_INITIAL_PROMPT' .github/template-state.json &>/dev/null 2>&1; then
-            echo "No Serena artifacts to remove"
-            exit 0
-          fi
-          # Check sync_exclusions — respect .serena/* if excluded
-          SERENA_EXCLUDED=false
-          if jq -e '.sync_exclusions[]' .github/template-state.json 2>/dev/null | grep -q '\.serena'; then
-            SERENA_EXCLUDED=true
-            echo "Skipping .serena/ removal (matched sync_exclusions)"
-          fi
-          if ! $SERENA_EXCLUDED; then
-            echo "Removing Serena artifacts (no longer in upstream defaults)..."
-            rm -rf .serena
-            if [[ -f .gitignore ]] && grep -q '^!\.serena' .gitignore; then
-              sed -i '/^!\.serena$/d' .gitignore
-            fi
-            if [[ -f .claude/settings.local.json ]] && jq -e '.permissions.allow | any(startswith("mcp__serena__"))' .claude/settings.local.json &>/dev/null 2>&1; then
-              jq '.permissions.allow |= map(select(startswith("mcp__serena__") | not))' .claude/settings.local.json > .claude/settings.local.json.tmp
-              mv .claude/settings.local.json.tmp .claude/settings.local.json
-            fi
-          fi
-          # Remove SERENA_INITIAL_PROMPT from manifest
-          if jq -e '.variables.SERENA_INITIAL_PROMPT' .github/template-state.json &>/dev/null 2>&1; then
-            jq 'del(.variables.SERENA_INITIAL_PROMPT)' .github/template-state.json > .github/template-state.json.tmp
-            mv .github/template-state.json.tmp .github/template-state.json
-          fi
-          echo "Serena removal complete"
-
-      - name: Apply Staged Changes
-        run: |
-          STAGING_DIR=".github/sync-artifacts/sync-staging/substituted"
-
-          # Copy claude config files
-          if [[ -d "$STAGING_DIR/claude" ]]; then
-            cp -r "$STAGING_DIR/claude/"* .claude/ 2>/dev/null || true
-            echo "Applied changes to .claude/"
-          fi
-
-          # Copy codex config files
-          if [[ -d "$STAGING_DIR/codex" ]]; then
-            mkdir -p .codex
-            cp -r "$STAGING_DIR/codex/"* .codex/ 2>/dev/null || true
-            chmod +x .codex/scripts/*.sh 2>/dev/null || true
-            echo "Applied changes to .codex/"
-          fi
-
-          # Copy workflow files (sync infrastructure)
-          if [[ -d "$STAGING_DIR/workflows" ]]; then
-            cp -r "$STAGING_DIR/workflows/"* .github/workflows/ 2>/dev/null || true
-            echo "Applied changes to .github/workflows/"
-          fi
-
-          # Copy script files (sync infrastructure, preserve executable permissions)
-          if [[ -d "$STAGING_DIR/scripts" ]]; then
-            cp -r "$STAGING_DIR/scripts/"* .github/scripts/ 2>/dev/null || true
-            chmod +x .github/scripts/*.sh 2>/dev/null || true
-            echo "Applied changes to .github/scripts/"
-          fi
-
-          # Ensure .codex is not gitignored in downstream repos
-          # Many repos use ".*" to ignore all dotdirs; without "!.codex" the synced files are silently dropped
-          if [[ -d "$STAGING_DIR/codex" && -f ".gitignore" ]]; then
-            if git check-ignore -q .codex 2>/dev/null; then
-              if ! grep -q '^!\.codex' .gitignore; then
-                # Find the right place: after existing !.claude line
-                if grep -q '^!\.claude' .gitignore; then
-                  sed -i '/^!\.claude$/a !.codex' .gitignore
-                else
-                  printf '!.codex\n' >> .gitignore
-                fi
-                echo "Added !.codex to .gitignore (was excluded by .* pattern)"
-              fi
-            fi
-          fi
-
-          # Auto-append @import reference for CLAUDE.extra.md on first sync
-          # If the file was just added and CLAUDE.md exists but doesn't reference it, add the import
-          if [[ -f "$STAGING_DIR/claude/CLAUDE.extra.md" && -f "CLAUDE.md" ]]; then
-            if ! grep -q '@.claude/CLAUDE.extra.md' CLAUDE.md; then
-              printf '\n# Extra Instructions\n' >> CLAUDE.md
-              printf '@.claude/CLAUDE.extra.md\n' >> CLAUDE.md
-              echo "Added @import reference for .claude/CLAUDE.extra.md to CLAUDE.md"
-            fi
-          fi
-
-      - name: Cleanup Staging Artifacts
-        run: |
-          # Remove staging artifacts to prevent them from being included in the PR
+          chmod +x .github/scripts/template-sync.sh
+          .github/scripts/template-sync.sh \
+            --apply \
+            --version "${{ needs.sync.outputs.new_version }}" \
+            --output-dir .github/sync-artifacts/sync-staging
           rm -rf .github/sync-artifacts .github/reports
-          echo "Cleaned up staging artifacts"
-
-      - name: Update Manifest Version
-        run: |
-          NEW_VERSION="${{ needs.sync.outputs.new_version }}"
-          SYNCED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-
-          # Migrate upstream_repo if still using old repository name
-          CURRENT_REPO=$(jq -r '.upstream_repo' .github/template-state.json)
-          if [[ "$CURRENT_REPO" == "serpro69/claude-starter-kit" ]]; then
-            echo "Migrating upstream_repo from serpro69/claude-starter-kit to serpro69/claude-toolbox"
-            jq '.upstream_repo = "serpro69/claude-toolbox"' \
-              .github/template-state.json > .github/template-state.json.tmp
-            mv .github/template-state.json.tmp .github/template-state.json
-          fi
-
-          # Backfill missing optional variables with defaults
-          DEFAULTS='{"CC_STATUSLINE":"enhanced","CC_EFFORT_LEVEL":"high","CC_PERMISSION_MODE":"default","CODEX_MODEL":"gpt-5.5","CODEX_APPROVAL_POLICY":"on-request","SKIP_CAPY":"false"}'
-          for key in $(echo "$DEFAULTS" | jq -r 'keys[]'); do
-            if [[ "$(jq -r ".variables.$key // \"__MISSING__\"" .github/template-state.json)" == "__MISSING__" ]]; then
-              default_val=$(echo "$DEFAULTS" | jq -r ".$key")
-              jq --arg k "$key" --arg v "$default_val" '.variables[$k] = $v' \
-                .github/template-state.json > .github/template-state.json.tmp
-              mv .github/template-state.json.tmp .github/template-state.json
-              echo "Backfilled $key=$default_val"
-            fi
-          done
-
-          jq --arg version "$NEW_VERSION" --arg synced_at "$SYNCED_AT" \
-            '.template_version = $version | .synced_at = $synced_at' \
-            .github/template-state.json > .github/template-state.json.tmp
-          mv .github/template-state.json.tmp .github/template-state.json
-
-          echo "Updated manifest to version $NEW_VERSION"
 
       - name: Check for Existing PR
         id: check-pr

@@ -10,6 +10,7 @@
 #   ./template-sync.sh --version v1.2.0     # Sync to specific version
 #   ./template-sync.sh --dry-run            # Preview what would change
 #   ./template-sync.sh --ci                 # CI mode for GitHub Actions
+#   ./template-sync.sh --apply --output-dir ./staging  # Apply staged changes
 #
 # OPTIONS:
 #   --version VERSION     Target version to sync (default: latest)
@@ -17,6 +18,7 @@
 #                         - "main": Latest from main branch
 #                         - "v1.2.3": Specific tag
 #   --dry-run             Preview changes without applying them
+#   --apply               Apply staged changes to the working tree (used by CI)
 #   --ci                  CI mode for GitHub Actions (structured output)
 #   --output-dir DIR      Directory for staged changes (default: temp)
 #   -h, --help            Show this help message
@@ -108,6 +110,10 @@ RESOLVED_VERSION=""
 
 # Plugin migration tracking
 PLUGIN_MIGRATED=false
+
+# Apply mode: when true, migration functions perform filesystem mutations.
+# When false (default), they only populate tracking arrays for reporting.
+APPLY_MODE=false
 
 # =============================================================================
 # Color Output
@@ -221,12 +227,15 @@ check_dependencies() {
     missing+=("git")
   fi
 
-  if ! command -v curl &>/dev/null; then
-    missing+=("curl")
-  fi
+  # curl and yq are only needed for fetch/substitute, not apply mode
+  if ! $APPLY_MODE; then
+    if ! command -v curl &>/dev/null; then
+      missing+=("curl")
+    fi
 
-  if ! command -v yq &>/dev/null; then
-    missing+=("yq")
+    if ! command -v yq &>/dev/null; then
+      missing+=("yq")
+    fi
   fi
 
   if [[ ${#missing[@]} -gt 0 ]]; then
@@ -235,6 +244,31 @@ check_dependencies() {
     echo "  macOS:  brew install ${missing[*]}"
     echo "  Linux:  apt-get install ${missing[*]}"
     exit 1
+  fi
+}
+
+# json_update()
+# Atomically updates a JSON file using a jq expression.
+# Writes to a temp file first, then moves into place on success.
+#
+# Args:
+#   $1 - Target file path
+#   $2 - jq filter expression
+#   $@ - Additional arguments forwarded to jq (e.g., --arg key val)
+#
+# Returns:
+#   0 on success, 1 on jq failure (target file unchanged)
+json_update() {
+  local file="$1" expr="$2"
+  shift 2
+  local tmp
+  tmp=$(mktemp "/tmp/json-update.XXXXXX")
+  if jq "$@" "$expr" "$file" >"$tmp"; then
+    mv "$tmp" "$file"
+    return 0
+  else
+    rm -f "$tmp"
+    return 1
   fi
 }
 
@@ -402,14 +436,10 @@ migrate_manifest() {
 
   if [[ "$upstream_repo" == "serpro69/claude-starter-kit" ]]; then
     log_info "Migrating upstream_repo from serpro69/claude-starter-kit to serpro69/claude-toolbox"
-    local tmp
-    tmp=$(mktemp "/tmp/manifest-migrate.XXXXXX")
-    if ! jq '.upstream_repo = "serpro69/claude-toolbox"' "$MANIFEST_PATH" >"$tmp"; then
-      rm -f "$tmp"
+    if ! json_update "$MANIFEST_PATH" '.upstream_repo = "serpro69/claude-toolbox"'; then
       log_error "Failed to migrate manifest"
       exit 1
     fi
-    mv "$tmp" "$MANIFEST_PATH"
     read_manifest
   fi
 }
@@ -449,8 +479,6 @@ backfill_manifest_variables() {
   done
 
   if $needs_update; then
-    local tmp
-    tmp=$(mktemp "/tmp/manifest-backfill.XXXXXX")
     local jq_expr='.'
     for entry in "${defaults[@]}"; do
       local var="${entry%%:*}"
@@ -459,12 +487,10 @@ backfill_manifest_variables() {
         jq_expr="$jq_expr | .variables.$var = \"$default_val\""
       fi
     done
-    if ! jq "$jq_expr" "$MANIFEST_PATH" >"$tmp"; then
-      rm -f "$tmp"
+    if ! json_update "$MANIFEST_PATH" "$jq_expr"; then
       log_warn "Failed to backfill manifest variables"
       return 0
     fi
-    mv "$tmp" "$MANIFEST_PATH"
     log_info "Backfilled missing manifest variables: ${backfilled[*]}"
     read_manifest
   fi
@@ -540,60 +566,62 @@ run_plugin_migration() {
     ".claude/scripts/validate-bash.sh"
   )
 
-  # Remove directories
+  # Track and optionally remove directories
   for dir in "${dirs_to_remove[@]}"; do
     if [[ -d "$dir" ]]; then
-      rm -rf "$dir"
       DELETED_FILES+=("$dir/")
-      log_info "Removed $dir/"
+      if $APPLY_MODE; then
+        rm -rf "$dir"
+        log_info "Removed $dir/"
+      else
+        log_info "Would remove $dir/"
+      fi
     fi
   done
 
-  # Remove individual files
+  # Track and optionally remove individual files
   for file in "${files_to_remove[@]}"; do
     if [[ -f "$file" ]]; then
-      rm -f "$file"
       DELETED_FILES+=("$file")
-      log_info "Removed $file"
+      if $APPLY_MODE; then
+        rm -f "$file"
+        log_info "Removed $file"
+      else
+        log_info "Would remove $file"
+      fi
     fi
   done
 
-  # Clean up empty parent directories
-  rmdir .claude/skills 2>/dev/null || true
-  rmdir .claude/commands 2>/dev/null || true
+  if $APPLY_MODE; then
+    # Clean up empty parent directories
+    rmdir .claude/skills 2>/dev/null || true
+    rmdir .claude/commands 2>/dev/null || true
 
-  # Update settings.json: remove hooks, add marketplace and plugin config
-  local settings_file=".claude/settings.json"
-  if [[ -f "$settings_file" ]]; then
-    local tmp
-    tmp=$(mktemp "/tmp/settings-migrate.XXXXXX")
-    if jq --arg repo "$upstream_repo" \
-      'del(.hooks) |
-       .extraKnownMarketplaces = {
-         "claude-toolbox": {
-           "source": {
-             "source": "github",
-             "repo": $repo
+    # Update settings.json: remove hooks, add marketplace and plugin config
+    local settings_file=".claude/settings.json"
+    if [[ -f "$settings_file" ]]; then
+      if json_update "$settings_file" \
+        'del(.hooks) |
+         .extraKnownMarketplaces = {
+           "claude-toolbox": {
+             "source": {
+               "source": "github",
+               "repo": $repo
+             }
            }
-         }
-       }' "$settings_file" >"$tmp"; then
-      mv "$tmp" "$settings_file"
-      log_info "Updated $settings_file for plugin system"
-    else
-      rm -f "$tmp"
-      log_warn "Failed to update $settings_file — manual update required"
+         }' --arg repo "$upstream_repo"; then
+        log_info "Updated $settings_file for plugin system"
+      else
+        log_warn "Failed to update $settings_file — manual update required"
+      fi
     fi
-  fi
 
-  # Set plugin_migrated flag in manifest
-  local tmp
-  tmp=$(mktemp "/tmp/manifest-plugin.XXXXXX")
-  if jq '.plugin_migrated = true' "$MANIFEST_PATH" >"$tmp"; then
-    mv "$tmp" "$MANIFEST_PATH"
-    log_info "Set plugin_migrated flag in manifest"
-  else
-    rm -f "$tmp"
-    log_warn "Failed to update manifest — manual update required"
+    # Set plugin_migrated flag in manifest
+    if json_update "$MANIFEST_PATH" '.plugin_migrated = true'; then
+      log_info "Set plugin_migrated flag in manifest"
+    else
+      log_warn "Failed to update manifest — manual update required"
+    fi
   fi
 
   log_success "Plugin migration complete"
@@ -638,44 +666,52 @@ run_serena_removal() {
     log_info "Skipping .serena/ removal (matched sync_exclusions)"
   else
     if [[ -d ".serena" ]]; then
-      rm -rf ".serena"
       DELETED_FILES+=(".serena/")
-      log_info "Removed .serena/"
+      if $APPLY_MODE; then
+        rm -rf ".serena"
+        log_info "Removed .serena/"
+      else
+        log_info "Would remove .serena/"
+      fi
     fi
 
     # Remove !.serena from .gitignore if present
     if [[ -f ".gitignore" ]] && grep -q '^!\.serena' .gitignore; then
-      sed -i '/^!\.serena$/d' .gitignore
       MODIFIED_FILES+=(".gitignore")
-      log_info "Removed !.serena from .gitignore"
+      if $APPLY_MODE; then
+        sed -i '/^!\.serena$/d' .gitignore
+        log_info "Removed !.serena from .gitignore"
+      else
+        log_info "Would remove !.serena from .gitignore"
+      fi
     fi
 
     # Remove mcp__serena__* from settings.local.json permissions if present
     local local_settings=".claude/settings.local.json"
     if [[ -f "$local_settings" ]] && jq -e '.permissions.allow | any(startswith("mcp__serena__"))' "$local_settings" &>/dev/null 2>&1; then
-      local tmp
-      tmp=$(mktemp "/tmp/settings-serena.XXXXXX")
-      if jq '.permissions.allow |= map(select(startswith("mcp__serena__") | not))' "$local_settings" >"$tmp"; then
-        mv "$tmp" "$local_settings"
-        MODIFIED_FILES+=("$local_settings")
-        log_info "Removed mcp__serena__* from $local_settings permissions"
+      if $APPLY_MODE; then
+        if json_update "$local_settings" '.permissions.allow |= map(select(startswith("mcp__serena__") | not))'; then
+          MODIFIED_FILES+=("$local_settings")
+          log_info "Removed mcp__serena__* from $local_settings permissions"
+        fi
       else
-        rm -f "$tmp"
+        MODIFIED_FILES+=("$local_settings")
+        log_info "Would remove mcp__serena__* from $local_settings permissions"
       fi
     fi
   fi
 
   # Clean manifest: remove SERENA_INITIAL_PROMPT variable and set flag
   if [[ -f "$MANIFEST_PATH" ]]; then
-    local tmp
-    tmp=$(mktemp "/tmp/manifest-serena.XXXXXX")
-    if jq 'del(.variables.SERENA_INITIAL_PROMPT)' "$MANIFEST_PATH" >"$tmp"; then
-      mv "$tmp" "$MANIFEST_PATH"
-      read_manifest
-      log_info "Removed SERENA_INITIAL_PROMPT from manifest"
+    if $APPLY_MODE; then
+      if json_update "$MANIFEST_PATH" 'del(.variables.SERENA_INITIAL_PROMPT)'; then
+        read_manifest
+        log_info "Removed SERENA_INITIAL_PROMPT from manifest"
+      else
+        log_warn "Failed to update manifest — manual cleanup may be needed"
+      fi
     else
-      rm -f "$tmp"
-      log_warn "Failed to update manifest — manual cleanup may be needed"
+      log_info "Would remove SERENA_INITIAL_PROMPT from manifest"
     fi
   fi
 
@@ -1420,6 +1456,101 @@ generate_markdown_summary() {
 }
 
 # =============================================================================
+# Apply Changes (consolidates all mutations the YAML used to do inline)
+# =============================================================================
+
+# apply_changes()
+# Applies all staged changes to the working tree: copies files, runs
+# migrations, patches gitignore, auto-imports CLAUDE.extra.md, and
+# updates the manifest version.
+#
+# Args:
+#   $1 - Staging directory containing substituted templates
+#   $2 - Resolved version string to write into the manifest
+#
+# Side effects:
+#   Mutates working tree files, updates manifest
+apply_changes() {
+  local staging_dir="$1"
+  local new_version="$2"
+
+  log_step "Applying staged changes"
+
+  # --- Copy staged files into working tree ---
+  local -A dir_map=(
+    ["claude"]=".claude"
+    ["codex"]=".codex"
+    ["workflows"]=".github/workflows"
+    ["scripts"]=".github/scripts"
+    ["docs"]="docs"
+  )
+
+  for staging_subdir in "${!dir_map[@]}"; do
+    local source="$staging_dir/$staging_subdir"
+    local target="${dir_map[$staging_subdir]}"
+    [[ ! -d "$source" ]] && continue
+    mkdir -p "$target"
+    cp -r "$source/"* "$target/" 2>/dev/null || true
+    log_info "Applied changes to $target/"
+  done
+
+  # Restore executable permissions on scripts
+  chmod +x .codex/scripts/*.sh 2>/dev/null || true
+  chmod +x .github/scripts/*.sh 2>/dev/null || true
+
+  # --- Run migrations ---
+  local upstream_dir
+  upstream_dir="$(dirname "$staging_dir")/upstream"
+  if needs_plugin_migration "$upstream_dir"; then
+    run_plugin_migration
+  fi
+
+  if needs_serena_removal; then
+    run_serena_removal
+  fi
+
+  # --- Patch .gitignore for .codex ---
+  if [[ -d "$staging_dir/codex" && -f ".gitignore" ]]; then
+    if git check-ignore -q .codex 2>/dev/null; then
+      if ! grep -q '^!\.codex' .gitignore; then
+        if grep -q '^!\.claude' .gitignore; then
+          sed -i '/^!\.claude$/a !.codex' .gitignore
+        else
+          printf '!.codex\n' >> .gitignore
+        fi
+        log_info "Added !.codex to .gitignore (was excluded by .* pattern)"
+      fi
+    fi
+  fi
+
+  # --- Auto-import CLAUDE.extra.md ---
+  if [[ -f "$staging_dir/claude/CLAUDE.extra.md" && -f "CLAUDE.md" ]]; then
+    if ! grep -q '@.claude/CLAUDE.extra.md' CLAUDE.md; then
+      printf '\n# Extra Instructions\n' >> CLAUDE.md
+      printf '@.claude/CLAUDE.extra.md\n' >> CLAUDE.md
+      log_info "Added @import reference for .claude/CLAUDE.extra.md to CLAUDE.md"
+    fi
+  fi
+
+  # --- Update manifest version ---
+  local synced_at
+  synced_at=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+  migrate_manifest
+  backfill_manifest_variables
+
+  if json_update "$MANIFEST_PATH" \
+    '.template_version = $version | .synced_at = $synced_at' \
+    --arg version "$new_version" --arg synced_at "$synced_at"; then
+    log_info "Updated manifest to version $new_version"
+  else
+    log_warn "Failed to update manifest version"
+  fi
+
+  log_success "All changes applied"
+}
+
+# =============================================================================
 # Help / Usage
 # =============================================================================
 
@@ -1439,6 +1570,7 @@ Options:
                         - "v1.2.3": Specific tag
                         - SHA: Specific commit
   --dry-run             Preview changes without applying them
+  --apply               Apply staged changes to the working tree
   --ci                  CI mode: outputs GitHub Actions compatible format
   --output-dir DIR      Directory to stage changes (default: temporary directory)
   -h, --help            Show this help message
@@ -1482,6 +1614,10 @@ parse_arguments() {
       DRY_RUN=true
       shift
       ;;
+    --apply)
+      APPLY_MODE=true
+      shift
+      ;;
     --ci)
       CI_MODE=true
       shift
@@ -1522,13 +1658,19 @@ main() {
   # Register cleanup trap early for signal handling
   trap cleanup_on_exit EXIT INT TERM
 
-  # Check dependencies first
-  check_dependencies
-
-  # Parse CLI arguments
+  # Parse CLI arguments (before dependency check so APPLY_MODE is set)
   parse_arguments "$@"
 
-  # Set default staging directory if not provided
+  # Check dependencies (applies mode-aware checks)
+  check_dependencies
+
+  # Apply mode requires an explicit staging directory
+  if $APPLY_MODE && [[ -z "$STAGING_DIR" ]]; then
+    log_error "--apply requires --output-dir to locate staged changes"
+    exit 2
+  fi
+
+  # Set default staging directory if not provided (non-apply mode only)
   if [[ -z "$STAGING_DIR" ]]; then
     STAGING_DIR=$(mktemp -d "/tmp/template-sync.XXXXXX")
     # Track temp directory for cleanup
@@ -1552,6 +1694,13 @@ main() {
   # Read and validate manifest
   read_manifest
   validate_manifest
+
+  # Apply mode: skip fetch/compare/report, just apply staged changes
+  if $APPLY_MODE; then
+    apply_changes "$STAGING_DIR/substituted" "$TARGET_VERSION"
+    return 0
+  fi
+
   migrate_manifest
   backfill_manifest_variables
 

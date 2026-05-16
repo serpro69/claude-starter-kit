@@ -355,21 +355,21 @@ fi
 # Section 6: Workflow Auto-Import
 # =============================================================================
 
-log_section "Section 6: Workflow Auto-Import"
+log_section "Section 6: Sync Script Auto-Import"
 
-log_test "template-sync.yml contains auto-import logic"
-workflow_file="$REPO_ROOT/.github/workflows/template-sync.yml"
-if grep -q '@.claude/CLAUDE.extra.md' "$workflow_file"; then
-  log_pass "Workflow contains CLAUDE.extra.md auto-import logic"
+log_test "template-sync.sh contains auto-import logic"
+sync_script="$REPO_ROOT/.github/scripts/template-sync.sh"
+if grep -q '@.claude/CLAUDE.extra.md' "$sync_script"; then
+  log_pass "Sync script contains CLAUDE.extra.md auto-import logic"
 else
-  log_fail "Workflow should contain auto-import logic for CLAUDE.extra.md"
+  log_fail "Sync script should contain auto-import logic for CLAUDE.extra.md"
 fi
 
-log_test "template-sync.yml has idempotent import check"
-if grep -q "grep -q '@.claude/CLAUDE.extra.md'" "$workflow_file"; then
-  log_pass "Workflow checks for existing import before appending"
+log_test "template-sync.sh has idempotent import check"
+if grep -q "grep -q '@.claude/CLAUDE.extra.md'" "$sync_script"; then
+  log_pass "Sync script checks for existing import before appending"
 else
-  log_fail "Workflow should check for existing import to prevent duplication"
+  log_fail "Sync script should check for existing import to prevent duplication"
 fi
 
 # =============================================================================
