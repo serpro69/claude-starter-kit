@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Test suite for .github/scripts/template-cleanup.sh manifest generation
+# Test suite for .claude/toolbox/scripts/template-cleanup.sh manifest generation
 set -euo pipefail
 
 # Source shared test helpers
@@ -8,7 +8,7 @@ source "$SCRIPT_DIR/helpers.sh"
 
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 SCHEMA_FILE="$REPO_ROOT/docs/template-sync/template-state-schema.json"
-TEMPLATE_CLEANUP_SCRIPT="$REPO_ROOT/.github/scripts/template-cleanup.sh"
+TEMPLATE_CLEANUP_SCRIPT="$REPO_ROOT/.claude/toolbox/scripts/template-cleanup.sh"
 
 # Source the script to get access to functions
 # The script has a sourcing guard that prevents main execution when sourced

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Test suite for .github/scripts/semver-compare.sh
+# Test suite for .claude/toolbox/scripts/semver-compare.sh
 # Validates semver 2.0.0 compliant comparison (https://semver.org/#spec-item-11)
 set -euo pipefail
 
@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/helpers.sh"
 
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-COMPARE="$REPO_ROOT/.github/scripts/semver-compare.sh"
+COMPARE="$REPO_ROOT/.claude/toolbox/scripts/semver-compare.sh"
 
 # Helper: assert that compare(v1, v2) produces expected output
 assert_cmp() {

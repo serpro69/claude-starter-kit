@@ -5,9 +5,9 @@
 # Based on .github/workflows/template-cleanup.yml
 #
 # Usage:
-#   ./.github/scripts/template-cleanup.sh                    # Interactive mode (recommended)
-#   ./.github/scripts/template-cleanup.sh [options]          # Non-interactive with CLI options
-#   ./.github/scripts/template-cleanup.sh -y [options]       # Skip confirmation prompt
+#   ./.claude/toolbox/scripts/template-cleanup.sh                    # Interactive mode (recommended)
+#   ./.claude/toolbox/scripts/template-cleanup.sh [options]          # Non-interactive with CLI options
+#   ./.claude/toolbox/scripts/template-cleanup.sh -y [options]       # Skip confirmation prompt
 #
 # Options:
 #   --model <model>           Claude Code model (default: default)
@@ -93,9 +93,9 @@ Template Cleanup Script
 Converts the claude-toolbox template into a project-specific setup.
 
 Usage:
-  ./.github/scripts/template-cleanup.sh                    # Interactive mode (recommended)
-  ./.github/scripts/template-cleanup.sh [options]          # Non-interactive with CLI options
-  ./.github/scripts/template-cleanup.sh -y [options]       # Skip confirmation prompt
+  ./.claude/toolbox/scripts/template-cleanup.sh                    # Interactive mode (recommended)
+  ./.claude/toolbox/scripts/template-cleanup.sh [options]          # Non-interactive with CLI options
+  ./.claude/toolbox/scripts/template-cleanup.sh -y [options]       # Skip confirmation prompt
 
 Options:
   --model <model>           Claude Code model alias (default: default)
@@ -123,16 +123,16 @@ Options:
 
 Examples:
   # Interactive setup (recommended for first-time users)
-  ./.github/scripts/template-cleanup.sh
+  ./.claude/toolbox/scripts/template-cleanup.sh
 
   # Basic setup with TypeScript
-  ./.github/scripts/template-cleanup.sh --languages typescript -y
+  ./.claude/toolbox/scripts/template-cleanup.sh --languages typescript -y
 
   # Setup with multiple languages
-  ./.github/scripts/template-cleanup.sh --languages python,typescript,bash -y
+  ./.claude/toolbox/scripts/template-cleanup.sh --languages python,typescript,bash -y
 
   # Full setup with custom model
-  ./.github/scripts/template-cleanup.sh --model sonnet --languages python -y
+  ./.claude/toolbox/scripts/template-cleanup.sh --model sonnet --languages python -y
 EOF
 }
 
@@ -436,25 +436,19 @@ execute_cleanup() {
       "$codex_config_file"
   fi
 
-  if [[ -f .github/scripts/bootstrap.sh ]]; then
-    cp .github/scripts/bootstrap.sh .
-    rm -f .github/scripts/bootstrap.sh
+  if [[ -f .claude/toolbox/scripts/bootstrap.sh ]]; then
+    cp .claude/toolbox/scripts/bootstrap.sh .
+    rm -f .claude/toolbox/scripts/bootstrap.sh
   fi
 
   log_step "Cleaning up .github/ (preserving sync infrastructure)..."
   rm -f .github/template-state.example.json
-  rm -f .github/scripts/template-cleanup.sh
   rm -f .github/workflows/template-cleanup.yml
   rm -f .github/workflows/pre-release.yml
   rm -f .github/workflows/release.yml
   rm -f .github/workflows/docs.yml
 
   log_step "Preserving files for restore after cleanup..."
-  local tmpfile_update_sh=""
-  if [[ -f docs/update.sh ]]; then
-    tmpfile_update_sh="$(mktemp)"
-    cp docs/update.sh "$tmpfile_update_sh"
-  fi
   local tmpfile_capy_agents=""
   if [[ "$SKIP_CAPY" != "true" ]] && [[ -f .capy/AGENTS.md ]]; then
     tmpfile_capy_agents="$(mktemp)"
@@ -489,12 +483,6 @@ execute_cleanup() {
     log_info "Stripped all capy config and scripts (SKIP_CAPY=true)"
   fi
 
-  if [[ -n "$tmpfile_update_sh" ]]; then
-    mkdir -p docs
-    cp "$tmpfile_update_sh" docs/update.sh
-    chmod +x docs/update.sh
-    rm -f "$tmpfile_update_sh"
-  fi
   if [[ -n "$tmpfile_capy_agents" ]]; then
     mkdir -p .capy
     cp "$tmpfile_capy_agents" .capy/AGENTS.md

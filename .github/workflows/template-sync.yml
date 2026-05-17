@@ -93,15 +93,16 @@ jobs:
           fi
 
           echo "Fetching sync scripts from $UPSTREAM_REPO @ $VERSION"
-          BASE_URL="https://raw.githubusercontent.com/$UPSTREAM_REPO/$VERSION/.github/scripts"
+          mkdir -p .claude/toolbox/scripts
+          BASE_URL="https://raw.githubusercontent.com/$UPSTREAM_REPO/$VERSION/.claude/toolbox/scripts"
           FETCH_OK=true
           for script in template-sync.sh semver-compare.sh; do
-            if curl -fsSL "$BASE_URL/$script" -o ".github/scripts/${script}.new" 2>/dev/null; then
-              mv ".github/scripts/${script}.new" ".github/scripts/$script"
-              chmod +x ".github/scripts/$script"
+            if curl -fsSL "$BASE_URL/$script" -o ".claude/toolbox/scripts/${script}.new" 2>/dev/null; then
+              mv ".claude/toolbox/scripts/${script}.new" ".claude/toolbox/scripts/$script"
+              chmod +x ".claude/toolbox/scripts/$script"
               echo "Updated $script to $VERSION"
             else
-              rm -f ".github/scripts/${script}.new"
+              rm -f ".claude/toolbox/scripts/${script}.new"
               echo "::warning::Could not fetch upstream $script, using local version"
               FETCH_OK=false
             fi
@@ -111,9 +112,9 @@ jobs:
         id: sync
         continue-on-error: true
         run: |
-          chmod +x .github/scripts/template-sync.sh
+          chmod +x .claude/toolbox/scripts/template-sync.sh
           mkdir -p .github/reports
-          .github/scripts/template-sync.sh \
+          .claude/toolbox/scripts/template-sync.sh \
             --version "${{ inputs.version }}" \
             --ci \
             --output-dir .github/sync-staging \
@@ -176,8 +177,8 @@ jobs:
 
       - name: Apply Changes
         run: |
-          chmod +x .github/scripts/template-sync.sh
-          .github/scripts/template-sync.sh \
+          chmod +x .claude/toolbox/scripts/template-sync.sh
+          .claude/toolbox/scripts/template-sync.sh \
             --apply \
             --version "${{ needs.sync.outputs.new_version }}" \
             --output-dir .github/sync-artifacts/sync-staging

@@ -27,9 +27,9 @@ Repos created from this template can pull configuration updates via the **Templa
 === "Local script"
 
     ```bash
-    .github/scripts/template-sync.sh --local
-    .github/scripts/template-sync.sh --local --version v1.2.3
-    .github/scripts/template-sync.sh --local --dry-run  # preview only
+    .claude/toolbox/scripts/template-sync.sh --local
+    .claude/toolbox/scripts/template-sync.sh --local --version v1.2.3
+    .claude/toolbox/scripts/template-sync.sh --local --dry-run  # preview only
     ```
 
     Requires `jq`, `git`, `curl`, and `yq` ([mikefarah/yq](https://github.com/mikefarah/yq)). Review changes with `git diff` before committing.
@@ -84,7 +84,7 @@ Edit `.github/template-state.json` and add a `sync_exclusions` array:
 
 ## Syncing Workflow Files
 
-Template sync updates its own workflow and script (`.github/workflows/template-sync.yml` and `.github/scripts/template-sync.sh`) alongside everything else. However, GitHub does not allow the default `GITHUB_TOKEN` to push changes to workflow files — the push is rejected with a `workflows` permission error ([details](https://github.com/peter-evans/create-pull-request/issues/3558)).
+Template sync updates its own workflow (`.github/workflows/template-sync.yml`) alongside everything else — the sync script is part of the `.claude/` directory and is synced as part of that tree. However, GitHub does not allow the default `GITHUB_TOKEN` to push changes to workflow files — the push is rejected with a `workflows` permission error ([details](https://github.com/peter-evans/create-pull-request/issues/3558)).
 
 These updates are sometimes required for sync to work correctly (e.g., when the sync logic itself changes between versions), so skipping them indefinitely is not recommended.
 
@@ -162,9 +162,9 @@ It will port pending tasks, clean up TM files, update configs, and walk you thro
         VERSION="v0.3.0"  # or use latest tag
         curl -fsSL "https://raw.githubusercontent.com/serpro69/claude-toolbox/${VERSION}/.github/workflows/template-sync.yml" \
           -o .github/workflows/template-sync.yml
-        curl -fsSL "https://raw.githubusercontent.com/serpro69/claude-toolbox/${VERSION}/.github/scripts/template-sync.sh" \
-          -o .github/scripts/template-sync.sh
-        chmod +x .github/scripts/template-sync.sh
+        curl -fsSL "https://raw.githubusercontent.com/serpro69/claude-toolbox/${VERSION}/.claude/toolbox/scripts/template-sync.sh" \
+          -o .claude/toolbox/scripts/template-sync.sh
+        chmod +x .claude/toolbox/scripts/template-sync.sh
         ```
 
     Task tracking now lives in simple markdown files (`docs/wip/[feature]/tasks.md`) created by the `design` skill and consumed by `implement`. No external MCP server required.

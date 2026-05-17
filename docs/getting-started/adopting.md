@@ -32,7 +32,7 @@ You don't need to create a repo from this template to use the full configuration
     }
     ```
 
-    Copy `.github/workflows/template-sync.yml` and `.github/scripts/template-sync.sh` from the [template repository](https://github.com/serpro69/claude-toolbox).
+    Copy `.github/workflows/template-sync.yml` and `.claude/toolbox/scripts/template-sync.sh` from the [template repository](https://github.com/serpro69/claude-toolbox).
 
 3. **Run Template Sync** from your repo's Actions tab to pull in the configuration (settings, statusline, permissions). Review and merge the PR.
 

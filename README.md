@@ -211,13 +211,13 @@ Verify with `codex mcp list`. See [Pal configuration docs](https://github.com/se
 **Option B: Run locally**
 
 ```bash
-./.github/scripts/template-cleanup.sh
+./.claude/toolbox/scripts/template-cleanup.sh
 ```
 
 Interactive mode walks you through each option. Run with `--help` for all flags, or pass them directly:
 
 ```bash
-./.github/scripts/template-cleanup.sh --languages python,typescript -y
+./.claude/toolbox/scripts/template-cleanup.sh --languages python,typescript -y
 ```
 
 3. Clone your repo (if using Option A) and verify MCP servers:
@@ -237,7 +237,7 @@ Interactive mode walks you through each option. Run with `--help` for all flags,
 4. Finalize initialization:
 
    ```bash
-   chmod +x .github/scripts/bootstrap.sh && ./.github/scripts/bootstrap.sh
+   chmod +x .claude/toolbox/scripts/bootstrap.sh && ./.claude/toolbox/scripts/bootstrap.sh
    ```
 
    This installs the kk plugin, wires up the Capy knowledge base (if installed), and commits the configuration.
@@ -320,7 +320,7 @@ Alongside `skills/`, `commands/`, `agents/`, and `hooks/`, the plugin ships a to
 ### Configuration
 
 - **Permission allowlist/denylist** (`.claude/settings.json`) — baseline permissions: auto-approves safe bash commands and WebSearch while blocking dangerous patterns. Per-repo MCP tool permissions go in `settings.local.json`.
-- **Status line** (`.claude/scripts/statusline_enhanced.sh`) — rich statusline with model, context %, git branch, session duration, thinking mode, and rate limits. Themes: set `CLAUDE_STATUSLINE_THEME` to `darcula`, `nord`, or `catppuccin`, and `CLAUDE_STATUSLINE_MODE` to `dark` (default) or `light` to match your terminal background
+- **Status line** (`.claude/toolbox/scripts/statusline_enhanced.sh`) — rich statusline with model, context %, git branch, session duration, thinking mode, and rate limits. Themes: set `CLAUDE_STATUSLINE_THEME` to `darcula`, `nord`, or `catppuccin`, and `CLAUDE_STATUSLINE_MODE` to `dark` (default) or `light` to match your terminal background
 
 ### Template Infrastructure
 
@@ -412,9 +412,9 @@ Run from Claude Code:
 Or run the script directly:
 
 ```bash
-.github/scripts/template-sync.sh --local
-.github/scripts/template-sync.sh --local --version v1.2.3
-.github/scripts/template-sync.sh --local --dry-run  # preview only
+.claude/toolbox/scripts/template-sync.sh --local
+.claude/toolbox/scripts/template-sync.sh --local --version v1.2.3
+.claude/toolbox/scripts/template-sync.sh --local --dry-run  # preview only
 ```
 
 Requires `jq`, `git`, `curl`, and `yq` ([mikefarah/yq](https://github.com/mikefarah/yq)). Review changes with `git diff` before committing.
@@ -467,7 +467,7 @@ Edit `.github/template-state.json` and add a `sync_exclusions` array:
 
 ### Syncing Workflow Files
 
-Template sync updates its own workflow and script (`.github/workflows/template-sync.yml` and `.github/scripts/template-sync.sh`) alongside everything else. However, GitHub does not allow the default `GITHUB_TOKEN` to push changes to workflow files — the push is rejected with a `workflows` permission error ([details](https://github.com/peter-evans/create-pull-request/issues/3558)).
+Template sync updates its own workflow (`.github/workflows/template-sync.yml`) alongside everything else. The sync script itself (`.claude/toolbox/scripts/template-sync.sh`) is synced as part of the `.claude/` directory. However, GitHub does not allow the default `GITHUB_TOKEN` to push changes to workflow files — the push is rejected with a `workflows` permission error ([details](https://github.com/peter-evans/create-pull-request/issues/3558)).
 
 These updates are sometimes required for sync to work correctly (e.g., when the sync logic itself changes between versions), so skipping them indefinitely is not recommended.
 
@@ -546,9 +546,10 @@ If you prefer to migrate manually, follow these steps after syncing:
    VERSION="v0.3.0"  # or use latest tag
    curl -fsSL "https://raw.githubusercontent.com/serpro69/claude-toolbox/${VERSION}/.github/workflows/template-sync.yml" \
      -o .github/workflows/template-sync.yml
-   curl -fsSL "https://raw.githubusercontent.com/serpro69/claude-toolbox/${VERSION}/.github/scripts/template-sync.sh" \
-     -o .github/scripts/template-sync.sh
-   chmod +x .github/scripts/template-sync.sh
+   mkdir -p .claude/toolbox/scripts
+   curl -fsSL "https://raw.githubusercontent.com/serpro69/claude-toolbox/${VERSION}/.claude/toolbox/scripts/template-sync.sh" \
+     -o .claude/toolbox/scripts/template-sync.sh
+   chmod +x .claude/toolbox/scripts/template-sync.sh
    ```
 
 Task tracking now lives in simple markdown files (`/docs/wip/[feature]/tasks.md`) created by the `design` skill and consumed by `implement`. No external MCP server required.
@@ -596,7 +597,7 @@ You don't need to create a repo from this template to use the full configuration
    }
    ```
 
-   Copy `.github/workflows/template-sync.yml` and `.github/scripts/template-sync.sh` from the [template repository](https://github.com/serpro69/claude-toolbox).
+   Copy `.github/workflows/template-sync.yml` and `.claude/toolbox/scripts/template-sync.sh` from the [template repository](https://github.com/serpro69/claude-toolbox).
 
 3. **Run Template Sync** from your repo's Actions tab to pull in the configuration (settings, statusline, permissions). Review and merge the PR.
 

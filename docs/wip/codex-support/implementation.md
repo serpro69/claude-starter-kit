@@ -276,7 +276,7 @@ validates the output and tests it in a live codex session.
 
 **Files to update:**
 
-- `.github/scripts/template-sync.sh` — add `.codex/` to sparse-clone list,
+- `.claude/toolbox/scripts/template-sync.sh` — add `.codex/` to sparse-clone list,
   add `AGENTS.md` to root-level files, add strip rules for
   `.codex/scripts/capy.sh`, add variable substitution for codex files.
 - `.github/workflows/template-sync.yml` — add codex variable backfilling

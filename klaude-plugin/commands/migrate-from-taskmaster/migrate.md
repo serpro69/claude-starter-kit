@@ -73,9 +73,9 @@ Update by fetching the latest sync infrastructure:
 VERSION="latest"
 curl -fsSL "https://raw.githubusercontent.com/serpro69/claude-toolbox/master/.github/workflows/template-sync.yml" \
   -o .github/workflows/template-sync.yml
-curl -fsSL "https://raw.githubusercontent.com/serpro69/claude-toolbox/master/.github/scripts/template-sync.sh" \
-  -o .github/scripts/template-sync.sh
-chmod +x .github/scripts/template-sync.sh
+curl -fsSL "https://raw.githubusercontent.com/serpro69/claude-toolbox/master/.claude/toolbox/scripts/template-sync.sh" \
+  -o .claude/toolbox/scripts/template-sync.sh
+chmod +x .claude/toolbox/scripts/template-sync.sh
 ```
 
 ## Step 7: Update MCP config

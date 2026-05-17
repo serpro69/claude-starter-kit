@@ -70,7 +70,6 @@ jobs:
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
 
-      # Cleanup project using the .github/scripts/template-cleanup.sh script
       - name: Cleanup
         env:
           CC_MODEL: ${{ github.event.inputs.CC_MODEL }}
@@ -78,8 +77,8 @@ jobs:
           CC_PERMISSION_MODE: ${{ github.event.inputs.CC_PERMISSION_MODE }}
           LANGUAGES: ${{ github.event.inputs.LANGUAGES }}
         run: |
-          chmod +x .github/scripts/template-cleanup.sh
-          ./.github/scripts/template-cleanup.sh --ci --no-commit
+          chmod +x .claude/toolbox/scripts/template-cleanup.sh
+          ./.claude/toolbox/scripts/template-cleanup.sh --ci --no-commit
 
       # Commit modified files
       - name: Commit files

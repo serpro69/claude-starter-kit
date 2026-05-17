@@ -136,7 +136,7 @@
 
 ### Subtasks
 
-- [x] 9.1 Update `.github/scripts/template-sync.sh` — add `.codex` to sparse-clone; add `.codex/scripts/capy.sh` to BUILTIN_EXCLUSIONS; copy `.codex/` to staging (strip capy.sh); add `%CODEX_MODEL%`/`%CODEX_APPROVAL_POLICY%` substitution for config.toml; add `codex` to dir_map. Created `.codex/AGENTS.extra.md` (codex equivalent of `.claude/CLAUDE.extra.md`) for downstream behavioral instructions
+- [x] 9.1 Update `.claude/toolbox/scripts/template-sync.sh` — add `.codex` to sparse-clone; add `.codex/scripts/capy.sh` to BUILTIN_EXCLUSIONS; copy `.codex/` to staging (strip capy.sh); add `%CODEX_MODEL%`/`%CODEX_APPROVAL_POLICY%` substitution for config.toml; add `codex` to dir_map. Created `.codex/AGENTS.extra.md` (codex equivalent of `.claude/CLAUDE.extra.md`) for downstream behavioral instructions
 - [x] 9.2 Add codex-specific manifest variables to `backfill_manifest_variables()`: `CODEX_MODEL` (default: `gpt-5.5`), `CODEX_APPROVAL_POLICY` (default: `on-request`). Workflow backfill defaults updated in parallel
 - [x] 9.3 Update `.github/workflows/template-sync.yml` — add codex variable backfilling in DEFAULTS JSON; add `.codex/` and root-level file copy to "Apply Staged Changes" step
 - [x] 9.4 Verify: all 211 existing tests pass (7 test files, 0 failures). Full dry-run on downstream repo deferred to Task 11 (manual smoke test)

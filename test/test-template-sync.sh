@@ -8,7 +8,7 @@ source "$SCRIPT_DIR/helpers.sh"
 
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 FIXTURES_DIR="$SCRIPT_DIR/fixtures"
-TEMPLATE_SYNC_SCRIPT="$REPO_ROOT/.github/scripts/template-sync.sh"
+TEMPLATE_SYNC_SCRIPT="$REPO_ROOT/.claude/toolbox/scripts/template-sync.sh"
 
 # Source the script to get access to functions
 # The script has a sourcing guard that prevents main() from running when sourced
@@ -1117,22 +1117,16 @@ popd >/dev/null || true
 
 assert_equals "1" "${#UNCHANGED_FILES[@]}" "One file detected as unchanged"
 
-log_test "compare_files does NOT flag scripts/workflows files as deleted (sync infrastructure exclusion)"
+log_test "compare_files does NOT flag workflow files as deleted (sync infrastructure exclusion)"
 reset_globals
-test_dir=$(create_temp_dir "compare-scripts-excluded")
+test_dir=$(create_temp_dir "compare-workflows-excluded")
 
-# Create staging with only template-sync.sh (mimics what copy_sync_files does)
-mkdir -p "$test_dir/staging/scripts"
+# Create staging with only template-sync.yml (mimics what copy_sync_files does)
 mkdir -p "$test_dir/staging/workflows"
-echo "sync script content" >"$test_dir/staging/scripts/template-sync.sh"
 echo "sync workflow content" >"$test_dir/staging/workflows/template-sync.yml"
 
-# Create project with additional files (bootstrap.sh, template-cleanup.*)
-mkdir -p "$test_dir/project/.github/scripts"
+# Create project with additional workflow files
 mkdir -p "$test_dir/project/.github/workflows"
-echo "sync script content" >"$test_dir/project/.github/scripts/template-sync.sh"
-echo "bootstrap content" >"$test_dir/project/.github/scripts/bootstrap.sh"
-echo "cleanup script" >"$test_dir/project/.github/scripts/template-cleanup.sh"
 echo "sync workflow content" >"$test_dir/project/.github/workflows/template-sync.yml"
 echo "cleanup workflow" >"$test_dir/project/.github/workflows/template-cleanup.yml"
 
@@ -1144,10 +1138,10 @@ MANIFEST_PATH="$FIXTURES_DIR/manifests/valid-manifest.json"
 compare_files "$test_dir/staging" 2>/dev/null
 popd >/dev/null || true
 
-# bootstrap.sh and template-cleanup.* should NOT be in DELETED_FILES
-assert_equals "0" "${#DELETED_FILES[@]}" "No files should be flagged as deleted in scripts/workflows dirs"
-# The sync files should be detected as unchanged
-assert_equals "2" "${#UNCHANGED_FILES[@]}" "Only the sync infrastructure files should be compared"
+# template-cleanup.yml should NOT be in DELETED_FILES (workflows/ skips deletion detection)
+assert_equals "0" "${#DELETED_FILES[@]}" "No files should be flagged as deleted in workflows dir"
+# The sync workflow should be detected as unchanged
+assert_equals "1" "${#UNCHANGED_FILES[@]}" "Only the sync workflow file should be compared"
 
 # =============================================================================
 # Section 7: Diff Report Generation Tests
@@ -1240,22 +1234,7 @@ copy_sync_files "$test_dir/upstream" "$output_dir" 2>/dev/null
 
 assert_file_exists "$output_dir/workflows/template-sync.yml" "Workflow copied to staging"
 
-log_test "copy_sync_files copies script when present"
-reset_globals
-test_dir=$(create_temp_dir "copy-sync-script")
-
-# Create upstream directory structure with script
-mkdir -p "$test_dir/upstream/.github/scripts"
-echo "#!/bin/bash" >"$test_dir/upstream/.github/scripts/template-sync.sh"
-
-# Create output directory
-output_dir="$test_dir/output"
-
-copy_sync_files "$test_dir/upstream" "$output_dir" 2>/dev/null
-
-assert_file_exists "$output_dir/scripts/template-sync.sh" "Script copied to staging"
-
-log_test "copy_sync_files handles missing files gracefully"
+log_test "copy_sync_files handles missing workflow gracefully"
 reset_globals
 test_dir=$(create_temp_dir "copy-sync-missing")
 
@@ -1269,25 +1248,7 @@ output_dir="$test_dir/output"
 copy_sync_files "$test_dir/upstream" "$output_dir" 2>/dev/null
 exit_code=$?
 
-assert_equals "0" "$exit_code" "copy_sync_files succeeds even when files are missing"
-
-log_test "copy_sync_files copies both files when both present"
-reset_globals
-test_dir=$(create_temp_dir "copy-sync-both")
-
-# Create upstream directory structure with both files
-mkdir -p "$test_dir/upstream/.github/workflows"
-mkdir -p "$test_dir/upstream/.github/scripts"
-echo "name: Template Sync" >"$test_dir/upstream/.github/workflows/template-sync.yml"
-echo "#!/bin/bash" >"$test_dir/upstream/.github/scripts/template-sync.sh"
-
-# Create output directory
-output_dir="$test_dir/output"
-
-copy_sync_files "$test_dir/upstream" "$output_dir" 2>/dev/null
-
-assert_file_exists "$output_dir/workflows/template-sync.yml" "Workflow copied when both present"
-assert_file_exists "$output_dir/scripts/template-sync.sh" "Script copied when both present"
+assert_equals "0" "$exit_code" "copy_sync_files succeeds even when workflow is missing"
 
 # =============================================================================
 # Section 9: Version Resolution Tests

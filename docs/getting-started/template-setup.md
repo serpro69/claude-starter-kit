@@ -18,13 +18,13 @@ Use the GitHub template to create a new project with the full claude-toolbox con
     === "Option B: Run locally"
 
         ```bash
-        ./.github/scripts/template-cleanup.sh
+        ./.claude/toolbox/scripts/template-cleanup.sh
         ```
 
         Interactive mode walks you through each option. Run with `--help` for all flags, or pass them directly:
 
         ```bash
-        ./.github/scripts/template-cleanup.sh --languages python,typescript -y
+        ./.claude/toolbox/scripts/template-cleanup.sh --languages python,typescript -y
         ```
 
 3. **Clone your repo** (if using Option A) and **verify MCP servers**:
@@ -44,7 +44,7 @@ Use the GitHub template to create a new project with the full claude-toolbox con
 4. **Finalize initialization**:
 
     ```bash
-    chmod +x .github/scripts/bootstrap.sh && ./.github/scripts/bootstrap.sh
+    chmod +x .claude/toolbox/scripts/bootstrap.sh && ./.claude/toolbox/scripts/bootstrap.sh
     ```
 
     This installs the kk plugin, wires up the Capy knowledge base (if installed), and commits the configuration.

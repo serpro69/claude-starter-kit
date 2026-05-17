@@ -44,9 +44,8 @@ fi
 
 DIRNAME=$1
 
-# Resolve project root (script location is docs/, so go up one level)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
 # Validate source directory exists
 if [[ ! -d "${PROJECT_ROOT}/docs/wip/${DIRNAME}" ]]; then

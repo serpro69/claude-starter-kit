@@ -61,7 +61,7 @@ set -euo pipefail
 # shellcheck source=semver-compare.sh
 _semver_path="$(dirname "${BASH_SOURCE[0]}")/semver-compare.sh"
 if [[ ! -f "$_semver_path" ]]; then
-  curl -fsSL "https://raw.githubusercontent.com/serpro69/claude-toolbox/master/.github/scripts/semver-compare.sh" \
+  curl -fsSL "https://raw.githubusercontent.com/serpro69/claude-toolbox/master/.claude/toolbox/scripts/semver-compare.sh" \
     -o "$_semver_path" 2>/dev/null || {
     echo "Failed to fetch semver-compare.sh" >&2
     exit 1
@@ -724,6 +724,75 @@ run_serena_removal() {
 }
 
 # =============================================================================
+# Script Consolidation Migration
+# =============================================================================
+
+# needs_script_consolidation()
+# Checks whether scripts still exist at pre-consolidation locations.
+# Returns 0 if any old-location scripts are found.
+needs_script_consolidation() {
+  local old_paths=(
+    ".github/scripts/template-sync.sh"
+    ".github/scripts/semver-compare.sh"
+    ".github/scripts/template-cleanup.sh"
+    ".github/scripts/bootstrap.sh"
+    ".claude/scripts/statusline.sh"
+    ".claude/scripts/statusline_enhanced.sh"
+    ".claude/scripts/sync-workflow.sh"
+    "docs/update.sh"
+  )
+
+  for path in "${old_paths[@]}"; do
+    if [[ -f "$path" ]]; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+# run_script_consolidation()
+# Removes scripts from pre-consolidation locations. The new copies at
+# .claude/toolbox/scripts/ arrive via the normal .claude/ directory sync.
+#
+# Side effects:
+#   - Deletes old-location script files
+#   - Removes empty parent directories
+#   - Appends removed files to DELETED_FILES array
+run_script_consolidation() {
+  log_step "Consolidating scripts to .claude/toolbox/scripts/"
+
+  local files_to_remove=(
+    ".github/scripts/template-sync.sh"
+    ".github/scripts/semver-compare.sh"
+    ".github/scripts/template-cleanup.sh"
+    ".github/scripts/bootstrap.sh"
+    ".claude/scripts/statusline.sh"
+    ".claude/scripts/statusline_enhanced.sh"
+    ".claude/scripts/sync-workflow.sh"
+    "docs/update.sh"
+  )
+
+  for file in "${files_to_remove[@]}"; do
+    if [[ -f "$file" ]]; then
+      DELETED_FILES+=("$file")
+      if $APPLY_MODE; then
+        rm -f "$file"
+        log_info "Removed $file"
+      else
+        log_info "Would remove $file"
+      fi
+    fi
+  done
+
+  if $APPLY_MODE; then
+    rmdir .github/scripts 2>/dev/null || true
+  fi
+
+  log_success "Script consolidation complete"
+}
+
+# =============================================================================
 # Version Resolution and Template Fetching
 # =============================================================================
 
@@ -905,7 +974,7 @@ fetch_upstream_templates() {
   if ! git sparse-checkout init --cone --quiet 2>/dev/null; then
     log_warn "Sparse-checkout init failed, continuing with full checkout"
   fi
-  if ! git sparse-checkout set .claude .codex .github/workflows/template-sync.yml .github/scripts/template-sync.sh docs/update.sh klaude-plugin/.claude-plugin/plugin.json --quiet 2>/dev/null; then
+  if ! git sparse-checkout set .claude .codex .github/workflows/template-sync.yml klaude-plugin/.claude-plugin/plugin.json --quiet 2>/dev/null; then
     log_warn "Sparse-checkout set failed, config dirs may not exist at this version"
   fi
 
@@ -1066,8 +1135,10 @@ apply_substitutions() {
 }
 
 # copy_sync_files()
-# Copies sync infrastructure files (workflow and script) from upstream to staging.
+# Copies sync infrastructure files (workflow) from upstream to staging.
 # These files are synced as-is without variable substitution.
+# Note: template-sync.sh and other scripts are now under .claude/toolbox/scripts/
+# and are synced as part of the .claude/ directory — no separate copy needed.
 #
 # Args:
 #   $1 - Upstream directory (parent of .github/)
@@ -1077,16 +1148,15 @@ apply_substitutions() {
 #   0 on success
 #
 # Side effects:
-#   Creates workflows/ and scripts/ subdirectories in output_dir
-#   Copies template-sync.yml and template-sync.sh if they exist
+#   Creates workflows/ subdirectory in output_dir
+#   Copies template-sync.yml if it exists
 copy_sync_files() {
   local upstream_dir="$1"
   local output_dir="$2"
 
   log_step "Copying sync infrastructure files"
 
-  # Create staging subdirectories
-  mkdir -p "$output_dir/workflows" "$output_dir/scripts"
+  mkdir -p "$output_dir/workflows"
 
   local copied=0
 
@@ -1094,21 +1164,6 @@ copy_sync_files() {
   if [[ -f "$upstream_dir/.github/workflows/template-sync.yml" ]]; then
     cp "$upstream_dir/.github/workflows/template-sync.yml" "$output_dir/workflows/"
     log_info "Copied template-sync.yml"
-    copied=$((copied + 1))
-  fi
-
-  # Copy script if it exists
-  if [[ -f "$upstream_dir/.github/scripts/template-sync.sh" ]]; then
-    cp "$upstream_dir/.github/scripts/template-sync.sh" "$output_dir/scripts/"
-    log_info "Copied template-sync.sh"
-    copied=$((copied + 1))
-  fi
-
-  # Copy docs/update.sh if it exists
-  if [[ -f "$upstream_dir/docs/update.sh" ]]; then
-    mkdir -p "$output_dir/docs"
-    cp "$upstream_dir/docs/update.sh" "$output_dir/docs/"
-    log_info "Copied docs/update.sh"
     copied=$((copied + 1))
   fi
 
@@ -1156,8 +1211,6 @@ compare_files() {
     ["claude"]=".claude"
     ["codex"]=".codex"
     ["workflows"]=".github/workflows"
-    ["scripts"]=".github/scripts"
-    ["docs"]="docs"
   )
 
   for staging_subdir in "${!dir_map[@]}"; do
@@ -1194,9 +1247,8 @@ compare_files() {
     done < <(find "${staging_find_args[@]}" 2>/dev/null)
 
     # Find deleted files (exist in project but not in staging)
-    # Skip for sync infrastructure directories - we only sync specific files, not entire dirs
-    # (scripts/ only syncs template-sync.sh, workflows/ only syncs template-sync.yml)
-    if [[ -d "$project_dir" && "$staging_subdir" != "scripts" && "$staging_subdir" != "workflows" && "$staging_subdir" != "docs" ]]; then
+    # Skip for workflows/ — we only sync template-sync.yml, not the entire directory
+    if [[ -d "$project_dir" && "$staging_subdir" != "workflows" ]]; then
       local find_args=("$project_dir" -type f -print0)
 
       while IFS= read -r -d '' project_file; do
@@ -1514,6 +1566,10 @@ apply_changes() {
     run_serena_removal
   fi
 
+  if needs_script_consolidation; then
+    run_script_consolidation
+  fi
+
   # --- Patch .gitignore for .codex ---
   if [[ -d "$staging_dir/codex" && -f ".gitignore" ]]; then
     if git check-ignore -q .codex 2>/dev/null; then
@@ -1756,6 +1812,10 @@ main() {
   # Remove Serena artifacts if still present (upstream dropped Serena)
   if needs_serena_removal; then
     run_serena_removal
+  fi
+
+  if needs_script_consolidation; then
+    run_script_consolidation
   fi
 
   # Apply substitutions to fetched templates

@@ -9,7 +9,7 @@ Arguments: $ARGUMENTS
 Run the template-sync script with `--local` to fetch, compare, and apply in a single invocation:
 
 ```bash
-.github/scripts/template-sync.sh --local $ARGUMENTS
+.claude/toolbox/scripts/template-sync.sh --local $ARGUMENTS
 ```
 
 `$ARGUMENTS` is forwarded as-is. Common usage:

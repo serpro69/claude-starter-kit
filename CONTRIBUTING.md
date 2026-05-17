@@ -238,7 +238,7 @@ Only index non-obvious learnings not derivable from reading the code or git hist
 
 6. **Stale Known Profiles list.** When adding a profile, you must update both `EXPECTED_PROFILES` in the test file and the Known Profiles list in `klaude-plugin/skills/_shared/profile-detection.md`. The list is the runtime enumeration — consumers iterate it rather than walking the filesystem.
 
-7. **Renaming skills.** Update `EXPECTED_SKILLS` / `EXPECTED_COMMANDS` in tests. Don't rename agent files. Don't touch `run_plugin_migration`'s `dirs_to_remove` in `.github/scripts/template-sync.sh` (historical cleanup paths). Don't touch `docs/done/` (frozen history). Watch for substring collisions in sed operations.
+7. **Renaming skills.** Update `EXPECTED_SKILLS` / `EXPECTED_COMMANDS` in tests. Don't rename agent files. Don't touch `run_plugin_migration`'s `dirs_to_remove` in `.claude/toolbox/scripts/template-sync.sh` (historical cleanup paths). Don't touch `docs/done/` (frozen history). Watch for substring collisions in sed operations.
 
 8. **Vague `Load if:` clauses.** Conditional entries in profile `index.md` must name concrete diff properties (field values, filenames, directory names) — not vague category labels. Two agents evaluating the same diff must reach the same conclusion.
 

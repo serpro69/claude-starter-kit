@@ -57,7 +57,7 @@
     ]
   },
   "statusLine": {
-    "command": "bash $CLAUDE_PROJECT_DIR/.claude/scripts/statusline_enhanced.sh",
+    "command": "bash $CLAUDE_PROJECT_DIR/.claude/toolbox/scripts/statusline_enhanced.sh",
     "type": "command"
   }
 }

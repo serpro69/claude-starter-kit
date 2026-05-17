@@ -85,7 +85,7 @@ When adding a new shared instruction:
 ### When renaming
 
 - Update `test/test-plugin-structure.sh` `EXPECTED_SKILLS` and `EXPECTED_COMMANDS`.
-- **Don't touch `run_plugin_migration`'s `dirs_to_remove` in `.github/scripts/template-sync.sh`** — those are historical paths for cleaning up pre-v0.5.0 downstream projects. They must stay as the names that existed at migration time.
+- **Don't touch `run_plugin_migration`'s `dirs_to_remove` in `.claude/toolbox/scripts/template-sync.sh`** — those are historical paths for cleaning up pre-v0.5.0 downstream projects. They must stay as the names that existed at migration time.
 - Leave `docs/done/**` untouched — it's frozen history.
 - Watch for substring collisions (e.g., a `design-review` → `review-design` rename will also hit the `design-reviewer` agent name via simple sed; hand-fix those).
 

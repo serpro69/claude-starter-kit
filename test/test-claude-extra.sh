@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/helpers.sh"
 
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-TEMPLATE_SYNC_SCRIPT="$REPO_ROOT/.github/scripts/template-sync.sh"
+TEMPLATE_SYNC_SCRIPT="$REPO_ROOT/.claude/toolbox/scripts/template-sync.sh"
 
 # Source the sync script to get access to functions
 # shellcheck source=/dev/null
@@ -331,21 +331,21 @@ fi
 log_section "Section 5: Bootstrap Script"
 
 log_test "bootstrap.sh contains import append logic"
-if grep -q '@.claude/CLAUDE.extra.md' "$REPO_ROOT/.github/scripts/bootstrap.sh"; then
+if grep -q '@.claude/CLAUDE.extra.md' "$REPO_ROOT/.claude/toolbox/scripts/bootstrap.sh"; then
   log_pass "bootstrap.sh references CLAUDE.extra.md import"
 else
   log_fail "bootstrap.sh should contain '@.claude/CLAUDE.extra.md'"
 fi
 
 log_test "bootstrap.sh does not contain old behavioral instructions append"
-if grep -q '## Claude-Code Behavioral Instructions' "$REPO_ROOT/.github/scripts/bootstrap.sh"; then
+if grep -q '## Claude-Code Behavioral Instructions' "$REPO_ROOT/.claude/toolbox/scripts/bootstrap.sh"; then
   log_fail "bootstrap.sh should not contain old behavioral instructions (migrated to CLAUDE.extra.md)"
 else
   log_pass "Old behavioral instructions removed from bootstrap.sh"
 fi
 
 log_test "bootstrap.sh has idempotent import (grep guard)"
-if grep -q "grep -q '@.claude/CLAUDE.extra.md'" "$REPO_ROOT/.github/scripts/bootstrap.sh"; then
+if grep -q "grep -q '@.claude/CLAUDE.extra.md'" "$REPO_ROOT/.claude/toolbox/scripts/bootstrap.sh"; then
   log_pass "bootstrap.sh checks for existing import before appending"
 else
   log_fail "bootstrap.sh should check for existing import to be idempotent"
@@ -358,7 +358,7 @@ fi
 log_section "Section 6: Sync Script Auto-Import"
 
 log_test "template-sync.sh contains auto-import logic"
-sync_script="$REPO_ROOT/.github/scripts/template-sync.sh"
+sync_script="$REPO_ROOT/.claude/toolbox/scripts/template-sync.sh"
 if grep -q '@.claude/CLAUDE.extra.md' "$sync_script"; then
   log_pass "Sync script contains CLAUDE.extra.md auto-import logic"
 else
