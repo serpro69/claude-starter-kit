@@ -105,8 +105,6 @@ BUILTIN_EXCLUSIONS=(
   ".claude/capy/*"
   ".claude/scripts/capy.sh"
   ".codex/scripts/capy.sh"
-  ".claude/toolbox/scripts/template-cleanup.sh"
-  ".claude/toolbox/scripts/bootstrap.sh"
 )
 
 # Resolved version (for reporting)
