@@ -25,7 +25,7 @@ description: |
 
 - Imperative verbs over noun phrases: `/kk:design` not `/kk:analysis-process`.
 - Family prefixes for grouped skills: `/kk:review-code`, `/kk:review-design`, `/kk:review-spec`.
-- Always use `/kk:` prefix when referencing skills: write `/kk:review-code` not `/kk:review-code`. The codex generation tool rewrites `/kk:` → `$kk:` for Codex output.
+- Always use `/kk:` prefix when referencing skills: write `/kk:review-code` not `review-code`. The codex generation tool rewrites `/kk:` → `$kk:` for Codex output.
 
 ### Description budget
 
