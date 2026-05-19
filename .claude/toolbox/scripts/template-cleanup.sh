@@ -422,8 +422,8 @@ execute_cleanup() {
     if $cc_effort_level == "default" then del(.effortLevel) else .effortLevel = $cc_effort_level end |
     # Permission mode
     .permissions.defaultMode = $cc_permission_mode |
-    # Statusline script
-    .statusLine.command = (.statusLine.command | gsub("statusline_enhanced\\.sh"; $statusline_script)) |
+    # Statusline script — migrate old path and swap filename
+    .statusLine.command = (.statusLine.command | gsub("\\.claude/scripts/"; ".claude/toolbox/scripts/") | gsub("statusline_enhanced\\.sh"; $statusline_script)) |
     # Plugin marketplace: directory -> github source for downstream
     .extraKnownMarketplaces."claude-toolbox".source = { "source": "github", "repo": $repo }
     ' "$cc_settings_file" >"${cc_settings_file}.tmp" && mv "${cc_settings_file}.tmp" "$cc_settings_file"

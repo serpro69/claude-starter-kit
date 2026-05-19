@@ -1030,6 +1030,39 @@ popd >/dev/null
 assert_equals "a-string-not-object" "$(jq -r '.customSetting' "$output_dir/claude/settings.json")" "Downstream string preserved when upstream has object"
 assert_equals "a-string-not-array" "$(jq -r '.anotherSetting' "$output_dir/claude/settings.json")" "Downstream string preserved when upstream has array"
 
+log_test "smart merge: statusLine old path migrated to new path"
+reset_globals
+test_dir=$(create_temp_dir "merge-statusline-path")
+create_merge_test_manifest "$test_dir/manifest.json"
+MANIFEST_PATH="$test_dir/manifest.json"
+
+# Upstream template with new path
+mkdir -p "$test_dir/templates/claude"
+cat >"$test_dir/templates/claude/settings.json" <<'EOF'
+{
+  "permissions": { "defaultMode": "default" },
+  "statusLine": { "command": "bash $CLAUDE_PROJECT_DIR/.claude/toolbox/scripts/statusline_enhanced.sh" }
+}
+EOF
+
+# Downstream project with OLD path
+mkdir -p "$test_dir/project/.claude"
+cat >"$test_dir/project/.claude/settings.json" <<'EOF'
+{
+  "permissions": { "defaultMode": "default" },
+  "statusLine": { "command": "bash $CLAUDE_PROJECT_DIR/.claude/scripts/statusline_enhanced.sh" }
+}
+EOF
+
+pushd "$test_dir/project" >/dev/null
+output_dir="$test_dir/output"
+apply_substitutions "$test_dir/templates" "$output_dir" 2>/dev/null
+popd >/dev/null
+
+result=$(jq -r '.statusLine.command' "$output_dir/claude/settings.json")
+assert_output_contains ".claude/toolbox/scripts/" "echo '$result'" "statusLine command uses new toolbox path"
+assert_output_not_contains '\.claude/scripts/s' "echo '$result'" "statusLine command no longer uses old path"
+
 # =============================================================================
 # Section 6: File Comparison Tests
 # =============================================================================
