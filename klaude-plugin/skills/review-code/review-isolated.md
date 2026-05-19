@@ -32,6 +32,7 @@ Gather the artifacts that will be passed to the sub-agents.
 Run `git diff --stat` and `git diff` to capture the changes under review. If there are no unstaged changes, check for staged changes with `git diff --cached`. If the user specified a commit range, use that instead.
 
 **Edge cases:**
+
 - **No changes**: Inform the user and stop.
 - **Large diff (>500 lines)**: Proceed — the sub-agent handles batching internally. If the diff exceeds the sub-agent's context window, note the limitation and suggest the user scope the review to specific files or tasks.
 
@@ -85,11 +86,11 @@ Launch both reviewers in a **single message** so they execute in parallel.
 
 Spawn using the Agent tool with:
 
-| Parameter | Value |
-|---|---|
-| `subagent_type` | `kk:code-reviewer` |
-| `description` | `Isolated code review` |
-| `prompt` | See prompt template below |
+| Parameter       | Value                     |
+| --------------- | ------------------------- |
+| `subagent_type` | `kk:code-reviewer`        |
+| `description`   | `Isolated code review`    |
+| `prompt`        | See prompt template below |
 
 **Sub-agent prompt template:**
 
@@ -199,6 +200,7 @@ Use this report template, organized by agreement level:
 ---
 
 ### Corroborated Findings
+
 (Both reviewers flagged — highest signal)
 
 - **[file:line]** Brief title ⟨corroborated⟩
@@ -209,6 +211,7 @@ Use this report template, organized by agreement level:
   - Author context: [optional annotation]
 
 ### Code Reviewer Findings
+
 (code-reviewer sub-agent only — P0-P3 format)
 
 - **[file:line]** Brief title
@@ -219,6 +222,7 @@ Use this report template, organized by agreement level:
   - Author context: [optional annotation]
 
 ### External Review Findings
+
 (pal codereview — native format)
 
 - [pal output presented in its native format]
@@ -227,6 +231,7 @@ Use this report template, organized by agreement level:
   - Author context: [optional annotation]
 
 ### Author-Sourced Findings
+
 (Main agent observations during annotation — weight accordingly)
 
 - **[file:line]** Brief title ⟨author-sourced⟩
@@ -236,6 +241,7 @@ Use this report template, organized by agreement level:
 ```
 
 **Section rules:**
+
 - Omit any section that has no findings (e.g., if no corroborated findings, skip that section).
 - If a reviewer failed and only one reviewer's findings are present, note the failure at the top and present the available findings under the appropriate section.
 
@@ -249,6 +255,20 @@ After presenting the report, ask the user how to proceed:
 ## Next Steps
 
 I found X issues (corroborated: ..., code-reviewer: ..., pal: ..., author-sourced: ...).
+
+The actionable items I recommend fixing:
+
+1. P1 (corroborated) ...
+2. P2 (code-reviewer) ...
+3. P2 (pal) ...
+4. P3 (corroborated) ...
+5. P3 (author-sourced) ...
+
+Items I recommend keeping as is:
+
+- ...: the finding is a false-positive because ...
+- ...: correct behavior because ...
+- ...: mirrors production behavior of ...
 
 **How would you like to proceed?**
 
