@@ -30,17 +30,17 @@ After each execution + review cycle, verify all outputs:
 
 - [ ] Implementation addresses the requirement (plan mode: matches plan)
 - [ ] Verification/tests pass
-- [ ] Code review completed (via `review-code` — which owns indexing its own `kk:review-findings`)
+- [ ] Code review completed (via `/kk:review-code` — which owns indexing its own `kk:review-findings`)
 - [ ] New project conventions indexed as `kk:project-conventions` (skip if none established)
 - [ ] (Plan mode only) `tasks.md` updated to `done`
 
-**Indexing ownership:** Review skills (`review-code`, `review-spec`) index their own findings. This skill only indexes `kk:project-conventions` for non-obvious patterns discovered during implementation. Do NOT duplicate review indexing here.
+**Indexing ownership:** Review skills (`/kk:review-code`, `/kk:review-spec`) index their own findings. This skill only indexes `kk:project-conventions` for non-obvious patterns discovered during implementation. Do NOT duplicate review indexing here.
 
 ### Review Mode
 
 By default, review checkpoints use **isolated mode** (`kk:review-code:isolated`, `kk:review-spec:isolated`). This is mandatory because the implementing session has authorship bias — the same model that wrote the code produces weaker reviews of it. Isolated mode spawns an independent sub-agent with no prior exposure to the implementation.
 
-The user can override at any checkpoint ("use standard review for this one") to fall back to in-session `review-code`.
+The user can override at any checkpoint ("use standard review for this one") to fall back to in-session `/kk:review-code`.
 
 ## Workflow
 
@@ -63,25 +63,25 @@ After completing the mode's entry procedure, continue with Step 2.
 
 1. (Plan mode only) Update `tasks.md`: set the task's status to `in-progress`.
 2. **Profile-aware per-task gotchas (pre-write).** Run the shared profile-detection procedure against the target files (and any diff-so-far). For each active profile that contributes an `implement/` subdirectory, load `${CLAUDE_PLUGIN_ROOT}/profiles/<name>/implement/index.md` and read the always-load + any matching conditional content. Apply those gotchas to the upcoming edits — they exist to prevent mistakes the post-write reviewer would otherwise catch. If no active profile contributes an `implement/` subdirectory, skip this step.
-3. **Dependency-handling (pre-write).** Whenever the task introduces or changes a dependency — new import, version bump, unfamiliar call, **and per the widened trigger also: a Kubernetes API version, a CRD, a Helm chart or chart dependency, or a container image tag/digest** — apply the `dependency-handling` skill BEFORE writing the call. Do not guess signatures, API versions, or configuration; look them up via capy/context7 per that skill's rules. Per-profile lookup cascades live in each profile's `overview.md` (e.g., `${CLAUDE_PLUGIN_ROOT}/profiles/k8s/overview.md` §Looking up Kubernetes dependencies).
+3. **Dependency-handling (pre-write).** Whenever the task introduces or changes a dependency — new import, version bump, unfamiliar call, **and per the widened trigger also: a Kubernetes API version, a CRD, a Helm chart or chart dependency, or a container image tag/digest** — apply the `/kk:dependency-handling` skill BEFORE writing the call. Do not guess signatures, API versions, or configuration; look them up via capy/context7 per that skill's rules. Per-profile lookup cascades live in each profile's `overview.md` (e.g., `${CLAUDE_PLUGIN_ROOT}/profiles/k8s/overview.md` §Looking up Kubernetes dependencies).
 4. Make the changes. (Plan mode: follow the plan exactly.)
 5. (Plan mode only) Check off subtasks (`- [x]`) in `tasks.md` as you complete them.
-6. Run verifications; run `test` skill.
+6. Run verifications; run `/kk:test` skill.
 
 ### Step 3: Report and Review
 
 - Show what was implemented
 - Show verification output
 - **Default (isolated)**: Use `kk:review-code:isolated` — this handles both sub-agent and pal codereview internally with independent reviewers. Do NOT run a separate `pal` codereview call, as it is already included in the isolated workflow.
-- **If user explicitly requests standard review**: Use `review-code` skill in-session, then run `pal` mcp code-review, consolidate findings.
+- **If user explicitly requests standard review**: Use `/kk:review-code` skill in-session, then run `pal` mcp code-review, consolidate findings.
 - Based on user and code-review feedback: apply changes if needed and finalize
 - (Plan mode only) Update `tasks.md`: set the task's status to `done`
 
 **After finalizing**, verify all items in the **Required Outputs** section above:
 
 - [ ] Implementation addresses the requirement (plan mode: implementation matches plan)
-- [ ] Verification/tests pass, `test` completed
-- [ ] Code review completed (via `review-code` — which owns indexing its own `kk:review-findings`)
+- [ ] Verification/tests pass, `/kk:test` completed
+- [ ] Code review completed (via `/kk:review-code` — which owns indexing its own `kk:review-findings`)
 - [ ] New project conventions indexed as `kk:project-conventions` (skip if none established)
 - [ ] (Plan mode only) `tasks.md` updated to `done`
 
@@ -120,6 +120,6 @@ Follow the completion procedure in [plan-mode.md](plan-mode.md) — final valida
 - Review plan critically first
 - Follow plan steps exactly
 - Don't skip verifications
-- Use skills when applicable (dependency-handling, test, review-code) (Plan mode: also when the plan says to do so)
+- Use skills when applicable (/kk:dependency-handling, /kk:test, /kk:review-code) (Plan mode: also when the plan says to do so)
 - Between batches: just report and wait
 - Stop when blocked, don't guess

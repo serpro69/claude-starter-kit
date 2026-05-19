@@ -100,8 +100,8 @@ Issue the pal step 1 call and the Agent tool call (Reviewer A) in the **same mes
 Handle reviewer failures inline as they occur:
 
 - **`pal` failure** (listmodels returns no models, or codereview step 1/2 fails): Note the failure, proceed to Step 3 with design-reviewer findings only.
-- **`design-reviewer` sub-agent failure** (timeout or error): Note the failure, proceed to Step 3 with pal findings only. Suggest `/kk:review-design` (standard mode) as supplement.
-- **Both reviewers fail**: Abort isolated mode. Display message suggesting fallback to `/kk:review-design` (standard mode). Do not proceed to Step 3.
+- **`design-reviewer` sub-agent failure** (timeout or error): Note the failure, proceed to Step 3 with pal findings only. Suggest `$kk:review-design` (standard mode) as supplement.
+- **Both reviewers fail**: Abort isolated mode. Display message suggesting fallback to `$kk:review-design` (standard mode). Do not proceed to Step 3.
 - **Malformed output**: Attempt best-effort parsing. If completely unparseable, treat as a failure and apply the rules above.
 
 ---

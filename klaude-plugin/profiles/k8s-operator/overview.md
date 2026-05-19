@@ -33,7 +33,7 @@ A Kubernetes operator extends the API server with Custom Resource Definitions an
 
 ## Looking up operator dependencies
 
-When adding, modifying, or upgrading an operator-facing dependency, follow the `dependency-handling` skill's cascade (capy-first, context7-second, web-last) against the targets below.
+When adding, modifying, or upgrading an operator-facing dependency, follow the `/kk:dependency-handling` skill's cascade (capy-first, context7-second, web-last) against the targets below.
 
 1. **controller-runtime** (core operator library)
    - capy: prior project fetches for controller-runtime APIs.

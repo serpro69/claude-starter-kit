@@ -19,4 +19,4 @@ Review checks specific to skills targeting the Claude Code harness.
 ## Command variant naming
 
 - [ ] For skills with standard + isolated modes: are commands named `default.md` and `isolated.md`?
-- [ ] Is stuttering avoided? (`/kk:chain-of-verification:default` not `/kk:cove:cove`)
+- [ ] Is stuttering avoided? (`$kk:chain-of-verification:default` not `$kk:cove:cove`)

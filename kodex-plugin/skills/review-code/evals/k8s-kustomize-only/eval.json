@@ -3,7 +3,7 @@
   "name": "k8s-kustomize-only",
   "description": "A Kustomize-only diff (kustomization.yaml + a ConfigMap patch) activates the k8s profile and the kustomize-checklist, but not helm-checklist or reliability-checklist.",
   "skills": ["review-code"],
-  "prompt": "I've staged the following changes. Run `/kk:review-code` against them.",
+  "prompt": "I've staged the following changes. Run `$kk:review-code` against them.",
   "trap": "Model sees 'Kubernetes-shaped YAML' and loads `helm-checklist.md` anyway (despite no `Chart.yaml`), or fails to recognize `kustomization.yaml` as the authoritative Kustomize filename signal, or spuriously loads `reliability-checklist.md` even though no workload kind (Deployment/StatefulSet/DaemonSet/Job/CronJob) is present in the diff.",
   "files": [
     "test-files/kustomization.yaml",

@@ -25,7 +25,7 @@ Tools like Claude Code and Codex are powerful on their own, but LLMs don't know 
 **A structured development pipeline** — 10 workflow skills with explicit multi-language support that take you from idea through design, implementation, code review, testing, to documentation, with persistent knowledge that carries across sessions.
 
 ```
-/design → /review-design → /implement → /review-code → /test → /document
+/kk:design → /kk:review-design → /kk:implement → /kk:review-code → /kk:test → /kk:document
 ```
 
 Out of the box you get:
@@ -313,7 +313,7 @@ Without Capy, each session starts fresh — all skills still work, they just don
 
 The **kk** plugin contains all development workflow functionality — 10 skills, 4 commands, and hooks — distributed via the Claude Code plugin system (see [kodex-plugin](./kodex-plugin/README.md) for the Codex variant). Skills are invoked as `/kk:skill-name`, commands as `/kk:dir:command`.
 
-Includes: **design**, **implement**, **test**, **document**, **development-guidelines**, **review-code**, **review-spec**, **review-design**, **merge-docs**, **chain-of-verification**. Plus commands for CoVe, implementation review, design review, Task Master migration, and template sync. See the [plugin README](./klaude-plugin/README.md) for full details.
+Includes: **/kk:design**, **/kk:implement**, **/kk:test**, **/kk:document**, **development-guidelines**, **/kk:review-code**, **/kk:review-spec**, **/kk:review-design**, **/kk:merge-docs**, **/kk:chain-of-verification**. Plus commands for CoVe, implementation review, design review, Task Master migration, and template sync. See the [plugin README](./klaude-plugin/README.md) for full details.
 
 Alongside `skills/`, `commands/`, `agents/`, and `hooks/`, the plugin ships a top-level `profiles/` directory. Each profile (e.g., `go`, `python`, `k8s`) bundles per-domain content — detection rules, review checklists, design prompts, test validators, doc rubrics — that the workflow skills consult when the code under work matches the profile. Profiles are the extension point for new languages and IaC DSLs; see the **Profile Conventions** section of [`CLAUDE.md`](./CLAUDE.md) for the full authoring contract.
 
@@ -506,7 +506,7 @@ The workflow detects these credentials automatically and uses them for both push
 
 ### Migrating from Task Master
 
-Task Master MCP was removed in favor of native markdown-based task tracking integrated into the `design` and `implement` skills.
+Task Master MCP was removed in favor of native markdown-based task tracking integrated into the `/kk:design` and `/kk:implement` skills.
 
 The easiest way to migrate is to run the migration command in Claude Code:
 
@@ -551,7 +551,7 @@ If you prefer to migrate manually, follow these steps after syncing:
    chmod +x .github/scripts/template-sync.sh
    ```
 
-Task tracking now lives in simple markdown files (`/docs/wip/[feature]/tasks.md`) created by the `design` skill and consumed by `implement`. No external MCP server required.
+Task tracking now lives in simple markdown files (`/docs/wip/[feature]/tasks.md`) created by the `/kk:design` skill and consumed by `/kk:implement`. No external MCP server required.
 
 </details>
 

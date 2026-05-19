@@ -7,9 +7,9 @@
 
 ## Context
 
-Every plugin skill drives the agent through a workflow: `review-code` reviews a diff, `implement` executes a task plan, `design` turns an idea into a PRD, `document` writes docs, `test` writes/runs tests, and so on. Each skill's workflow has two components — the **instructions** (SKILL.md, referenced process files, shared protocols, and — for profile-driven skills — resolved profile content) and the **subject matter** (the diff, the code, the idea prose, the feature tree). An agent running the skill must read both; the ordering between the two determines whether the skill's structured work actually happens.
+Every plugin skill drives the agent through a workflow: `/kk:review-code` reviews a diff, `/kk:implement` executes a task plan, `/kk:design` turns an idea into a PRD, `/kk:document` writes docs, `/kk:test` writes/runs tests, and so on. Each skill's workflow has two components — the **instructions** (SKILL.md, referenced process files, shared protocols, and — for profile-driven skills — resolved profile content) and the **subject matter** (the diff, the code, the idea prose, the feature tree). An agent running the skill must read both; the ordering between the two determines whether the skill's structured work actually happens.
 
-The `review-code` skill provided the canonical failure example. Empirical observation from three consecutive `/kk:review-code` runs on the same diff surfaced a repeatable failure mode:
+The `/kk:review-code` skill provided the canonical failure example. Empirical observation from three consecutive `/kk:review-code` runs on the same diff surfaced a repeatable failure mode:
 
 - **Run 1.** Skill loaded, but the agent already had a diff dump on disk. It produced a review from the diff alone without loading profile checklists or re-reading changed files. When pressed, the agent admitted: "I had the full diff visible, recognized the changes as a clean source-kind refactor, and decided I could pattern-match a review from the diff alone. I took the shortcut." A transient DB error provided cover but was not the cause.
 - **Run 2.** Fresh session. Skill loaded from scratch. Agent read one process file, ran `git diff`, and launched into findings — still bypassing profile detection and checklist loading.
@@ -19,7 +19,7 @@ The shared thread: the skill's own workflow told the agent to **start with** `gi
 
 This is a workflow-ordering bug, not an agent-discipline bug. "Tell the model to follow the process" (Run 3) does not fix it, because the process itself prescribes the failure-prone order.
 
-**The same failure mode applies to every skill, not just `review-code`.** An `implement` run that reads the code to modify before loading the per-task gotchas produces edits that miss profile-specific pitfalls. A `design` run that engages the idea prose before loading the question bank skips the refinement step. A `document` run that reads the feature tree before loading the profile rubric produces generic prose. The subject matter differs, the subject-matter-first shortcut is the same. The canonical case surfaced in `review-code` only because the three consecutive runs made the pattern legible; other skills have the same latent risk.
+**The same failure mode applies to every skill, not just `/kk:review-code`.** An `/kk:implement` run that reads the code to modify before loading the per-task gotchas produces edits that miss profile-specific pitfalls. A `/kk:design` run that engages the idea prose before loading the question bank skips the refinement step. A `/kk:document` run that reads the feature tree before loading the profile rubric produces generic prose. The subject matter differs, the subject-matter-first shortcut is the same. The canonical case surfaced in `/kk:review-code` only because the three consecutive runs made the pattern legible; other skills have the same latent risk.
 
 ## Decision
 
@@ -41,16 +41,16 @@ The subject matter varies per skill:
 
 | Skill | Subject matter | Minimal early scope |
 |---|---|---|
-| `review-code` | the diff | `git diff --stat` (filenames) |
-| `review-spec` | the implementation tree | feature-directory listing (filenames) |
-| `review-design` | the design doc | doc file list |
-| `test` | the code under test | `git diff --stat` or feature listing |
-| `implement` | the code to modify | the current task's target filenames |
-| `design` | the idea prose | keyword scan of idea prose for the auto-trigger set |
-| `document` | the feature tree | feature-directory listing |
-| `merge-docs` | the two docs to merge | file list |
-| `dependency-handling` | the lookup target | the call being written — name + signature, not full implementation |
-| `chain-of-verification` | the response being verified | the response text (already in context) |
+| `/kk:review-code` | the diff | `git diff --stat` (filenames) |
+| `/kk:review-spec` | the implementation tree | feature-directory listing (filenames) |
+| `/kk:review-design` | the design doc | doc file list |
+| `/kk:test` | the code under test | `git diff --stat` or feature listing |
+| `/kk:implement` | the code to modify | the current task's target filenames |
+| `/kk:design` | the idea prose | keyword scan of idea prose for the auto-trigger set |
+| `/kk:document` | the feature tree | feature-directory listing |
+| `/kk:merge-docs` | the two docs to merge | file list |
+| `/kk:dependency-handling` | the lookup target | the call being written — name + signature, not full implementation |
+| `/kk:chain-of-verification` | the response being verified | the response text (already in context) |
 
 The specialization — "profile checklists/gotchas/rubrics are part of instructions and must load before subject-matter content" — continues to apply for every skill that runs profile detection.
 
@@ -65,7 +65,7 @@ The specialization — "profile checklists/gotchas/rubrics are part of instructi
 
 - **Consistent review quality regardless of priming.** Whether the user pre-stages a diff on disk, invokes fresh, or re-runs after a session reload, the agent produces the same structured output. The Run-1 shortcut mode is eliminated because the agent cannot reach findings without first loading the checklists.
 - **Ordering becomes testable.** A review's "checklists loaded" step has a concrete artifact (Read calls on specific files) that can be audited post-hoc. Run 3 passed the "agent follows the process" test but failed methodology-loading; with this ADR, that gap closes.
-- **Compounds across skills.** The same ordering shape applies to `review-spec`, `review-design`, and `test` as those skills absorb profile-aware behavior.
+- **Compounds across skills.** The same ordering shape applies to `/kk:review-spec`, `/kk:review-design`, and `/kk:test` as those skills absorb profile-aware behavior.
 
 ### Negative
 
@@ -82,7 +82,7 @@ The specialization — "profile checklists/gotchas/rubrics are part of instructi
 
 ## Verification
 
-The ordering change was applied to `review-code` concurrently with the acceptance of this ADR:
+The ordering change was applied to `/kk:review-code` concurrently with the acceptance of this ADR:
 
 - `klaude-plugin/skills/review-code/SKILL.md` — added the mandatory-order directive at the top of the Workflow section.
 - `klaude-plugin/skills/review-code/review-process.md` — reordered so Step 1 is filename-only scope, Step 2 is profile detection, Step 3 loads profile `review-code/index.md` files, Step 4 reads every resolved checklist, Step 5 (new dedicated step) reads the full diff + re-reads changed files + runs `capy_search`, Step 6 applies checklists. Content-level read instructions appear exactly once, at Step 5.
@@ -90,4 +90,4 @@ The ordering change was applied to `review-code` concurrently with the acceptanc
 
 A follow-up dry-run (three consecutive invocations on the same diff, mirroring the Context section's experiment) confirms whether the failure mode reproduces. The result is recorded in `docs/wip/kubernetes-support/tasks.md` Task 7.
 
-Applying the mandatory-order directive to the remaining nine skills (`review-spec`, `review-design`, `test`, `implement`, `design`, `document`, `merge-docs`, `dependency-handling`, `chain-of-verification`) is tracked as amendment A2 in `docs/wip/kubernetes-support/design.md §Amendments`. The per-skill sweep needs tailored wording since each skill's subject matter and minimal early scope differ; it is deliberately staged as its own review pass rather than bundled into this commit.
+Applying the mandatory-order directive to the remaining nine skills (`/kk:review-spec`, `/kk:review-design`, `/kk:test`, `/kk:implement`, `/kk:design`, `/kk:document`, `/kk:merge-docs`, `/kk:dependency-handling`, `/kk:chain-of-verification`) is tracked as amendment A2 in `docs/wip/kubernetes-support/design.md §Amendments`. The per-skill sweep needs tailored wording since each skill's subject matter and minimal early scope differ; it is deliberately staged as its own review pass rather than bundled into this commit.

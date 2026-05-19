@@ -1,6 +1,6 @@
 # Kubernetes Operator — required design sections
 
-Every `design.md` for an operator-shaped feature must include the four sections below. Omit none; if a section genuinely does not apply, state so explicitly with a one-line justification — silent omissions hide scope gaps, and a reviewer (or `review-spec`) cannot tell absence-by-intent from absence-by-oversight.
+Every `design.md` for an operator-shaped feature must include the four sections below. Omit none; if a section genuinely does not apply, state so explicitly with a one-line justification — silent omissions hide scope gaps, and a reviewer (or `/kk:review-spec`) cannot tell absence-by-intent from absence-by-oversight.
 
 These sections complement the `k8s` profile's required sections. When both profiles are active, the design document must include sections from both profiles.
 

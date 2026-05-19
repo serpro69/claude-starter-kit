@@ -7,7 +7,7 @@
 
 ## Context
 
-The `review-code` skill has historically detected a single "primary language" from file extensions and loaded per-language reference checklists from `reference/<lang>/`. Extensions mapped to reference sets: `.go` → `reference/go/`, `.py` → `reference/python/`, etc. Other skills (`test`, `document`, `design`) use a `%LANGUAGE%` placeholder in their prose.
+The `/kk:review-code` skill has historically detected a single "primary language" from file extensions and loaded per-language reference checklists from `reference/<lang>/`. Extensions mapped to reference sets: `.go` → `reference/go/`, `.py` → `reference/python/`, etc. Other skills (`/kk:test`, `/kk:document`, `/kk:design`) use a `%LANGUAGE%` placeholder in their prose.
 
 Adding Kubernetes support surfaces a question the existing model did not address: K8s is not a programming language in the classical sense — it is a schema overlay on YAML (plus Helm templating and Kustomize composition). Whether to model K8s as another "language" row or as a parallel concept materially affects every skill touched by this and all future non-programming-language profiles (Terraform, Dockerfile, Ansible collections, …).
 
@@ -65,7 +65,7 @@ If behavioral divergence between programming-language profiles and non-language 
 Trigger conditions that would warrant starting this migration (non-exhaustive):
 - Severity weighting needs to differ between programming-language and IaC findings.
 - A skill's reviewer agent needs to be chosen by kind (e.g., a dedicated IaC reviewer).
-- Prose in `test`/`document`/`design` needs to say something meaningfully different for IaC — where the additive "plus, consult profile-specific guidance" clause no longer suffices.
+- Prose in `/kk:test`/`/kk:document`/`/kk:design` needs to say something meaningfully different for IaC — where the additive "plus, consult profile-specific guidance" clause no longer suffices.
 
 Until at least one such trigger fires, B remains the decision.
 

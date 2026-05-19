@@ -5,19 +5,19 @@
 
 ## Problem
 
-Creating good agent skills is hard. The principles that make skills reliable — workflow ordering, progressive disclosure, description effectiveness, resource separation — are documented across ADRs, CLAUDE.md, Anthropic's skill-building guide, and hard-won session experience. There is no mechanism for the existing workflow pipeline (`design` → `implement` → `review-code` → `test` → `document`) to apply this domain knowledge automatically when a user is authoring skills.
+Creating good agent skills is hard. The principles that make skills reliable — workflow ordering, progressive disclosure, description effectiveness, resource separation — are documented across ADRs, CLAUDE.md, Anthropic's skill-building guide, and hard-won session experience. There is no mechanism for the existing workflow pipeline (`/kk:design` → `/kk:implement` → `/kk:review-code` → `/kk:test` → `/kk:document`) to apply this domain knowledge automatically when a user is authoring skills.
 
 ## Decision
 
 Create a `skill-md` profile rather than a standalone skill. Agent skills are a [provider-agnostic concept](https://agentskills.io/home); each provider (Claude Code, Codex, etc.) adds its own conventions on top. The profile encodes universal skill-authoring knowledge in always-load checklists and provider-specific knowledge in conditional checklists.
 
-No new skill is needed. The existing pipeline handles the workflow — `implement` in standalone mode handles ad-hoc "create a skill" requests, `review-code` reviews skill quality, etc. The profile injects domain expertise at each phase.
+No new skill is needed. The existing pipeline handles the workflow — `/kk:implement` in standalone mode handles ad-hoc "create a skill" requests, `/kk:review-code` reviews skill quality, etc. The profile injects domain expertise at each phase.
 
-**How `implement` standalone activates this profile:** The shared detection procedure uses target file lists for `implement`, not design signals (design signals are exclusively for the `design` skill). In standalone mode, `implement` identifies planned target files (step 6 of standalone-mode.md: "identify the set of files that will need changes") before running profile detection. When the user says "create a skill that does X," the planned targets include paths like `skills/my-skill/SKILL.md` — the `SKILL.md` filename signal activates the profile via normal file-based detection.
+**How `/kk:implement` standalone activates this profile:** The shared detection procedure uses target file lists for `/kk:implement`, not design signals (design signals are exclusively for the `/kk:design` skill). In standalone mode, `/kk:implement` identifies planned target files (step 6 of standalone-mode.md: "identify the set of files that will need changes") before running profile detection. When the user says "create a skill that does X," the planned targets include paths like `skills/my-skill/SKILL.md` — the `SKILL.md` filename signal activates the profile via normal file-based detection.
 
 ### Alternatives considered
 
-- **Standalone skill-creator skill.** Rejected: duplicates the existing pipeline's capabilities. `implement` already supports ad-hoc tasks; `review-code` already reviews; `design` already interviews. A separate skill would need to replicate or delegate to all of these.
+- **Standalone skill-creator skill.** Rejected: duplicates the existing pipeline's capabilities. `/kk:implement` already supports ad-hoc tasks; `/kk:review-code` already reviews; `/kk:design` already interviews. A separate skill would need to replicate or delegate to all of these.
 - **Port of Anthropic's official skill-creator.** Rejected: heavily coupled to their Python eval tooling (HTML viewer, benchmark aggregation, blind A/B comparison). The eval infrastructure doesn't align with this project's eval conventions (eval.json with traps/assertions, test-files/ directories). Users who want Anthropic's eval loop can install it independently.
 - **Bundled reference files in the skill-creator skill.** Rejected in favor of profiles: a profile integrates with the entire pipeline automatically, while a skill's reference files are only accessible when that skill is invoked.
 

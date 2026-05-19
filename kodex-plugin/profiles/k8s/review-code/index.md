@@ -1,6 +1,6 @@
 # Kubernetes — review checklists
 
-Consumed by the `review-code` skill. When the `k8s` profile is active, every checklist in **Always load** is applied to the diff. **Conditional** checklists load only when their `Load if:` predicate matches the current diff.
+Consumed by the `$kk:review-code` skill. When the `k8s` profile is active, every checklist in **Always load** is applied to the diff. **Conditional** checklists load only when their `Load if:` predicate matches the current diff.
 
 Conditional triggers are stated as predicates keyed to concrete diff properties (field values, filenames, directory names) — not vague category labels. Two reviewers evaluating the same diff against the same trigger must reach the same conclusion.
 

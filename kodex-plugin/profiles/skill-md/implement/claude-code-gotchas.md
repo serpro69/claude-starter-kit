@@ -38,7 +38,7 @@ Hook scripts in `hooks/*.json` follow a strict contract:
 
 Commands live under `commands/<name>/`. For skills with standard + isolated modes:
 
-- `default.md` — standard variant, invoked as `/kk:<name>:default`
-- `isolated.md` — isolated sub-agent variant, invoked as `/kk:<name>:isolated`
+- `default.md` — standard variant, invoked as `$kk:<name>:default`
+- `isolated.md` — isolated sub-agent variant, invoked as `$kk:<name>:isolated`
 
-Symmetric naming avoids stuttering (`/kk:cove:cove` is bad, `/kk:chain-of-verification:default` is good).
+Symmetric naming avoids stuttering (`$kk:cove:cove` is bad, `$kk:chain-of-verification:default` is good).

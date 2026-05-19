@@ -5,30 +5,30 @@ The kk plugin ships 10 workflow skills that form a complete development pipeline
 ## The Pipeline
 
 ```
-/design → /review-design → /implement → /review-code → /test → /document
+/kk:design → /kk:review-design → /kk:implement → /kk:review-code → /kk:test → /kk:document
 ```
 
-1. **design** — turns an idea into design docs, an implementation plan, and a task list
-2. **review-design** — evaluates design docs for completeness and technical soundness
-3. **implement** — executes tasks with review checkpoints between batches
-4. **review-code** — reviews code for SOLID violations, security risks, and quality issues
-5. **test** — generates tests and runs the full suite
-6. **document** — updates architecture docs and records ADRs
+1. **/kk:design** — turns an idea into design docs, an implementation plan, and a task list
+2. **/kk:review-design** — evaluates design docs for completeness and technical soundness
+3. **/kk:implement** — executes tasks with review checkpoints between batches
+4. **/kk:review-code** — reviews code for SOLID violations, security risks, and quality issues
+5. **/kk:test** — generates tests and runs the full suite
+6. **/kk:document** — updates architecture docs and records ADRs
 
 ## Skill Reference
 
 | Skill | What it does |
 |-------|-------------|
-| **design** | Turns an idea into design docs, an implementation plan, and a task list in `docs/wip/`. Asks refinement questions, then documents everything a developer needs to start coding. |
-| **implement** | Executes a task list from `docs/wip/` with batched steps and code review checkpoints between batches. Updates task status as it goes. |
-| **test** | Generates tests following project conventions: table-driven, integration, mocking, property-based. Runs the full suite and reports coverage. |
-| **document** | Updates ARCHITECTURE.md, TESTING.md, and records ADRs for non-obvious decisions made during implementation. |
-| **review-code** | Reviews git changes for SOLID violations, security risks, and code quality. Domain-specific checklists for Go, Java, JS/TS, Kotlin, Python, Kubernetes, K8s Operator, and agent skills. Standard and isolated modes. |
-| **review-design** | Pre-implementation review gate. Evaluates design docs for completeness, internal consistency, and technical soundness before code is written. |
-| **review-spec** | Compares implemented code against design/implementation docs. Finds spec deviations, missing implementations, and outdated docs — in both directions. |
-| **dependency-handling** | Fires before calling a library/SDK/API or adding a dependency. Forces a capy/context7 lookup instead of guessing signatures or behavior. |
-| **merge-docs** | Merges two competing design docs for the same feature into one unified document, resolving conflicts and preserving the best of both. |
-| **chain-of-verification** | Makes Claude fact-check its own answers. Standard mode (prompt-based) or isolated mode (independent sub-agents). For high-stakes accuracy. |
+| **/kk:design** | Turns an idea into design docs, an implementation plan, and a task list in `docs/wip/`. Asks refinement questions, then documents everything a developer needs to start coding. |
+| **/kk:implement** | Executes a task list from `docs/wip/` with batched steps and code review checkpoints between batches. Updates task status as it goes. |
+| **/kk:test** | Generates tests following project conventions: table-driven, integration, mocking, property-based. Runs the full suite and reports coverage. |
+| **/kk:document** | Updates ARCHITECTURE.md, TESTING.md, and records ADRs for non-obvious decisions made during implementation. |
+| **/kk:review-code** | Reviews git changes for SOLID violations, security risks, and code quality. Domain-specific checklists for Go, Java, JS/TS, Kotlin, Python, Kubernetes, K8s Operator, and agent skills. Standard and isolated modes. |
+| **/kk:review-design** | Pre-implementation review gate. Evaluates design docs for completeness, internal consistency, and technical soundness before code is written. |
+| **/kk:review-spec** | Compares implemented code against design/implementation docs. Finds spec deviations, missing implementations, and outdated docs — in both directions. |
+| **/kk:dependency-handling** | Fires before calling a library/SDK/API or adding a dependency. Forces a capy/context7 lookup instead of guessing signatures or behavior. |
+| **/kk:merge-docs** | Merges two competing design docs for the same feature into one unified document, resolving conflicts and preserving the best of both. |
+| **/kk:chain-of-verification** | Makes Claude fact-check its own answers. Standard mode (prompt-based) or isolated mode (independent sub-agents). For high-stakes accuracy. |
 
 ## Commands
 
@@ -45,10 +45,10 @@ Commands are skill variants invoked with explicit mode selection:
 
 ## Utility Skills
 
-**dependency-handling** is pulled in automatically during implementation whenever you touch an external library, SDK, or API — it routes through capy/context7 instead of guessing.
+**/kk:dependency-handling** is pulled in automatically during implementation whenever you touch an external library, SDK, or API — it routes through capy/context7 instead of guessing.
 
-**review-spec** verifies code matches design/spec and detects deviations — use during or after implementation.
+**/kk:review-spec** verifies code matches design/spec and detects deviations — use during or after implementation.
 
-**merge-docs** reconciles competing design docs into one unified document.
+**/kk:merge-docs** reconciles competing design docs into one unified document.
 
-**chain-of-verification** adds self-verification for high-stakes accuracy at any stage.
+**/kk:chain-of-verification** adds self-verification for high-stakes accuracy at any stage.

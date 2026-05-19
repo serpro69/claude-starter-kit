@@ -1,7 +1,7 @@
 ## Profile detection procedure
 
 Single source of truth for computing the set of profiles active in the current context.
-Consumed by six skills: `review-code`, `review-spec`, `design`, `implement`, `test`, and `document`.
+Consumed by six skills: `$kk:review-code`, `$kk:review-spec`, `$kk:design`, `$kk:implement`, `$kk:test`, and `$kk:document`.
 
 Every profile under `klaude-plugin/profiles/<name>/` declares its own trigger rule in `DETECTION.md` using the mandatory three-section schema (`## Path signals`, `## Filename signals`, `## Content signals`).
 The shared procedure below applies the same algorithm against every profile's declared values.
@@ -10,21 +10,21 @@ The shared procedure below applies the same algorithm against every profile's de
 
 Not every consumer has a diff available. Use the input listed for your skill:
 
-- **`review-code`** — git diff (staged, or an explicit commit range). Scope is
+- **`$kk:review-code`** — git diff (staged, or an explicit commit range). Scope is
   the set of files the diff touches.
-- **`review-spec`** — git diff when invoked standalone; the feature directory's
-  full file list when invoked by `implement` (spec review runs over the whole
+- **`$kk:review-spec`** — git diff when invoked standalone; the feature directory's
+  full file list when invoked by `$kk:implement` (spec review runs over the whole
   feature, not just the current task's diff).
-- **`test`** — git diff mid-feature, OR the feature directory's file list
+- **`$kk:test`** — git diff mid-feature, OR the feature directory's file list
   post-implementation.
-- **`implement`** — the current sub-task's target file list, augmented by the
+- **`$kk:implement`** — the current sub-task's target file list, augmented by the
   diff accumulated so far in the feature.
-- **`design`** — **no file list available** (implementation does not yet exist).
+- **`$kk:design`** — **no file list available** (implementation does not yet exist).
   Detection uses a user-declared or keyword-inferred signal instead; see
-  [The `design` interaction pattern](#the-design-interaction-pattern) below.
-- **`document`** — feature directory's current file list; diff optional.
+  [The `$kk:design` interaction pattern](#the-design-interaction-pattern) below.
+- **`$kk:document`** — feature directory's current file list; diff optional.
 
-### The `design` interaction pattern
+### The `$kk:design` interaction pattern
 
 The design phase runs before any code exists, so file-based detection is impossible. Detection uses idea-prose keyword matching against tokens declared in each profile's `DETECTION.md`.
 
@@ -38,7 +38,7 @@ The design phase runs before any code exists, so file-based detection is impossi
 5. **Fallback.** If no token matches but the idea is **ambiguous** — names infrastructure, deployment, runtime, or platform concerns without naming a specific technology (e.g., _"add a caching layer for the service"_, _"build a CI pipeline"_, _"deploy to production"_); or includes overloaded tokens that collide across domains — build the fallback prompt dynamically from all profiles that declare `## Design signals`:
    *"Does this feature involve {display_name_1, display_name_2, ...}? If yes, which?"*
 
-Confirmation is required — the design skill never auto-activates a profile silently. The narrow per-profile token sets avoid noisy false positives from tokens that overload across domains.
+Confirmation is required — the $kk:design skill never auto-activates a profile silently. The narrow per-profile token sets avoid noisy false positives from tokens that overload across domains.
 
 Once activated, subsequent design-phase steps treat the profile as active in the same record shape produced by file-based detection (see §Output shape).
 

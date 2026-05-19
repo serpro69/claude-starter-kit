@@ -1,5 +1,5 @@
 name = "profile-resolver"
-description = "Resolves active profiles and their checklist-load decisions for a given diff, using the shared profile-detection procedure. Emits a structured resolution report: active profiles with per-file `triggered_by` signal, plus loaded vs. not-loaded checklists with Load-if reasoning. Useful wherever profile detection must be isolated from downstream work — the review-code eval harness uses it to grade detection independently of review output, and production skill invocations may delegate detection here to keep the main session's context free of the procedure files."
+description = "Resolves active profiles and their checklist-load decisions for a given diff, using the shared profile-detection procedure. Emits a structured resolution report: active profiles with per-file `triggered_by` signal, plus loaded vs. not-loaded checklists with Load-if reasoning. Useful wherever profile detection must be isolated from downstream work — the /kk:review-code eval harness uses it to grade detection independently of review output, and production skill invocations may delegate detection here to keep the main session's context free of the procedure files."
 sandbox_mode = "read-only"
 model = "gpt-5.4"
 model_reasoning_effort = "xhigh"
@@ -65,5 +65,5 @@ Every file in the diff appears in the Active profiles table, even when no profil
 
 ## Phase scope
 
-This agent currently resolves checklists for the `review-code` phase only (reads `review-code/index.md`). The detection procedure itself (path/filename/content signals) is phase-independent; only the `index.md` lookup is phase-specific. When another phase (design, implement, test, document) needs resolver support, extend this agent with a phase parameter rather than forking a new agent.
+This agent currently resolves checklists for the `$kk:review-code` phase only (reads `review-code/index.md`). The detection procedure itself (path/filename/content signals) is phase-independent; only the `index.md` lookup is phase-specific. When another phase (design, implement, test, document) needs resolver support, extend this agent with a phase parameter rather than forking a new agent.
 """

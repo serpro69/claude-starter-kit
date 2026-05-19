@@ -64,7 +64,7 @@ When you defer a fix, a partial implementation, or a known-but-unaddressed issue
 
 - **Write it down where the next contributor will find it.** Inline code comments at the affected site (`TODO:` / `FIXME:` with enough context to act), markdown notes in the relevant design/implementation doc under `docs/wip/<feature>/`, or an entry in `tasks.md` — not just a chat reply.
 - **Be explicit, not handwavy.** "Skipped X because Y; to fix, do Z" beats "postponed — trivial." What seems trivial in-context is opaque without it. State the *what*, the *why it was deferred*, and the *concrete next step*.
-- **Applies to review outputs too.** When `review-code`, `review-design`, or `review-spec` identifies an issue that won't be fixed in the current task, the reviewer or the consumer must record it durably (task entry, doc note, inline TODO) — not leave it as a conversational aside.
+- **Applies to review outputs too.** When `$kk:review-code`, `$kk:review-design`, or `$kk:review-spec` identifies an issue that won't be fixed in the current task, the reviewer or the consumer must record it durably (task entry, doc note, inline TODO) — not leave it as a conversational aside.
 - **Explicit partial > silent postpone.** A documented partial solution is honest and actionable. A silently deferred fix is invisible technical debt that the next session cannot see.
 
 This is a corollary of Fail Loud: the codebase itself must fail loud about its own gaps.
@@ -74,11 +74,11 @@ This is a corollary of Fail Loud: the codebase itself must fail loud about its o
 Task tracking uses simple markdown files co-located with feature design docs:
 
 - **Location:** `/docs/wip/[feature]/tasks.md` alongside `design.md` and `implementation.md`
-- **Created by:** `design` skill (Step 6 of the idea workflow)
-- **Consumed by:** `implement` skill (reads tasks, updates status/checkboxes during execution)
+- **Created by:** `$kk:design` skill (Step 6 of the idea workflow)
+- **Consumed by:** `$kk:implement` skill (reads tasks, updates status/checkboxes during execution)
 - **Format:** H2 headings per task, checkbox subtasks, bold key-value status/dependencies
 
-The full workflow: `design` (design + create tasks) → `review-design` → `implement` (execute tasks + `review-code`/`test`/`document` at the end of each task) → `test` (verify) → `document` (document)
+The full workflow: `$kk:design` (design + create tasks) → `$kk:review-design` → `$kk:implement` (execute tasks + `$kk:review-code`/`$kk:test`/`$kk:document` at the end of each task) → `$kk:test` (verify) → `$kk:document` (document)
 EOF
 
 AGENTS_CAPY_MD=""

@@ -14,7 +14,7 @@ Read capy knowledge base conventions at [shared-capy-knowledge-protocol.md](shar
 
 ## Overview
 
-Pre-implementation review gate that evaluates design documents produced by `design` before code is written. Sits between `design` (creates docs) and `implement` (executes them). Reviews tree distinct dimensions
+Pre-implementation review gate that evaluates design documents produced by `$kk:design` before code is written. Sits between `$kk:design` (creates docs) and `$kk:implement` (executes them). Reviews tree distinct dimensions
 
 - document quality/structure (completeness, internal consistency, clarity, convention adherence)
 - technical soundness (architectural viability, edge cases, failure modes, trade-off analysis)
@@ -22,11 +22,11 @@ Pre-implementation review gate that evaluates design documents produced by `desi
 
 ## Review Modes
 
-### Standard Mode (`/kk:review-design`)
+### Standard Mode (`$kk:review-design`)
 
 Reviews design documents in the main conversation context. Fast, single-pass review using the workflow below.
 
-### Isolated Mode (`/kk:review-design:isolated`)
+### Isolated Mode (`$kk:review-design:isolated`)
 
 Delegates detection to independent reviewers that did not participate in the design, then annotates their findings with author context. Two parallel reviewers: a `design-reviewer` sub-agent and `pal codereview` (external model in native format). Produces a report organized by agreement level with corroborated findings highlighted.
 
@@ -77,16 +77,16 @@ See [review-process.md](./review-process.md) for the detailed step-by-step proce
 Standard mode — reviews `design.md` + `implementation.md` by default:
 
 ```
-/kk:review-design [feature-name]
+$kk:review-design [feature-name]
 ```
 
 Standard mode with scope — review specific documents:
 
 ```
-/kk:review-design [feature-name] design
-/kk:review-design [feature-name] implementation
-/kk:review-design [feature-name] tasks
-/kk:review-design [feature-name] all
+$kk:review-design [feature-name] design
+$kk:review-design [feature-name] implementation
+$kk:review-design [feature-name] tasks
+$kk:review-design [feature-name] all
 ```
 
 | Scope            | Documents reviewed                             |
@@ -100,6 +100,6 @@ Standard mode with scope — review specific documents:
 Isolated mode with independent sub-agents:
 
 ```
-/kk:review-design:isolated [feature-name]
-/kk:review-design:isolated [feature-name] tasks
+$kk:review-design:isolated [feature-name]
+$kk:review-design:isolated [feature-name] tasks
 ```

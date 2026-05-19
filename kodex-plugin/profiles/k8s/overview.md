@@ -32,7 +32,7 @@ Kubernetes is declarative: every resource is a desired-state document (`apiVersi
 
 ## Looking up Kubernetes dependencies
 
-When adding, modifying, or upgrading a Kubernetes-facing dependency, follow the `dependency-handling` skill's cascade (capy-first, context7-second, web-last) against the target below. Per-category targets:
+When adding, modifying, or upgrading a Kubernetes-facing dependency, follow the `$kk:dependency-handling` skill's cascade (capy-first, context7-second, web-last) against the target below. Per-category targets:
 
 1. **Kubernetes API versions** (built-in resources and their fields)
    - capy: project's indexed API-version decisions and prior context7 fetches.

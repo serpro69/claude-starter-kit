@@ -1,6 +1,6 @@
 # Kubernetes — test artifacts
 
-Consumed by the `test` skill when the `k8s` profile is active. The three files below are always-loaded and cooperate: the presence-check protocol gates every validator named in `validators.md` and `policy-hook.md` — executing any validator before `command -v` confirms the binary is on `PATH` is the failure mode this trio exists to prevent.
+Consumed by the `$kk:test` skill when the `k8s` profile is active. The three files below are always-loaded and cooperate: the presence-check protocol gates every validator named in `validators.md` and `policy-hook.md` — executing any validator before `command -v` confirms the binary is on `PATH` is the failure mode this trio exists to prevent.
 
 ## Always load
 

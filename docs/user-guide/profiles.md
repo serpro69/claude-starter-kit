@@ -37,12 +37,12 @@ Each profile populates phase-specific content for the skills that consume it:
 
 | Phase | Consuming Skill | Content |
 |-------|----------------|---------|
-| `review-code/` | review-code | Language-specific review checklists, gotchas |
-| `design/` | design | Architecture patterns, design considerations |
-| `implement/` | implement | Implementation gotchas, idioms |
-| `test/` | test | Testing frameworks, conventions, validators |
-| `document/` | document | Documentation rubrics |
-| `review-spec/` | review-spec | Spec conformance rules |
+| `review-code/` | /kk:review-code | Language-specific review checklists, gotchas |
+| `design/` | /kk:design | Architecture patterns, design considerations |
+| `implement/` | /kk:implement | Implementation gotchas, idioms |
+| `test/` | /kk:test | Testing frameworks, conventions, validators |
+| `document/` | /kk:document | Documentation rubrics |
+| `review-spec/` | /kk:review-spec | Spec conformance rules |
 
 ## Vendored Content
 

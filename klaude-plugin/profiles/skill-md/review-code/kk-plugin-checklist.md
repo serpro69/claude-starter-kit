@@ -18,10 +18,10 @@ Review checks specific to skills within the `klaude-plugin/` directory structure
 
 ## Naming conventions
 
-- [ ] Do skill names use imperative verbs (`design`, not `analysis-process`)?
-- [ ] Do grouped skills share a family prefix (`review-code`, `review-design`, `review-spec`)?
+- [ ] Do skill names use imperative verbs (`/kk:design`, not `/kk:analysis-process`)?
+- [ ] Do grouped skills share a family prefix (`/kk:review-code`, `/kk:review-design`, `/kk:review-spec`)?
 - [ ] Do agent names describe roles (`code-reviewer`), not invoking skills?
-- [ ] Are other skills referenced without the `kk:` prefix in prose?
+- [ ] Are other skills referenced with the `/kk:` prefix everywhere?
 
 ## Test registration and Codex generation
 

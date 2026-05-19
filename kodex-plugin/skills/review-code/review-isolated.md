@@ -39,7 +39,7 @@ Run `git diff --stat` and `git diff` to capture the changes under review. If the
 
 Spec context is optional but improves review quality:
 
-1. If this review is happening within `implement`, locate the relevant `design.md` section and task description from `tasks.md` in the feature's `/docs/wip/[feature]/` directory.
+1. If this review is happening within `$kk:implement`, locate the relevant `design.md` section and task description from `tasks.md` in the feature's `/docs/wip/[feature]/` directory.
 2. If standalone, check if the user provided context or if design docs exist in `/docs/wip/` that relate to the changed files.
 3. If no spec context is found, that's fine — the sub-agent works without it.
 
@@ -69,7 +69,7 @@ Before spawning sub-agents, prepare a brief summary of approaches that were trie
 
 Build the Task Scope artifact following [shared-review-scope-protocol.md](shared-review-scope-protocol.md). This is what prevents reviewers from flagging pending tasks as missing functionality — it is not optional when a feature directory is present.
 
-- **Invoked from `implement`**: the feature directory and current task are known. Read `tasks.md`, list the current task (plus any other `done` tasks) as in-scope and any `pending`/`in-progress` tasks as out-of-scope. Use mode `mid-implementation` unless all tasks are `done`.
+- **Invoked from `$kk:implement`**: the feature directory and current task are known. Read `tasks.md`, list the current task (plus any other `done` tasks) as in-scope and any `pending`/`in-progress` tasks as out-of-scope. Use mode `mid-implementation` unless all tasks are `done`.
 - **Invoked directly inside a feature**: locate the relevant `/docs/wip/[feature]/tasks.md`. Classify by status field. Use `post-implementation` only when every task is `done`.
 - **No feature directory relates to the diff**: emit the "No task scope available" variant from the shared protocol and proceed.
 
@@ -138,8 +138,8 @@ Issue the pal step 1 call and the Agent tool call (Reviewer A) in the **same mes
 Handle reviewer failures inline as they occur:
 
 - **`pal` failure** (listmodels returns no models, or codereview step 1/2 fails): Note the failure, proceed to Step 3 with code-reviewer findings only.
-- **`code-reviewer` sub-agent failure** (timeout or error): Note the failure, proceed to Step 3 with pal findings only. Suggest `/kk:review-code` (standard mode) as supplement.
-- **Both reviewers fail**: Abort isolated mode. Display message suggesting fallback to `/kk:review-code` (standard mode). Do not proceed to Step 3.
+- **`code-reviewer` sub-agent failure** (timeout or error): Note the failure, proceed to Step 3 with pal findings only. Suggest `$kk:review-code` (standard mode) as supplement.
+- **Both reviewers fail**: Abort isolated mode. Display message suggesting fallback to `$kk:review-code` (standard mode). Do not proceed to Step 3.
 - **Malformed output**: Attempt best-effort parsing. If completely unparseable, treat as a failure and apply the rules above.
 
 ---

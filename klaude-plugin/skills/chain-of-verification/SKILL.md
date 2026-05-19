@@ -50,7 +50,7 @@ CoVe adds the most value in these scenarios:
 
 CoVe offers two verification modes to balance accuracy vs. cost:
 
-### Standard Mode (`/chain-of-verification`)
+### Standard Mode (`/kk:chain-of-verification`)
 
 Uses prompt-based isolation within a single conversation turn.
 
@@ -83,10 +83,10 @@ See [chain-of-verification-isolated.md](./chain-of-verification-isolated.md) for
 
 | Use Case                    | Recommended Mode                            |
 | --------------------------- | ------------------------------------------- |
-| Quick fact-checking         | `/chain-of-verification`                                     |
+| Quick fact-checking         | `/kk:chain-of-verification`                                     |
 | High-stakes accuracy        | `/kk:chain-of-verification:isolated`                    |
 | Codebase verification       | `/kk:chain-of-verification:isolated --explore`          |
-| Cost-sensitive verification | `/chain-of-verification` or `/kk:chain-of-verification:isolated --haiku` |
+| Cost-sensitive verification | `/kk:chain-of-verification` or `/kk:chain-of-verification:isolated --haiku` |
 
 ## Workflow
 
@@ -101,13 +101,13 @@ See [chain-of-verification-process.md](./chain-of-verification-process.md) for t
 
 ## Invocation
 
-Use the `/chain-of-verification` skill followed by your question:
+Use the `/kk:chain-of-verification` skill followed by your question:
 
 ```
-/chain-of-verification What is the time complexity of Python's sorted() function?
+/kk:chain-of-verification What is the time complexity of Python's sorted() function?
 ```
 
-Or invoke `/chain-of-verification` after receiving a response to verify it.
+Or invoke `/kk:chain-of-verification` after receiving a response to verify it.
 
 For isolated verification with sub-agents:
 

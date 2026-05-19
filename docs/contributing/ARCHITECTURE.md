@@ -23,7 +23,7 @@ klaude-plugin/          (canonical source)
 
 The canonical source of truth for all workflow functionality. Contains:
 
-- **`skills/`** — 10 workflow skills (design, implement, review-code, test, document, etc.)
+- **`skills/`** — 10 workflow skills (/kk:design, /kk:implement, /kk:review-code, /kk:test, /kk:document, etc.)
 - **`commands/`** — Slash commands for isolated/variant invocations
 - **`agents/`** — Sub-agent definitions (code-reviewer, design-reviewer, spec-reviewer, eval-grader, profile-resolver)
 - **`profiles/`** — Per-domain content (Go, Java, JS/TS, Kotlin, K8s, Python) with detection rules, review checklists, implementation gotchas, design prompts, test validators, and doc rubrics

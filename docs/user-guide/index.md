@@ -15,7 +15,7 @@ Learn how to use claude-toolbox's features effectively.
 ## The Pipeline
 
 ```
-/design → /review-design → /implement → /review-code → /test → /document
+/kk:design → /kk:review-design → /kk:implement → /kk:review-code → /kk:test → /kk:document
 ```
 
 Each skill produces artifacts the next one consumes. See [Skills](skills.md) for the full breakdown.

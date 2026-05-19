@@ -1,6 +1,6 @@
 # Kubernetes review-spec content
 
-Verification patterns for comparing Kubernetes implementations against their design specifications. The core IaC semantic shift — declarative artifacts ARE the implementation — is documented in the `review-spec` skill files; this index provides K8s-specific verification targets.
+Verification patterns for comparing Kubernetes implementations against their design specifications. The core IaC semantic shift — declarative artifacts ARE the implementation — is documented in the `$kk:review-spec` skill files; this index provides K8s-specific verification targets.
 
 ## Always load
 

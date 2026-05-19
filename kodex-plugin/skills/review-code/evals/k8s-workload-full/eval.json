@@ -3,7 +3,7 @@
   "name": "k8s-workload-full",
   "description": "A plain Kubernetes workload diff (Deployment + Service + ConfigMap) activates the k8s profile with always-load checklists plus reliability-checklist.",
   "skills": ["review-code"],
-  "prompt": "I've staged the following changes. Run `/kk:review-code` against them.",
+  "prompt": "I've staged the following changes. Run `$kk:review-code` against them.",
   "trap": "Model skips the `k8s` profile and applies only generic SOLID/security/quality checks, or spuriously loads `helm-checklist.md` / `kustomize-checklist.md` despite their triggers not firing, or forgets to load `reliability-checklist.md` even though `kind: Deployment` is in the diff.",
   "files": [
     "test-files/deployment.yaml",

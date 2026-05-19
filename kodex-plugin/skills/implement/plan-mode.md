@@ -26,7 +26,7 @@ After each execution + review cycle (SKILL.md Steps 2–3):
 
 After all tasks are complete and verified:
 
-- Use `test` skill to verify and validate functionality
-- Use `document` skill to create or update any relevant docs
+- Use `$kk:test` skill to verify and validate functionality
+- Use `$kk:document` skill to create or update any relevant docs
 - **Reflect:** briefly note where the implementation diverged from the plan, what turned out harder or simpler than expected, and any surprises that future work in this area should know about. Keep it short — a paragraph, not an essay. Index non-obvious learnings as `kk:project-conventions` or `kk:arch-decisions` if they weren't already captured during per-task cycles.
 - Update the feature status in `tasks.md` header to `done`

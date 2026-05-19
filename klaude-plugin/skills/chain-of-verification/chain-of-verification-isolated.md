@@ -258,7 +258,7 @@ If ALL sub-agents fail, abort isolated mode entirely:
 
 ```
 Isolated mode unavailable due to sub-agent failures.
-Please use `/chain-of-verification` for standard mode verification instead.
+Please use `/kk:chain-of-verification` for standard mode verification instead.
 ```
 
-3. Suggest the user retry with `/chain-of-verification` (standard mode)
+3. Suggest the user retry with `/kk:chain-of-verification` (standard mode)

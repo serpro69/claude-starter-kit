@@ -20,7 +20,7 @@ Any file with a `.go` extension in scope. See [DETECTION.md](DETECTION.md) for t
 
 ## Looking up Go dependencies
 
-When adding or upgrading a dependency (module, SDK, framework, API), follow the `dependency-handling` skill's cascade:
+When adding or upgrading a dependency (module, SDK, framework, API), follow the `/kk:dependency-handling` skill's cascade:
 
 1. **capy-first** — query the project's indexed `kk:lang-idioms` / `kk:project-conventions` / prior context7 fetches.
 2. **context7** — fetch current docs for the Go module (`github.com/<org>/<repo>` resolves to a context7 library). Covers standard-library and common third-party packages.

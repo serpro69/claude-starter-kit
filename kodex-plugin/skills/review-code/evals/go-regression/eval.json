@@ -3,7 +3,7 @@
   "name": "go-regression",
   "description": "A Go-only diff (main.go) activates the go profile and does NOT activate the k8s profile, even when the source contains K8s-evocative prose like 'deploy' or 'cluster' in comments.",
   "skills": ["review-code"],
-  "prompt": "I've staged the following changes. Run `/kk:review-code` against them.",
+  "prompt": "I've staged the following changes. Run `$kk:review-code` against them.",
   "trap": "Model spuriously activates the `k8s` profile because the file contains the word 'deploy' or 'cluster' in a comment, instead of applying the authoritative rule (k8s content signal requires `apiVersion:` + `kind:` at zero indent in YAML, or a Helm/Kustomize filename signal).",
   "files": [
     "test-files/main.go"

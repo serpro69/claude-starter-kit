@@ -18,35 +18,35 @@ All skills appear as `/skill-name` in the slash command menu (annotated with `(k
 
 | Skill                      | What it does                                                                                                                                                                    |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **design**       | Turns an idea into design docs, an implementation plan, and a task list in `docs/wip/`. Asks refinement questions, then documents everything a developer needs to start coding. |
-| **implement** | Executes a task list from `docs/wip/` with batched steps and code review checkpoints between batches. Updates task status as it goes.                                           |
-| **test**        | Generates tests following project conventions: table-driven, integration, mocking, property-based. Runs the full suite and reports coverage.                                    |
-| **document**  | Updates ARCHITECTURE.md, TESTING.md, and records ADRs for non-obvious decisions made during implementation.                                                                     |
-| **dependency-handling**    | Fires before calling a library/SDK/API or adding a dependency. Forces a capy/context7 lookup instead of guessing signatures or behavior.                                         |
-| **review-code**      | Reviews git changes for SOLID violations, security risks, and code quality. Language-specific checklists for Go, Java, JS/TS, Kotlin, and Python. Standard and isolated modes.  |
-| **review-spec**  | Compares implemented code against design/implementation docs. Finds spec deviations, missing implementations, and outdated docs — in both directions.                           |
-| **review-design**          | Pre-implementation review gate. Evaluates design docs for completeness, internal consistency, and technical soundness before code is written.                                    |
-| **merge-docs**             | Merges two competing design docs for the same feature into one unified document, resolving conflicts and preserving the best of both.                                           |
-| **chain-of-verification**  | Makes Claude fact-check its own answers. Standard mode (prompt-based) or isolated mode (independent sub-agents). For high-stakes accuracy.               |
+| **/kk:design**       | Turns an idea into design docs, an implementation plan, and a task list in `docs/wip/`. Asks refinement questions, then documents everything a developer needs to start coding. |
+| **/kk:implement** | Executes a task list from `docs/wip/` with batched steps and code review checkpoints between batches. Updates task status as it goes.                                           |
+| **/kk:test**        | Generates tests following project conventions: table-driven, integration, mocking, property-based. Runs the full suite and reports coverage.                                    |
+| **/kk:document**  | Updates ARCHITECTURE.md, TESTING.md, and records ADRs for non-obvious decisions made during implementation.                                                                     |
+| **/kk:dependency-handling**    | Fires before calling a library/SDK/API or adding a dependency. Forces a capy/context7 lookup instead of guessing signatures or behavior.                                         |
+| **/kk:review-code**      | Reviews git changes for SOLID violations, security risks, and code quality. Language-specific checklists for Go, Java, JS/TS, Kotlin, and Python. Standard and isolated modes.  |
+| **/kk:review-spec**  | Compares implemented code against design/implementation docs. Finds spec deviations, missing implementations, and outdated docs — in both directions.                           |
+| **/kk:review-design**          | Pre-implementation review gate. Evaluates design docs for completeness, internal consistency, and technical soundness before code is written.                                    |
+| **/kk:merge-docs**             | Merges two competing design docs for the same feature into one unified document, resolving conflicts and preserving the best of both.                                           |
+| **/kk:chain-of-verification**  | Makes Claude fact-check its own answers. Standard mode (prompt-based) or isolated mode (independent sub-agents). For high-stakes accuracy.               |
 
 ### Development Workflow
 
 The skills are designed to work together in a pipeline:
 
 ```
-design → review-design → implement → review-code → test → document
+/kk:design → /kk:review-design → /kk:implement → /kk:review-code → /kk:test → /kk:document
 ```
 
-1. **design** — design docs + implementation plan + task list
-2. **review-design** — evaluate design docs for completeness and technical soundness before writing code
-3. **implement** — execute tasks with review checkpoints
-4. **review-code** — review code for SOLID violations, security risks, and quality issues
-5. **test** — verify and validate
-6. **document** — update docs
+1. **/kk:design** — design docs + implementation plan + task list
+2. **/kk:review-design** — evaluate design docs for completeness and technical soundness before writing code
+3. **/kk:implement** — execute tasks with review checkpoints
+4. **/kk:review-code** — review code for SOLID violations, security risks, and quality issues
+5. **/kk:test** — verify and validate
+6. **/kk:document** — update docs
 
-**During implementation**, **dependency-handling** is pulled in whenever you touch an external library, SDK, or API — it routes you through capy/context7 instead of letting you guess. **review-spec** verifies code matches design/spec and detects deviations — use during or after implementation.
+**During implementation**, **/kk:dependency-handling** is pulled in whenever you touch an external library, SDK, or API — it routes you through capy/context7 instead of letting you guess. **/kk:review-spec** verifies code matches design/spec and detects deviations — use during or after implementation.
 
-**Utilities**: **merge-docs** reconciles competing design docs into one unified document. **chain-of-verification** adds self-verification for high-stakes accuracy at any stage.
+**Utilities**: **/kk:merge-docs** reconciles competing design docs into one unified document. **/kk:chain-of-verification** adds self-verification for high-stakes accuracy at any stage.
 
 ## Commands
 

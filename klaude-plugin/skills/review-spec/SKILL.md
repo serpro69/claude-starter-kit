@@ -27,7 +27,7 @@ Before declaring the review complete, verify all outputs are delivered:
 - [ ] User-confirmed intentional `SPEC_DEV`/`EXTRA_IMPL` findings indexed as `kk:arch-decisions` (skip if none confirmed)
 - [ ] Next steps confirmation from user
 
-Indexing is owned by this skill — callers (e.g., `implement`) do NOT duplicate it.
+Indexing is owned by this skill — callers (e.g., `/kk:implement`) do NOT duplicate it.
 
 ## Review Modes
 
@@ -73,7 +73,7 @@ For each active IaC profile that populates a `review-spec/` slot, load `${CLAUDE
 
 ## Severity Levels
 
-Same P0–P3 scale as `review-code`, adapted for spec conformance:
+Same P0–P3 scale as `/kk:review-code`, adapted for spec conformance:
 
 | Level  | Name     | Description                                                                           | Action                  |
 | ------ | -------- | ------------------------------------------------------------------------------------- | ----------------------- |
@@ -114,7 +114,7 @@ See [review-process.md](./review-process.md) for the detailed step-by-step proce
 
 ## Invocation
 
-Use the `/review-spec [feature-name]` command, or invoke naturally when a user asks to verify implementation against docs.
+Use the `/kk:review-spec [feature-name]` command, or invoke naturally when a user asks to verify implementation against docs.
 
 For isolated mode with an independent sub-agent:
 

@@ -21,7 +21,7 @@ Deferred phases: `design/`, `test/`, `document/`, `review-spec/`.
 
 ## Looking up skill-authoring dependencies
 
-When authoring skills that integrate with a provider's SDK or plugin system, follow the `dependency-handling` skill's cascade:
+When authoring skills that integrate with a provider's SDK or plugin system, follow the `/kk:dependency-handling` skill's cascade:
 
 1. **capy-first** — query indexed `kk:project-conventions` and `kk:arch-decisions` for prior skill-authoring patterns and decisions.
 2. **context7** — fetch current provider documentation. For Claude Code skills, resolve `claude-code` or `anthropic` as the context7 library. For Codex, resolve `openai-codex`.

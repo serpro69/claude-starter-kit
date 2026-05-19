@@ -10,6 +10,10 @@ skills:
     - type: inject_header
       content: |
         <!-- codex: tool-name mapping applied. See .codex/scripts/session-start.sh -->
+    - type: skill_prefix_rewrite
+      scope: all_md
+      from: "/kk:"
+      to: "$kk:"
   shared:
     copy: true
 
@@ -28,6 +32,9 @@ agents:
         ## Plugin root
 
         `<kk-plugin-root>` = root directory of the `kk` plugin installation. The spawning context must provide this path. If not provided, resolve by finding where kk plugin skills are loaded from and taking the parent of the `skills/` directory.
+    - type: skill_prefix_rewrite
+      from: "/kk:"
+      to: "$kk:"
 
 manifest:
   name: "kk"

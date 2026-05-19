@@ -47,10 +47,10 @@ Applies when creating or renaming kk-plugin skills and commands.
 
 ### Skills
 
-- **Imperative verbs over noun phrases.** `design` not `analysis-process`, `implement` not `implementation-process`. Drop filler suffixes like `-process`. Skills are invoked as `/skill-name` — shorter names are faster to type.
-- **Self-documenting over acronyms.** `chain-of-verification` beats `cove`. If the name requires expansion to understand it, it's the wrong name.
-- **Family prefixes for grouped skills.** When multiple skills do the same action on different targets, share a prefix: `review-design`, `review-spec`, `review-code`. Tab-completion, discoverability, and mental grouping all benefit.
-- **Reference bare in prose.** Inside skill/command files, reference other skills without the `kk:` prefix (e.g., `` `review-code` `` not `` `kk:review-code` ``). The `kk:` prefix is for command invocations, not prose references.
+- **Imperative verbs over noun phrases.** `/kk:design` not `/kk:analysis-process`, `/kk:implement` not `/kk:implementation-process`. Drop filler suffixes like `-process`. Skills are invoked as `/skill-name` — shorter names are faster to type.
+- **Self-documenting over acronyms.** `/kk:chain-of-verification` beats `cove`. If the name requires expansion to understand it, it's the wrong name.
+- **Family prefixes for grouped skills.** When multiple skills do the same action on different targets, share a prefix: `/kk:review-design`, `/kk:review-spec`, `/kk:review-code`. Tab-completion, discoverability, and mental grouping all benefit.
+- **Always use `/kk:` prefix.** Reference skills with the `/kk:` prefix everywhere — prose, invocation examples, docs (e.g., `` `/kk:review-code` `` not `` `review-code` ``). This ensures consistent, greppable, unambiguous skill references. The codex generation tool rewrites `/kk:` → `$kk:` for Codex output. Exception: `kk:review-findings`, `kk:lang-idioms`, etc. are capy knowledge-store labels, not skill references.
 
 ### Commands
 
@@ -87,7 +87,7 @@ When adding a new shared instruction:
 - Update `test/test-plugin-structure.sh` `EXPECTED_SKILLS` and `EXPECTED_COMMANDS`.
 - **Don't touch `run_plugin_migration`'s `dirs_to_remove` in `.github/scripts/template-sync.sh`** — those are historical paths for cleaning up pre-v0.5.0 downstream projects. They must stay as the names that existed at migration time.
 - Leave `docs/done/**` untouched — it's frozen history.
-- Watch for substring collisions (e.g., a `design-review` → `review-design` rename will also hit the `design-reviewer` agent name via simple sed; hand-fix those).
+- Watch for substring collisions (e.g., a `design-review` → `/kk:review-design` rename will also hit the `design-reviewer` agent name via simple sed; hand-fix those).
 
 ### Skill description budget
 
@@ -108,7 +108,7 @@ When touching a skill description in the future, re-check the docs page linked a
 
 ### Skill workflow ordering — instructions before action
 
-Applies to every plugin skill. The canonical failure example surfaced in `review-code`, but the rule is universal. See [ADR 0004](docs/adr/0004-skill-workflow-ordering.md) for the full rationale and the failure transcripts.
+Applies to every plugin skill. The canonical failure example surfaced in `/kk:review-code`, but the rule is universal. See [ADR 0004](docs/adr/0004-skill-workflow-ordering.md) for the full rationale and the failure transcripts.
 
 Core rule: a skill MUST fully load its instructions before taking any action on its subject matter.
 
@@ -141,7 +141,7 @@ klaude-plugin/skills/<skill>/evals/
       …
 ```
 
-**One directory per eval, not a single `evals.json`.** Skills that detect on paths or directory adjacency (e.g., `review-code` → `values*` adjacent to `Chart.yaml`, `templates/` ancestor chains, `kustomization.yaml` filename signal) can only be exercised against real filesystem structure. Inline-in-prompt fixtures force the evaluator to describe directory layout in prose, which tests pattern-matching on prose rather than the detection logic. Real fixtures are also syntax-highlightable, validatable (`kubeconform`, `helm lint`, `go build`), and trivial to edit — YAML embedded in JSON strings as `\n`-escaped text is not.
+**One directory per eval, not a single `evals.json`.** Skills that detect on paths or directory adjacency (e.g., `/kk:review-code` → `values*` adjacent to `Chart.yaml`, `templates/` ancestor chains, `kustomization.yaml` filename signal) can only be exercised against real filesystem structure. Inline-in-prompt fixtures force the evaluator to describe directory layout in prose, which tests pattern-matching on prose rather than the detection logic. Real fixtures are also syntax-highlightable, validatable (`kubeconform`, `helm lint`, `go build`), and trivial to edit — YAML embedded in JSON strings as `\n`-escaped text is not.
 
 `eval.json` schema:
 
@@ -171,7 +171,7 @@ klaude-plugin/skills/<skill>/evals/
 
 ## Profile Conventions
 
-Applies when authoring profiles under `klaude-plugin/profiles/`. Profiles make per-domain concerns (programming languages, IaC DSLs, config schemas) available to every phase of the `design` → `implement` → `review-code` → `test` → `document` flow.
+Applies when authoring profiles under `klaude-plugin/profiles/`. Profiles make per-domain concerns (programming languages, IaC DSLs, config schemas) available to every phase of the `/kk:design` → `/kk:implement` → `/kk:review-code` → `/kk:test` → `/kk:document` flow.
 
 ### Directory layout
 

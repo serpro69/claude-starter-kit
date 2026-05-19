@@ -327,8 +327,8 @@ validates the output and tests it in a live codex session.
 
 - All tests pass.
 - `make generate-kodex` produces no diff (output is fresh).
-- `review-code` on new Go code, shell scripts, TOML, Starlark.
-- `review-spec` against this plan and design.md.
+- `/kk:review-code` on new Go code, shell scripts, TOML, Starlark.
+- `/kk:review-spec` against this plan and design.md.
 - Smoke test from a codex session: install plugin, verify skills, hooks,
   agents, capy.
 

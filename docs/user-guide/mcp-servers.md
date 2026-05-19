@@ -107,11 +107,11 @@ Verify with `codex mcp list`. See [Pal configuration docs](https://github.com/se
 
 ### Context7
 
-Fetches current documentation for any library, framework, or SDK. Used by the **dependency-handling** skill to look up API signatures instead of guessing. Also available for ad-hoc queries.
+Fetches current documentation for any library, framework, or SDK. Used by the **/kk:dependency-handling** skill to look up API signatures instead of guessing. Also available for ad-hoc queries.
 
 ### Pal
 
-Multi-model AI integration. Powers the **review-code** skill's independent reviewer sub-agents — your code gets reviewed by Gemini (or other models) in addition to Claude, catching blind spots neither model would find alone. Also provides: `debug`, `planner`, `secaudit`, `testgen`, and more.
+Multi-model AI integration. Powers the **/kk:review-code** skill's independent reviewer sub-agents — your code gets reviewed by Gemini (or other models) in addition to Claude, catching blind spots neither model would find alone. Also provides: `debug`, `planner`, `secaudit`, `testgen`, and more.
 
 ### Capy (Knowledge Base)
 

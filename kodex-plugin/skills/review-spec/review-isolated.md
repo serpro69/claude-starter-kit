@@ -27,7 +27,7 @@ Isolated Implementation Review Progress:
 
 ### 1a) Locate feature directory
 
-Find the feature directory in `/docs/wip/[feature]/`. If the user specified a feature name, use it directly. If invoked from `implement`, the feature directory is already known.
+Find the feature directory in `/docs/wip/[feature]/`. If the user specified a feature name, use it directly. If invoked from `$kk:implement`, the feature directory is already known.
 
 ### 1b) Verify docs exist
 
@@ -106,7 +106,7 @@ This is a single sub-agent, not parallel. Wait for it to complete before proceed
 
 ### Error handling
 
-- **Sub-agent timeout or failure**: Abort isolated mode. Suggest fallback to `/kk:review-spec` (standard mode).
+- **Sub-agent timeout or failure**: Abort isolated mode. Suggest fallback to `$kk:review-spec` (standard mode).
 - **Malformed output**: Attempt best-effort parsing. If completely unparseable, treat as failure and abort with the fallback suggestion above.
 
 ---
@@ -201,7 +201,7 @@ Use this report template, organized by finding type:
 
 ### Integration with implement
 
-If this review is happening within `implement`:
+If this review is happening within `$kk:implement`:
 - Feed `MISSING_IMPL` and `SPEC_DEV` findings back as implementation tasks
 - Feed `DOC_INCON`, `OUTDATED_DOC`, and `AMBIGUOUS` findings back as doc-update tasks
 - Present the combined list for user confirmation before proceeding

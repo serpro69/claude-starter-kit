@@ -23,7 +23,7 @@ func GenerateProfiles(m *Manifest, dryRun bool) error {
 		return nil
 	}
 
-	if err := copySkillDir(srcProfiles, dstProfiles, nil); err != nil {
+	if err := copySkillDir(srcProfiles, dstProfiles, m.Skills.Transforms); err != nil {
 		return fmt.Errorf("copying profiles directory: %w", err)
 	}
 

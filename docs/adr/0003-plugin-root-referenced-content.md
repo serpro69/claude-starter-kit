@@ -7,7 +7,7 @@
 
 ## Context
 
-[ADR 0002](0002-profile-content-organization.md) introduces `klaude-plugin/profiles/<name>/` as a new top-level directory, peer to `klaude-plugin/skills/`. Profile content is consumed by multiple skills (`review-code`, `review-spec`, `design`, `implement`, `test`, `document`) and by their sub-agents.
+[ADR 0002](0002-profile-content-organization.md) introduces `klaude-plugin/profiles/<name>/` as a new top-level directory, peer to `klaude-plugin/skills/`. Profile content is consumed by multiple skills (`/kk:review-code`, `/kk:review-spec`, `/kk:design`, `/kk:implement`, `/kk:test`, `/kk:document`) and by their sub-agents.
 
 The plugin has an existing pattern for content shared across skills: `klaude-plugin/skills/_shared/<name>.md` with per-consuming-skill symlinks at `skills/<skill>/shared-<name>.md` → `../_shared/<name>.md`. This pattern is documented in `CLAUDE.md` and used today by `capy-knowledge-protocol.md`, `pal-codereview-invocation.md`, and `review-scope-protocol.md`.
 

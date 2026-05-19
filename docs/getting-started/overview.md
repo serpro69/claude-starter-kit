@@ -20,7 +20,7 @@ Tools like Claude Code and Codex are powerful on their own, but LLMs don't know 
 **A structured development pipeline** — 10 workflow skills with explicit multi-language support that take you from idea through design, implementation, code review, testing, to documentation, with persistent knowledge that carries across sessions.
 
 ```
-/design → /review-design → /implement → /review-code → /test → /document
+/kk:design → /kk:review-design → /kk:implement → /kk:review-code → /kk:test → /kk:document
 ```
 
 ## Features at a Glance

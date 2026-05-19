@@ -28,15 +28,15 @@ Before declaring the review complete, verify all outputs are delivered:
 - [ ] User-confirmed intentional `SPEC_DEV`/`EXTRA_IMPL` findings indexed as `kk:arch-decisions` (skip if none confirmed)
 - [ ] Next steps confirmation from user
 
-Indexing is owned by this skill — callers (e.g., `implement`) do NOT duplicate it.
+Indexing is owned by this skill — callers (e.g., `$kk:implement`) do NOT duplicate it.
 
 ## Review Modes
 
-### Standard Mode (`/kk:review-spec`)
+### Standard Mode (`$kk:review-spec`)
 
 Reviews spec conformance in the main conversation context. Single-pass review using the workflow below.
 
-### Isolated Mode (`/kk:review-spec:isolated`)
+### Isolated Mode (`$kk:review-spec:isolated`)
 
 Delegates detection to an independent `spec-reviewer` sub-agent that did not write the code, then annotates its findings with type-specific author context. Low-relevance types (MISSING_IMPL, DOC_INCON, OUTDATED_DOC, AMBIGUOUS) get brief annotations; high-relevance types (SPEC_DEV, EXTRA_IMPL) get detailed annotations with spec update suggestions.
 
@@ -74,7 +74,7 @@ For each active IaC profile that populates a `review-spec/` slot, load `../../pr
 
 ## Severity Levels
 
-Same P0–P3 scale as `review-code`, adapted for spec conformance:
+Same P0–P3 scale as `$kk:review-code`, adapted for spec conformance:
 
 | Level  | Name     | Description                                                                           | Action                  |
 | ------ | -------- | ------------------------------------------------------------------------------------- | ----------------------- |
@@ -115,10 +115,10 @@ See [review-process.md](./review-process.md) for the detailed step-by-step proce
 
 ## Invocation
 
-Use the `/review-spec [feature-name]` command, or invoke naturally when a user asks to verify implementation against docs.
+Use the `$kk:review-spec [feature-name]` command, or invoke naturally when a user asks to verify implementation against docs.
 
 For isolated mode with an independent sub-agent:
 
 ```
-/kk:review-spec:isolated [feature-name]
+$kk:review-spec:isolated [feature-name]
 ```

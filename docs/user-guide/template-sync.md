@@ -123,7 +123,7 @@ The workflow detects these credentials automatically and uses them for both push
 
 ## Migrating from Task Master
 
-Task Master MCP was removed in favor of native markdown-based task tracking integrated into the `design` and `implement` skills.
+Task Master MCP was removed in favor of native markdown-based task tracking integrated into the `/kk:design` and `/kk:implement` skills.
 
 The easiest way to migrate is to run the migration command in Claude Code:
 
@@ -167,7 +167,7 @@ It will port pending tasks, clean up TM files, update configs, and walk you thro
         chmod +x .github/scripts/template-sync.sh
         ```
 
-    Task tracking now lives in simple markdown files (`docs/wip/[feature]/tasks.md`) created by the `design` skill and consumed by `implement`. No external MCP server required.
+    Task tracking now lives in simple markdown files (`docs/wip/[feature]/tasks.md`) created by the `/kk:design` skill and consumed by `/kk:implement`. No external MCP server required.
 
 ## Upgrading to the Plugin System (v0.5.0+)
 

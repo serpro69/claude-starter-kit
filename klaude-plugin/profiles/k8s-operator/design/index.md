@@ -1,6 +1,6 @@
 # Kubernetes Operator — design artifacts
 
-Consumed by the `design` skill when the `k8s-operator` profile is active. Both files are always-loaded (the design phase has no diff to predicate on).
+Consumed by the `/kk:design` skill when the `k8s-operator` profile is active. Both files are always-loaded (the design phase has no diff to predicate on).
 
 ## Always load
 

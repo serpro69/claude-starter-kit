@@ -20,7 +20,7 @@ The `skill-md` profile has non-trivial detection logic (nearest-ancestor `SKILL.
 
 Deferred from initial scope (see design.md §Phases):
 
-- **`design/`** — `questions.md` feeding the design skill's refinement question pool (e.g., "What should this skill enable?", "When should it trigger?", "What's the expected output format?", "Should it bundle scripts?"). `sections.md` requiring design doc sections for skill architecture, detection strategy, resource organization.
+- **`design/`** — `questions.md` feeding the /kk:design skill's refinement question pool (e.g., "What should this skill enable?", "When should it trigger?", "What's the expected output format?", "Should it bundle scripts?"). `sections.md` requiring design doc sections for skill architecture, detection strategy, resource organization.
 - **`test/`** — eval creation guidance using this project's eval.json format (traps, assertions, real filesystem fixtures). Would teach the model to generate eval scenarios for new skills.
 - **`document/`** — documentation rubric for skill README/overview content.
 - **`review-spec/`** — spec conformance checks between skill design docs and implemented SKILL.md.

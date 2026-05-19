@@ -14,7 +14,7 @@ This playbook fixes all three. Multi-model sampling is deliberately deferred.
 
 ## Roles
 
-This harness uses three sub-agents per eval, each with a narrowly scoped input, matching the real `/kk:review-code` invocation path:
+This harness uses three sub-agents per eval, each with a narrowly scoped input, matching the real `$kk:review-code` invocation path:
 
 - **Orchestrator** — the agent reading this playbook. Runs `setup.sh`, captures `git diff`, spawns the three sub-agents per eval, aggregates. Has full context (including assertions).
 - **Profile resolver** — a `kk:profile-resolver` sub-agent, one per eval. Receives only the diff text + worktree root. Runs the shared profile-detection procedure. Emits a structured resolution (active profiles, per-file `triggered_by`, loaded/not-loaded checklists with Load-if reasoning). Does NOT see assertions, user intent, or fixture files beyond what the procedure inspects.

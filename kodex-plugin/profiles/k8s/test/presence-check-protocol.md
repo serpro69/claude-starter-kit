@@ -30,7 +30,7 @@ Proceed with the tool as described in `validators.md` / `policy-hook.md`.
 
 ## Floor-binary absence is NOT a blocker
 
-A missing floor binary (`kubeconform`, `helm`, `kustomize`) surfaces the install hint and continues the run. The remaining floor checks still execute. The test skill does not abort the overall test plan because one tool is missing — the user is informed and the other validators produce their usual output.
+A missing floor binary (`kubeconform`, `helm`, `kustomize`) surfaces the install hint and continues the run. The remaining floor checks still execute. The $kk:test skill does not abort the overall test plan because one tool is missing — the user is informed and the other validators produce their usual output.
 
 Policy-hook tools that are gated by project markers follow the same rule: if the marker exists but the binary is missing, surface the install hint and continue; do not let a missing `conftest` silence the rest of the validator run.
 

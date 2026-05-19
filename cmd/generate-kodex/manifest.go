@@ -35,6 +35,9 @@ type TransformConfig struct {
 	Content         string `yaml:"content"`
 	Placeholder     string `yaml:"placeholder"`
 	Preamble        string `yaml:"preamble"`
+	From            string `yaml:"from"`
+	To              string `yaml:"to"`
+	Scope           string `yaml:"scope"` // "skill_md" (default) or "all_md"
 }
 
 type ProfilesConfig struct {

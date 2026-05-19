@@ -3,7 +3,7 @@
   "name": "k8s-helm-chart",
   "description": "A Helm chart diff (Chart.yaml + values.yaml + templated Deployment + _helpers.tpl) activates the k8s profile, helm-checklist, and reliability-checklist.",
   "skills": ["review-code"],
-  "prompt": "I've staged the following changes. Run `/kk:review-code` against them.",
+  "prompt": "I've staged the following changes. Run `$kk:review-code` against them.",
   "trap": "Model doesn't recognize templates as Kubernetes manifests because `{{ }}` placeholders make them technically invalid YAML, or misses the `values.yaml` / `Chart.yaml` adjacency rule, or spuriously loads `kustomize-checklist.md` alongside helm.",
   "files": [
     "test-files/Chart.yaml",

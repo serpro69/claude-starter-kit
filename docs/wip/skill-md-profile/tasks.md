@@ -56,8 +56,8 @@
 - **Depends on:** Task 1, Task 2, Task 3, Task 4
 
 ### Subtasks
-- [x] 5.1 Run `test` skill — full test suite (`for test in test/test-*.sh; do $test; done`)
+- [x] 5.1 Run `/kk:test` skill — full test suite (`for test in test/test-*.sh; do $test; done`)
 - [x] 5.2 Run `make generate-kodex && git diff --exit-code kodex-plugin/` — Codex parity clean (kodex drift staged)
-- [x] 5.3 Run `review-code` skill to review the implementation
-- [x] 5.4 Run `review-spec` skill to verify implementation matches design and implementation docs
-- [x] 5.5 Manual smoke test: verify `skill-md` profile activates when `review-code` runs on a diff touching a SKILL.md (verified via structural chain: profile registered in Known Profiles, DETECTION.md has SKILL.md filename signal, review-code/index.md resolves all links, all tests pass)
+- [x] 5.3 Run `/kk:review-code` skill to review the implementation
+- [x] 5.4 Run `/kk:review-spec` skill to verify implementation matches design and implementation docs
+- [x] 5.5 Manual smoke test: verify `skill-md` profile activates when `/kk:review-code` runs on a diff touching a SKILL.md (verified via structural chain: profile registered in Known Profiles, DETECTION.md has SKILL.md filename signal, review-code/index.md resolves all links, all tests pass)

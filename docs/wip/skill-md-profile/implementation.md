@@ -112,5 +112,5 @@ kk-plugin-specific review checks:
 
 - `bash test/test-plugin-structure.sh` — all assertions pass including bidirectional invariant for both phase subdirectories
 - `make generate-kodex && git diff --exit-code kodex-plugin/` — Codex parity clean
-- Manual smoke test: trigger `review-code` on a diff touching a SKILL.md file, verify `skill-md` profile activates and checklists load
-- Manual smoke test: trigger `implement` standalone with "create a skill" prompt, verify profile activates via planned target filenames (e.g., `skills/my-skill/SKILL.md`) through the standard file-based detection path — not design signals
+- Manual smoke test: trigger `/kk:review-code` on a diff touching a SKILL.md file, verify `skill-md` profile activates and checklists load
+- Manual smoke test: trigger `/kk:implement` standalone with "create a skill" prompt, verify profile activates via planned target filenames (e.g., `skills/my-skill/SKILL.md`) through the standard file-based detection path — not design signals

@@ -26,7 +26,7 @@ In order to gain a better understanding of the project, **check the contributing
 
 Once you've become familiar with the project and code, you can start asking me questions, one at a time, to **help refine the idea**.
 
-**Detect active profiles before refining.** The design phase runs before any code exists, so file-based detection is impossible. Run the design interaction pattern from [shared-profile-detection.md §The `design` interaction pattern](shared-profile-detection.md) — it iterates all profiles with `## Design signals`, matches their declared tokens against the idea prose, and handles confirmation prompts. Never auto-activate a profile silently.
+**Detect active profiles before refining.** The design phase runs before any code exists, so file-based detection is impossible. Run the design interaction pattern from [shared-profile-detection.md §The `$kk:design` interaction pattern](shared-profile-detection.md) — it iterates all profiles with `## Design signals`, matches their declared tokens against the idea prose, and handles confirmation prompts. Never auto-activate a profile silently.
 
 For each active profile, use the `Read` tool on `<plugin_root>/profiles/<name>/design/index.md` — where `<plugin_root>` is the absolute plugin-root path you already know from SKILL.md context. Skip silently if absent; not every profile populates a `design/` subdirectory. Load every file listed under **Always load**; a profile's `questions.md` (when present) seeds the refinement question pool. Integrate the profile's questions into the flow below — one question per message, as always.
 
@@ -38,7 +38,7 @@ Don't forget: only one question per message!
 
 Once you believe you understand what we're trying to achieve, stop and **describe the whole design** to me, **in sections of 200-300 words at a time**, **asking after each section whether it looks right so far**.
 
-**If the design recommends a specific library, SDK, framework, or API** — especially one not already in use in this project — apply the `dependency-handling` skill BEFORE committing to that recommendation. Verifying behavior against context7 at design time prevents proposing something that doesn't actually work the way you assumed.
+**If the design recommends a specific library, SDK, framework, or API** — especially one not already in use in this project — apply the `$kk:dependency-handling` skill BEFORE committing to that recommendation. Verifying behavior against context7 at design time prevents proposing something that doesn't actually work the way you assumed.
 
 **Step 5: Document the design**
 
@@ -83,4 +83,4 @@ Follow the structure and conventions in the [example task file](./example-tasks.
 - **Dependencies** reference other tasks by number when ordering matters
 - **Status values:** `pending`, `in-progress`, `done`, `blocked` (with reason)
 - Tasks should map roughly 1:1 to atomic, self-contained commits
-- **Always include a final verification task** that depends on all other tasks — it should invoke `test` to run the full test suite, `document` to update any relevant docs, `review-code` with project's language input to review the code, and `review-spec` to verify the implementation matches the design and implementation docs
+- **Always include a final verification task** that depends on all other tasks — it should invoke `$kk:test` to run the full test suite, `$kk:document` to update any relevant docs, `$kk:review-code` with project's language input to review the code, and `$kk:review-spec` to verify the implementation matches the design and implementation docs

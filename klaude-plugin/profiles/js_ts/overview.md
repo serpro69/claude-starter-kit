@@ -10,13 +10,13 @@ Any file with one of these extensions in scope: `.js`, `.jsx`, `.mjs`, `.cjs`, `
 
 ## Populated phases
 
-- `review-code/` — checklists consumed by `review-code` (security, SOLID, code-quality, removal-plan).
+- `review-code/` — checklists consumed by `/kk:review-code` (security, SOLID, code-quality, removal-plan).
 
 Other phase subdirectories are not populated for this profile: generic per-phase behavior is sufficient.
 
 ## Looking up JS/TS dependencies
 
-When adding or upgrading a dependency, follow the `dependency-handling` skill's cascade:
+When adding or upgrading a dependency, follow the `/kk:dependency-handling` skill's cascade:
 
 1. **capy-first** — query the project's indexed `kk:lang-idioms` / `kk:project-conventions` / prior context7 fetches.
 2. **context7** — fetch current docs for the library, framework, or tool (React, Next.js, Vite, Vitest, Prisma, etc.).

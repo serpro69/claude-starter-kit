@@ -25,7 +25,7 @@ Before declaring the review complete, verify all outputs are delivered:
 - [ ] P0/P1 systemic findings indexed as `kk:review-findings` (skip if no qualifying findings)
 - [ ] Next steps confirmation from user
 
-Indexing is owned by this skill — callers (e.g., `implement`) do NOT duplicate it.
+Indexing is owned by this skill — callers (e.g., `/kk:implement`) do NOT duplicate it.
 
 ## Review Modes
 

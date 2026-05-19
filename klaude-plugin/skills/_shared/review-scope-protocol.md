@@ -6,7 +6,7 @@ Isolated reviewers see the diff and the design docs but have zero visibility int
 
 The review workflow must handle three invocation shapes:
 
-1. **Invoked from `implement`** — `/docs/wip/[feature]/` exists with `design.md`, `implementation.md`, `tasks.md`. The current task id is known (the one just finished). Use full scope filtering.
+1. **Invoked from `/kk:implement`** — `/docs/wip/[feature]/` exists with `design.md`, `implementation.md`, `tasks.md`. The current task id is known (the one just finished). Use full scope filtering.
 2. **Invoked directly inside a feature** — `/docs/wip/[feature]/` exists but no current task is explicitly supplied. Derive scope from `tasks.md` status fields (`done` = in scope, `pending`/`in-progress` = out of scope).
 3. **Invoked on an arbitrary diff** — no `/docs/wip/` directory relates to the diff. Skip the scope artifact entirely and note "No task scope available" in the reviewer prompt.
 
@@ -43,7 +43,7 @@ No task scope available — review the diff on its own merits without assuming a
 - **mid-implementation** — at least one task in `tasks.md` has status `pending` or `in-progress`.
 - **post-implementation** — all tasks are `done`.
 
-In shape 1, the invoking workflow (`implement`) may pass the current task id directly; that task is automatically in scope even if `tasks.md` hasn't been updated yet.
+In shape 1, the invoking workflow (`/kk:implement`) may pass the current task id directly; that task is automatically in scope even if `tasks.md` hasn't been updated yet.
 
 ### Interpretation guidance for reviewers
 

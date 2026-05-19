@@ -70,7 +70,7 @@ func copySkillDir(srcDir, dstDir string, transforms []TransformConfig) error {
 		dst := filepath.Join(dstDir, rel)
 
 		if d.Type()&os.ModeSymlink != 0 {
-			return copySymlink(path, dst)
+			return copySymlink(path, dst, rel, transforms)
 		}
 
 		if d.IsDir() {
@@ -86,22 +86,16 @@ func copySkillDir(srcDir, dstDir string, transforms []TransformConfig) error {
 	})
 }
 
-func copySymlink(src, dst string) error {
-	// Resolve symlink and copy file contents instead of recreating the link.
-	// Codex plugin cache may strip symlinks, so copies are safer.
+func copySymlink(src, dst, rel string, transforms []TransformConfig) error {
 	resolved, err := filepath.EvalSymlinks(src)
 	if err != nil {
 		return fmt.Errorf("resolving symlink %s: %w", src, err)
-	}
-	content, err := os.ReadFile(resolved)
-	if err != nil {
-		return fmt.Errorf("reading resolved symlink target %s: %w", resolved, err)
 	}
 	info, err := os.Stat(resolved)
 	if err != nil {
 		return fmt.Errorf("stat %s: %w", resolved, err)
 	}
-	return os.WriteFile(dst, content, info.Mode())
+	return copyFile(resolved, dst, rel, transforms, info.Mode())
 }
 
 func copyFile(src, dst, rel string, transforms []TransformConfig, mode fs.FileMode) error {
@@ -110,15 +104,32 @@ func copyFile(src, dst, rel string, transforms []TransformConfig, mode fs.FileMo
 		return fmt.Errorf("reading %s: %w", src, err)
 	}
 
-	if filepath.Base(rel) == "SKILL.md" {
+	ext := filepath.Ext(rel)
+	if ext == ".md" || ext == ".json" {
+		isSkillMD := filepath.Base(rel) == "SKILL.md"
+		applicable := filterTransforms(transforms, isSkillMD)
 		var err error
-		content, err = ApplyTransforms(content, transforms)
+		content, err = ApplyTransforms(content, applicable)
 		if err != nil {
 			return fmt.Errorf("transforming %s: %w", rel, err)
 		}
 	}
 
 	return os.WriteFile(dst, content, mode)
+}
+
+func filterTransforms(transforms []TransformConfig, isSkillMD bool) []TransformConfig {
+	var result []TransformConfig
+	for _, t := range transforms {
+		scope := t.Scope
+		if scope == "" {
+			scope = "skill_md"
+		}
+		if scope == "all_md" || (scope == "skill_md" && isSkillMD) {
+			result = append(result, t)
+		}
+	}
+	return result
 }
 
 func GenerateShared(m *Manifest, dryRun bool) error {
@@ -138,7 +149,7 @@ func GenerateShared(m *Manifest, dryRun bool) error {
 		return nil
 	}
 
-	if err := copySkillDir(srcShared, dstShared, nil); err != nil {
+	if err := copySkillDir(srcShared, dstShared, m.Skills.Transforms); err != nil {
 		return fmt.Errorf("copying _shared directory: %w", err)
 	}
 

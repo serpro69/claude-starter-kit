@@ -1,6 +1,6 @@
 # Policy-toolchain auto-detection
 
-Kubernetes projects commonly adopt one of three policy engines: **Conftest/OPA**, **Kyverno**, or **Gatekeeper** (Gatekeeper's CLI is `gator`). Each has its own project-local markers (directories, file patterns, resource kinds) that signal the project uses it. The `test` skill's policy hook activates a policy engine's tests when BOTH its project marker is present AND its binary is on `PATH` (per [presence-check-protocol.md](presence-check-protocol.md)).
+Kubernetes projects commonly adopt one of three policy engines: **Conftest/OPA**, **Kyverno**, or **Gatekeeper** (Gatekeeper's CLI is `gator`). Each has its own project-local markers (directories, file patterns, resource kinds) that signal the project uses it. The `/kk:test` skill's policy hook activates a policy engine's tests when BOTH its project marker is present AND its binary is on `PATH` (per [presence-check-protocol.md](presence-check-protocol.md)).
 
 **Both gates are required.** Marker alone → skill emits an install hint for the corresponding binary, does not execute. Binary alone → skill does nothing (the project has not adopted the engine; running the binary against random YAML produces spurious findings). No markers → the policy hook is skipped silently; no install hints are surfaced.
 

@@ -1,6 +1,6 @@
 # Agent Skills — review checklists
 
-Consumed by the `review-code` skill. When the `skill-md` profile is active, every checklist in **Always load** is applied to the diff. Conditional entries are loaded when their trigger matches.
+Consumed by the `$kk:review-code` skill. When the `skill-md` profile is active, every checklist in **Always load** is applied to the diff. Conditional entries are loaded when their trigger matches.
 
 ## Always load
 

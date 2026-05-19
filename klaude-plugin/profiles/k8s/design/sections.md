@@ -1,6 +1,6 @@
 # Kubernetes — required design sections
 
-Every `design.md` for a K8s-shaped feature must include the five sections below. Omit none; if a section genuinely does not apply, state so explicitly with a one-line justification — silent omissions hide scope gaps, and a reviewer (or `review-spec`) cannot tell absence-by-intent from absence-by-oversight.
+Every `design.md` for a K8s-shaped feature must include the five sections below. Omit none; if a section genuinely does not apply, state so explicitly with a one-line justification — silent omissions hide scope gaps, and a reviewer (or `/kk:review-spec`) cannot tell absence-by-intent from absence-by-oversight.
 
 Section order is not mandated; the sections must all be present. Cross-reference between sections liberally where a decision in one drives a constraint in another (e.g., a PSA level in **Security posture** constrains `readOnlyRootFilesystem` defaults in **Reliability posture**).
 

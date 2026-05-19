@@ -15,6 +15,8 @@ func ApplyTransforms(content []byte, transforms []TransformConfig) ([]byte, erro
 			result = applyInjectHeader(result, t.Content)
 		case "plugin_root_placeholder":
 			result = applyPluginRootPlaceholder(result, t.Placeholder, t.Preamble)
+		case "skill_prefix_rewrite":
+			result = applySkillPrefixRewrite(result, t.From, t.To)
 		default:
 			return nil, fmt.Errorf("unknown transform type %q", t.Type)
 		}
@@ -34,6 +36,12 @@ func applyPluginRootPlaceholder(content []byte, placeholder, preamble string) []
 	if preamble != "" {
 		s = preamble + "\n" + s
 	}
+	return []byte(s)
+}
+
+func applySkillPrefixRewrite(content []byte, from, to string) []byte {
+	s := string(content)
+	s = strings.ReplaceAll(s, from, to)
 	return []byte(s)
 }
 

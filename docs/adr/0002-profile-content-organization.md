@@ -7,7 +7,7 @@
 
 ## Context
 
-Profile detection ([ADR 0001](0001-profile-detection-model.md)) produces a set of active profiles for the current task. Skills need a consistent place and shape for the profile content they consume: review-code loads checklists; `design` loads idea-refinement prompts; `test` loads validator catalogs; `implement` loads per-task gotchas; `document` loads doc rubrics; `review-spec` loads spec-vs-impl semantics.
+Profile detection ([ADR 0001](0001-profile-detection-model.md)) produces a set of active profiles for the current task. Skills need a consistent place and shape for the profile content they consume: /kk:review-code loads checklists; `/kk:design` loads idea-refinement prompts; `/kk:test` loads validator catalogs; `/kk:implement` loads per-task gotchas; `/kk:document` loads doc rubrics; `/kk:review-spec` loads spec-vs-impl semantics.
 
 Two orthogonal organizational questions must be answered together:
 
@@ -40,7 +40,7 @@ klaude-plugin/profiles/<name>/
 
 Existing `review-code/reference/<lang>/` directories migrate to `profiles/<lang>/review/` as part of this feature's P0 phase. Migration is mechanical: file moves, plus an authored `index.md` per profile that lists the already-existing checklists as always-load entries.
 
-Skill workflows stop encoding checklist filenames as hardcoded step names. The review-code workflow's former "Step 3: SOLID / Step 4: Removal / Step 5: Security / Step 6: Quality" collapses into "Step 3: load each active profile's `review/index.md`; resolve entries per always-load and conditional triggers; apply each resolved checklist; group findings by (profile, checklist)". The same index-driven pattern extends to every other per-phase subdirectory consumed by other skills.
+Skill workflows stop encoding checklist filenames as hardcoded step names. The /kk:review-code workflow's former "Step 3: SOLID / Step 4: Removal / Step 5: Security / Step 6: Quality" collapses into "Step 3: load each active profile's `review/index.md`; resolve entries per always-load and conditional triggers; apply each resolved checklist; group findings by (profile, checklist)". The same index-driven pattern extends to every other per-phase subdirectory consumed by other skills.
 
 ## Alternatives considered
 
@@ -82,7 +82,7 @@ Each consuming skill copies the K8s-specific block inline in its own SKILL.md.
 - (Skill × profile) content has a natural home: `profiles/<name>/<phase>/*`.
 
 **Negative**
-- A one-time workflow restructure inside `review-code` (SKILL.md, review-process.md, review-isolated.md, code-reviewer agent prompt). Steps 3–6 collapse into a more generic "load indexes, apply checklists" sequence. This is paid once, benefits all current and future profiles.
+- A one-time workflow restructure inside `/kk:review-code` (SKILL.md, review-process.md, review-isolated.md, code-reviewer agent prompt). Steps 3–6 collapse into a more generic "load indexes, apply checklists" sequence. This is paid once, benefits all current and future profiles.
 - A new top-level directory convention in the plugin. Documented in CLAUDE.md.
 - Consumers that previously hardcoded a filename (`security-checklist.md`) now depend on the index being accurate. Mitigated by a test assertion that every file referenced by an index.md exists on disk.
 

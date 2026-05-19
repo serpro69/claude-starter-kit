@@ -3,7 +3,7 @@
   "name": "k8s-monorepo-false-positive",
   "description": "A monorepo with a root-level Chart.yaml plus an unrelated docs/templates/ subtree must not spuriously flag the docs templates as Helm templates. Regression guard for the tightened ancestor-search rule.",
   "skills": ["review-code"],
-  "prompt": "I've staged the following changes in a monorepo that ships an umbrella Helm chart at the repository root and also contains an unrelated docs site. Run `/kk:review-code` against them.",
+  "prompt": "I've staged the following changes in a monorepo that ships an umbrella Helm chart at the repository root and also contains an unrelated docs site. Run `$kk:review-code` against them.",
   "trap": "Model applies the depth-unbounded Helm-template ancestor search: sees the root-level `Chart.yaml` and concludes that every `templates/` directory anywhere in the tree — including `docs/templates/` — is a Helm template. Consequence: `helm-checklist.md` gets applied to `docs/templates/reference.yaml` (a docs-site config, not a Helm template), producing noisy, irrelevant findings. The tightened rule requires the `templates/` directory itself to be a direct sibling of a `Chart.yaml`; `docs/` does not contain a `Chart.yaml`, so `docs/templates/reference.yaml` is not a Helm template.",
   "files": [
     "test-files/Chart.yaml",

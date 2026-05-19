@@ -1,8 +1,8 @@
 # Kubernetes — per-task gotchas
 
-Read before editing Kubernetes manifests, Helm charts, or Kustomize overlays. These are authoring-time pitfalls — situations where the naive choice compiles, lints, and applies cleanly but fails in production or at the next cluster upgrade. Reviewers catch most of these post-write via `review-code`; the point here is to avoid them at the keyboard.
+Read before editing Kubernetes manifests, Helm charts, or Kustomize overlays. These are authoring-time pitfalls — situations where the naive choice compiles, lints, and applies cleanly but fails in production or at the next cluster upgrade. Reviewers catch most of these post-write via `/kk:review-code`; the point here is to avoid them at the keyboard.
 
-When in doubt about an API field, version, CRD schema, Helm chart behavior, or container image digest, invoke the `dependency-handling` skill BEFORE writing — do not guess. See [`../overview.md` §Looking up Kubernetes dependencies](../overview.md#looking-up-kubernetes-dependencies) for the per-category cascade.
+When in doubt about an API field, version, CRD schema, Helm chart behavior, or container image digest, invoke the `/kk:dependency-handling` skill BEFORE writing — do not guess. See [`../overview.md` §Looking up Kubernetes dependencies](../overview.md#looking-up-kubernetes-dependencies) for the per-category cascade.
 
 ## API-version pinning
 
@@ -79,4 +79,4 @@ Schema source by resource category:
 
 Multi-document YAML (`---`-separated): each document needs its own `# yaml-language-server` comment immediately preceding it. The comment applies only to the document that follows.
 
-When unsure which schema URL to use for a CRD, check `datreeio/CRDs-catalog` first. If not cataloged there, check whether the upstream project publishes its own JSON schema. Do not invent schema URLs — invoke the `dependency-handling` skill to look up the correct one.
+When unsure which schema URL to use for a CRD, check `datreeio/CRDs-catalog` first. If not cataloged there, check whether the upstream project publishes its own JSON schema. Do not invent schema URLs — invoke the `/kk:dependency-handling` skill to look up the correct one.

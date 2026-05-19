@@ -1,6 +1,6 @@
 # Python — review checklists
 
-Consumed by the `review-code` skill. When the `python` profile is active, every checklist in **Always load** is applied to the diff. There are no conditional entries for this profile.
+Consumed by the `$kk:review-code` skill. When the `python` profile is active, every checklist in **Always load** is applied to the diff. There are no conditional entries for this profile.
 
 ## Always load
 

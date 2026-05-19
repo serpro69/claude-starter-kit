@@ -10,13 +10,13 @@ Any file with a `.py` or `.pyi` extension in scope. See [DETECTION.md](DETECTION
 
 ## Populated phases
 
-- `review-code/` — checklists consumed by `review-code` (security, SOLID, code-quality, removal-plan).
+- `review-code/` — checklists consumed by `$kk:review-code` (security, SOLID, code-quality, removal-plan).
 
 Other phase subdirectories are not populated for this profile: generic per-phase behavior is sufficient.
 
 ## Looking up Python dependencies
 
-When adding or upgrading a dependency, follow the `dependency-handling` skill's cascade:
+When adding or upgrading a dependency, follow the `$kk:dependency-handling` skill's cascade:
 
 1. **capy-first** — query the project's indexed `kk:lang-idioms` / `kk:project-conventions` / prior context7 fetches.
 2. **context7** — fetch current docs for the package; most mainstream PyPI packages are indexed there.

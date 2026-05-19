@@ -26,15 +26,15 @@ Before declaring the review complete, verify all outputs are delivered:
 - [ ] P0/P1 systemic findings indexed as `kk:review-findings` (skip if no qualifying findings)
 - [ ] Next steps confirmation from user
 
-Indexing is owned by this skill — callers (e.g., `implement`) do NOT duplicate it.
+Indexing is owned by this skill — callers (e.g., `$kk:implement`) do NOT duplicate it.
 
 ## Review Modes
 
-### Standard Mode (`/kk:review-code`)
+### Standard Mode (`$kk:review-code`)
 
 Reviews code in the main conversation context. Fast, single-pass review using the workflow below.
 
-### Isolated Mode (`/kk:review-code:isolated`)
+### Isolated Mode (`$kk:review-code:isolated`)
 
 Delegates detection to independent reviewers that did not write the code, then annotates their findings with author context. Two parallel reviewers: a `code-reviewer` sub-agent and `pal codereview` (external model in native format). Produces a report organized by agreement level with corroborated findings highlighted.
 
@@ -82,11 +82,11 @@ See [review-process.md](./review-process.md) for the detailed step-by-step proce
 Standard mode:
 
 ```
-/kk:review-code
+$kk:review-code
 ```
 
 Isolated mode with independent sub-agents:
 
 ```
-/kk:review-code:isolated
+$kk:review-code:isolated
 ```
