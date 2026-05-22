@@ -9,7 +9,8 @@
 !.yamlfmt.yaml
 !.yamllint.yml
 !.mcp.json
-!**/.sessions/
+!docs/**/.sessions/
+!docs/**/.reviews/
 !.capy.toml
 !.arc.yml
 
