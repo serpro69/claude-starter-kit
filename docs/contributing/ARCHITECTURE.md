@@ -23,7 +23,7 @@ klaude-plugin/          (canonical source)
 
 The canonical source of truth for all workflow functionality. Contains:
 
-- **`skills/`** — 10 workflow skills (/kk:design, /kk:implement, /kk:review-code, /kk:test, /kk:document, etc.)
+- **`skills/`** — 11 workflow skills (/kk:design, /kk:implement, /kk:review-code, /kk:test, /kk:document, etc.)
 - **`commands/`** — Slash commands for isolated/variant invocations
 - **`agents/`** — Sub-agent definitions (code-reviewer, design-reviewer, spec-reviewer, eval-grader, profile-resolver)
 - **`profiles/`** — Per-domain content (Go, Java, JS/TS, Kotlin, K8s, Python) with detection rules, review checklists, implementation gotchas, design prompts, test validators, and doc rubrics
@@ -84,7 +84,7 @@ Users interact with claude-toolbox through three distinct modes, each providing 
 
 | What you get                 | Plugin-only | Template / Sync | Full repo checkout |
 | ---------------------------- | :---------: | :-------------: | :----------------: |
-| Skills (10 workflow skills)  |      Y      |        Y        |         Y          |
+| Skills (11 workflow skills)  |      Y      |        Y        |         Y          |
 | Profiles (language-specific) |      Y      |        Y        |         Y          |
 | Commands                     |  Y (Claude) |    Y (Claude)   |         Y          |
 | Hooks                        |  Y (Claude) |        Y        |         Y          |

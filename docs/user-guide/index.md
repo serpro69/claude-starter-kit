@@ -6,7 +6,7 @@ Learn how to use claude-toolbox's features effectively.
 
 | Topic | Description |
 |-------|-------------|
-| [Skills](skills.md) | The 10 workflow skills and how they chain together |
+| [Skills](skills.md) | The 11 workflow skills and how they chain together |
 | [Profiles](profiles.md) | Language-specific content for Go, Java, JS/TS, Kotlin, K8s, Python |
 | [MCP Servers](mcp-servers.md) | Context7, Pal, and Capy — the knowledge stack |
 | [Configuration](configuration.md) | Settings, permissions, statusline, and hooks |

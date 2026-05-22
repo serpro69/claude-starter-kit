@@ -2,7 +2,7 @@
 
 > Design: [./design.md](./design.md)
 > Implementation: [./implementation.md](./implementation.md)
-> Status: pending
+> Status: done
 > Created: 2026-05-22
 > Not Doing: cross-rename syntax, mechanical extraction pass, confidence levels, behavioral evals, CI integration, multi-skill invocation, auto-fix suggestions, extension points
 
@@ -62,16 +62,16 @@
 - [x] 4.5 Run `bash test/test-plugin-structure.sh` and confirm all assertions pass (including kodex-plugin skill count parity at line ~388)
 
 ## Task 5: Final verification
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1, Task 2, Task 3, Task 4
 - **Size:** S
 - **Can run in parallel with:** —
 
 ### Subtasks
-- [ ] 5.1 Run `/kk:test` skill to verify the full test suite passes
-- [ ] 5.2 Run `/kk:document` skill to update any relevant docs
-- [ ] 5.3 Run `/kk:review-code` skill with markdown/shell input to review the new skill files
-- [ ] 5.4 Run `/kk:review-spec` skill to verify SKILL.md + diff-process.md match design.md and implementation.md
+- [x] 5.1 Run `/kk:test` skill to verify the full test suite passes
+- [x] 5.2 Run `/kk:document` skill to update any relevant docs
+- [x] 5.3 Run `/kk:review-code` skill with markdown/shell input to review the new skill files
+- [x] 5.4 Run `/kk:review-spec` skill to verify SKILL.md + diff-process.md match design.md and implementation.md
 
 ## Dependency Graph
 
