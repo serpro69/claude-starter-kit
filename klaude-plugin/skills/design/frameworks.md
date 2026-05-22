@@ -4,7 +4,7 @@
 
 # Ideation Frameworks Reference
 
-Use these frameworks selectively. Pick the lens that fits the idea — don't mechanically run every framework. The goal is to unlock thinking, not to follow a checklist.
+These frameworks apply to software engineering features — APIs, infrastructure, developer tools, internal systems, library design. The goal is to unlock thinking about implementation approaches and architectural trade-offs, not to follow a checklist. Pick the lens that fits the idea; don't mechanically run every framework.
 
 ## SCAMPER
 
@@ -61,7 +61,7 @@ Focus on what the user is trying to accomplish, not what they say they want:
 
 Format: "When I [situation], I want to [motivation], so I can [expected outcome]."
 
-**Key insight:** People don't buy products — they hire them to do a job. The competing product isn't always in the same category. (Netflix competes with sleep, not just other streaming services.)
+**Key insight:** Users don't adopt tools — they hire them to do a job. The competing solution isn't always in the same category. (A CLI tool competes with a shell script alias, not just other CLI tools.)
 
 **Best for:** Understanding the real problem. When you're not sure if you're solving the right thing.
 
@@ -98,6 +98,6 @@ Look at how other domains solved similar problems:
 - What natural system or distributed system works this way?
 - What historical precedent exists?
 
-The key is finding *structural* similarities, not surface-level ones. "Uber for X" is surface-level. "A two-sided marketplace that solves a trust problem between strangers" is structural.
+The key is finding *structural* similarities, not surface-level ones. "Git for config files" is surface-level. "A content-addressable store with branching semantics that solves the concurrent-edit problem" is structural.
 
 **Best for:** Phase 1 expansion. Generating variations that feel genuinely different from the obvious approach.

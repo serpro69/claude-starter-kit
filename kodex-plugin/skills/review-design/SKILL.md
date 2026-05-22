@@ -74,6 +74,8 @@ See [review-process.md](./review-process.md) for the detailed step-by-step proce
 
 ## Invocation
 
+**Post-design gate.** This is the recommended review step after `$kk:design` completes and before `$kk:implement` begins. The default scope reviews all documents, including task-format checks.
+
 Standard mode — reviews all documents by default:
 
 ```
