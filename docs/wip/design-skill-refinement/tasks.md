@@ -2,7 +2,7 @@
 
 > Design: [./design.md](./design.md)
 > Implementation: [./implementation.md](./implementation.md)
-> Status: pending
+> Status: done
 > Created: 2026-05-21
 > Not Doing: existing-task-process.md changes, implement skill changes, pal-based stress-testing, Mermaid graphs, design skill evals, skill-md profile design/ subdirectory
 
@@ -117,18 +117,18 @@
 - [x] 8.3 Create `klaude-plugin/skills/design/evals/review-design-catches-missing-sections/` with eval.json and test-files/ containing a design.md missing Assumptions/Not Doing and a tasks.md with horizontal layers and no Size tags
 
 ## Task 9: Final verification
-- **Status:** in-progress
+- **Status:** done
 - **Depends on:** Task 5, Task 6, Task 7, Task 8
 - **Size:** S
 - **Can run in parallel with:** —
 
 ### Subtasks
-- [ ] 9.1 Run full test suite: `for test in test/test-*.sh; do $test; done` — all green
-- [ ] 9.2 Run `make generate-kodex && git diff --exit-code kodex-plugin/ .codex/agents/` — Codex plugin freshness check passes
-- [ ] 9.3 Run `/kk:test` skill to verify all tasks
-- [ ] 9.4 Run `/kk:document` skill to update any relevant docs
-- [ ] 9.5 Run `/kk:review-code` skill to review the implementation
-- [ ] 9.6 Run `/kk:review-spec` skill to verify implementation matches design and implementation docs
+- [x] 9.1 Run full test suite: `for test in test/test-*.sh; do $test; done` — all green
+- [x] 9.2 Run `make generate-kodex && git diff --exit-code kodex-plugin/ .codex/agents/` — Codex plugin freshness check passes (7 files regenerated)
+- [x] 9.3 Run `/kk:test` skill to verify all tasks
+- [x] 9.4 Run `/kk:document` skill to update any relevant docs (no updates needed — changes are self-contained within skill files)
+- [x] 9.5 Run `/kk:review-code` skill to review the implementation (one P3 fixed: stale framework count in design.md)
+- [x] 9.6 Run `/kk:review-spec` skill to verify implementation matches design and implementation docs (2 OUTDATED_DOC fixed: framework count, scope description)
 
 ## Dependency Graph
 

@@ -37,14 +37,14 @@
        Source: https://github.com/addyosmani/agent-skills/blob/<SHA>/skills/idea-refine/frameworks.md
        Pinned at: <SHA> -->
   ```
-- Preserve the full structure: one H2 per framework (SCAMPER, HMW, First Principles, JTBD, Pre-mortem, Constraint Mapping), each with a description, usage guidance, and "Best for" line.
+- Preserve the full structure: one H2 per framework (SCAMPER, HMW, First Principles, JTBD, Constraint Mapping, Pre-mortem, Analogous Inspiration), each with a description, usage guidance, and "Best for" line.
 - Light adaptation:
   - Add a brief framing paragraph at the top: these frameworks apply to software engineering features — APIs, infrastructure, developer tools, internal systems, library design — not just consumer products. The goal is to unlock thinking, not follow a checklist.
   - Remove product-specific examples that reference restaurants, startups, delivery platforms, or consumer apps. Replace with brief SE-flavored equivalents where the framework's meaning would be unclear without an example (e.g., for SCAMPER's "Substitute": "What if you swapped the synchronous RPC for an event-driven approach?").
   - Keep the structural definitions, quality criteria, and "Best for" guidance verbatim.
 - The file has no frontmatter — it is a reference file loaded by the agent, not a skill entry point.
 
-**Step → verify:** Read the produced file and confirm: all six frameworks present, no consumer-product examples, "Best for" guidance on each, framing note at top.
+**Step → verify:** Read the produced file and confirm: all seven frameworks present, no consumer-product examples, "Best for" guidance on each, framing note at top.
 
 ### Task 1.2: Create refinement-criteria.md
 
@@ -147,7 +147,7 @@ Add to the "Key points" bullet list after the existing bullets:
   - **Risk-First**: tackle the most uncertain piece first to surface unknowns early. Use when one task carries significantly more uncertainty than others.
 - **Parallel markers:** Each task gets a `**Can run in parallel with:**` field listing task numbers with no blocking dependency, or `—`.
 - **Dependency graph:** After all tasks, add a `## Dependency Graph` section with an ASCII diagram showing task relationships. Written once, never updated during implementation.
-- **Review scope recommendation:** At the end of Step 6, recommend invoking `/kk:review-design <feature> all` as the post-design gate. The default review scope (`design.md + implementation.md`) does not include tasks.md, so the new task-format checks would never run under default invocation.
+- **Review scope recommendation:** At the end of Step 6, recommend invoking `/kk:review-design <feature>` as the post-design gate. The default scope already reviews all documents (`design.md + implementation.md + tasks.md`), including the task-format checks.
 
 **Step → verify:** Read Step 6 and confirm: all seven additions present (Not Doing header, vertical slicing with anti-pattern, Size tags with L-forbidden rule, slicing strategies with definitions, parallel markers, dependency graph), existing bullet points preserved.
 

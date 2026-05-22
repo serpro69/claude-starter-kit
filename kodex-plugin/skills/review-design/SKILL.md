@@ -74,7 +74,7 @@ See [review-process.md](./review-process.md) for the detailed step-by-step proce
 
 ## Invocation
 
-Standard mode — reviews `design.md` + `implementation.md` by default:
+Standard mode — reviews all documents by default:
 
 ```
 $kk:review-design [feature-name]
@@ -86,16 +86,14 @@ Standard mode with scope — review specific documents:
 $kk:review-design [feature-name] design
 $kk:review-design [feature-name] implementation
 $kk:review-design [feature-name] tasks
-$kk:review-design [feature-name] all
 ```
 
 | Scope            | Documents reviewed                             |
 | ---------------- | ---------------------------------------------- |
-| _(none)_         | `design.md` + `implementation.md` (default)    |
+| _(none)_         | `design.md` + `implementation.md` + `tasks.md` |
 | `design`         | `design.md` only                               |
 | `implementation` | `implementation.md` only                       |
 | `tasks`          | `tasks.md` only                                |
-| `all`            | `design.md` + `implementation.md` + `tasks.md` |
 
 Isolated mode with independent sub-agents:
 

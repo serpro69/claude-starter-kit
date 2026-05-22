@@ -17,18 +17,17 @@ Design Review Progress:
 ### 1) Load Documents
 
 - Parse the invocation arguments: extract feature name and optional scope argument
-- **Argument disambiguation:** if the first argument matches a directory in `/docs/wip/`, treat it as the feature name. If it matches a scope keyword (`design`, `implementation`, `tasks`, `all`) and no such feature directory exists, treat it as the scope and prompt the user for the feature name.
+- **Argument disambiguation:** if the first argument matches a directory in `/docs/wip/`, treat it as the feature name. If it matches a scope keyword (`design`, `implementation`, `tasks`) and no such feature directory exists, treat it as the scope and prompt the user for the feature name.
 - Locate `/docs/wip/[feature-name]/` directory
 - If feature name is not provided or ambiguous, list `/docs/wip/` contents and ask the user
 - Scope resolution:
 
 | Scope arg        | Documents to load                              |
 | ---------------- | ---------------------------------------------- |
-| _(none)_         | `design.md` + `implementation.md`              |
+| _(none)_         | `design.md` + `implementation.md` + `tasks.md` |
 | `design`         | `design.md` only                               |
 | `implementation` | `implementation.md` only                       |
 | `tasks`          | `tasks.md` only                                |
-| `all`            | `design.md` + `implementation.md` + `tasks.md` |
 
 - If a requested document is missing, inform the user and proceed with available docs (do NOT stop — reviewing a single doc is a valid use case)
 - Read all in-scope documents
@@ -48,6 +47,13 @@ Evaluate each in-scope document against design expectations:
 - **Cross-document consistency** — Do design.md and implementation.md agree? (only when both are in scope)
 - **Convention adherence** — Does the document structure follow the design output conventions? Are sections well-organized with appropriate headings?
 - **Subtask quality** (only when tasks.md is in scope) — Are subtasks specific enough? Do they name the file/function/component being touched? Are dependencies between tasks correct?
+- **Assumptions and Not Doing** (only when design.md is in scope) — Check for an **Assumptions** section: present? Are assumptions specific and testable (not vague hedges like "the API is fast enough")? Check for a **Not Doing** section: present? Are exclusions justified with rationale? Missing either section → `STRUCTURE` finding.
+- **Task format conventions** (only when tasks.md is in scope):
+  - **Not Doing** in header metadata. Missing → `STRUCTURE`.
+  - **Size tags** on every task. Missing → `STRUCTURE`. Any task tagged L that has not been broken down → `STRUCTURE`.
+  - **Vertical slicing** — flag tasks that look like horizontal layers: tasks named or scoped as "all models", "all endpoints", "all tests", or that complete an entire architectural layer without delivering a testable user-facing path → `TECH_RISK`.
+  - **Parallel markers** (`Can run in parallel with:`) on every task. Missing → `STRUCTURE`.
+  - **Dependency graph** section. Missing → `STRUCTURE`.
 
 ### 4) Technical Soundness Review
 
@@ -60,6 +66,8 @@ Evaluate the proposed architecture:
 - **Testing strategy** — Does the plan account for how the feature will be tested?
 - **Migration and rollback** — If the feature changes existing behavior, is there a migration path? Can it be rolled back?
 - **Cross-reference with codebase** — When the design references existing code, patterns, or files, verify they exist and the references are accurate. Use Grep/Glob for this.
+- **Assumptions testability** (only when design.md Assumptions section is in scope) — Verify assumptions are specific enough to be testable or falsifiable. "We assume the API is fast enough" → `AMBIGUOUS`. "We assume the external API responds within 200ms at p99 under expected load" → pass.
+- **Not Doing validity** (only when design.md Not Doing section is in scope) — Verify exclusions are genuine scope decisions, not deferred critical requirements disguised as non-goals. If a Not Doing item would block the feature from being usable or shippable, it is not a scope exclusion — it is a deferred critical requirement → `TECH_RISK`.
 
 ### 5) Self-Check and Confidence Assessment
 

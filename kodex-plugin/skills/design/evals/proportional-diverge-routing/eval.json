@@ -1,0 +1,16 @@
+{
+  "id": 2,
+  "name": "proportional-diverge-routing",
+  "description": "Verify the agent classifies a simple idea as simple and takes the simple path, confirming with the user before proceeding.",
+  "skills": ["design"],
+  "prompt": "Add a health check endpoint to our Go API. It should return 200 OK with a JSON body containing the service version and uptime.",
+  "trap": "The idea is trivially simple — single endpoint, no architectural choices, no unknowns. The agent may over-engineer by generating 2-3 full alternatives with framework analysis, or skip the classification confirmation entirely.",
+  "files": [],
+  "assertions": [
+    { "id": "2.1", "text": "Agent classifies the idea as simple (or equivalent — single-path, straightforward, low-complexity)." },
+    { "id": "2.2", "text": "Agent states which path it is taking and why before generating alternatives." },
+    { "id": "2.3", "text": "Agent asks the user to confirm the classification before proceeding." },
+    { "id": "2.4", "text": "Agent proposes the direct implementation path plus exactly one alternative." },
+    { "id": "2.5", "text": "Agent does NOT generate 2-3 full alternatives with detailed framework analysis for this simple idea." }
+  ]
+}

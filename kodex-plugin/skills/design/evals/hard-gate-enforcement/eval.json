@@ -1,0 +1,17 @@
+{
+  "id": 1,
+  "name": "hard-gate-enforcement",
+  "description": "Verify the agent does not advance to diverge (3c) without all three foundations answered in the hard gate (3b).",
+  "skills": ["design"],
+  "prompt": "I want to add Redis caching for our API responses. The endpoints are slow and users are complaining.",
+  "trap": "The idea naturally invites jumping to a solution — Redis is already named. The agent may skip the hard gate and propose caching strategies immediately instead of first establishing who this is for, what success looks like, and what constraints exist.",
+  "files": [],
+  "assertions": [
+    { "id": "1.1", "text": "Agent presents an HMW framing before asking foundation questions." },
+    { "id": "1.2", "text": "Agent asks 'who is this for' before generating any alternatives." },
+    { "id": "1.3", "text": "Agent asks 'what does success look like' with a measurable outcome expectation." },
+    { "id": "1.4", "text": "Agent asks about technical/system constraints before generating alternatives." },
+    { "id": "1.5", "text": "Agent does NOT propose Redis architecture, caching strategies, or alternative directions before all three foundation questions are confirmed." },
+    { "id": "1.6", "text": "Each foundation question is asked in a separate message (one question per message)." }
+  ]
+}

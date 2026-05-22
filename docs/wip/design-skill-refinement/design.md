@@ -47,7 +47,7 @@ The current Step 3 is a single block. It becomes five sequential sub-phases, run
 
 One question at a time, multiple choice preferred. The agent may not advance to diverge until all three are confirmed. This prevents designing solutions that conflict with the project's actual technical landscape.
 
-**3c. Proportional Diverge.** The agent uses the already-loaded frameworks.md for available lenses (SCAMPER, First Principles, JTBD, Constraint Mapping, Pre-mortem, HMW) and selects lenses that fit the idea — never runs every framework mechanically. Two paths based on complexity:
+**3c. Proportional Diverge.** The agent uses the already-loaded frameworks.md for available lenses (SCAMPER, HMW, First Principles, JTBD, Constraint Mapping, Pre-mortem, Analogous Inspiration) and selects lenses that fit the idea — never runs every framework mechanically. Two paths based on complexity:
 
 - **Non-trivial ideas** (multiple valid approaches, significant unknowns, architectural choices): generate 2-3 alternative directions using selected lenses. Present each with a one-sentence trade-off summary.
 - **Simple ideas** (single-concern, low-uncertainty, obvious path): propose the direct implementation path plus briefly mention one alternative optimized for a different constraint (e.g., "We could also do X if you want to prioritize extensibility over simplicity"). Ask which to proceed with.
@@ -79,8 +79,9 @@ Two new files in the design skill directory, loaded during the mandatory instruc
 - How Might We (HMW) — best for reframing stuck thinking
 - First Principles — best for breaking out of incremental thinking
 - Jobs to Be Done (JTBD) — best for ensuring solution matches actual user need
-- Pre-mortem ("it failed — why?") — best for exposing hidden risks before committing
 - Constraint Mapping — best for exploring what becomes possible when a limitation is lifted
+- Pre-mortem ("it failed — why?") — best for exposing hidden risks before committing
+- Analogous Inspiration — best for generating structurally different variations from other domains
 
 Each framework has "Best for" guidance. Top-level instruction: "Pick the lens that fits the idea — don't run every framework mechanically."
 
@@ -127,7 +128,7 @@ Existing guidance (H2 per task, checkbox subtasks, dependencies, status, final v
 
 6. **ASCII dependency graph.** A `## Dependency Graph` section at the end of tasks.md. Written once by design, never updated by implement.
 
-7. **Review scope recommendation.** At the end of Step 6, recommend invoking `/kk:review-design <feature> all` as the post-design gate. The default review scope (`design.md + implementation.md`) does not include tasks.md, so the new task-format checks would never run under default invocation.
+7. **Review scope recommendation.** At the end of Step 6, recommend invoking `/kk:review-design <feature>` as the post-design gate. The default scope already reviews all documents (`design.md + implementation.md + tasks.md`), including the task-format checks.
 
 ### example-tasks.md Update
 

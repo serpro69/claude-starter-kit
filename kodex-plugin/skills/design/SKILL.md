@@ -16,14 +16,16 @@ Read capy knowledge base conventions at [shared-capy-knowledge-protocol.md](shar
 
 Profile detection is delegated to [shared-profile-detection.md](shared-profile-detection.md). When an active profile contributes a `design/` subdirectory (e.g., `../../profiles/k8s/design/`), its `questions.md` feeds the idea-refinement question pool and its `sections.md` lists required sections the design document must cover. Both the idea-to-design and continue-WIP flows consult the shared procedure; see each flow's workflow file for the specific integration points.
 
+For fresh ideas, two reference files provide methodology and evaluation rubric: [frameworks.md](./frameworks.md) (ideation lenses for the diverge phase) and [refinement-criteria.md](./refinement-criteria.md) (evaluation dimensions and MVP scoping for the converge phase). These are loaded during the instruction-load step and consumed by idea-process.md Step 3 sub-phases.
+
 ## Workflow
 
-**Mandatory order — understanding before engagement.** The flow below is strictly sequential. Do not engage with the idea prose beyond a keyword scan, ask refinement questions, or write design content until all instructions — this SKILL.md, the relevant process file, the shared profile-detection procedure, and every resolved profile's `design/` content — are fully loaded.
+**Mandatory order — understanding before engagement.** The flow below is strictly sequential. Do not engage with the idea prose beyond a keyword scan, ask refinement questions, or write design content until all instructions — this SKILL.md, the relevant process file, the shared profile-detection procedure, every resolved profile's `design/` content, and (for fresh ideas) the reference files [frameworks.md](./frameworks.md) and [refinement-criteria.md](./refinement-criteria.md) — are fully loaded.
 
 The `$kk:design` skill has two entry points; each has its own process file with a detailed workflow. Both follow the same mandatory ordering:
 
 1. **Keyword scan only.** The idea prose (or WIP feature directory) is scanned at the keyword/filename level — enough to drive profile detection, not enough to engage with the content.
-2. **Load instructions.** Read the relevant process file ([idea-process.md](./idea-process.md) or [existing-task-process.md](./existing-task-process.md)) and the shared profile-detection procedure.
+2. **Load instructions.** Read the relevant process file ([idea-process.md](./idea-process.md) or [existing-task-process.md](./existing-task-process.md)), the shared profile-detection procedure, and (for fresh ideas) the reference files [frameworks.md](./frameworks.md) (ideation lenses) and [refinement-criteria.md](./refinement-criteria.md) (evaluation rubric).
 3. **Detect active profiles.** Delegate to [shared-profile-detection.md](shared-profile-detection.md). For fresh ideas, this uses the design interaction pattern (token matching against idea prose). For WIP features, this uses file-based detection with design-pattern fallback.
 4. **Load profile content.** For each active profile contributing a `design/` subdirectory, read its `index.md` and all always-load entries (`questions.md`, `sections.md`). These feed the refinement question pool and required design sections.
 5. **Engage with subject matter.** Only now: ask refinement questions, analyze the idea, write design content.
