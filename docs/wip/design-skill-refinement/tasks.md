@@ -79,16 +79,16 @@
 - [x] 5.4 Add `## Dependency Graph` section at the bottom with ASCII format
 
 ## Task 6: Update SKILL.md conventions
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 3
 - **Size:** S
 - **Can run in parallel with:** Task 5
 - **Docs:** [implementation.md#task-51-reference-new-files-in-skillmd](./implementation.md#task-51-reference-new-files-in-skillmd)
 
 ### Subtasks
-- [ ] 6.1 Update mandatory-order directive in `klaude-plugin/skills/design/SKILL.md` §Workflow to name frameworks.md and refinement-criteria.md in the instruction enumeration
-- [ ] 6.2 Update Workflow step 2 to include frameworks.md and refinement-criteria.md in the instruction-load set for fresh ideas
-- [ ] 6.3 Add sentence to Conventions section mentioning frameworks.md and refinement-criteria.md as methodology/rubric reference files
+- [x] 6.1 Update mandatory-order directive in `klaude-plugin/skills/design/SKILL.md` §Workflow to name frameworks.md and refinement-criteria.md in the instruction enumeration
+- [x] 6.2 Update Workflow step 2 to include frameworks.md and refinement-criteria.md in the instruction-load set for fresh ideas
+- [x] 6.3 Add sentence to Conventions section mentioning frameworks.md and refinement-criteria.md as methodology/rubric reference files
 
 ## Task 7: Update review-design (all review paths)
 - **Status:** pending
