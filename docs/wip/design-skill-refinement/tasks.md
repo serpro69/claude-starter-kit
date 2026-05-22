@@ -105,16 +105,16 @@
 - [x] 7.5 Add scope recommendation to `klaude-plugin/skills/review-design/SKILL.md`: note that `all` scope is recommended after `/kk:design` runs
 
 ## Task 8: Create spec-style evals
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 3, Task 7
 - **Size:** M
 - **Can run in parallel with:** Task 5, Task 6
 - **Docs:** [implementation.md#task-71-create-spec-style-evals-for-design-skill](./implementation.md#task-71-create-spec-style-evals-for-design-skill)
 
 ### Subtasks
-- [ ] 8.1 Create `klaude-plugin/skills/design/evals/hard-gate-enforcement/` with eval.json and test idea that invites skipping the gate
-- [ ] 8.2 Create `klaude-plugin/skills/design/evals/proportional-diverge-routing/` with eval.json and simple single-concern test idea
-- [ ] 8.3 Create `klaude-plugin/skills/design/evals/review-design-catches-missing-sections/` with eval.json and test-files/ containing a design.md missing Assumptions/Not Doing and a tasks.md with horizontal layers and no Size tags
+- [x] 8.1 Create `klaude-plugin/skills/design/evals/hard-gate-enforcement/` with eval.json and test idea that invites skipping the gate
+- [x] 8.2 Create `klaude-plugin/skills/design/evals/proportional-diverge-routing/` with eval.json and simple single-concern test idea
+- [x] 8.3 Create `klaude-plugin/skills/design/evals/review-design-catches-missing-sections/` with eval.json and test-files/ containing a design.md missing Assumptions/Not Doing and a tasks.md with horizontal layers and no Size tags
 
 ## Task 9: Final verification
 - **Status:** pending
