@@ -133,4 +133,4 @@ Follow the structure and conventions in the [example task file](./example-tasks.
 - **Parallel markers:** Each task gets a `**Can run in parallel with:**` field listing task numbers with no blocking dependency, or `—`.
 - **Dependency graph:** After all tasks, add a `## Dependency Graph` section with an ASCII diagram showing task relationships. Written once, never updated during implementation.
 
-At the end of Step 6, recommend invoking `/kk:review-design <feature> all` as the post-design gate. The default review scope (`design.md + implementation.md`) does not include tasks.md, so the new task-format checks only run under the `all` scope.
+At the end of Step 6, recommend invoking `/kk:review-design <feature>` as the post-design gate. The default scope reviews all documents (`design.md + implementation.md + tasks.md`), including the task-format checks.

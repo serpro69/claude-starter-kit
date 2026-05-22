@@ -17,18 +17,17 @@ Design Review Progress:
 ### 1) Load Documents
 
 - Parse the invocation arguments: extract feature name and optional scope argument
-- **Argument disambiguation:** if the first argument matches a directory in `/docs/wip/`, treat it as the feature name. If it matches a scope keyword (`design`, `implementation`, `tasks`, `all`) and no such feature directory exists, treat it as the scope and prompt the user for the feature name.
+- **Argument disambiguation:** if the first argument matches a directory in `/docs/wip/`, treat it as the feature name. If it matches a scope keyword (`design`, `implementation`, `tasks`) and no such feature directory exists, treat it as the scope and prompt the user for the feature name.
 - Locate `/docs/wip/[feature-name]/` directory
 - If feature name is not provided or ambiguous, list `/docs/wip/` contents and ask the user
 - Scope resolution:
 
 | Scope arg        | Documents to load                              |
 | ---------------- | ---------------------------------------------- |
-| _(none)_         | `design.md` + `implementation.md`              |
+| _(none)_         | `design.md` + `implementation.md` + `tasks.md` |
 | `design`         | `design.md` only                               |
 | `implementation` | `implementation.md` only                       |
 | `tasks`          | `tasks.md` only                                |
-| `all`            | `design.md` + `implementation.md` + `tasks.md` |
 
 - If a requested document is missing, inform the user and proceed with available docs (do NOT stop — reviewing a single doc is a valid use case)
 - Read all in-scope documents

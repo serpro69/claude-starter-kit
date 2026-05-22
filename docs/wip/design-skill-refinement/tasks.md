@@ -117,7 +117,7 @@
 - [x] 8.3 Create `klaude-plugin/skills/design/evals/review-design-catches-missing-sections/` with eval.json and test-files/ containing a design.md missing Assumptions/Not Doing and a tasks.md with horizontal layers and no Size tags
 
 ## Task 9: Final verification
-- **Status:** pending
+- **Status:** in-progress
 - **Depends on:** Task 5, Task 6, Task 7, Task 8
 - **Size:** S
 - **Can run in parallel with:** —
