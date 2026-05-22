@@ -49,21 +49,21 @@
 - [x] 3.8 Write sub-phase 3e (surface outputs) requiring Assumptions and Not Doing artifacts
 
 ## Task 4: Update idea-process.md Steps 5 and 6
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 3
 - **Size:** M
 - **Can run in parallel with:** —
 - **Docs:** [implementation.md#task-31-update-step-5-in-idea-processmd](./implementation.md#task-31-update-step-5-in-idea-processmd), [implementation.md#task-32-update-step-6-in-idea-processmd](./implementation.md#task-32-update-step-6-in-idea-processmd)
 
 ### Subtasks
-- [ ] 4.1 Add Assumptions and Not Doing section requirements to Step 5's documentation guidelines (before the DO NOT list)
-- [ ] 4.2 Add Not Doing header requirement to Step 6's key points
-- [ ] 4.3 Add vertical slicing mandate with explicit anti-pattern to Step 6
-- [ ] 4.4 Add Size tags (S/M/L) with L-forbidden rule to Step 6
-- [ ] 4.5 Add slicing strategy definitions (Vertical, Contract-First, Risk-First) to Step 6
-- [ ] 4.6 Add parallel markers requirement to Step 6
-- [ ] 4.7 Add ASCII dependency graph requirement to Step 6
-- [ ] 4.8 Add recommendation to invoke `/kk:review-design <feature> all` as the post-design gate at the end of Step 6
+- [x] 4.1 Add Assumptions and Not Doing section requirements to Step 5's documentation guidelines (before the DO NOT list)
+- [x] 4.2 Add Not Doing header requirement to Step 6's key points
+- [x] 4.3 Add vertical slicing mandate with explicit anti-pattern to Step 6
+- [x] 4.4 Add Size tags (S/M/L) with L-forbidden rule to Step 6
+- [x] 4.5 Add slicing strategy definitions (Vertical, Contract-First, Risk-First) to Step 6
+- [x] 4.6 Add parallel markers requirement to Step 6
+- [x] 4.7 Add ASCII dependency graph requirement to Step 6
+- [x] 4.8 Add recommendation to invoke `/kk:review-design <feature> all` as the post-design gate at the end of Step 6
 
 ## Task 5: Rework example-tasks.md
 - **Status:** pending

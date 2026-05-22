@@ -98,6 +98,8 @@ When creating documentation, follow this approach:
 - **Document everything the developer may need to know**: which files to touch for each task, code structure to be aware of, testing approaches, any potential docs they might need to check. Give them the whole plan as bite-sized tasks.
 - **Make sure the plan is unambiguous, detailed and comprehensive** so the developer can adhere to DRY, YAGNI, TDD, atomic/self-contained commits principles when following this plan.
 - **Pair each step with an explicit verification.** Every implementation step should name *how the developer will know it worked* — a specific test to run, a command whose output to check, or an observable behavior. Use the form `Step → verify: <check>`. Steps without a verification are a smell: either the step is too vague, or the work isn't really done when the step is.
+- **Include an Assumptions section** — carried from Step 3e. List assumptions baked into the design, each specific enough to be validated or invalidated during implementation. Assumptions are not caveats — they are testable bets the design depends on.
+- **Include a Not Doing section** — carried from Step 3e. Explicit scope exclusions with a one-line rationale each. These are genuine scope decisions, not deferred work items. If something is deferred (will be done later), say so in the implementation plan, not in Not Doing.
 
 But, of course, **DO NOT:**
 
@@ -121,3 +123,14 @@ Follow the structure and conventions in the [example task file](./example-tasks.
 - **Status values:** `pending`, `in-progress`, `done`, `blocked` (with reason)
 - Tasks should map roughly 1:1 to atomic, self-contained commits
 - **Always include a final verification task** that depends on all other tasks — it should invoke `/kk:test` to run the full test suite, `/kk:document` to update any relevant docs, `/kk:review-code` with project's language input to review the code, and `/kk:review-spec` to verify the implementation matches the design and implementation docs
+- **Not Doing in header:** The tasks.md header metadata block includes a `> Not Doing:` line listing the concise scope exclusions from design.md (names only, no extended rationale). The implement skill reads tasks.md first; this puts scope boundaries front and center.
+- **Vertical slicing:** Each task delivers one complete, testable user-facing path — not a horizontal layer. Anti-pattern: "Do not create tasks that complete an entire layer (all database work, then all API work, then all UI work) — this defers integration risk to the end." A task like "create all DB models" is wrong; "create user registration end-to-end (model + endpoint + validation + test)" is right.
+- **Size tags:** Each task gets a `**Size:** S/M/L` field. S = 1-2 files, M = 3-5 files, L = 5+ files. Size measures complexity, not raw file count — exclude boilerplate registrations, test fixtures, and config entries that are mechanical consequences of the main change. Hard rule: any task tagged L is forbidden as a single task. Break it into smaller vertical slices.
+- **Slicing strategies:** Three strategies, noted per-task only when deviating from default:
+  - **Vertical** (default): each task delivers one complete path from input to output, testable in isolation.
+  - **Contract-First**: define the interface/API boundary first, then implement each side independently. Use when introducing a new external boundary (API, SDK, message queue).
+  - **Risk-First**: tackle the most uncertain piece first to surface unknowns early. Use when one task carries significantly more uncertainty than others.
+- **Parallel markers:** Each task gets a `**Can run in parallel with:**` field listing task numbers with no blocking dependency, or `—`.
+- **Dependency graph:** After all tasks, add a `## Dependency Graph` section with an ASCII diagram showing task relationships. Written once, never updated during implementation.
+
+At the end of Step 6, recommend invoking `/kk:review-design <feature> all` as the post-design gate. The default review scope (`design.md + implementation.md`) does not include tasks.md, so the new task-format checks only run under the `all` scope.
