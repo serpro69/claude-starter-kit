@@ -100,7 +100,7 @@ Only these count as degradations:
 - Verification step removed
 - Scope narrowed (fewer cases covered)
 - Required output dropped
-- Reference broken — a link that resolved in the before-state but is missing in the after-state
+- Reference broken — a link whose target does not exist in the after-state. This covers two cases: a previously-resolving link whose target was removed, and a newly-added link whose target never existed. Missing links present in both states are pre-existing advisories, not degradations
 
 Content that was **relocated** (moved between files, inlined elsewhere, extracted to a new file) is neutral — check whether the substance survived. If yes, neutral. If substance was lost in the move, degradation.
 

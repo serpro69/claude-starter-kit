@@ -26,7 +26,7 @@ Read capy knowledge base conventions at [shared-capy-knowledge-protocol.md](shar
 
 - [ ] Report written to `docs/reviews/diff-skill/<slug>-<sha-a>-<sha-b>.md`
 - [ ] Inline summary presented (under 10 lines: verdict, finding counts, report path)
-- [ ] Capy indexed under `kk:review-findings` if any findings exist (skip on clean results)
+- [ ] Capy indexed under `kk:review-findings` if any degradation or complexity regression findings exist (skip on clean results and pre-existing advisories)
 
 ## Invocation
 
