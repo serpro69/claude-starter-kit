@@ -66,17 +66,17 @@
 - [x] 4.8 Add recommendation to invoke `/kk:review-design <feature> all` as the post-design gate at the end of Step 6
 
 ## Task 5: Rework example-tasks.md
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 4
 - **Size:** S
 - **Can run in parallel with:** Task 6
 - **Docs:** [implementation.md#task-41-rework-example-tasksmd](./implementation.md#task-41-rework-example-tasksmd)
 
 ### Subtasks
-- [ ] 5.1 Add `> Not Doing:` line to the header metadata block with realistic JWT-auth exclusions
-- [ ] 5.2 Add `**Size:**` and `**Can run in parallel with:**` fields to each task
-- [ ] 5.3 Reslice tasks to demonstrate vertical slices (e.g., "User login end-to-end" instead of "Token generation library")
-- [ ] 5.4 Add `## Dependency Graph` section at the bottom with ASCII format
+- [x] 5.1 Add `> Not Doing:` line to the header metadata block with realistic JWT-auth exclusions
+- [x] 5.2 Add `**Size:**` and `**Can run in parallel with:**` fields to each task
+- [x] 5.3 Reslice tasks to demonstrate vertical slices (e.g., "User login end-to-end" instead of "Token generation library")
+- [x] 5.4 Add `## Dependency Graph` section at the bottom with ASCII format
 
 ## Task 6: Update SKILL.md conventions
 - **Status:** pending
