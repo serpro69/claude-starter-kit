@@ -41,21 +41,30 @@ Follows the flat `package main` pattern used by `cmd/generate-kodex/` and `cmd/v
 
 **`Edge`** — `Source` (path), `Target` (path), `Type`, `Line` (source line number for diagnostics).
 
-**`Graph`** — `Nodes` map (path → Node), `Edges` slice. Methods: `AddNode`, `AddEdge`, `NodeByPath`, `OutEdges(path)`, `InEdges(path)`, `Reachable(path, direction)`.
+**`Graph`** — `Nodes` map (path → Node), `Edges` slice. Methods: `AddNode`, `AddEdge`, `NodeByPath`, `OutEdges(path)`, `InEdges(path)`, `Reachable(path, direction)`, `NormalizePath(path)`.
 
-The graph builder walks the plugin root, classifies each file/directory into a node type based on its location in the tree, then runs the extractors on each `.md` file to discover edges.
+The graph builder walks the plugin root, classifies each file/directory into a node type based on its location in the tree, then runs the extractors on each `.md` file to discover edges. Edge endpoints are normalized to their owning artifact node via `NormalizePath`.
+
+#### Node identity and normalization
+
+Two node levels: **artifact nodes** (directory-level: skill, profile, profile-phase, command) and **file nodes** (individual `.md`: shared, agent, content). Edges are discovered from file paths but normalized:
+
+- Files inside an artifact directory → normalized to the artifact node (e.g., `skills/review-code/SKILL.md` → `skills/review-code/`)
+- Files not inside an artifact directory → kept as file-level nodes (e.g., `skills/_shared/profile-detection.md`)
+
+`NormalizePath(path string) string` walks up from the given path, checking if any ancestor is a known artifact node. Returns the artifact's path if found, otherwise the original path. Targeted mode also uses this: `plugin-graph metrics skills/review-code/SKILL.md` resolves to the `skills/review-code/` skill node.
 
 #### Node Classification Rules
 
-| Path pattern | Node type |
-|-------------|-----------|
-| `skills/<name>/SKILL.md` present → directory is a `skill` | `skill` |
-| `skills/_shared/*.md` | `shared` |
-| `agents/*.md` | `agent` |
-| `profiles/<name>/` (directory with `DETECTION.md`) | `profile` |
-| `profiles/<name>/<phase>/` (directory with `index.md`) | `profile-phase` |
-| `commands/<name>/` | `command` |
-| Everything else `.md` | `content` |
+| Path pattern | Node type | Level |
+|-------------|-----------|-------|
+| `skills/<name>/SKILL.md` present → directory is a `skill` | `skill` | artifact |
+| `skills/_shared/*.md` | `shared` | file |
+| `agents/*.md` | `agent` | file |
+| `profiles/<name>/` (directory with `DETECTION.md`) | `profile` | artifact |
+| `profiles/<name>/<phase>/` (directory with `index.md`) | `profile-phase` | artifact |
+| `commands/<name>/` | `command` | artifact |
+| Everything else `.md` | `content` | file |
 
 ### Extractors (`parse.go`)
 
@@ -67,24 +76,33 @@ Each extractor is a standalone function: `func(filePath string, content []byte, 
 - `KnownPhases` — `[]string{"review-code", "review-spec", "design", "implement", "test", "document"}`
 - `KnownAgents` — list of agent names (derived from `agents/` directory listing at startup)
 - `KnownSkills` — list of skill names (derived from `skills/` directory listing at startup)
+- `KnownCommands` — map of skill name → command names (derived from `commands/` directory listing)
 
-**Extractor 1 — Markdown links:** Parse with goldmark, walk AST for `ast.Link` nodes, extract `Destination`. Resolve relative paths against the file's directory. Filter: skip external URLs (`://`), anchor-only (`#...`), non-`.md` targets. Each surviving link → `markdown-link` edge with line number from AST position.
+#### Code-block stripping
+
+Before running regex-based extractors (3–5), content is pre-processed to replace fenced code blocks (`` ``` `` and `~~~`` delimited) with blank lines of equal length (preserving line numbers for edge diagnostics). Extractor 1 (goldmark AST) is inherently code-block-safe. Extractor 2 (symlinks) operates on the filesystem.
+
+**Extractor 1 — Markdown links:** Parse with goldmark, walk AST for `ast.Link` nodes, extract `Destination`. Resolve relative paths against the file's directory. Filter: skip external URLs (`://`), anchor-only (`#...`), non-`.md` targets. Each surviving link → `markdown-link` edge with line number from AST position. Code-block-safe via AST.
 
 **Extractor 2 — Symlinks:** Called before content extraction. `os.Lstat(path)` → if `ModeSymlink`, `os.Readlink(path)` → resolve target relative to symlink's directory → `symlink` edge. Note: the resolved file's content is still processed by other extractors (the walker follows symlinks for content but records the symlink edge separately).
 
-**Extractor 3 — Template references:** Regex: `` `\$\{CLAUDE_PLUGIN_ROOT\}/([^`]+)` ``. Capture group 1 is the relative path. Create `template-ref` edge. Line number from byte offset.
+**Extractor 3 — Plugin-root references (merged template + parameterized):** A single extractor handles both concrete and parameterized `${CLAUDE_PLUGIN_ROOT}/...` paths. Regex: `` `\$\{CLAUDE_PLUGIN_ROOT\}/([^`]+)` ``. Strip the prefix, then branch:
+- **No angle-bracket variables** in remainder → `template-ref` edge to the concrete relative path.
+- **Contains `<name>`, `<profile>`, `<phase>`, or `<checklist>`** → `parameterized-nav` edge. Expansion logic:
+  1. Expand `<name>` and `<profile>` over `KnownProfiles`.
+  2. Expand `<phase>` over `KnownPhases`.
+  3. Expand `<checklist>` by globbing `profiles/<profile>/<phase>/*.md` (excluding `index.md`). The bidirectional invariant guarantees this matches what `index.md` references, avoiding the need to parse index files during extraction.
+  4. Each concrete expansion that exists on disk → edge.
 
-**Extractor 4 — Parameterized navigation:** Regex: backtick-quoted paths containing `<...>` variables. Match pattern: `` `[^`]*<(plugin_root|name|phase|profile|checklist)>[^`]*` ``. For each match:
-1. Replace `<plugin_root>` with empty string (paths are already relative).
-2. Identify remaining variables. Expand `<name>` and `<profile>` over `KnownProfiles`, `<phase>` over `KnownPhases`.
-3. For each concrete expansion, check if the target exists on disk. If yes → `parameterized-nav` edge.
-4. `<checklist>` requires special handling: expand over the files listed in the profile-phase's `index.md` (if the profile-phase is part of the expansion context).
+Runs on code-block-stripped content.
 
-**Extractor 5 — Agent delegation:** Two patterns:
-1. Regex for `subagent_type.*kk:([a-z-]+)` → maps to `agents/<name>.md`.
-2. Regex for known agent names in prose: scan for each `KnownAgents` entry as a whole word. Create `agent-delegation` edge.
+**Extractor 4 — Agent delegation:** Matches `subagent_type` in **structured contexts only**: markdown table rows where one cell contains `subagent_type` and another cell on the same line contains `kk:(<agent-name>)`. Regex: a line matching `\|\s*` + `subagent_type` + `\s*\|` + `.*kk:([a-z-]+)`. Maps capture to `agents/<name>.md`. Does NOT scan for agent names as whole words in free prose — this avoids false positives from prose descriptions that mention agents without implying delegation.
 
-**Extractor 6 — Skill invocation:** Regex: `/kk:([a-z-]+)` not inside a backtick code span that's defining the current skill's own name. Match against `KnownSkills`. Create `skill-invocation` edge.
+Runs on code-block-stripped content.
+
+**Extractor 5 — Skill and command invocation:** Regex: `/kk:([a-z-]+)(?::([a-z-]+))?`. The first capture group maps to `skills/<skill>/` directories (matched against `KnownSkills`). If a second capture group is present (command name), an additional edge is created to `commands/<skill>/<command>.md` if it exists on disk. Self-references (skill referencing itself) are skipped.
+
+Runs on code-block-stripped content.
 
 ### Metrics (`metrics.go`)
 
@@ -97,26 +115,28 @@ Computation:
 - Depth: DFS from each node, memoized. Cycle detection → report cycle as a diagnostic, depth = -1 for nodes in a cycle.
 - Transitive closure: BFS from each node, count reachable set size.
 - Coupling: for each pair of `skill` nodes, intersect their forward-reachable sets. Only report pairs with intersection > threshold (default 3).
-- Orphans: nodes where fan-in = 0 AND type is `content` or `shared` (skills, agents, profiles, commands are root-level entry points and aren't expected to have incoming edges from other files in all cases).
+- Orphans: nodes where fan-in = 0, excluding **entry-point nodes** that legitimately have no incoming edges. Entry points: `skill` nodes (invoked by users), `profile` nodes (activated by detection), `command` nodes (invoked via `/kk:<skill>:<command>` — but may also have edges from skill-invocation extractor), `agent` nodes (spawned by skills, but delegation edges may exist), `README.md` at plugin root, and files under `evals/` directories (test fixtures). Only `content` and `shared` nodes with zero fan-in are flagged as orphans.
 - Broken edges: edges whose target path doesn't resolve to a file on disk.
 
 ### Output (`output.go`)
 
-Four formatter functions, each taking `*Graph` and `*GraphMetrics` and returning `[]byte`.
+Four formatter functions, each taking `*Graph` and `*GraphMetrics` and returning `[]byte`. Structured output goes to **stdout**; diagnostics (cycles, parse warnings, skipped files) go to **stderr**.
 
-**JSON:** Direct marshal of a `Report` struct containing nodes, edges, per-node metrics, and global metrics. Pretty-printed with `json.MarshalIndent`.
+**JSON:** Marshal a `Report` struct containing `nodes`, `edges`, `metrics`, and `diagnostics` arrays. Pretty-printed with `json.MarshalIndent`. The `diagnostics` array captures cycle reports, parse warnings, etc. so programmatic consumers get the full picture.
 
-**Text:** Table formatted with `text/tabwriter`. Header row, one row per skill node sorted by transitive closure size descending. Columns: Name, Fan-out, Fan-in, Depth, Transitive. Followed by sections for orphans, broken edges, hotspots.
+**Text:** Table formatted with `text/tabwriter`. Header row, one row per skill node sorted by transitive closure size descending. Columns: Name, Fan-out, Fan-in, Depth, Transitive. Followed by sections for orphans, broken edges, hotspots. Diagnostics appended at the end.
 
-**DOT:** Template-based. Nodes get `shape` and `fillcolor` by type. Edges get `style` by type (solid for static, dashed for template/parameterized, dotted for implicit). Subgraph clusters for skills, profiles, agents.
+**DOT:** Template-based. Nodes get `shape` and `fillcolor` by type. Edges get `style` by type (solid for static, dashed for template/parameterized, dotted for implicit). Subgraph clusters for skills, profiles, agents. Diagnostics only on stderr.
 
-**Mermaid:** Same visual semantics as DOT, rendered as Mermaid flowchart LR syntax. Node IDs are sanitized paths. Edge labels show type.
+**Mermaid:** Same visual semantics as DOT, rendered as Mermaid flowchart LR syntax. Node IDs are sanitized paths. Edge labels show type. Diagnostics only on stderr.
+
+The `validate` subcommand respects `--format`: `json` emits structured validation findings (broken edges, orphans), `text` (default) emits human-readable findings. Exit code 1 when findings exist.
 
 ### Targeted Mode
 
 When positional args are provided:
 1. Build the full graph normally.
-2. Parse each arg as a path relative to plugin root.
+2. Parse each arg as a path relative to plugin root. Normalize via `NormalizePath` to resolve file paths to their owning artifact node.
 3. Based on `--direction`: compute forward-reachable set (BFS following out-edges), reverse-reachable set (BFS following in-edges), or union of both.
 4. Filter graph to only include nodes in the reachable set and edges between them.
 5. Compute metrics on the filtered subgraph.
@@ -139,10 +159,14 @@ Error handling: if `git worktree add` fails (invalid ref, not a git repo), retur
 ```makefile
 plugin-graph:
 	go test ./cmd/plugin-graph/...
-	go run ./cmd/plugin-graph validate
+	go run ./cmd/plugin-graph --root klaude-plugin/ validate
 ```
 
 The `validate` subcommand provides a natural CI hook — broken links and orphans fail the build.
+
+### CLI Flag Parsing
+
+The binary uses per-subcommand `flag.FlagSet`s. `main()` extracts global flags (`--root`, `--ref`) from `os.Args[1:]` before the subcommand, then passes remaining args to the subcommand's own FlagSet. This matches the usage pattern `plugin-graph <subcommand> [flags] [targets...]`.
 
 ## Testing Strategy
 
@@ -150,12 +174,12 @@ The `validate` subcommand provides a natural CI hook — broken links and orphan
 
 **Extractor tests (`parse_test.go`):** Table-driven. Each extractor gets its own test function with cases like:
 
-- Markdown links: inline link, reference link, external URL (skipped), anchor-only (skipped), non-md target (skipped)
+- Markdown links: inline link, reference link, external URL (skipped), anchor-only (skipped), non-md target (skipped), link inside code block (skipped — goldmark AST)
 - Symlinks: valid symlink, broken symlink
-- Template refs: `${CLAUDE_PLUGIN_ROOT}/...` path, bare `$CLAUDE_PLUGIN_ROOT` (skipped — no braces)
-- Parameterized nav: single variable, multiple variables, non-existent expansion target (skipped)
-- Agent delegation: `subagent_type` reference, prose mention of agent name
-- Skill invocation: `/kk:name` reference, self-reference (skipped)
+- Plugin-root refs (merged extractor): concrete `${CLAUDE_PLUGIN_ROOT}/profiles/k8s/overview.md` → template-ref; parameterized `${CLAUDE_PLUGIN_ROOT}/profiles/<name>/review-code/index.md` → parameterized-nav expanded over profiles; bare `$CLAUDE_PLUGIN_ROOT` (skipped — no braces); path inside fenced code block (skipped); `<checklist>` expansion via glob
+- Agent delegation: `subagent_type` in markdown table row → edge; `subagent_type` in fenced code block (skipped); agent name in free prose (skipped — structured context only)
+- Skill/command invocation: `/kk:review-code` → skill edge; `/kk:review-code:isolated` → skill edge + command edge; `/kk:name` inside code block (skipped); self-reference (skipped)
+- Code-block stripping: verify fenced blocks are removed while preserving line numbers
 
 **Metrics tests (`metrics_test.go`):** Construct small graphs programmatically, assert computed metrics. Cases: linear chain (depth), diamond (fan-in/out), isolated node (orphan), missing target (broken edge), cycle (cycle detection).
 
@@ -184,17 +208,8 @@ Runs the full pipeline: walk → parse → build graph → compute metrics → v
 
 ## Assumptions
 
-1. **Goldmark can reliably extract markdown link targets.** Validated in Task 0.
-2. **Three link categories cover all dependency edges.** Static, template, and parameterized. Variable vocabulary is small and expansion sets are finite.
-3. **`git worktree` is available** in CI and local dev.
-4. **The graph fits in memory.** Dozens of nodes.
-5. **JSON output is sufficient for programmatic consumers.**
+See [design.md §Assumptions](design.md#assumptions).
 
 ## Not Doing
 
-- **Review skill integration** — Follow-up work after the CLI exists.
-- **Committed JSON artifact / CI freshness checks** — Easy to layer later.
-- **Interactive visualization** — DOT/Mermaid rendered externally.
-- **Diff/comparison subcommand** — Users diff JSON from two `--ref` runs.
-- **Cross-plugin analysis** — Only `klaude-plugin/`.
-- **Semantic analysis of prose** — Only backtick-quoted path patterns.
+See [design.md §Not Doing](design.md#not-doing).
