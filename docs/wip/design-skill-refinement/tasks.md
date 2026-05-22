@@ -45,7 +45,7 @@
 - [x] 3.4 Write sub-phase 3a (HMW framing) with reference to frameworks.md §HMW
 - [x] 3.5 Write sub-phase 3b (hard gate) with three explicit requirements: who, success, technical constraints
 - [x] 3.6 Write sub-phase 3c (proportional diverge) with complexity classification confirmation, two paths (non-trivial: 2-3 alternatives, simple: direct + one alternative), and rejection loop
-- [x] 3.7 Write sub-phase 3d (converge): manual criteria-based analysis as default, CoVe scoped to verifiable claims only, concrete fallback triggers
+- [x] 3.7 Write sub-phase 3d (converge): criteria-based analysis as default, CoVe as user-initiated option for verifiable claims
 - [x] 3.8 Write sub-phase 3e (surface outputs) requiring Assumptions and Not Doing artifacts
 
 ## Task 4: Update idea-process.md Steps 5 and 6

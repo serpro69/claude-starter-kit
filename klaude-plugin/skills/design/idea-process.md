@@ -63,7 +63,7 @@ Classify the idea before generating alternatives. **Non-trivial** if it involves
 
 Two paths:
 
-- **Non-trivial ideas** (multiple valid approaches, significant unknowns, architectural choices): generate 2-3 alternative directions using selected lenses. Present each with a one-sentence trade-off summary.
+- **Non-trivial ideas** (multiple valid approaches, significant unknowns, architectural choices): generate 2-3 alternative directions using selected lenses. Present each with a one-sentence trade-off summary. After presenting alternatives, stop and ask which alternatives to carry into evaluation — or whether to add a missed constraint and loop back. Do not evaluate or recommend a direction in the same message that first presents alternatives unless the user explicitly asks you to continue.
 - **Simple ideas** (single-concern, low-uncertainty, obvious path): propose the direct implementation path plus briefly mention one alternative optimized for a different constraint (e.g., "We could also do X if extensibility matters more than simplicity"). Ask which to proceed with.
 
 Never skip this step silently — the user always sees at least two options. If the user rejects all alternatives, ask what constraint or dimension was missed, then loop back to 3c with that input as an additional lens.

@@ -1,7 +1,7 @@
 ---
 name: review-design
 description: |
-  Review design and implementation docs produced by design. Evaluates document quality, internal consistency, and technical soundness.
+  Review design, implementation, and task documents produced by design. Evaluates document quality, internal consistency, and technical soundness.
   Use after design completes and before starting implement.
 ---
 

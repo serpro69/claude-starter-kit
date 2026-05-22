@@ -1,0 +1,16 @@
+{
+  "id": 4,
+  "name": "wip-feature-no-subphases",
+  "description": "Verify the agent does NOT run HMW framing or hard gate sub-phases (3a-3e) when resuming a WIP feature with existing design docs.",
+  "skills": ["design"],
+  "prompt": "Let's continue working on the auth-refactor feature. The design docs are in docs/wip/auth-refactor/.",
+  "trap": "The agent may treat this as a fresh idea and run the 3a-3e refinement flow (HMW framing, hard gate, alternatives) instead of recognizing existing design docs and following the existing-task-process.md resume flow.",
+  "files": ["test-files/design.md", "test-files/tasks.md"],
+  "assertions": [
+    { "id": "4.1", "text": "Agent recognizes this as a WIP feature with existing design docs, not a fresh idea." },
+    { "id": "4.2", "text": "Agent does NOT present an HMW problem framing." },
+    { "id": "4.3", "text": "Agent does NOT ask the hard gate foundation questions (who/success/constraints)." },
+    { "id": "4.4", "text": "Agent does NOT generate alternative directions or run the diverge sub-phase." },
+    { "id": "4.5", "text": "Agent follows the existing-task-process.md flow: reads existing docs, identifies remaining tasks, and resumes work." }
+  ]
+}
