@@ -1,0 +1,61 @@
+.md-grid {
+  max-width: 96%;
+}
+
+/* ── Header ─────────────────────────────────────────────────── */
+[data-md-color-scheme="tokyonight:dark"] .md-header {
+  background: rgba(26, 27, 38, 0.97);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: none;
+  border-bottom: 1px solid rgba(122, 162, 247, 0.08);
+}
+
+[data-md-color-scheme="tokyonight:dark"] .md-tabs {
+  background: rgba(26, 27, 38, 0.97);
+  border-bottom: 1px solid rgba(122, 162, 247, 0.06);
+}
+
+/* ── Tab font ────────────────────────────────────────────────── */
+.md-tabs__link {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 12px !important;
+}
+
+/* ── Code blocks ─────────────────────────────────────────────── */
+.md-typeset pre > code {
+  border-radius: 6px;
+}
+
+.md-typeset code {
+  border-radius: 3px;
+}
+
+/* ── Admonitions — left accent only ──────────────────────────── */
+.md-typeset .admonition,
+.md-typeset details {
+  border-width: 0;
+  border-left-width: 3px;
+}
+
+/* ── Tables — monospace headers ──────────────────────────────── */
+.md-typeset table:not([class]) th {
+  font-family: var(--md-code-font-family);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ── Nav sidebar tweaks ──────────────────────────────────────── */
+.md-nav__title {
+  font-family: var(--md-code-font-family);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ── ToC active ──────────────────────────────────────────────── */
+.md-nav__link--active {
+  border-left: 2px solid var(--tn-blue);
+  padding-left: 0.6rem;
+}

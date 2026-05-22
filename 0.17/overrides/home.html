@@ -1,0 +1,768 @@
+{% extends "main.html" %}
+
+{% block tabs %}
+{{ super() }}
+
+<style>
+.md-main { display: none !important; }
+.md-content { display: none !important; }
+
+/* ── Landing globals ─── */
+.lp-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 80px 40px 60px;
+  background: var(--md-default-bg-color);
+}
+
+/* Scrolling backdrop */
+.lp-backdrop {
+  position: fixed; inset: 0;
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  opacity: 0.04; pointer-events: none; overflow: hidden;
+  z-index: 0;
+}
+[data-md-color-scheme="tokyonight:light"] .lp-backdrop { opacity: 0.06; }
+.lp-col {
+  font-family: 'Space Mono', var(--md-code-font-family);
+  font-size: 11px; line-height: 2.2;
+  color: var(--tn-blue); padding: 0 6px;
+  animation: lpScrollUp 22s linear infinite;
+  white-space: nowrap;
+}
+.lp-col:nth-child(2) { animation-duration: 18s; color: var(--tn-purple); }
+.lp-col:nth-child(3) { animation-duration: 26s; color: var(--tn-green); }
+.lp-col:nth-child(4) { animation-duration: 20s; color: var(--tn-cyan); }
+.lp-col:nth-child(5) { animation-duration: 15s; color: var(--tn-orange); }
+@keyframes lpScrollUp { 0%{transform:translateY(0)} 100%{transform:translateY(-50%)} }
+
+.lp-hero-content { position: relative; z-index: 2; }
+
+/* ── Title ─── */
+.lp-prompt {
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  font-size: clamp(42px, 8vw, 88px);
+  line-height: 1;
+  color: var(--md-default-fg-color);
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+.lp-prompt-chevron { color: var(--tn-green); opacity: 0.7; }
+.lp-prompt-accent { color: var(--tn-blue); }
+.lp-cursor {
+  display: inline-block;
+  width: 0.55em; height: 0.72em;
+  background: var(--tn-blue);
+  margin-left: 2px; vertical-align: baseline;
+  opacity: 0.8;
+  animation: lpBlink 1s step-end infinite;
+}
+@keyframes lpBlink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ── Subtitle / tagline ─── */
+.lp-tagline {
+  font-family: 'Space Mono', monospace;
+  font-size: clamp(13px, 2vw, 16px);
+  color: var(--tn-comment);
+  margin: 16px 0 8px; letter-spacing: 0.02em;
+}
+
+/* ── Typewriter ─── */
+.lp-tw {
+  font-family: 'Space Mono', monospace;
+  font-size: clamp(12px, 1.5vw, 15px);
+  color: var(--tn-cyan); height: 24px;
+  margin: 20px 0 28px; opacity: 0.8;
+}
+
+/* ── Provider badges ─── */
+.lp-badges { display: flex; gap: 10px; justify-content: center; margin-bottom: 28px; flex-wrap: wrap; }
+.lp-badge {
+  font-family: 'Space Mono', monospace; font-size: 11px;
+  padding: 5px 14px; border-radius: 3px; border: 1px solid;
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+/* ── CTA ─── */
+.lp-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.lp-btn-p {
+  font-family: 'Space Mono', monospace; font-weight: 700; font-size: 13px;
+  padding: 12px 32px; border-radius: 3px; letter-spacing: 0.06em; text-transform: uppercase;
+  background: var(--tn-blue); color: var(--tn-night);
+  border: none; cursor: pointer; white-space: nowrap; transition: all 0.2s;
+  text-decoration: none;
+}
+.lp-btn-p:hover { background: var(--tn-cyan); box-shadow: 0 0 24px rgba(125, 207, 255, 0.25); }
+.lp-btn-s {
+  font-family: 'Space Mono', monospace; font-size: 13px;
+  padding: 12px 32px; border-radius: 3px; letter-spacing: 0.06em; text-transform: uppercase;
+  background: transparent; color: var(--tn-blue);
+  border: 1px solid var(--tn-blue); cursor: pointer; white-space: nowrap;
+  opacity: 0.75; transition: all 0.2s; text-decoration: none;
+}
+.lp-btn-s:hover { opacity: 1; }
+
+/* ── Stats ─── */
+.lp-stats {
+  position: relative; z-index: 2;
+  display: flex; gap: 48px; justify-content: center;
+  margin-top: 48px; padding-top: 32px;
+  border-top: 1px solid rgba(122, 162, 247, 0.1);
+  flex-wrap: wrap;
+}
+.lp-stat-val {
+  font-family: 'Space Mono', monospace; font-size: 32px; font-weight: 700;
+  color: var(--tn-blue); line-height: 1;
+}
+.lp-stat-label {
+  font-family: 'Space Mono', monospace; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--md-default-fg-color); opacity: 0.4; margin-top: 6px;
+}
+
+/* ── Scroll-pinned hero → pipeline transition ─── */
+.lp-hero-wrap {
+  position: relative;
+  height: 300vh;
+}
+.lp-pin-stack {
+  position: sticky; top: 0;
+  height: 100vh;
+  display: grid; grid-template-areas: 'stack';
+  overflow: hidden;
+}
+.lp-pin-stack > * { grid-area: stack; }
+
+.lp-hero.lp-hero--pinned {
+  position: relative !important; top: auto;
+  height: 100vh; min-height: 100vh;
+  z-index: 2;
+  --lp-fade: 0;
+  opacity: calc(1 - var(--lp-fade));
+  transition: none;
+  will-change: opacity;
+}
+
+/* Canvas rain overlay — lives in pin-stack, above both hero and pipeline */
+.lp-rain-canvas {
+  width: 100%; height: 100%;
+  pointer-events: none; z-index: 3;
+  opacity: 0;
+  transition: none;
+}
+
+/* Pipeline section: stacked under hero, revealed as hero fades */
+.lp-pipeline-section.lp-pipeline-section--pinned {
+  z-index: 1;
+  height: 100vh; min-height: 100vh;
+  padding: 0 !important;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: var(--md-default-bg-color);
+}
+.lp-pipeline-section--pinned .lp-inner { padding: 0 48px; }
+
+/* Staged reveal for pipeline content */
+.lp-pipeline-section .lp-eyebrow,
+.lp-pipeline-section .lp-h2,
+.lp-pipeline-section .lp-lead,
+.lp-pipeline-section .lp-pipeline,
+.lp-pipeline-section .lp-term {
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 650ms cubic-bezier(0.2, 0.6, 0.2, 1),
+              transform 650ms cubic-bezier(0.2, 0.6, 0.2, 1);
+  will-change: opacity, transform;
+}
+.lp-pipeline-section.is-revealed .lp-eyebrow { opacity: 1; transform: translateY(0); transition-delay: 0ms; }
+.lp-pipeline-section.is-revealed .lp-h2 { opacity: 1; transform: translateY(0); transition-delay: 120ms; }
+.lp-pipeline-section.is-revealed .lp-lead { opacity: 1; transform: translateY(0); transition-delay: 240ms; }
+.lp-pipeline-section.is-revealed .lp-pipeline { opacity: 1; transform: translateY(0); transition-delay: 400ms; }
+.lp-pipeline-section.is-revealed .lp-term { opacity: 1; transform: translateY(0); transition-delay: 560ms; }
+
+/* ── Section commons ─── */
+.lp-section { padding: 96px 0; position: relative; z-index: 1; }
+.lp-section.lp-alt { background: rgba(var(--tn-storm1-rgb), 0.6); }
+[data-md-color-scheme="tokyonight:light"] .lp-section.lp-alt { background: rgba(var(--tn-day-bg2-rgb), 0.6); }
+.lp-inner { max-width: 1200px; margin: 0 auto; padding: 0 48px; }
+.lp-eyebrow {
+  font-family: 'Space Mono', monospace; font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.15em; color: var(--tn-blue); margin-bottom: 12px; opacity: 0.8;
+  display: flex; align-items: center; gap: 8px;
+}
+.lp-eyebrow::before { content: '//'; color: var(--tn-comment); }
+.lp-h2 {
+  font-family: 'Space Mono', monospace; font-weight: 700;
+  font-size: clamp(28px, 4vw, 48px);
+  line-height: 1.1; letter-spacing: -0.01em;
+  color: var(--md-default-fg-color); margin-bottom: 16px;
+}
+.lp-h2 span { color: var(--tn-blue); }
+.lp-lead {
+  font-size: 14px; line-height: 1.7;
+  color: var(--md-default-fg-color); opacity: 0.6; max-width: 560px;
+}
+
+/* ── Pipeline ─── */
+.lp-pipeline {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0; margin: 48px 0; flex-wrap: wrap;
+}
+.lp-pipe-step {
+  font-family: 'Space Mono', monospace; font-size: 12px;
+  padding: 10px 18px; border-radius: 4px;
+  background: rgba(var(--tn-blue-rgb), 0.08);
+  border: 1px solid rgba(var(--tn-blue-rgb), 0.15);
+  color: var(--md-default-fg-color); white-space: nowrap;
+  transition: all 0.2s;
+}
+.lp-pipe-step:hover {
+  border-color: rgba(var(--tn-blue-rgb), 0.4);
+  background: rgba(var(--tn-blue-rgb), 0.12);
+}
+.lp-pipe-arrow {
+  font-family: 'Space Mono', monospace;
+  color: var(--tn-comment); padding: 0 6px; font-size: 14px;
+}
+
+/* ── Terminal window ─── */
+.lp-term {
+  background: var(--tn-night); border-radius: 8px;
+  border: 1px solid rgba(var(--tn-blue-rgb), 0.1);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
+  overflow: hidden; max-width: 720px; margin: 40px auto 0;
+}
+[data-md-color-scheme="tokyonight:light"] .lp-term { background: #1e2030; }
+.lp-term-bar {
+  background: rgba(var(--tn-storm-rgb), 0.8);
+  padding: 10px 16px; display: flex; align-items: center; gap: 6px;
+  border-bottom: 1px solid rgba(var(--tn-blue-rgb), 0.06);
+}
+.lp-term-dot { width: 10px; height: 10px; border-radius: 50%; }
+.lp-term-title {
+  font-family: 'Space Mono', monospace; font-size: 11px;
+  color: var(--tn-comment); margin-left: 8px;
+}
+.lp-term-body {
+  padding: 20px 24px; font-family: 'Space Mono', monospace;
+  font-size: 13px; line-height: 2; color: var(--tn-fg);
+}
+.lp-term-body .prompt { color: var(--tn-green); }
+.lp-term-body .cmd { color: var(--tn-blue); }
+.lp-term-body .flag { color: var(--tn-purple); }
+.lp-term-body .out { color: var(--tn-comment); font-style: italic; }
+
+/* ── Feature cards ─── */
+.lp-features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 48px; }
+.lp-feat-card {
+  background: var(--md-default-bg-color--light); border-radius: 8px;
+  border: 1px solid rgba(var(--tn-blue-rgb), 0.08); padding: 28px;
+  transition: border-color 0.2s;
+}
+.lp-feat-card:hover { border-color: rgba(var(--tn-blue-rgb), 0.2); }
+.lp-feat-icon {
+  font-family: 'Space Mono', monospace; font-size: 14px; font-weight: 700;
+  color: var(--tn-night); margin-bottom: 16px; line-height: 1;
+  display: inline-block; padding: 6px 10px; border-radius: 4px;
+}
+.lp-feat-title {
+  font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700;
+  color: var(--md-default-fg-color); margin-bottom: 12px; line-height: 1.2;
+}
+.lp-feat-body {
+  font-size: 13px; line-height: 1.7; color: var(--md-default-fg-color); opacity: 0.6;
+}
+.lp-feat-list { margin-top: 12px; padding: 0; list-style: none; }
+.lp-feat-list li {
+  font-size: 12px; line-height: 1.6; color: var(--md-default-fg-color); opacity: 0.7;
+  padding: 6px 0; border-top: 1px solid rgba(var(--tn-blue-rgb), 0.06);
+  display: flex; gap: 8px; align-items: flex-start;
+}
+.lp-feat-list li::before { content: '>'; color: var(--tn-green); flex-shrink: 0; font-family: 'Space Mono', monospace; }
+
+/* ── Language chips ─── */
+.lp-lang-grid {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  justify-content: center; margin-top: 32px;
+}
+.lp-lang-chip {
+  font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 700;
+  padding: 8px 20px; border-radius: 4px; border: 1px solid;
+  letter-spacing: 0.04em; transition: all 0.2s;
+}
+.lp-lang-chip:hover { transform: translateY(-2px); }
+
+/* ── Scroll reveal (for sections after the pinned transition) ─── */
+.lp-reveal {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity 600ms cubic-bezier(0.2, 0.6, 0.2, 1),
+              transform 600ms cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+.lp-reveal.is-visible { opacity: 1; transform: translateY(0); }
+
+/* ── Footer ─── */
+.lp-footer {
+  background: var(--tn-night);
+  border-top: 1px solid rgba(var(--tn-blue-rgb), 0.07);
+  padding: 64px 48px 40px;
+}
+.lp-footer-grid {
+  max-width: 1200px; margin: 0 auto;
+  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 48px; margin-bottom: 48px;
+}
+.lp-footer-brand {
+  font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700;
+  color: var(--tn-fg); margin-bottom: 12px;
+}
+.lp-footer-brand span { color: var(--tn-blue); }
+.lp-footer-desc {
+  font-size: 12px; line-height: 1.65; color: var(--tn-fg); opacity: 0.35; max-width: 240px;
+}
+.lp-footer-heading {
+  font-family: 'Space Mono', monospace; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--tn-blue); margin-bottom: 16px; opacity: 0.7;
+}
+.lp-footer ul { list-style: none; padding: 0; margin: 0; }
+.lp-footer li { margin-bottom: 10px; }
+.lp-footer a {
+  font-size: 13px; color: var(--tn-fg); opacity: 0.45;
+  text-decoration: none; transition: opacity 0.2s;
+}
+.lp-footer a:hover { opacity: 0.8; }
+.lp-footer-bottom {
+  max-width: 1200px; margin: 0 auto;
+  padding-top: 24px; border-top: 1px solid rgba(var(--tn-blue-rgb), 0.06);
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+}
+.lp-footer-copy {
+  font-family: 'Space Mono', monospace; font-size: 11px;
+  color: var(--tn-fg); opacity: 0.2;
+}
+
+/* ── Responsive ─── */
+@media (max-width: 960px) {
+  .lp-features { grid-template-columns: 1fr; }
+  .lp-footer-grid { grid-template-columns: 1fr 1fr; }
+  .lp-inner { padding: 0 24px; }
+  .lp-pipeline { gap: 4px; }
+  .lp-pipe-step { font-size: 10px; padding: 6px 10px; }
+}
+@media (max-width: 540px) {
+  .lp-footer-grid { grid-template-columns: 1fr; }
+  .lp-stats { gap: 24px; }
+  .lp-pipeline { flex-direction: column; align-items: center; }
+  .lp-pipe-arrow { transform: rotate(90deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-hero-wrap { height: auto; }
+  .lp-pin-stack { position: static; height: auto; display: block; overflow: visible; }
+  .lp-hero.lp-hero--pinned {
+    position: relative !important; height: auto; min-height: calc(100vh - 60px);
+    opacity: 1 !important;
+  }
+  .lp-rain-canvas { display: none; }
+  .lp-pipeline-section.lp-pipeline-section--pinned {
+    height: auto; min-height: 0; padding: 96px 0 !important; display: block;
+  }
+  .lp-pipeline-section .lp-eyebrow,
+  .lp-pipeline-section .lp-h2,
+  .lp-pipeline-section .lp-lead,
+  .lp-pipeline-section .lp-pipeline,
+  .lp-pipeline-section .lp-term {
+    opacity: 1 !important; transform: none !important; transition: none !important;
+  }
+  .lp-backdrop { display: none; }
+  .lp-cursor { animation: none; opacity: 1; }
+  .lp-reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+}
+</style>
+
+<!-- ══ SCROLL-PINNED: HERO → PIPELINE ═══════════════════════ -->
+<div class="lp-hero-wrap" id="lpHeroWrap">
+<div class="lp-pin-stack">
+
+<!-- Rain canvas (z-index 3, above both hero and pipeline) -->
+<canvas class="lp-rain-canvas" id="lpRainCanvas" aria-hidden="true"></canvas>
+
+<!-- Hero (z-index 2, fades out) -->
+<section class="lp-hero lp-hero--pinned">
+  <div class="lp-backdrop" id="lpBackdrop"></div>
+  <div class="lp-hero-content">
+    <div class="lp-prompt">
+      <span class="lp-prompt-chevron">&gt;</span> claude-<span class="lp-prompt-accent">toolbox</span><span class="lp-cursor"></span>
+    </div>
+    <div class="lp-tagline">a structured AI development pipeline</div>
+    <div class="lp-tw" id="lpTw"></div>
+    <div class="lp-badges">
+      <span class="lp-badge" style="color:var(--tn-purple);border-color:rgba(187,154,247,0.35)">Claude Code</span>
+      <span class="lp-badge" style="color:var(--tn-green);border-color:rgba(158,206,106,0.35)">Codex</span>
+    </div>
+    <div class="lp-actions">
+      <a href="{{ config.site_url }}/getting-started/overview/" class="lp-btn-p">Get Started</a>
+      <a href="{{ config.repo_url }}" target="_blank" class="lp-btn-s">GitHub ↗</a>
+    </div>
+  </div>
+  <div class="lp-stats">
+    <div><div class="lp-stat-val">10</div><div class="lp-stat-label">Skills</div></div>
+    <div><div class="lp-stat-val">6</div><div class="lp-stat-label">Languages</div></div>
+    <div><div class="lp-stat-val">2</div><div class="lp-stat-label">Providers</div></div>
+    <div><div class="lp-stat-val">v0.14</div><div class="lp-stat-label">Latest</div></div>
+  </div>
+</section>
+
+<!-- Pipeline (z-index 1, revealed as hero dissolves) -->
+<section class="lp-section lp-alt lp-pipeline-section lp-pipeline-section--pinned">
+  <div class="lp-inner">
+    <div class="lp-eyebrow">workflow</div>
+    <h2 class="lp-h2">From Idea to <span>Shipped</span></h2>
+    <p class="lp-lead">Ten skills chained into a pipeline. Each step produces artifacts the next step consumes — design docs, task lists, code, reviews, tests, documentation.</p>
+    <div class="lp-pipeline">
+      <div class="lp-pipe-step">/design</div>
+      <span class="lp-pipe-arrow">→</span>
+      <div class="lp-pipe-step">/review-design</div>
+      <span class="lp-pipe-arrow">→</span>
+      <div class="lp-pipe-step">/implement</div>
+      <span class="lp-pipe-arrow">→</span>
+      <div class="lp-pipe-step">/review-code</div>
+      <span class="lp-pipe-arrow">→</span>
+      <div class="lp-pipe-step">/test</div>
+      <span class="lp-pipe-arrow">→</span>
+      <div class="lp-pipe-step">/document</div>
+    </div>
+    <div class="lp-term">
+      <div class="lp-term-bar">
+        <div class="lp-term-dot" style="background:var(--tn-red)"></div>
+        <div class="lp-term-dot" style="background:var(--tn-yellow)"></div>
+        <div class="lp-term-dot" style="background:var(--tn-green)"></div>
+        <span class="lp-term-title">~/project</span>
+      </div>
+      <div class="lp-term-body">
+        <div><span class="prompt">$</span> <span class="cmd">/kk:design</span> <span class="flag">"add user authentication"</span></div>
+        <div><span class="out">→ Created docs/wip/auth/design.md, tasks.md</span></div>
+        <div><span class="prompt">$</span> <span class="cmd">/kk:implement</span> <span class="flag">"work on task 1"</span></div>
+        <div><span class="out">→ Implementing... running review-code checkpoint</span></div>
+        <div><span class="prompt">$</span> <span class="cmd">/kk:test</span></div>
+        <div><span class="out">→ 14 tests passed, 92% coverage</span></div>
+        <div><span class="prompt">$</span> <span class="cmd">/kk:document</span></div>
+        <div><span class="out">→ Updated ARCHITECTURE.md, recorded ADR-0006</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+</div>
+
+<!-- ══ WHAT'S INCLUDED ═══════════════════════════════════════ -->
+<section class="lp-section lp-reveal">
+  <div class="lp-inner">
+    <div class="lp-eyebrow">batteries included</div>
+    <h2 class="lp-h2">Everything You <span>Need</span></h2>
+    <p class="lp-lead">An opinionated setup that works out of the box. Install the plugin or adopt the full template — either way, you're productive in minutes.</p>
+    <div class="lp-features">
+      <div class="lp-feat-card">
+        <div class="lp-feat-icon" style="background:var(--tn-blue)">kk</div>
+        <div class="lp-feat-title">Workflow Plugin</div>
+        <div class="lp-feat-body">10 skills forming a complete development pipeline — from design through implementation, review, testing, to documentation.</div>
+        <ul class="lp-feat-list">
+          <li>Design docs with task lists</li>
+          <li>Implementation with review checkpoints</li>
+          <li>Multi-model code review (Gemini, etc.)</li>
+          <li>Chain-of-Verification for accuracy</li>
+        </ul>
+      </div>
+      <div class="lp-feat-card">
+        <div class="lp-feat-icon" style="background:var(--tn-purple)">⚙</div>
+        <div class="lp-feat-title">Configuration</div>
+        <div class="lp-feat-body">Sensible permission baselines, a rich statusline with themes, hooks for safety, and sync infrastructure to keep it all current.</div>
+        <ul class="lp-feat-list">
+          <li>Permission guardrails for sensitive paths</li>
+          <li>Statusline with multiple themes</li>
+          <li>Template sync for upstream updates</li>
+          <li>Codex config generation</li>
+        </ul>
+      </div>
+      <div class="lp-feat-card">
+        <div class="lp-feat-icon" style="background:var(--tn-cyan)">◈</div>
+        <div class="lp-feat-title">Knowledge Stack</div>
+        <div class="lp-feat-body">MCP servers pre-wired for persistent knowledge, up-to-date library docs, and multi-model capabilities.</div>
+        <ul class="lp-feat-list">
+          <li>Capy — persistent knowledge base</li>
+          <li>Context7 — library documentation</li>
+          <li>Pal — multi-model code review</li>
+          <li>Findings survive across sessions</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ MULTI-LANGUAGE ════════════════════════════════════════ -->
+<section class="lp-section lp-alt lp-reveal">
+  <div class="lp-inner" style="text-align:center">
+    <div class="lp-eyebrow" style="justify-content:center">profiles</div>
+    <h2 class="lp-h2">Language-Aware <span>Everywhere</span></h2>
+    <p class="lp-lead" style="margin:0 auto 8px">Every workflow skill adapts — review checklists, implementation gotchas, test validators, and doc rubrics are all language-specific.</p>
+    <div class="lp-lang-grid">
+      <span class="lp-lang-chip" style="color:var(--tn-cyan);border-color:rgba(125,207,255,0.35)">Go</span>
+      <span class="lp-lang-chip" style="color:var(--tn-yellow);border-color:rgba(224,175,104,0.35)">Java</span>
+      <span class="lp-lang-chip" style="color:var(--tn-purple);border-color:rgba(187,154,247,0.35)">JS / TS</span>
+      <span class="lp-lang-chip" style="color:var(--tn-orange);border-color:rgba(255,158,100,0.35)">Kotlin</span>
+      <span class="lp-lang-chip" style="color:var(--tn-blue);border-color:rgba(122,162,247,0.35)">Kubernetes</span>
+      <span class="lp-lang-chip" style="color:var(--tn-green);border-color:rgba(158,206,106,0.35)">Python</span>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block content %}{% endblock %}
+
+{% block footer %}
+<footer class="lp-footer">
+  <div class="lp-footer-grid">
+    <div>
+      <div class="lp-footer-brand">claude-<span>toolbox</span></div>
+      <div class="lp-footer-desc">A structured AI development pipeline — skills, configs, MCP servers, hooks, and sub-agents for Claude Code and Codex.</div>
+    </div>
+    <div>
+      <div class="lp-footer-heading">Docs</div>
+      <ul>
+        <li><a href="{{ config.site_url }}/getting-started/overview/">Getting Started</a></li>
+        <li><a href="{{ config.site_url }}/user-guide/skills/">Skills</a></li>
+        <li><a href="{{ config.site_url }}/user-guide/mcp-servers/">MCP Servers</a></li>
+        <li><a href="{{ config.site_url }}/user-guide/configuration/">Configuration</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="lp-footer-heading">Project</div>
+      <ul>
+        <li><a href="{{ config.repo_url }}" target="_blank">GitHub</a></li>
+        <li><a href="{{ config.site_url }}/about/changelog/">Changelog</a></li>
+        <li><a href="{{ config.repo_url }}/issues" target="_blank">Issues</a></li>
+        <li><a href="{{ config.site_url }}/contributing/">Contributing</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="lp-footer-heading">Legal</div>
+      <ul>
+        <li><a href="{{ config.site_url }}/about/license/">License (ELv2)</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="lp-footer-bottom">
+    <div class="lp-footer-copy">© claude-toolbox — ELv2 License</div>
+    <div class="lp-footer-copy">Built for AI-powered development</div>
+  </div>
+</footer>
+
+{% raw %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ── MATRIX RAIN CANVAS ────────────────────────────────────
+  var canvas = document.getElementById('lpRainCanvas');
+  var ctx = canvas ? canvas.getContext('2d') : null;
+  var columns = [];
+  var GLYPHS = '/>{$01kK>_|'.split('');
+  var COLORS = ['#7aa2f7','#9ece6a','#7dcfff','#bb9af7','#73daca'];
+  var COL_W = 18;
+  var FONT_SIZE = 14;
+  var rainIntensity = 0;
+
+  function initRain() {
+    if (!canvas) return;
+    canvas.width = canvas.offsetWidth * (window.devicePixelRatio || 1);
+    canvas.height = canvas.offsetHeight * (window.devicePixelRatio || 1);
+    ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+    var nCols = Math.ceil(canvas.offsetWidth / COL_W);
+    columns = [];
+    for (var i = 0; i < nCols; i++) {
+      columns.push({
+        x: i * COL_W,
+        y: Math.random() * -canvas.offsetHeight,
+        speed: 1.5 + Math.random() * 3,
+        color: COLORS[i % COLORS.length],
+        chars: []
+      });
+      for (var j = 0; j < 30; j++) {
+        columns[i].chars.push(GLYPHS[Math.floor(Math.random() * GLYPHS.length)]);
+      }
+    }
+  }
+
+  var rainAnimId = null;
+  function drawRain() {
+    if (!ctx || rainIntensity <= 0) { rainAnimId = null; return; }
+    var w = canvas.offsetWidth;
+    var h = canvas.offsetHeight;
+    ctx.clearRect(0, 0, w, h);
+    ctx.font = FONT_SIZE + 'px "Space Mono", monospace';
+
+    for (var i = 0; i < columns.length; i++) {
+      var col = columns[i];
+      col.y += col.speed * rainIntensity;
+      if (col.y > h + FONT_SIZE * col.chars.length) {
+        col.y = Math.random() * -h * 0.5;
+        col.speed = 1.5 + Math.random() * 3;
+      }
+
+      for (var j = 0; j < col.chars.length; j++) {
+        var cy = col.y + j * FONT_SIZE;
+        if (cy < -FONT_SIZE || cy > h + FONT_SIZE) continue;
+        var alpha = (j === 0 ? 1.0 : Math.max(0.05, 1 - j / col.chars.length)) * rainIntensity;
+        ctx.fillStyle = col.color;
+        ctx.globalAlpha = alpha;
+        ctx.fillText(col.chars[j], col.x, cy);
+        if (Math.random() < 0.02) {
+          col.chars[j] = GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+    rainAnimId = requestAnimationFrame(drawRain);
+  }
+
+  if (canvas && !prefersReduced) {
+    initRain();
+    window.addEventListener('resize', initRain);
+  }
+
+  // ── SCROLL-PINNED HERO TRANSITION (matrix rain dissolve → pipeline reveal) ──
+  var heroWrap = document.getElementById('lpHeroWrap');
+  var hero = heroWrap && heroWrap.querySelector('.lp-hero');
+  var pipelineSection = document.querySelector('.lp-pipeline-section');
+
+  if (prefersReduced && pipelineSection) pipelineSection.classList.add('is-revealed');
+
+  if (heroWrap && hero && !prefersReduced) {
+    var ticking = false;
+    var pipelineRevealed = false;
+    function updateHero() {
+      ticking = false;
+      var rect = heroWrap.getBoundingClientRect();
+      var scrollDistance = rect.height - window.innerHeight;
+      if (scrollDistance <= 0) return;
+      var p = Math.max(0, Math.min(1, -rect.top / scrollDistance));
+
+      // Phase 1 (0–0.25): hero fades out, rain builds up
+      // Phase 2 (0.25–0.45): hero gone, rain at full (the hold)
+      // Phase 3 (0.45–0.70): pipeline fades in, rain fades out
+      // Phase 4 (0.70–1.0): pipeline lingers alone
+
+      var fade, rain;
+      if (p < 0.25) {
+        var t = p / 0.25;
+        fade = t;
+        rain = t;
+      } else if (p < 0.45) {
+        fade = 1;
+        rain = 1;
+      } else if (p < 0.70) {
+        var t2 = (p - 0.45) / 0.25;
+        fade = 1;
+        rain = 1 - t2;
+      } else {
+        fade = 1;
+        rain = 0;
+      }
+
+      hero.style.setProperty('--lp-fade', fade.toFixed(3));
+
+      rainIntensity = rain;
+      if (canvas) canvas.style.opacity = rain.toFixed(3);
+      if (rain > 0 && !rainAnimId) rainAnimId = requestAnimationFrame(drawRain);
+
+      if (pipelineSection && !pipelineRevealed && p > 0.48) {
+        pipelineSection.classList.add('is-revealed');
+        pipelineRevealed = true;
+      }
+    }
+
+    function onScroll() {
+      if (!ticking) { requestAnimationFrame(updateHero); ticking = true; }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    updateHero();
+  }
+
+  // ── BACKDROP ──────────────────────────────────────────
+  var commands = [
+    '/kk:design', '/kk:implement', '/kk:review-code', '/kk:test', '/kk:document',
+    '/kk:review-design', '/kk:review-spec', '/kk:chain-of-verification',
+    '/kk:dependency-handling', '/kk:merge-docs',
+    'context7', 'capy', 'pal',
+    'design.md', 'tasks.md', 'ARCHITECTURE.md',
+    '> design → implement → review', '> skills + profiles + hooks',
+    'SOLID / security / quality', 'Go / Java / Kotlin / Python / JS',
+    'template-sync --push', 'plugin install kk@claude-toolbox'
+  ];
+  var wrap = document.getElementById('lpBackdrop');
+  if (wrap && !prefersReduced) {
+    for (var c = 0; c < 5; c++) {
+      var col = document.createElement('div');
+      col.className = 'lp-col';
+      var h = '';
+      for (var r = 0; r < 40; r++) h += commands[(c * 7 + r) % commands.length] + '<br>';
+      col.innerHTML = h + h;
+      wrap.appendChild(col);
+    }
+  }
+
+  // ── TYPEWRITER ────────────────────────────────────────
+  var stages = [
+    '$ /kk:design "add authentication"',
+    '$ /kk:review-design',
+    '$ /kk:implement "work on task 1"',
+    '$ /kk:review-code',
+    '$ /kk:test',
+    '$ /kk:document'
+  ];
+  var si = 0, ci = 0, deleting = false;
+  var tw = document.getElementById('lpTw');
+  function tick() {
+    if (!tw || prefersReduced) { if (tw) tw.textContent = stages[0]; return; }
+    var line = stages[si];
+    if (!deleting) {
+      if (ci < line.length) {
+        tw.textContent = line.slice(0, ++ci) + '▋';
+        setTimeout(tick, 35);
+      } else {
+        setTimeout(function() { deleting = true; tick(); }, 2000);
+      }
+    } else {
+      if (ci > 0) {
+        tw.textContent = line.slice(0, --ci) + '▋';
+        setTimeout(tick, 15);
+      } else {
+        deleting = false;
+        si = (si + 1) % stages.length;
+        setTimeout(tick, 300);
+      }
+    }
+  }
+  tick();
+
+  // ── SCROLL REVEAL (for sections after the pinned transition) ──
+  if (!prefersReduced) {
+    var reveals = document.querySelectorAll('.lp-reveal');
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) { if (e.isIntersecting) e.target.classList.add('is-visible'); });
+    }, { rootMargin: '-40px', threshold: 0.1 });
+    reveals.forEach(function(el) { observer.observe(el); });
+  }
+});
+</script>
+{% endraw %}
+{% endblock %}
