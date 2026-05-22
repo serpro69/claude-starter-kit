@@ -1,0 +1,23 @@
+{
+  "id": 1,
+  "name": "known-degradation",
+  "description": "Three deliberate degradations: a MUST weakened to SHOULD, a required-output bullet removed, and a broken link introduced. All three should be flagged.",
+  "skills": ["diff-skill"],
+  "prompt": "Run /kk:diff-skill on the example-skill, comparing the before/ and after/ directories in test-files/.",
+  "trap": "Model treats the MUST→SHOULD weakening as a minor style edit rather than a constraint degradation, or misses the removed required-output bullet because the surrounding list still looks complete, or ignores the broken link to style-guide.md because it was added (not removed) — but it references a file that does not exist.",
+  "files": [
+    "test-files/before/SKILL.md",
+    "test-files/before/example-process.md",
+    "test-files/before/shared-conventions.md",
+    "test-files/after/SKILL.md",
+    "test-files/after/example-process.md",
+    "test-files/after/shared-conventions.md"
+  ],
+  "assertions": [
+    { "id": "1.1", "text": "Degradation — constraint weakened: the report flags that 'MUST validate' was weakened to 'SHOULD validate' in example-process.md Phase 1 as a degradation." },
+    { "id": "1.2", "text": "Degradation — required output dropped: the report flags that the 'Failures indexed under kk:review-findings' bullet was removed from SKILL.md Required Outputs." },
+    { "id": "1.3", "text": "Degradation — broken reference: the report flags that shared-conventions.md now links to style-guide.md which does not exist in the after-state." },
+    { "id": "1.4", "text": "Verdict includes 'Degraded' — the summary verdict names degradation (not 'No issues' or complexity-only)." },
+    { "id": "1.5", "text": "No false positives on neutral content: the report does NOT flag the unchanged workflow structure, phase headings, or verify steps as degradations." }
+  ]
+}

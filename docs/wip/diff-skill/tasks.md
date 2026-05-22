@@ -36,16 +36,16 @@
 - [x] 2.7 Write Phase 7 "Index to capy" — conditional indexing under `kk:review-findings`, skip on clean results
 
 ## Task 3: Author eval scenarios
-- **Status:** pending
+- **Status:** done
 - **Depends on:** Task 1
 - **Size:** S
 - **Can run in parallel with:** Task 2
 - **Docs:** [design.md#evaluation-scenarios](./design.md#evaluation-scenarios)
 
 ### Subtasks
-- [ ] 3.1 Create `klaude-plugin/skills/diff-skill/evals/known-degradation/` with `eval.json` and `test-files/` — a minimal SKILL.md + process file where a `MUST` is weakened to `SHOULD`, a required-output bullet is removed, and a link is broken. Assertions: all three flagged as degradations
-- [ ] 3.2 Create `klaude-plugin/skills/diff-skill/evals/clean-refactor/` with `eval.json` and `test-files/` — a restructured skill where 2 sections are extracted from SKILL.md into a new process file and links are updated accordingly; no substance is lost. Assertions: no degradations reported, pre-existing complexity advisory may appear but no complexity regressions
-- [ ] 3.3 Each `eval.json` follows the schema in `CLAUDE.md` §Skill evaluations — `id`, `name`, `description`, `skills`, `prompt`, `trap`, `files`, `assertions` with `<eval-id>.<n>` numbering
+- [x] 3.1 Create `klaude-plugin/skills/diff-skill/evals/known-degradation/` with `eval.json` and `test-files/` — a minimal SKILL.md + process file where a `MUST` is weakened to `SHOULD`, a required-output bullet is removed, and a link is broken. Assertions: all three flagged as degradations
+- [x] 3.2 Create `klaude-plugin/skills/diff-skill/evals/clean-refactor/` with `eval.json` and `test-files/` — a restructured skill where 2 sections are extracted from SKILL.md into a new process file and links are updated accordingly; no substance is lost. Assertions: no degradations reported, pre-existing complexity advisory may appear but no complexity regressions
+- [x] 3.3 Each `eval.json` follows the schema in `CLAUDE.md` §Skill evaluations — `id`, `name`, `description`, `skills`, `prompt`, `trap`, `files`, `assertions` with `<eval-id>.<n>` numbering
 
 ## Task 4: Wire into plugin manifest, docs, and tests
 - **Status:** pending

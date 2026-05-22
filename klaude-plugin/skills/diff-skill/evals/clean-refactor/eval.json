@@ -1,0 +1,19 @@
+{
+  "id": 2,
+  "name": "clean-refactor",
+  "description": "Two sections (Validation Rules, Error Handling) extracted from SKILL.md into a new review-process.md with links updated. No substance lost — should report no degradations.",
+  "skills": ["diff-skill"],
+  "prompt": "Run /kk:diff-skill on the review-tool skill, comparing the before/ and after/ directories in test-files/.",
+  "trap": "Model flags the extraction as a degradation because the sections were 'removed' from SKILL.md, instead of recognizing that the substance was relocated to review-process.md and is still reachable via the updated link.",
+  "files": [
+    "test-files/before/SKILL.md",
+    "test-files/after/SKILL.md",
+    "test-files/after/review-process.md"
+  ],
+  "assertions": [
+    { "id": "2.1", "text": "No degradations reported: the report does NOT flag the extraction of Validation Rules and Error Handling as degradations — their substance survived in review-process.md." },
+    { "id": "2.2", "text": "Relocation recognized: the report or neutral-changes section acknowledges that content was moved from SKILL.md to review-process.md." },
+    { "id": "2.3", "text": "Verdict is 'No issues' or complexity-only — NOT 'Degraded'. The extraction did not lose substance." },
+    { "id": "2.4", "text": "Pre-existing complexity advisory is acceptable: if the report flags structural issues in the after-state (e.g., the Phases list being a flat enumeration), that is fine — but these must appear in the Pre-existing Complexity section, not as regressions." }
+  ]
+}
