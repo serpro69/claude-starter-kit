@@ -32,6 +32,16 @@ Note: [frameworks.md](frameworks.md) and [refinement-criteria.md](refinement-cri
 
 **Interaction style throughout:** one question per message, multiple choice preferred. Open-ended questions are OK too. The sub-phases below add structure to _what_ is asked, not _how_.
 
+**Step 3 Progress:**
+- [ ] 3a HMW framing confirmed
+- [ ] 3b who/persona confirmed
+- [ ] 3b success metric confirmed
+- [ ] 3b constraints confirmed
+- [ ] 3c complexity classification confirmed
+- [ ] 3c alternatives presented
+- [ ] 3d direction chosen
+- [ ] 3e assumptions and Not Doing presented
+
 **3a. Frame the problem.** Restate the idea as a rough "How Might We" problem statement — a directional anchor, not a fully specified template. Use [frameworks.md §HMW](frameworks.md#how-might-we-hmw) for format quality guidance (good vs bad HMW qualities), but do not attempt to fill every slot (specific user, key constraint) yet — those come from 3b. Present the framing to the user for confirmation or correction before proceeding. This anchors all subsequent questions on the problem, not a solution.
 
 **3b. Establish foundations.** Three things must be explicitly answered before advancing to alternatives. Ask one at a time, multiple choice preferred:
@@ -58,15 +68,13 @@ Two paths:
 
 Never skip this step silently — the user always sees at least two options. If the user rejects all alternatives, ask what constraint or dimension was missed, then loop back to 3c with that input as an additional lens.
 
-**3d. Converge.** Default: evaluate each direction against the already-loaded [refinement-criteria.md](refinement-criteria.md) (User Value, Feasibility, Differentiation) via manual criteria-based analysis. Present a pros/cons matrix and recommend one direction with a one-line rationale per rejected alternative.
+**3d. Converge.** Evaluate each direction against the already-loaded [refinement-criteria.md](refinement-criteria.md) (User Value, Feasibility, Differentiation) via criteria-based analysis. Present a pros/cons matrix and recommend one direction with a one-line rationale per rejected alternative.
 
-**CoVe pre-check:** before invoking CoVe, evaluate whether any alternative makes a specific verifiable claim — "API X supports feature Y", "library Z handles concurrency this way", "the existing auth middleware already does W". If no verifiable claims exist, skip CoVe entirely and note it. If verifiable claims exist, briefly name them and ask the user to confirm before invoking `$kk:chain-of-verification:isolated`. CoVe is fact-check oriented; it is not effective for subjective design trade-offs.
-
-**CoVe post-check:** after CoVe returns, evaluate the results. If CoVe's verification questions do not reference any specific technical constraint, dependency, or trade-off from the alternatives (i.e., they could apply to any idea), or if CoVe's answers for all alternatives are substantively identical — skip the CoVe results and rely on the manual criteria-based analysis alone. Note the fallback in the design doc.
+If alternatives make specific factual claims about APIs, libraries, or existing code, offer the user an explicit choice: "Some of these alternatives make specific technical claims I can fact-check. Want me to run `$kk:chain-of-verification:isolated` to verify them, or should I proceed with the analysis as-is?" Let the user decide — do not auto-invoke or auto-skip CoVe.
 
 **3e. Surface assumptions and scope.** Before moving to Step 4, produce and present to the user:
 
-- **Assumptions** — what is baked into the chosen direction but has not been validated. Categorize using [refinement-criteria.md §Assumption Audit](refinement-criteria.md#assumption-audit): Must Be True (dealbreakers), Should Be True (important), Might Be True (nice to have). Each assumption should be specific enough to be testable or falsifiable.
+- **Assumptions** — what is baked into the chosen direction but has not been validated. Each assumption should be specific enough to be testable or falsifiable — not vague hedges like "the API is fast enough."
 - **Not Doing** — explicit scope exclusions with a one-line reason each.
 
 Both become first-class artifacts in the design document (Step 5) and tasks.md header (Step 6).

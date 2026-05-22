@@ -99,7 +99,7 @@ Never skip this step silently — the user always sees at least two options. If 
 
 **3d. Converge.** Default: evaluate each direction against the already-loaded refinement-criteria.md (User Value, Feasibility, Differentiation) via manual criteria-based analysis. Present a pros/cons matrix and recommend one direction with a one-line rationale per rejected alternative.
 
-CoVe for verifiable claims only: when alternatives make specific factual or codebase claims, invoke `/kk:chain-of-verification:isolated` to verify those claims. The agent evaluates whether verifiable claims exist, then confirms the verification approach with the user before invoking CoVe. Fallback triggers: if CoVe's verification questions don't reference any specific technical constraint or trade-off from the alternatives (could apply to any idea), or if answers for all alternatives are substantively identical — skip CoVe results and rely on the manual analysis.
+CoVe as user-initiated option: when alternatives make specific factual claims about APIs, libraries, or existing code, offer the user an explicit choice — run `/kk:chain-of-verification:isolated` to fact-check, or proceed with criteria-based analysis. The agent does not auto-invoke or auto-skip CoVe; the user decides.
 
 **3e. Surface assumptions and scope.** Before moving to Step 4, produce and present to the user:
 - **Assumptions** — what is baked into the chosen direction but has not been validated. Each should be specific enough to be testable or falsifiable.
@@ -258,9 +258,9 @@ The agent must produce these checks independently — it does not inherit standa
 
 **Actions:**
 
-Add a note in the invocation section or description that `all` scope is recommended after `/kk:design` runs, so task-format checks are included. This mitigates the risk of users habitually using the default scope.
+Add a note in the invocation section that review-design is the recommended post-design gate after `/kk:design` completes. The default scope already reviews all documents (`design.md + implementation.md + tasks.md`), including task-format checks — no special scope argument is needed.
 
-**Step → verify:** Read review-design SKILL.md and confirm the scope recommendation is present.
+**Step → verify:** Read review-design SKILL.md and confirm the post-design gate note is present in the invocation section.
 
 ---
 
@@ -286,7 +286,7 @@ Per CLAUDE.md §Skill evaluations, create spec-style eval scenarios for the high
 
 **Eval 3: review-design-catches-missing-sections** — Verify review-design flags missing Assumptions and Not Doing sections.
 - Test files: a design.md with no Assumptions section and no Not Doing section, a tasks.md with no Size tags and horizontal-layer tasks
-- Prompt: invoke review-design on the test files with `all` scope
+- Prompt: invoke review-design on the test files (default scope covers all documents)
 - Assertions: STRUCTURE findings for missing Assumptions and Not Doing, TECH_RISK for horizontal tasks, STRUCTURE for missing Size tags
 
 **Step → verify:** Each eval directory contains eval.json with id, name, description, skills, prompt, trap, files, and assertions fields per the CLAUDE.md schema.

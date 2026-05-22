@@ -96,7 +96,7 @@ Evaluate each in-scope document:
 - **Internal consistency** — Does each document agree with itself? (e.g., a design.md that says "3 endpoints" then only describes 2)
 - **Convention adherence** — Does the document structure follow expected conventions? Are sections well-organized?
 - **Subtask quality** (only when tasks.md is in scope) — Are subtasks specific enough? Do they name the file/function/component being touched? Are dependencies between tasks correct?
-- **Assumptions and Not Doing** (only when design.md is in scope) — Check for an **Assumptions** section: present? Are assumptions specific and testable? Check for a **Not Doing** section: present? Are exclusions justified with rationale? Missing either section → `STRUCTURE` finding.
+- **Assumptions and Not Doing** (only when design.md is in scope) — Check for an **Assumptions** section: present? Are assumptions specific and testable (not vague hedges like "the API is fast enough")? Check for a **Not Doing** section: present? Are exclusions justified with rationale? Missing either section → `STRUCTURE` finding.
 - **Task format conventions** (only when tasks.md is in scope):
   - **Not Doing** in header metadata. Missing → `STRUCTURE`.
   - **Size tags** on every task. Missing → `STRUCTURE`. Any task tagged L that has not been broken down → `STRUCTURE`.

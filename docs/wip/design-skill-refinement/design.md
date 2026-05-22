@@ -58,11 +58,9 @@ Before generating alternatives, the agent states which path it is taking and why
 
 **3d. Converge.** The agent uses the already-loaded refinement-criteria.md for the evaluation rubric (User Value, Feasibility, Differentiation).
 
-**Default: manual criteria-based analysis.** Evaluate each direction against the rubric dimensions. Present a pros/cons matrix and recommend one direction with a one-line rationale per rejected alternative.
+**Criteria-based analysis.** Evaluate each direction against the rubric dimensions. Present a pros/cons matrix and recommend one direction with a one-line rationale per rejected alternative.
 
-**CoVe for verifiable claims only.** When alternatives make specific factual or codebase claims — "API X supports feature Y", "library Z handles concurrency this way", "the existing auth middleware already does W" — invoke `/kk:chain-of-verification:isolated` to verify those claims. CoVe is fact-check oriented; it is not effective for subjective design trade-offs. The agent evaluates whether verifiable claims exist, then confirms the verification approach with the user before invoking CoVe.
-
-**CoVe fallback triggers.** If CoVe is invoked and its verification questions do not reference any specific technical constraint, dependency, or trade-off from the alternatives (i.e., they could apply to any idea), or if CoVe's answers for all alternatives are substantively identical — skip the CoVe results and rely on the manual criteria-based analysis alone. Note the fallback in the design doc.
+**CoVe as user-initiated option.** When alternatives make specific factual claims about APIs, libraries, or existing code, offer the user an explicit choice: run `/kk:chain-of-verification:isolated` to fact-check those claims, or proceed with the analysis as-is. The agent does not auto-invoke or auto-skip CoVe — the user decides.
 
 **3e. Surface Outputs.** Before moving to Step 4, produce two explicit artifacts:
 
@@ -143,7 +141,7 @@ The example is the agent's primary formatting reference. Changes:
 
 Updates to `review-process.md`, `review-isolated.md`, and the `design-reviewer` agent. The finding types and severity levels in review-design's SKILL.md already cover the new checks. The new quality/soundness checks must be consistent across standard mode, isolated mode, and the sub-agent — otherwise isolated reviews silently skip the task-format enforcement that standard reviews catch.
 
-Additionally, review-design's SKILL.md description should note that `all` scope is recommended after `/kk:design` runs, to mitigate the risk of users habitually invoking the default scope and silently skipping task-format checks.
+Additionally, review-design's SKILL.md invocation section should note that it is the recommended post-design gate after `/kk:design` completes — the default scope already reviews all documents, including task-format checks.
 
 **Step 3 (Document Quality Review)** — new checks:
 

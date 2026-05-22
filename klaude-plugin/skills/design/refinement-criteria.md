@@ -4,7 +4,7 @@
 
 # Refinement & Evaluation Criteria
 
-Use this rubric during Phase 2 (Evaluate & Converge) to stress-test idea directions. Not every criterion applies to every idea — use judgment about which dimensions matter most for the specific context.
+Use this rubric to stress-test idea directions during convergence. These criteria apply to software engineering features — APIs, infrastructure, developer tools, internal systems, library design. Not every criterion applies to every idea — use judgment about which dimensions matter most for the specific context.
 
 ## Core Evaluation Dimensions
 
@@ -94,19 +94,19 @@ For every idea direction, explicitly list assumptions in three categories:
 
 Assumptions that, if wrong, kill the idea entirely. These need validation before building.
 
-Example: "Users will share their data with us" — if they won't, the entire product doesn't work.
+Example: "The external API supports batch operations" — if it doesn't, the entire design around bulk processing doesn't work.
 
 ### Should Be True (Important)
 
 Assumptions that significantly impact success but don't kill the idea. You can adjust the approach if these are wrong.
 
-Example: "Users prefer self-serve over talking to a person" — if wrong, you need a different go-to-market, but the core product can still work.
+Example: "Teams will adopt the CLI over the existing manual workflow" — if wrong, you need a different rollout strategy, but the core tool can still work.
 
 ### Might Be True (Nice to Have)
 
 Assumptions about secondary features or optimizations. Don't validate these until the core is proven.
 
-Example: "Users will want to share their results with teammates" — a growth feature, not a core value proposition.
+Example: "Teams will want to export reports to Slack" — a convenience feature, not a core value proposition.
 
 ## Decision Framework
 

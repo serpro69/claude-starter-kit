@@ -4,7 +4,7 @@
 > Implementation: [./implementation.md](./implementation.md)
 > Status: done
 > Created: 2026-05-21
-> Not Doing: existing-task-process.md changes, implement skill changes, pal-based stress-testing, Mermaid graphs, design skill evals, skill-md profile design/ subdirectory
+> Not Doing: existing-task-process.md changes, implement skill changes, pal-based stress-testing, Mermaid graphs, comprehensive design skill eval coverage, skill-md profile design/ subdirectory
 
 ## Task 1: Create frameworks.md reference file
 - **Status:** done
@@ -63,7 +63,7 @@
 - [x] 4.5 Add slicing strategy definitions (Vertical, Contract-First, Risk-First) to Step 6
 - [x] 4.6 Add parallel markers requirement to Step 6
 - [x] 4.7 Add ASCII dependency graph requirement to Step 6
-- [x] 4.8 Add recommendation to invoke `/kk:review-design <feature> all` as the post-design gate at the end of Step 6
+- [x] 4.8 Add recommendation to invoke `/kk:review-design <feature>` as the post-design gate at the end of Step 6 (default scope now includes all documents)
 
 ## Task 5: Rework example-tasks.md
 - **Status:** done
@@ -102,7 +102,7 @@
 - [x] 7.2 Add tasks.md checks to `review-process.md` Step 3: Not Doing in header, Size tags, no unbroken L tasks, vertical slicing (flag horizontal layers as `TECH_RISK`), parallel markers, dependency graph
 - [x] 7.3 Add to `review-process.md` Step 4: assumptions testability check (vague → `AMBIGUOUS`), Not Doing validity check (disguised critical requirement → `TECH_RISK`)
 - [x] 7.4 Add same quality/soundness checks to `klaude-plugin/agents/design-reviewer.md` §3 (Document Quality Pass) and §4 (Technical Soundness Pass)
-- [x] 7.5 Add scope recommendation to `klaude-plugin/skills/review-design/SKILL.md`: note that `all` scope is recommended after `/kk:design` runs
+- [x] 7.5 Add post-design gate note to `klaude-plugin/skills/review-design/SKILL.md` invocation section: default scope reviews all documents after `/kk:design`
 
 ## Task 8: Create spec-style evals
 - **Status:** done
