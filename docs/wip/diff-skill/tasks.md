@@ -7,17 +7,17 @@
 > Not Doing: cross-rename syntax, mechanical extraction pass, confidence levels, behavioral evals, CI integration, multi-skill invocation, auto-fix suggestions, extension points
 
 ## Task 1: Skill directory and SKILL.md
-- **Status:** pending
+- **Status:** done
 - **Depends on:** —
 - **Size:** S
 - **Can run in parallel with:** —
 - **Docs:** [implementation.md#skillmd-authoring](./implementation.md#skillmd-authoring)
 
 ### Subtasks
-- [ ] 1.1 Create directory `klaude-plugin/skills/diff-skill/`
-- [ ] 1.2 Create symlink `shared-capy-knowledge-protocol.md → ../_shared/capy-knowledge-protocol.md` — verify with `readlink` and `cat` through the symlink
-- [ ] 1.3 Author `SKILL.md` with YAML frontmatter (`name: diff-skill`, multi-line `description` under 1,024 chars), overview (two judgment axes), conventions (capy protocol reference), required outputs checklist, invocation section, and workflow with mandatory-order directive pointing to `diff-process.md`. Model after `merge-docs/SKILL.md`
-- [ ] 1.4 Verify all internal `[text](path)` links in SKILL.md resolve to files in the skill directory
+- [x] 1.1 Create directory `klaude-plugin/skills/diff-skill/`
+- [x] 1.2 Create symlink `shared-capy-knowledge-protocol.md → ../_shared/capy-knowledge-protocol.md` — verify with `readlink` and `cat` through the symlink
+- [x] 1.3 Author `SKILL.md` with YAML frontmatter (`name: diff-skill`, multi-line `description` under 1,024 chars), overview (two judgment axes), conventions (capy protocol reference), required outputs checklist, invocation section, and workflow with mandatory-order directive pointing to `diff-process.md`. Model after `merge-docs/SKILL.md`
+- [x] 1.4 Verify all internal `[text](path)` links in SKILL.md resolve to files in the skill directory
 
 ## Task 2: Author diff-process.md
 - **Status:** pending
