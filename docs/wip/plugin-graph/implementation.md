@@ -8,7 +8,7 @@
 cmd/plugin-graph/
   main.go              — CLI entry point, flag parsing, subcommand dispatch
   graph.go             — Graph/Node/Edge types, graph builder
-  parse.go             — File walker + six extractors
+  parse.go             — File walker + five extractors
   parse_test.go        — Extractor unit tests (table-driven, one section per extractor)
   metrics.go           — Metric computation over the graph
   metrics_test.go      — Metric calculation tests
@@ -39,20 +39,27 @@ Follows the flat `package main` pattern used by `cmd/generate-kodex/` and `cmd/v
 
 **`Node`** — `Path` (relative to plugin root, unique ID), `Type`, `Name` (human label derived from path).
 
-**`Edge`** — `Source` (path), `Target` (path), `Type`, `Line` (source line number for diagnostics).
+**`Edge`** — `RawSource` (concrete file path), `RawTarget` (concrete file path), `Source` (normalized), `Target` (normalized), `Type`, `Line` (source line number for diagnostics).
 
-**`Graph`** — `Nodes` map (path → Node), `Edges` slice. Methods: `AddNode`, `AddEdge`, `NodeByPath`, `OutEdges(path)`, `InEdges(path)`, `Reachable(path, direction)`, `NormalizePath(path)`.
+**`Graph`** — `Nodes` map (path → Node), `Edges` slice. Methods: `AddNode`, `AddEdge`, `NodeByPath`, `OutEdges(path)`, `InEdges(path)`, `Reachable(path, direction)`, `NormalizePath(path)`, `MetricEdges()` (returns edges excluding intra-artifact self-loops).
 
-The graph builder walks the plugin root, classifies each file/directory into a node type based on its location in the tree, then runs the extractors on each `.md` file to discover edges. Edge endpoints are normalized to their owning artifact node via `NormalizePath`.
+The graph builder walks the plugin root, classifies each file/directory into a node type based on its location in the tree, then runs the extractors on each `.md` file to discover edges. Edges store both raw file paths and normalized artifact-level endpoints.
+
+#### Dual-layer edge model
+
+Edges carry both raw and normalized endpoints to serve different purposes:
+- **Validation** (broken-edge detection) uses `RawTarget` — checks whether the concrete file exists. A missing `skills/foo/missing.md` is a broken edge even if the `skills/foo/` artifact node exists.
+- **Metrics** (fan-in/out, depth, coupling) use normalized `Source`/`Target`. Intra-artifact edges (where `Source == Target` after normalization) are suppressed via `MetricEdges()` — they represent internal file references (e.g., `SKILL.md → review-process.md` within the same skill), not cross-artifact dependencies. Including them would create false self-cycles that corrupt depth metrics.
+- **Diagnostics** include `RawSource` and `Line` so findings point to the exact file and line, not an artifact directory.
 
 #### Node identity and normalization
 
-Two node levels: **artifact nodes** (directory-level: skill, profile, profile-phase, command) and **file nodes** (individual `.md`: shared, agent, content). Edges are discovered from file paths but normalized:
+Two node levels: **artifact nodes** (directory-level: skill, profile, profile-phase, command) and **file nodes** (individual `.md`: shared, agent, content). Edges are discovered from file paths and normalized to artifact-level endpoints:
 
 - Files inside an artifact directory → normalized to the artifact node (e.g., `skills/review-code/SKILL.md` → `skills/review-code/`)
 - Files not inside an artifact directory → kept as file-level nodes (e.g., `skills/_shared/profile-detection.md`)
 
-`NormalizePath(path string) string` walks up from the given path, checking if any ancestor is a known artifact node. Returns the artifact's path if found, otherwise the original path. Targeted mode also uses this: `plugin-graph metrics skills/review-code/SKILL.md` resolves to the `skills/review-code/` skill node.
+`NormalizePath(path string) string` walks up from the given path, returning the **nearest (most specific)** ancestor artifact node. For `profiles/go/review-code/index.md`, it returns `profiles/go/review-code/` (profile-phase), not `profiles/go/` (profile) — the walk stops at the first match. Returns the original path if no ancestor is an artifact. Targeted mode also uses this: `plugin-graph metrics skills/review-code/SKILL.md` resolves to the `skills/review-code/` skill node.
 
 #### Node Classification Rules
 
@@ -82,9 +89,9 @@ Each extractor is a standalone function: `func(filePath string, content []byte, 
 
 Before running regex-based extractors (3–5), content is pre-processed to replace fenced code blocks (`` ``` `` and `~~~`` delimited) with blank lines of equal length (preserving line numbers for edge diagnostics). Extractor 1 (goldmark AST) is inherently code-block-safe. Extractor 2 (symlinks) operates on the filesystem.
 
-**Extractor 1 — Markdown links:** Parse with goldmark, walk AST for `ast.Link` nodes, extract `Destination`. Resolve relative paths against the file's directory. Filter: skip external URLs (`://`), anchor-only (`#...`), non-`.md` targets. Each surviving link → `markdown-link` edge with line number from AST position. Code-block-safe via AST.
+**Extractor 1 — Markdown links:** Parse with goldmark, walk AST for `ast.Link` nodes, extract `Destination`. Resolve relative paths against the file's directory. Filter: skip external URLs (`://`), anchor-only (`#...`), non-`.md` targets. Each surviving link → `markdown-link` edge with line number from AST position. Code-block-safe via AST. **Error handling:** if goldmark fails to parse a file (malformed markdown), emit a diagnostic to stderr, skip Extractor 1 for that file, and continue — other extractors still run on it.
 
-**Extractor 2 — Symlinks:** Called before content extraction. `os.Lstat(path)` → if `ModeSymlink`, `os.Readlink(path)` → resolve target relative to symlink's directory → `symlink` edge. Note: the resolved file's content is still processed by other extractors (the walker follows symlinks for content but records the symlink edge separately).
+**Extractor 2 — Symlinks:** Called before content extraction. `os.Lstat(path)` → if `ModeSymlink`, `os.Readlink(path)` → resolve target relative to symlink's directory → `symlink` edge. The symlink file is **skipped for content extraction** — the walker does not run other extractors on it. The symlink target's canonical file is processed separately when the walker encounters it at its real path (e.g., `skills/_shared/profile-detection.md`). This prevents double-counting: shared files' outgoing links are attributed only to the canonical shared node, not duplicated across every consuming skill.
 
 **Extractor 3 — Plugin-root references (merged template + parameterized):** A single extractor handles both concrete and parameterized `${CLAUDE_PLUGIN_ROOT}/...` paths. Regex: `` `\$\{CLAUDE_PLUGIN_ROOT\}/([^`]+)` ``. Strip the prefix, then branch:
 - **No angle-bracket variables** in remainder → `template-ref` edge to the concrete relative path.
@@ -96,11 +103,11 @@ Before running regex-based extractors (3–5), content is pre-processed to repla
 
 Runs on code-block-stripped content.
 
-**Extractor 4 — Agent delegation:** Matches `subagent_type` in **structured contexts only**: markdown table rows where one cell contains `subagent_type` and another cell on the same line contains `kk:(<agent-name>)`. Regex: a line matching `\|\s*` + `subagent_type` + `\s*\|` + `.*kk:([a-z-]+)`. Maps capture to `agents/<name>.md`. Does NOT scan for agent names as whole words in free prose — this avoids false positives from prose descriptions that mention agents without implying delegation.
+**Extractor 4 — Agent delegation:** Matches `subagent_type` in **structured contexts only**: markdown table rows where one cell contains `subagent_type` and another cell on the same line contains `kk:(<agent-name>)`. Regex: a line matching `\|\s*` + `subagent_type` + `\s*\|` + `.*kk:([a-z-]+)`. Maps capture to `agents/<name>.md`. Does NOT scan for agent names as whole words in free prose — this avoids false positives from prose descriptions that mention agents without implying delegation. **Known limitation:** Agent tool-call examples inside fenced code blocks (e.g., `Agent({ subagent_type: "kk:code-reviewer" })`) are stripped by the code-block pre-processor and not detected. This is acceptable: those patterns are templates/examples, not live delegation declarations.
 
 Runs on code-block-stripped content.
 
-**Extractor 5 — Skill and command invocation:** Regex: `/kk:([a-z-]+)(?::([a-z-]+))?`. The first capture group maps to `skills/<skill>/` directories (matched against `KnownSkills`). If a second capture group is present (command name), an additional edge is created to `commands/<skill>/<command>.md` if it exists on disk. Self-references (skill referencing itself) are skipped.
+**Extractor 5 — Skill and command invocation:** Regex: `/kk:([a-z-]+)(?::([a-z-]+))?`. Skill and command edges are resolved **independently**: the first capture group creates a `skill-invocation` edge to `skills/<skill>/` if it exists in `KnownSkills`. The second capture group (if present) creates a separate edge to `commands/<skill>/<command>.md` if the file exists on disk — this does NOT require a matching skill (commands like `template` and `migrate-from-taskmaster` exist without peer skills). Self-references (skill referencing itself) are skipped.
 
 Runs on code-block-stripped content.
 
@@ -110,13 +117,13 @@ Runs on code-block-stripped content.
 
 **`GraphMetrics`** struct: `PerNode` map (path → NodeMetrics), `Orphans` ([]path), `BrokenEdges` ([]Edge), `Hotspots` ([]path sorted by fan-in desc), `Coupling` ([]SkillPair with shared dep count).
 
-Computation:
-- Fan-in/fan-out: single pass over edges, count per node.
-- Depth: DFS from each node, memoized. Cycle detection → report cycle as a diagnostic, depth = -1 for nodes in a cycle.
+Computation uses `MetricEdges()` (excluding intra-artifact self-loops) for all metric calculations:
+- Fan-in/fan-out: single pass over metric edges, count per normalized node.
+- Depth: DFS from each node, memoized. Cycle detection → report cycle as a diagnostic on stderr, depth = -1 for nodes in a cycle.
 - Transitive closure: BFS from each node, count reachable set size.
 - Coupling: for each pair of `skill` nodes, intersect their forward-reachable sets. Only report pairs with intersection > threshold (default 3).
-- Orphans: nodes where fan-in = 0, excluding **entry-point nodes** that legitimately have no incoming edges. Entry points: `skill` nodes (invoked by users), `profile` nodes (activated by detection), `command` nodes (invoked via `/kk:<skill>:<command>` — but may also have edges from skill-invocation extractor), `agent` nodes (spawned by skills, but delegation edges may exist), `README.md` at plugin root, and files under `evals/` directories (test fixtures). Only `content` and `shared` nodes with zero fan-in are flagged as orphans.
-- Broken edges: edges whose target path doesn't resolve to a file on disk.
+- Orphans: nodes where fan-in = 0 (on metric edges), excluding **entry-point nodes** that legitimately have no incoming edges. Entry points: `skill` nodes (invoked by users), `profile` nodes (activated by detection), `command` nodes (invoked via `/kk:<skill>:<command>` — but may also have edges from skill-invocation extractor), `agent` nodes (spawned by skills, but delegation edges may exist), `README.md` at plugin root, and files under `evals/` directories (test fixtures). Only `content` and `shared` nodes with zero fan-in are flagged as orphans.
+- Broken edges: uses **`RawTarget`** — checks whether the concrete file path exists on disk or resolves to a node. Does NOT normalize targets first — a missing `skills/foo/missing.md` is a broken edge even if `skills/foo/` exists as an artifact node.
 
 ### Output (`output.go`)
 
@@ -166,7 +173,9 @@ The `validate` subcommand provides a natural CI hook — broken links and orphan
 
 ### CLI Flag Parsing
 
-The binary uses per-subcommand `flag.FlagSet`s. `main()` extracts global flags (`--root`, `--ref`) from `os.Args[1:]` before the subcommand, then passes remaining args to the subcommand's own FlagSet. This matches the usage pattern `plugin-graph <subcommand> [flags] [targets...]`.
+Grammar: `plugin-graph [global-flags] <subcommand> [subcommand-flags] [targets...]`. Global flags come before the subcommand; per-subcommand flags come after.
+
+`main()` scans `os.Args[1:]` for recognized global flags (`--root`, `--ref`), extracts them, then treats the first non-flag argument as the subcommand. Remaining arguments are passed to the subcommand's own `flag.FlagSet` for per-subcommand flag parsing (`--format`, `--direction`). Positional arguments after per-subcommand flags are targets.
 
 ## Testing Strategy
 

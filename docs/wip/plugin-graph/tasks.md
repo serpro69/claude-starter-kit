@@ -41,15 +41,17 @@ Implement the graph data model and builder in `cmd/plugin-graph/graph.go`.
 
 - [ ] Define `NodeType` and `EdgeType` string enums with all values from design
 - [ ] Define `Node` struct: `Path`, `Type`, `Name`
-- [ ] Define `Edge` struct: `Source`, `Target`, `Type`, `Line`
+- [ ] Define `Edge` struct with dual-layer endpoints: `RawSource`, `RawTarget` (concrete file paths), `Source`, `Target` (normalized), `Type`, `Line`
 - [ ] Define `Graph` struct with `Nodes` map and `Edges` slice
-- [ ] Implement `AddNode`, `AddEdge`, `NodeByPath` methods
-- [ ] Implement `OutEdges(path)` and `InEdges(path)` query methods
-- [ ] Implement `Reachable(path, direction)` — BFS following out-edges, in-edges, or both; returns set of reachable node paths
-- [ ] Implement `NormalizePath(path)` — walks up from a file path, checking if any ancestor is a known artifact node (skill, profile, profile-phase, command); returns artifact path if found, original path otherwise
+- [ ] Implement `AddNode`, `AddEdge` (auto-normalizes raw endpoints), `NodeByPath` methods
+- [ ] Implement `OutEdges(path)` and `InEdges(path)` query methods (on normalized endpoints)
+- [ ] Implement `MetricEdges()` — returns edges excluding intra-artifact self-loops (where `Source == Target` after normalization)
+- [ ] Implement `Reachable(path, direction)` — BFS on metric edges following out-edges, in-edges, or both; returns set of reachable node paths
+- [ ] Implement `NormalizePath(path)` — walks up from a file path, returns the **nearest (most specific)** ancestor artifact node. For `profiles/go/review-code/index.md` returns `profiles/go/review-code/` (profile-phase), not `profiles/go/` (profile). Returns original path if no ancestor is an artifact
 - [ ] Implement node classification: given a file path relative to plugin root, return the correct `NodeType` based on the path pattern rules (skill directory with SKILL.md, `_shared/*.md`, `agents/*.md`, etc.)
 - [ ] Write table-driven tests for node classification covering all 7 node types plus edge cases (files outside known directories → `content`)
-- [ ] Write tests for `NormalizePath`: file inside skill dir → skill node, file in `_shared/` → stays as file, file in profile phase → profile-phase node
+- [ ] Write tests for `NormalizePath`: file inside skill dir → skill node (nearest), file in `_shared/` → stays as file, file in profile phase → profile-phase node (not profile), nested artifact specificity
+- [ ] Write tests for `MetricEdges`: intra-artifact edges suppressed, cross-artifact edges preserved
 
 **Verify:** `go test ./cmd/plugin-graph/... -run TestGraph` passes. Node classification correctly maps all path patterns. Reachable returns correct sets for a small hand-built graph.
 
@@ -64,13 +66,13 @@ Implement the graph data model and builder in `cmd/plugin-graph/graph.go`.
 
 > Ref: [implementation.md §Extractors](implementation.md#extractors-parsego)
 
-Implement the file walker and all six extractors in `cmd/plugin-graph/parse.go`.
+Implement the file walker and all five extractors in `cmd/plugin-graph/parse.go`.
 
 - [ ] Define `ParseContext` struct: `PluginRoot`, `KnownProfiles`, `KnownPhases`, `KnownAgents`, `KnownSkills`, `KnownCommands`
 - [ ] Implement `ParseContext` initialization: derive `KnownProfiles` by parsing §Known profiles from `skills/_shared/profile-detection.md`, derive `KnownAgents`, `KnownSkills`, and `KnownCommands` from directory listings, hardcode `KnownPhases`
 - [ ] Implement code-block stripping: replace fenced code blocks (`` ``` `` and `~~~`) with blank lines preserving line count. Used as pre-processing for regex extractors 3–5
 - [ ] Implement Extractor 1 (markdown links): goldmark AST walk for `ast.Link` nodes, resolve relative paths, filter external/anchor/non-md. Inherently code-block-safe
-- [ ] Implement Extractor 2 (symlinks): `os.Lstat` + `os.Readlink`, resolve relative target
+- [ ] Implement Extractor 2 (symlinks): `os.Lstat` + `os.Readlink`, resolve relative target, create `symlink` edge. Skip content extraction for symlink files — target's outgoing links are attributed to the canonical path only (prevents double-counting shared dependencies)
 - [ ] Implement Extractor 3 (plugin-root refs, merged template + parameterized): regex for `` `\$\{CLAUDE_PLUGIN_ROOT\}/([^`]+)` ``, strip prefix, branch on angle-bracket variable presence → concrete paths become `template-ref`, parameterized paths expand `<name>`/`<profile>` × `<phase>` × `<checklist>` (via glob). Runs on stripped content
 - [ ] Implement Extractor 4 (agent delegation): match `subagent_type` in markdown table rows only (structured context), extract `kk:<agent-name>` from same row → `agents/<name>.md`. No free-prose scanning. Runs on stripped content
 - [ ] Implement Extractor 5 (skill + command invocation): regex `/kk:([a-z-]+)(?::([a-z-]+))?`, first group → skill edge, second group (if present) → command edge to `commands/<skill>/<command>.md`. Runs on stripped content
@@ -100,9 +102,9 @@ Implement metric computation in `cmd/plugin-graph/metrics.go`.
 - [ ] Implement transitive closure: BFS from each node, count reachable set
 - [ ] Implement coupling: for each skill-node pair, intersect forward-reachable sets; report pairs above threshold (default 3)
 - [ ] Implement orphan detection: fan-in = 0, excluding entry-point nodes (skills, profiles, commands, agents, `README.md`, `evals/` fixtures). Only `content` and `shared` nodes flagged
-- [ ] Implement broken edge detection: edges whose target path not in `Nodes` map
+- [ ] Implement broken edge detection: uses `RawTarget` — checks concrete file path existence on disk. Does NOT normalize first (a missing `skills/foo/missing.md` is broken even if `skills/foo/` exists)
 - [ ] Implement hotspot ranking: nodes sorted by fan-in descending
-- [ ] Write tests in `metrics_test.go`: linear chain (depth = N), diamond (fan-in 2), star (fan-out N), isolated node (orphan), missing target (broken edge), cycle (depth -1)
+- [ ] Write tests in `metrics_test.go`: linear chain (depth = N), diamond (fan-in 2), star (fan-out N), isolated node (orphan), missing target via RawTarget (broken edge), cycle (depth -1), intra-artifact self-loop (suppressed from MetricEdges, not counted as cycle)
 
 **Verify:** `go test ./cmd/plugin-graph/... -run TestMetrics` passes. All metric cases produce expected values.
 
@@ -141,13 +143,13 @@ Implement the four output formatters in `cmd/plugin-graph/output.go`.
 
 Wire everything together in `cmd/plugin-graph/main.go`.
 
-- [ ] Implement CLI parsing with per-subcommand `flag.FlagSet`s: global flags (`--root`, `--ref`) parsed first, then subcommand name extracted, then subcommand-specific flags (`--format`, `--direction`) parsed by the subcommand's FlagSet
+- [ ] Implement CLI parsing: scan `os.Args[1:]` for global flags (`--root`, `--ref`) before the subcommand, extract them, treat first non-flag arg as subcommand, pass remainder to per-subcommand `flag.FlagSet` for `--format`/`--direction`
 - [ ] Implement subcommand dispatch: `graph` (default), `metrics`, `validate`
 - [ ] Implement targeted mode: when positional args provided, normalize paths via `NormalizePath`, build full graph, compute reachable set per `--direction`, filter graph to subgraph, then run the selected subcommand on the filtered result
 - [ ] Implement `validate` exit code: exit 1 if broken edges or orphans found. Respect `--format` for output
-- [ ] Add basic integration test in `main_test.go`: run `graph`, `metrics`, `validate` subcommands against a fixture and assert non-empty output / correct exit codes. Test flags both before and after subcommand are rejected/accepted correctly
+- [ ] Add basic integration test in `main_test.go`: run `graph`, `metrics`, `validate` subcommands against a fixture and assert non-empty output / correct exit codes. Test that global flags before subcommand work, per-subcommand flags after work
 
-**Verify:** `go run ./cmd/plugin-graph validate --root klaude-plugin/` exits cleanly against the real plugin. `go run ./cmd/plugin-graph metrics --format json --root klaude-plugin/` produces valid JSON with all skills present.
+**Verify:** `go run ./cmd/plugin-graph --root klaude-plugin/ validate` exits cleanly against the real plugin. `go run ./cmd/plugin-graph --root klaude-plugin/ metrics --format json` produces valid JSON with all skills present.
 
 ---
 
@@ -187,7 +189,7 @@ Create the integration test fixture and wire up Makefile/CI.
 - [ ] Add `plugin-graph` target to `Makefile`: `go test ./cmd/plugin-graph/...` then `go run ./cmd/plugin-graph --root klaude-plugin/ validate`
 - [ ] Run `make plugin-graph` against the real `klaude-plugin/` and fix any validation findings (broken links, orphans) that surface — these are real bugs in the plugin, not test failures
 
-**Verify:** `make plugin-graph` passes. Integration test passes. `go run ./cmd/plugin-graph metrics --format text --root klaude-plugin/` produces a readable table with all skills.
+**Verify:** `make plugin-graph` passes. Integration test passes. `go run ./cmd/plugin-graph --root klaude-plugin/ metrics --format text` produces a readable table with all skills.
 
 ---
 

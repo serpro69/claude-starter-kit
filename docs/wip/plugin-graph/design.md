@@ -28,11 +28,17 @@ Each node has a `type` discriminator and a `path` (relative to `klaude-plugin/`)
 
 #### Node identity
 
-Two levels exist: **artifact nodes** (directory-level groupings: skills, profiles, profile-phases, commands) and **file nodes** (individual `.md` files: shared, agent, content). Edges always reference file-level paths. When a file belongs to an artifact node (e.g., `skills/review-code/SKILL.md` belongs to the `skills/review-code/` skill), the builder normalizes the edge endpoint to the artifact node. This means:
+Two levels exist: **artifact nodes** (directory-level groupings: skills, profiles, profile-phases, commands) and **file nodes** (individual `.md` files: shared, agent, content).
 
-- Edge source `skills/review-code/SKILL.md` → normalized to `skills/review-code/`
-- Edge source `skills/review-code/review-process.md` → normalized to `skills/review-code/`
-- Edge source `skills/_shared/profile-detection.md` → stays as-is (file node, not inside an artifact)
+**Dual-layer edge model.** Each edge stores both raw and normalized endpoints:
+- `RawSource` / `RawTarget` — the concrete file paths as discovered by extractors.
+- `Source` / `Target` — normalized to the owning artifact node (via `NormalizePath`, which returns the **nearest** ancestor artifact, not the outermost).
+
+Validation (broken-edge detection) operates on **raw targets** — a missing `skills/foo/missing.md` is a broken edge even if `skills/foo/` exists. Metrics (fan-in/out, depth, coupling) operate on **normalized endpoints** — so complexity is measured at the artifact level, not per-file. Intra-artifact edges (where normalized source == normalized target, e.g., `skills/review-code/SKILL.md` → `skills/review-code/review-process.md`) are **suppressed from the metric graph** — they are internal file references, not cross-artifact dependencies, and including them would create false self-cycles that corrupt depth.
+
+Examples:
+- Raw edge `skills/review-code/SKILL.md → skills/review-code/review-process.md` → normalized `skills/review-code/ → skills/review-code/` → suppressed (intra-artifact)
+- Raw edge `skills/review-code/SKILL.md → skills/_shared/profile-detection.md` → normalized `skills/review-code/ → skills/_shared/profile-detection.md` → kept (cross-artifact)
 - Targeted mode: both `plugin-graph metrics skills/review-code/` and `plugin-graph metrics skills/review-code/SKILL.md` resolve to the same skill node
 
 | Type | Level | Description | Example |
@@ -78,7 +84,7 @@ Files are processed in a single pass. Five extractors run in sequence, each inde
 
 **Extractor 1 — Markdown links:** Uses goldmark (or regex fallback) to find `[text](target.md)`. Resolves relative targets against the file's directory. Ignores external URLs, anchor-only refs, and non-`.md` targets. Code-block-safe via goldmark AST (links inside code blocks are not `ast.Link` nodes).
 
-**Extractor 2 — Symlinks:** `os.Lstat` before reading content. If symlink, `os.Readlink` captures target. Creates `symlink` edge. The resolved file is also processed for its own outgoing links.
+**Extractor 2 — Symlinks:** `os.Lstat` before reading content. If symlink, `os.Readlink` captures target. Creates `symlink` edge. The symlink file is **not processed for content** — its target's outgoing links are attributed to the target's canonical path only, avoiding double-counting shared dependencies across every consuming skill.
 
 **Extractor 3 — Plugin-root references (merged template + parameterized):** A single extractor handles both concrete and parameterized `${CLAUDE_PLUGIN_ROOT}/...` paths. Regex matches backtick-delimited brace-form paths, strips the `${CLAUDE_PLUGIN_ROOT}/` prefix, then branches:
 - **No angle-bracket variables** → `template-ref` edge to the concrete relative path.
@@ -86,9 +92,9 @@ Files are processed in a single pass. Five extractors run in sequence, each inde
 
 Runs on code-block-stripped content.
 
-**Extractor 4 — Agent delegation:** Matches `subagent_type` in **structured contexts only**: markdown table rows where a cell contains `subagent_type` and another cell on the same row contains `kk:<agent-name>`. Does NOT scan for agent names as whole words in free prose. Runs on code-block-stripped content.
+**Extractor 4 — Agent delegation:** Matches `subagent_type` in **structured contexts only**: markdown table rows where a cell contains `subagent_type` and another cell on the same row contains `kk:<agent-name>`. Does NOT scan for agent names as whole words in free prose. Runs on code-block-stripped content. **Known limitation:** Agent tool-call examples inside fenced code blocks (e.g., `Agent({ subagent_type: "kk:code-reviewer" })`) are stripped by the code-block pre-processor and not detected. This is an acceptable trade-off: those code-block patterns are templates/examples, not live delegation declarations — the actual delegation table rows are the authoritative source.
 
-**Extractor 5 — Skill and command invocation:** Regex for `/kk:([a-z-]+)(?::([a-z-]+))?` patterns. The first capture group maps to `skills/<name>/`. If a second capture group is present (command name), an additional edge is created to `commands/<skill>/<command>.md` if it exists on disk. Runs on code-block-stripped content.
+**Extractor 5 — Skill and command invocation:** Regex for `/kk:([a-z-]+)(?::([a-z-]+))?` patterns. Skill and command edges are resolved independently: the first capture group creates a `skill-invocation` edge to `skills/<name>/` if the skill exists in `KnownSkills`. The second capture group (if present) creates a separate edge to `commands/<skill>/<command>.md` if the command file exists on disk. Command edges do NOT require a matching skill — commands like `template` and `migrate-from-taskmaster` exist without peer skills. Runs on code-block-stripped content.
 
 ### Metrics
 
@@ -115,10 +121,10 @@ Runs on code-block-stripped content.
 Lives at `cmd/plugin-graph/`. Single binary, subcommand-based.
 
 ```
-plugin-graph <subcommand> [flags] [target...]
+plugin-graph [global-flags] <subcommand> [subcommand-flags] [target...]
 ```
 
-Subcommand comes first, flags follow. Each subcommand uses its own `flag.FlagSet` so flags are parsed after the subcommand argument.
+Global flags come before the subcommand; per-subcommand flags come after. Each subcommand uses its own `flag.FlagSet`. `main()` scans `os.Args[1:]` for recognized global flags, extracts them, then treats the first non-flag argument as the subcommand and passes the remainder to the subcommand's FlagSet.
 
 #### Subcommands
 
@@ -128,16 +134,16 @@ Subcommand comes first, flags follow. Each subcommand uses its own `flag.FlagSet
 
 #### Flags
 
-Global flags (parsed before subcommand): `--root <path>` (default: `klaude-plugin/`), `--ref <git-ref>` (default: working tree).
+Global flags: `--root <path>` (default: `klaude-plugin/`), `--ref <git-ref>` (default: working tree).
 
 Per-subcommand flags: `--format json|text|dot|mermaid` (default: `text`), `--direction forward|reverse|both` (default: `forward`, targeted mode only).
 
 #### Targeted Mode
 
-When positional arguments are provided after flags, the tool builds the full graph internally but filters output to the subgraph reachable from those starting nodes. Multiple targets are unioned. Target paths resolve to the owning artifact node (e.g., `skills/review-code/SKILL.md` resolves to the `skills/review-code/` skill node).
+When positional arguments are provided after subcommand flags, the tool builds the full graph internally but filters output to the subgraph reachable from those starting nodes. Multiple targets are unioned. Target paths resolve to the owning artifact node (e.g., `skills/review-code/SKILL.md` resolves to the `skills/review-code/` skill node).
 
 ```
-plugin-graph metrics --format json skills/review-code/
+plugin-graph --root klaude-plugin/ metrics --format json skills/review-code/
 plugin-graph graph --direction both skills/_shared/profile-detection.md
 ```
 
@@ -151,19 +157,19 @@ When `--ref` is provided:
 
 ### Output Formats
 
-Structured output (graph data, metrics, validation results) goes to **stdout**. Diagnostics (cycle warnings, parse errors, skipped files) go to **stderr**.
+Structured output (graph data, metrics, validation results) goes to **stdout**. Diagnostics (cycle warnings, parse errors, skipped files) go to **stderr** in all formats. Per-format details:
 
-- **`json`** — full graph + metrics as structured JSON. Contains `nodes`, `edges`, `metrics`, and `diagnostics` arrays. The `diagnostics` array includes cycle reports, parse warnings, etc. The canonical programmatic output.
-- **`text`** — human-readable summary table. Per-skill metrics sorted by transitive closure size. Warnings for orphans/broken edges. Diagnostics appended at the end.
-- **`dot`** — GraphViz DOT format. Nodes colored by type, edges styled by type. Diagnostics only on stderr.
-- **`mermaid`** — Mermaid flowchart syntax. Same visual semantics as DOT. Diagnostics only on stderr.
+- **`json`** — full graph + metrics as structured JSON. Contains `nodes`, `edges`, `metrics`, and `diagnostics` arrays. Diagnostics appear **both** in the JSON `diagnostics` array (for programmatic consumers) **and** on stderr (for human visibility). The canonical programmatic output.
+- **`text`** — human-readable summary table. Per-skill metrics sorted by transitive closure size. Warnings for orphans/broken edges. Diagnostics appended to the text output on stdout and also emitted to stderr.
+- **`dot`** — GraphViz DOT format. Nodes colored by type, edges styled by type. Diagnostics on stderr only (not embedded in DOT syntax).
+- **`mermaid`** — Mermaid flowchart syntax. Same visual semantics as DOT. Diagnostics on stderr only.
 
 The `validate` subcommand respects `--format`: `json` emits structured validation findings, `text` (default) emits human-readable findings. Exit code 1 when broken edges or orphans are found.
 
 ## Assumptions
 
 1. **Goldmark (or equivalent) can reliably extract markdown link targets.** Will be validated as a prerequisite task before implementation.
-2. **Three link categories cover all dependency edges.** Static (markdown links, symlinks), template paths (`${CLAUDE_PLUGIN_ROOT}/...` with concrete suffixes), and parameterized navigation instructions (backtick-quoted paths with variables expanding over known sets). The variable vocabulary is small and the expansion sets are finite (8 profiles, 6 phases).
+2. **Three link categories cover all dependency edges.** Static (markdown links, symlinks), template paths (`${CLAUDE_PLUGIN_ROOT}/...` with concrete suffixes), and parameterized navigation instructions (backtick-quoted paths with variables expanding over known sets). The variable vocabulary is small and the expansion sets are finite.
 3. **`git worktree` is available** in environments where the tool runs (CI, local dev).
 4. **The graph fits in memory.** ~10 skills, 5 agents, 8 profiles, ~4 shared instructions — dozens of nodes, not thousands.
 5. **JSON output is sufficient for programmatic consumers.**
