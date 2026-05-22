@@ -1,7 +1,7 @@
 {
   "id": 1,
   "name": "known-degradation",
-  "description": "Three deliberate degradations: a MUST weakened to SHOULD, a required-output bullet removed, and a broken link introduced. All three should be flagged.",
+  "description": "Three deliberate degradations: a MUST weakened to SHOULD, a required-output bullet removed, and a newly added link to a non-existent file (style-guide.md). All three should be flagged.",
   "skills": ["diff-skill"],
   "prompt": "Run $kk:diff-skill on the example-skill, comparing the before/ and after/ directories in test-files/.",
   "trap": "Model treats the MUST→SHOULD weakening as a minor style edit rather than a constraint degradation, or misses the removed required-output bullet because the surrounding list still looks complete, or ignores the broken link to style-guide.md because it was added (not removed) — but it references a file that does not exist.",
