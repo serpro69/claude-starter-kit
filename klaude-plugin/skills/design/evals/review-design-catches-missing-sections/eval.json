@@ -1,0 +1,18 @@
+{
+  "id": 3,
+  "name": "review-design-catches-missing-sections",
+  "description": "Verify review-design flags missing Assumptions/Not Doing sections in design.md and task-format violations in tasks.md.",
+  "skills": ["review-design"],
+  "prompt": "/kk:review-design notification-system all",
+  "trap": "The design reads plausibly — it has Goals, Architecture, and reasonable structure. The reviewer may focus on technical soundness and miss the structural gaps: no Assumptions section, no Not Doing section, no Size tags, horizontal-layer tasks (all models, all endpoints, all UI), no parallel markers, no dependency graph, no Not Doing in tasks.md header.",
+  "files": ["test-files/design.md", "test-files/tasks.md"],
+  "assertions": [
+    { "id": "3.1", "text": "STRUCTURE finding for missing Assumptions section in design.md." },
+    { "id": "3.2", "text": "STRUCTURE finding for missing Not Doing section in design.md." },
+    { "id": "3.3", "text": "STRUCTURE finding for missing Not Doing in tasks.md header." },
+    { "id": "3.4", "text": "STRUCTURE finding for missing Size tags on tasks." },
+    { "id": "3.5", "text": "TECH_RISK finding for horizontal-layer tasks (e.g., 'Create all database models', 'Build all API endpoints')." },
+    { "id": "3.6", "text": "STRUCTURE finding for missing parallel markers on tasks." },
+    { "id": "3.7", "text": "STRUCTURE finding for missing dependency graph section." }
+  ]
+}
