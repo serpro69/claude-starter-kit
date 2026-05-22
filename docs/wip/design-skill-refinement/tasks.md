@@ -32,21 +32,21 @@
 - [x] 2.3 Light adaptation: add SE-context framing, remove consumer examples, preserve painkiller-vs-vitamin framing, differentiation ranking, value/feasibility matrix, and MVP rules
 
 ## Task 3: Rewrite idea-process.md Step 3
-- **Status:** pending
+- **Status:** in-progress
 - **Depends on:** Task 1, Task 2
 - **Size:** M
 - **Can run in parallel with:** —
 - **Docs:** [implementation.md#task-21-rewrite-idea-processmd-step-3](./implementation.md#task-21-rewrite-idea-processmd-step-3)
 
 ### Subtasks
-- [ ] 3.1 Replace current Step 3 body in `klaude-plugin/skills/design/idea-process.md` with five sub-phases (3a-3e)
-- [ ] 3.2 Preserve the profile detection block in its current position (before questions begin)
-- [ ] 3.3 Ensure Step 3 references frameworks.md and refinement-criteria.md as already-loaded (loaded during SKILL.md step 2, not re-loaded here)
-- [ ] 3.4 Write sub-phase 3a (HMW framing) with reference to frameworks.md §HMW
-- [ ] 3.5 Write sub-phase 3b (hard gate) with three explicit requirements: who, success, technical constraints
-- [ ] 3.6 Write sub-phase 3c (proportional diverge) with complexity classification confirmation, two paths (non-trivial: 2-3 alternatives, simple: direct + one alternative), and rejection loop
-- [ ] 3.7 Write sub-phase 3d (converge): manual criteria-based analysis as default, CoVe scoped to verifiable claims only, concrete fallback triggers
-- [ ] 3.8 Write sub-phase 3e (surface outputs) requiring Assumptions and Not Doing artifacts
+- [x] 3.1 Replace current Step 3 body in `klaude-plugin/skills/design/idea-process.md` with five sub-phases (3a-3e)
+- [x] 3.2 Preserve the profile detection block in its current position (before questions begin)
+- [x] 3.3 Ensure Step 3 references frameworks.md and refinement-criteria.md as already-loaded (loaded during SKILL.md step 2, not re-loaded here)
+- [x] 3.4 Write sub-phase 3a (HMW framing) with reference to frameworks.md §HMW
+- [x] 3.5 Write sub-phase 3b (hard gate) with three explicit requirements: who, success, technical constraints
+- [x] 3.6 Write sub-phase 3c (proportional diverge) with complexity classification confirmation, two paths (non-trivial: 2-3 alternatives, simple: direct + one alternative), and rejection loop
+- [x] 3.7 Write sub-phase 3d (converge): manual criteria-based analysis as default, CoVe scoped to verifiable claims only, concrete fallback triggers
+- [x] 3.8 Write sub-phase 3e (surface outputs) requiring Assumptions and Not Doing artifacts
 
 ## Task 4: Update idea-process.md Steps 5 and 6
 - **Status:** pending

@@ -6,7 +6,7 @@ Copy this checklist and check off items as you complete them:
 Task Progress:
 - [ ] Step 1: Understand the current state of the project
 - [ ] Step 2: Check the documentation
-- [ ] Step 3: Help refine the idea/feature
+- [ ] Step 3: Refine the idea
 - [ ] Step 4: Describe the design
 - [ ] Step 5: Document the design
 - [ ] Step 6: Create the task list
@@ -22,17 +22,49 @@ In order to gain a better understanding of the project, **check the contributing
 
 **Capy search:** Before refining the idea, search `kk:arch-decisions` and `kk:project-conventions` for prior design context related to the feature area being discussed.
 
-**Step 3: Help refine the idea/feature**
-
-Once you've become familiar with the project and code, you can start asking me questions, one at a time, to **help refine the idea**.
+**Step 3: Refine the idea**
 
 **Detect active profiles before refining.** The design phase runs before any code exists, so file-based detection is impossible. Run the design interaction pattern from [shared-profile-detection.md §The `/kk:design` interaction pattern](shared-profile-detection.md) — it iterates all profiles with `## Design signals`, matches their declared tokens against the idea prose, and handles confirmation prompts. Never auto-activate a profile silently.
 
-For each active profile, use the `Read` tool on `<plugin_root>/profiles/<name>/design/index.md` — where `<plugin_root>` is the absolute plugin-root path you already know from SKILL.md context. Skip silently if absent; not every profile populates a `design/` subdirectory. Load every file listed under **Always load**; a profile's `questions.md` (when present) seeds the refinement question pool. Integrate the profile's questions into the flow below — one question per message, as always.
+For each active profile, use the `Read` tool on `<plugin_root>/profiles/<name>/design/index.md` — where `<plugin_root>` is the absolute plugin-root path you already know from SKILL.md context. Skip silently if absent; not every profile populates a `design/` subdirectory. Load every file listed under **Always load**; a profile's `questions.md` (when present) seeds the refinement question pool. Integrate the profile's questions into the sub-phases below — one question per message, as always.
 
-Ideally, the questions would be multiple choice, but open-ended questions are OK too.
+Note: [frameworks.md](frameworks.md) and [refinement-criteria.md](refinement-criteria.md) are already loaded during the mandatory instruction-load phase (SKILL.md step 2). Do not reload them here.
 
-Don't forget: only one question per message!
+**Interaction style throughout:** one question per message, multiple choice preferred. Open-ended questions are OK too. The sub-phases below add structure to _what_ is asked, not _how_.
+
+**3a. Frame the problem.** Restate the idea as a "How Might We" problem statement (format defined in [frameworks.md §HMW](frameworks.md#how-might-we-hmw)). Present to the user for confirmation before proceeding. This anchors all subsequent questions on the problem, not a solution.
+
+**3b. Establish foundations.** Three things must be explicitly answered before advancing to alternatives. Ask one at a time, multiple choice preferred:
+
+1. **Who is this for** — specific user, persona, or role. "Everyone" is not an answer.
+2. **What does success look like** — a measurable outcome, not a feature name. "Users can log in" → "Login p99 latency under 500ms with zero-downtime deployment."
+3. **Technical/system constraints** — what existing systems, APIs, data stores, infrastructure, or conventions must be respected. What is off-limits to change.
+
+Do not advance to 3c until all three are confirmed.
+
+**3c. Explore alternatives.** Select frameworks from the already-loaded [frameworks.md](frameworks.md) that fit the idea — pick by "Best for" guidance, never run every framework. Before generating alternatives, state which path you are taking and why:
+
+> "This looks like a straightforward single-path problem — I'll propose the direct approach plus one alternative. Want me to explore more broadly instead?"
+
+Two paths:
+
+- **Non-trivial ideas** (multiple valid approaches, significant unknowns, architectural choices): generate 2-3 alternative directions using selected lenses. Present each with a one-sentence trade-off summary.
+- **Simple ideas** (single-concern, low-uncertainty, obvious path): propose the direct implementation path plus briefly mention one alternative optimized for a different constraint (e.g., "We could also do X if extensibility matters more than simplicity"). Ask which to proceed with.
+
+Never skip this step silently — the user always sees at least two options. If the user rejects all alternatives, ask what constraint or dimension was missed, then loop back to 3c with that input as an additional lens.
+
+**3d. Converge.** Default: evaluate each direction against the already-loaded [refinement-criteria.md](refinement-criteria.md) (User Value, Feasibility, Differentiation) via manual criteria-based analysis. Present a pros/cons matrix and recommend one direction with a one-line rationale per rejected alternative.
+
+**CoVe for verifiable claims only:** when alternatives make specific factual or codebase claims — "API X supports feature Y", "library Z handles concurrency this way", "the existing auth middleware already does W" — invoke `/kk:chain-of-verification:isolated` to verify those claims. CoVe is fact-check oriented; it is not effective for subjective design trade-offs. Evaluate whether verifiable claims exist, then confirm the verification approach with the user before invoking CoVe.
+
+**CoVe fallback triggers:** if CoVe's verification questions do not reference any specific technical constraint, dependency, or trade-off from the alternatives (i.e., they could apply to any idea), or if CoVe's answers for all alternatives are substantively identical — skip the CoVe results and rely on the manual criteria-based analysis alone. Note the fallback in the design doc.
+
+**3e. Surface assumptions and scope.** Before moving to Step 4, produce and present to the user:
+
+- **Assumptions** — what is baked into the chosen direction but has not been validated. Each should be specific enough to be testable or falsifiable.
+- **Not Doing** — explicit scope exclusions with a one-line reason each.
+
+Both become first-class artifacts in the design document (Step 5) and tasks.md header (Step 6).
 
 **Step 4: Describe the design**
 
