@@ -9,7 +9,7 @@
 
 ## Task 0: Validate goldmark dependency
 
-**Status:** pending
+**Status:** done
 **Size:** S
 **Dependencies:** —
 **Can run in parallel with:** —
@@ -19,10 +19,10 @@
 
 Validate that goldmark (`github.com/yuin/goldmark`) can extract inline markdown link targets from AST nodes before committing to it as a dependency.
 
-- [ ] Create `cmd/plugin-graph/` directory and `go` file with a spike test: parse a markdown snippet containing inline links (`[text](path.md)`), reference-style links, and non-link backtick content; walk the AST for `ast.Link` nodes; assert `Destination` fields are correct
-- [ ] Verify goldmark preserves source position info (line numbers) on link nodes — needed for edge diagnostics
-- [ ] If goldmark's AST is awkward for this use case, document findings and switch to regex-based extraction before proceeding
-- [ ] Add `github.com/yuin/goldmark` to `go.mod` / `go.sum`
+- [x] Create `cmd/plugin-graph/` directory and `go` file with a spike test: parse a markdown snippet containing inline links (`[text](path.md)`), reference-style links, and non-link backtick content; walk the AST for `ast.Link` nodes; assert `Destination` fields are correct
+- [x] Verify goldmark preserves source position info (line numbers) on link nodes — needed for edge diagnostics
+- [x] If goldmark's AST is awkward for this use case, document findings and switch to regex-based extraction before proceeding
+- [x] Add `github.com/yuin/goldmark` to `go.mod` / `go.sum`
 
 **Verify:** `go test ./cmd/plugin-graph/... -run TestGoldmarkSpike` passes and link targets + line numbers are correctly extracted.
 
