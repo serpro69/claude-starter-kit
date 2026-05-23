@@ -85,7 +85,7 @@ Implement the file walker and all five extractors in `cmd/plugin-graph/parse.go`
 
 ## Task 3: Metrics computation
 
-**Status:** pending
+**Status:** done
 **Size:** S
 **Dependencies:** Task 1
 **Can run in parallel with:** Task 2
@@ -94,17 +94,17 @@ Implement the file walker and all five extractors in `cmd/plugin-graph/parse.go`
 
 Implement metric computation in `cmd/plugin-graph/metrics.go`.
 
-- [ ] Define `NodeMetrics` struct: `FanOut`, `FanIn`, `Depth`, `TransitiveClosureSize`
-- [ ] Define `GraphMetrics` struct: `PerNode` map, `Orphans`, `BrokenEdges`, `Hotspots`, `Coupling`
-- [ ] Define `SkillPair` struct for coupling output
-- [ ] Implement fan-in/fan-out: single pass over edges, count per node
-- [ ] Implement depth: DFS from each node with memoization; detect cycles → depth = -1 for cyclic nodes, report cycle as diagnostic
-- [ ] Implement transitive closure: BFS from each node, count reachable set
-- [ ] Implement coupling: for each skill-node pair, intersect forward-reachable sets; report pairs above threshold (default 3)
-- [ ] Implement orphan detection: fan-in = 0, excluding entry-point nodes (skills, profiles, commands, agents, `README.md`, `evals/` fixtures). Only `content` and `shared` nodes flagged
-- [ ] Implement broken edge detection: uses `RawTarget` — checks concrete file path existence on disk. Does NOT normalize first (a missing `skills/foo/missing.md` is broken even if `skills/foo/` exists)
-- [ ] Implement hotspot ranking: nodes sorted by fan-in descending
-- [ ] Write tests in `metrics_test.go`: linear chain (depth = N), diamond (fan-in 2), star (fan-out N), isolated node (orphan), missing target via RawTarget (broken edge), cycle (depth -1), intra-artifact self-loop (suppressed from MetricEdges, not counted as cycle)
+- [x] Define `NodeMetrics` struct: `FanOut`, `FanIn`, `Depth`, `TransitiveClosureSize`
+- [x] Define `GraphMetrics` struct: `PerNode` map, `Orphans`, `BrokenEdges`, `Hotspots`, `Coupling`
+- [x] Define `SkillPair` struct for coupling output
+- [x] Implement fan-in/fan-out: single pass over edges, count per node
+- [x] Implement depth: DFS from each node with memoization; detect cycles → depth = -1 for cyclic nodes, report cycle as diagnostic
+- [x] Implement transitive closure: BFS from each node, count reachable set
+- [x] Implement coupling: for each skill-node pair, intersect forward-reachable sets; report pairs above threshold (default 3)
+- [x] Implement orphan detection: fan-in = 0, excluding entry-point nodes (skills, profiles, commands, agents, `README.md`, `evals/` fixtures). Only `content` and `shared` nodes flagged
+- [x] Implement broken edge detection: uses `RawTarget` — checks concrete file path existence on disk. Does NOT normalize first (a missing `skills/foo/missing.md` is broken even if `skills/foo/` exists)
+- [x] Implement hotspot ranking: nodes sorted by fan-in descending
+- [x] Write tests in `metrics_test.go`: linear chain (depth = N), diamond (fan-in 2), star (fan-out N), isolated node (orphan), missing target via RawTarget (broken edge), cycle (depth -1), intra-artifact self-loop (suppressed from MetricEdges, not counted as cycle)
 
 **Verify:** `go test ./cmd/plugin-graph/... -run TestMetrics` passes. All metric cases produce expected values.
 
