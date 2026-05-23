@@ -61,6 +61,7 @@ type Graph struct {
 func NewGraph() *Graph {
 	return &Graph{
 		Nodes: make(map[string]*Node),
+		Edges: []Edge{},
 	}
 }
 
@@ -90,7 +91,8 @@ func isArtifactType(t NodeType) bool {
 // artifact node registered in the graph. Returns the original path if no
 // ancestor is an artifact.
 func (g *Graph) NormalizePath(p string) string {
-	current := path.Clean(p)
+	clean := path.Clean(filepath.ToSlash(p))
+	current := clean
 	for {
 		dir := path.Dir(current)
 		if dir == "." || dir == current {
@@ -102,7 +104,7 @@ func (g *Graph) NormalizePath(p string) string {
 		}
 		current = dir
 	}
-	return p
+	return clean
 }
 
 func (g *Graph) OutEdges(p string) []Edge {
@@ -210,7 +212,7 @@ func ClassifyPath(relPath string, pluginRoot string) NodeType {
 	}
 
 	if len(parts) == 3 && parts[0] == "profiles" && knownPhases[parts[2]] {
-		if _, err := os.Stat(filepath.Join(pluginRoot, filepath.FromSlash(clean), "index.md")); err == nil {
+		if _, err := os.Stat(filepath.Join(pluginRoot, parts[0], parts[1], parts[2], "index.md")); err == nil {
 			return NodeProfilePhase
 		}
 	}

@@ -1,3 +1,6 @@
+// TODO(Task 2): delete this spike — superseded by link extractor tests.
+// Also: the production extractor should handle nested inline formatting
+// (emphasis, code spans) inside link text, not just plain ast.Text children.
 package main
 
 import (
