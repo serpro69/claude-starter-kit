@@ -1,6 +1,7 @@
 {
   "author": {
-    "name": "serpro69"
+    "name": "serpro69",
+    "url": "github.com/serpro69"
   },
   "description": "Development workflow skills, commands, and hooks from claude-toolbox",
   "homepage": "https://serpro69.github.io/claude-toolbox/",
@@ -15,5 +16,5 @@
   "name": "kk",
   "repository": "https://github.com/serpro69/claude-toolbox",
   "skills": "./skills/",
-  "version": "0.17.0"
+  "version": "0.17.1"
 }
