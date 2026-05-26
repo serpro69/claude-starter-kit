@@ -31,7 +31,7 @@ The `step` field carries the review framing — not the diff or file contents. S
 
    ```
    Files provided via relevant_files:
-   - Diff: /tmp/kk-review-diff-abc123.patch
+   - Diff: /tmp/kk-review-code-a1b2c3d4.patch
    - Changed: src/service.go, src/handler.go
    - Surrounding: src/types.go, src/middleware.go
    - Review checklists: .../profiles/go/review-code/solid-checklist.md
@@ -46,7 +46,7 @@ Do NOT inline file contents into `step`. These are passed via `relevant_files` �
 
 The caller assembles this list from artifacts gathered during preparation. All paths must be absolute. Categories, in order:
 
-1. **Diff file** — the git diff written to a temp file (e.g., `/tmp/kk-review-diff-<hash>.patch`). The caller writes this file; pal reads it.
+1. **Diff file** — the git diff written to a temp file via `mktemp` (e.g., `/tmp/kk-review-code-XXXXXXXX.patch`). The caller writes this file; pal reads it. Clean up after the review completes.
 2. **Changed source files** — every file touched by the diff. These give pal the full file context around each change.
 3. **Surrounding code files** — direct imports, callers, interfaces, and type definitions referenced by the changed code. These enable cross-file reasoning (e.g., verifying a called function's signature, checking convention consistency with adjacent files). The caller identifies these by scanning imports and references in the diff.
 4. **Profile checklist files** — resolved `(profile, checklist)` file paths from profile detection (e.g., `<plugin_root>/profiles/go/review-code/solid-checklist.md`). These give pal the same domain-specific review criteria as the sub-agent reviewer.

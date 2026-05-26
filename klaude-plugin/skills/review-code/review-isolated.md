@@ -34,10 +34,11 @@ Run `git diff --stat` and `git diff` to capture the changes under review. If the
 Write the diff to a temp file for pal consumption:
 
 ```bash
-git diff > /tmp/kk-review-diff-$(git rev-parse --short HEAD).patch
+diff_file=$(mktemp /tmp/kk-review-code-XXXXXXXX.patch)
+git diff > "$diff_file"
 ```
 
-(Adjust the git diff command to match the actual scope — staged, unstaged, or commit range.)
+Adjust the `git diff` command to match the actual scope (staged, unstaged, or commit range). The temp file is passed to pal via `relevant_files` in Step 2 and should be cleaned up after the review completes (`rm "$diff_file"`).
 
 **Edge cases:**
 

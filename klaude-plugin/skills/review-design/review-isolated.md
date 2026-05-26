@@ -40,15 +40,14 @@ Read the in-scope documents from `/docs/wip/[feature]/`.
 
 Call `pal` `listmodels` to get available models. Select the most capable model (prefer latest generation with thinking/reasoning support) for the `pal codereview` call in Step 2.
 
-### 1c) Prepare document content for pal
+### 1c) Collect context files for pal
 
-Since `pal codereview` cannot read files itself, prepare the document contents as a single text block to pass as input. Include clear headers separating each document.
+Assemble the file list that will be passed to pal codereview via `relevant_files`. All paths must be absolute.
 
-**Important:** `pal codereview` is optimized for source code and diffs. When passing design documents, wrap the content with an explicit framing instruction:
+1. **Document files** — the absolute paths of every in-scope document from Step 1a (`design.md`, `implementation.md`, `tasks.md` as determined by scope resolution). These are the primary review targets.
+2. **Related source files** — if the design docs reference specific source files (e.g., files to be created or modified), include those paths when they exist on disk. These give pal implementation context to validate the design against.
 
-> The following is a design document (markdown), not source code. Review it for technical soundness, completeness, internal consistency, and whether it provides sufficient detail for implementation.
-
-This prevents the model from applying code-specific heuristics to prose.
+Store this list for use in Step 2 (Reviewer B).
 
 ---
 
@@ -88,7 +87,16 @@ Read the documents yourself using the Read tool. Produce your findings in the ou
 
 Follow the invocation protocol in [shared-pal-codereview-invocation.md](shared-pal-codereview-invocation.md).
 
-For the `step` parameter in step 1, use the document contents prepared in Step 1c. For the `model` parameter, use the model resolved in Step 1b. Set `focus_on` to `"technical soundness, completeness, internal consistency, edge cases, failure modes"`.
+**`step` parameter (step 1):** Keep lean — framing + file manifest only:
+
+1. Framing: "The following files are design documents (markdown), not source code. Review them for technical soundness, completeness, internal consistency, and whether they provide sufficient detail for implementation. Focus on: edge cases, failure modes, missing constraints, and ambiguities that would block an implementer."
+2. File manifest — categorized list of paths in `relevant_files` so pal knows each file's role (see [shared-pal-codereview-invocation.md](shared-pal-codereview-invocation.md) §`step` content for format). Categories for design review: "Documents" (the review targets) and "Related source" (existing code for context).
+
+Do NOT inline document contents into `step`.
+
+**`relevant_files` parameter:** Use the file list assembled in Step 1c.
+
+**`model` parameter:** Use the model resolved in Step 1b.
 
 ### Parallel execution
 
