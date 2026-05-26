@@ -23,7 +23,7 @@ Each skill produced artifacts the next one consumed:
 | `/kk:implement` | Task list | Code changes, review checkpoints |
 | `/kk:review-code` | Git diff | Findings, fix suggestions |
 | `/kk:test` | Code changes | Test files, coverage report |
-| `/kk:document` | All of the above | Updated `ARCHITECTURE.md`, ADRs |
+| `/kk:document` | All of the above | Updated `architecture.md`, ADRs |
 
 ## Next Steps
 

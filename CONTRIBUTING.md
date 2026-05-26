@@ -12,7 +12,7 @@ Thanks for your interest in contributing to claude-toolbox!
 
 ## Development
 
-See [Architecture](docs/contributing/ARCHITECTURE.md) for how the components fit together and [Testing](docs/contributing/TESTING.md) for test conventions. The authoritative reference for all conventions is [`CLAUDE.md`](CLAUDE.md) — this guide summarizes the most important rules for quick orientation.
+See [Architecture](docs/contributing/architecture.md) for how the components fit together and [Testing](docs/contributing/testing.md) for test conventions. The authoritative reference for all conventions is [`CLAUDE.md`](CLAUDE.md) — this guide summarizes the most important rules for quick orientation.
 
 ### Key workflows
 
@@ -43,7 +43,6 @@ name: skill-name
 description: |
   Trigger-first description. Front-load the key use case.
 ---
-
 # Skill Title
 
 ## Conventions
@@ -115,13 +114,17 @@ Hook definitions in `klaude-plugin/hooks/hooks.json`:
 ```json
 {
   "hooks": {
-    "PreToolUse": [{
-      "matcher": "Bash",
-      "hooks": [{
-        "type": "command",
-        "command": "${CLAUDE_PLUGIN_ROOT}/scripts/validate-bash.sh"
-      }]
-    }]
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/validate-bash.sh"
+          }
+        ]
+      }
+    ]
   }
 }
 ```
@@ -176,9 +179,7 @@ evals/<eval-name>/
   "prompt": "The user prompt that triggers the skill.",
   "trap": "The failure hypothesis — what a model is likely to get wrong.",
   "files": ["test-files/foo.yaml"],
-  "assertions": [
-    { "id": "1.1", "text": "Specific, gradable behavior." }
-  ]
+  "assertions": [{ "id": "1.1", "text": "Specific, gradable behavior." }]
 }
 ```
 
@@ -213,14 +214,14 @@ For runtime-read files, prefer explicit content (e.g., hard-coded profile name l
 
 Skills that interact with capy MCP tools use `kk:` namespaced source labels:
 
-| Label | Contents |
-|-------|----------|
-| `kk:arch-decisions` | Architecture decisions, design rationale |
-| `kk:review-findings` | Code review patterns, recurring issues |
-| `kk:lang-idioms` | Language best practices from external sources |
-| `kk:project-conventions` | Discovered project patterns |
-| `kk:test-patterns` | Testing approaches, edge cases |
-| `kk:debug-context` | Root causes, tricky bugs |
+| Label                    | Contents                                      |
+| ------------------------ | --------------------------------------------- |
+| `kk:arch-decisions`      | Architecture decisions, design rationale      |
+| `kk:review-findings`     | Code review patterns, recurring issues        |
+| `kk:lang-idioms`         | Language best practices from external sources |
+| `kk:project-conventions` | Discovered project patterns                   |
+| `kk:test-patterns`       | Testing approaches, edge cases                |
+| `kk:debug-context`       | Root causes, tricky bugs                      |
 
 Only index non-obvious learnings not derivable from reading the code or git history. Empty results are normal for new projects — proceed with standard guidelines.
 
@@ -253,13 +254,13 @@ Only index non-obvious learnings not derivable from reading the code or git hist
 
 Non-trivial design decisions are recorded as ADRs in `docs/adr/` using [Michael Nygard's template](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions) (Context, Decision, Consequences). Per-feature design docs live at `docs/wip/<feature>/` while work is active and move to `docs/done/<feature>/` on completion.
 
-| ADR | Decision |
-|-----|----------|
-| [0001](docs/adr/0001-profile-detection-model.md) | Single additive detection axis for all profile types |
-| [0002](docs/adr/0002-profile-content-organization.md) | Profile-first layout with index-driven content loading |
+| ADR                                                     | Decision                                                  |
+| ------------------------------------------------------- | --------------------------------------------------------- |
+| [0001](docs/adr/0001-profile-detection-model.md)        | Single additive detection axis for all profile types      |
+| [0002](docs/adr/0002-profile-content-organization.md)   | Profile-first layout with index-driven content loading    |
 | [0003](docs/adr/0003-plugin-root-referenced-content.md) | Plugin-root references instead of cross-boundary symlinks |
-| [0004](docs/adr/0004-skill-workflow-ordering.md) | Instructions before action in every skill workflow |
-| [0005](docs/adr/0005-codex-hook-enforcement-gap.md) | Two-layer hook + advisory enforcement for Codex |
+| [0004](docs/adr/0004-skill-workflow-ordering.md)        | Instructions before action in every skill workflow        |
+| [0005](docs/adr/0005-codex-hook-enforcement-gap.md)     | Two-layer hook + advisory enforcement for Codex           |
 
 ## License
 

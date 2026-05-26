@@ -76,7 +76,7 @@ docs/                            # MkDocs site + internal design docs
 ├── getting-started/             # Setup guides
 ├── user-guide/                  # Skills, profiles, MCP, config, sync
 ├── providers/                   # Claude Code and Codex specifics
-├── contributing/                # ARCHITECTURE.md, TESTING.md, plugin dev
+├── contributing/                # architecture.md, testing.md, plugin dev
 ├── about/                       # License, changelog
 ├── adr/                         # Architecture decision records
 ├── wip/                         # In-progress feature design docs (excluded from search)
