@@ -4,7 +4,7 @@ Copy this checklist and check off items as you complete them:
 
 ```
 Isolated Code Review Progress:
-- [ ] Step 1: Prepare artifacts
+- [ ] Step 1: Prepare artifacts (1a–1g)
 - [ ] Step 2: Spawn reviewers (parallel)
 - [ ] Step 3: Annotate findings
 - [ ] Step 4: Index findings
@@ -14,7 +14,7 @@ Isolated Code Review Progress:
 
 ## Contents
 
-- **Step 1: Prepare Artifacts** — 1a) Capture diff, 1b) Locate spec context, 1c) Detect active profiles and resolve checklists, 1d) Resolve pal model, 1e) Curate rejected approaches, 1f) Determine task scope
+- **Step 1: Prepare Artifacts** — 1a) Capture diff, 1b) Locate spec context, 1c) Detect active profiles and resolve checklists, 1d) Resolve pal model, 1e) Curate rejected approaches, 1f) Determine task scope, 1g) Collect context files for pal
 - **Step 2: Spawn Reviewers** — Reviewer A (code-reviewer sub-agent), Reviewer B (pal codereview), error handling
 - **Step 3: Annotate Findings** — 3a) Duplicate merging, 3b) Author context, 3c) Author-sourced findings, 3d) pal follow-up
 - **Step 4: Index Findings**
@@ -30,6 +30,14 @@ Gather the artifacts that will be passed to the sub-agents.
 ### 1a) Capture the diff
 
 Run `git diff --stat` and `git diff` to capture the changes under review. If there are no unstaged changes, check for staged changes with `git diff --cached`. If the user specified a commit range, use that instead.
+
+Write the diff to a temp file for pal consumption:
+
+```bash
+git diff > /tmp/kk-review-diff-$(git rev-parse --short HEAD).patch
+```
+
+(Adjust the git diff command to match the actual scope — staged, unstaged, or commit range.)
 
 **Edge cases:**
 
@@ -75,6 +83,18 @@ Build the Task Scope artifact following [shared-review-scope-protocol.md](shared
 - **No feature directory relates to the diff**: emit the "No task scope available" variant from the shared protocol and proceed.
 
 The resulting block is inlined into both reviewer prompts in Step 2.
+
+### 1g) Collect context files for pal
+
+Assemble the file list that will be passed to pal codereview via `relevant_files`. All paths must be absolute.
+
+1. **Diff file** — the temp file written in Step 1a.
+2. **Changed source files** — every file touched by the diff (from `git diff --stat`).
+3. **Surrounding code files** — for each changed file, identify direct imports, callers, interfaces, and type definitions referenced in the diff. Use `grep`/`rg` to locate these. Include files that a reviewer would need to verify cross-file correctness (e.g., checking a function signature, confirming an interface contract, comparing with adjacent module conventions). Keep this bounded — aim for the immediate dependency ring, not transitive closure.
+4. **Profile checklist files** — the absolute paths of every resolved `(profile, checklist)` file from Step 1c. These give pal the same domain-specific review criteria as Reviewer A.
+5. **Design/implementation docs** — if spec context was located in Step 1b, include the full `design.md` and `implementation.md` file paths (not excerpts). These enable pal to flag spec deviations.
+
+Store this list for use in Step 2 (Reviewer B).
 
 ---
 
@@ -128,7 +148,18 @@ Produce your findings in the output format specified in your agent definition.
 
 Follow the invocation protocol in [shared-pal-codereview-invocation.md](shared-pal-codereview-invocation.md).
 
-For the `step` parameter in step 1, prepend the Task Scope block from Step 1f (so pal shares the same scope as the sub-agent) and then include the git diff. For the `model` parameter, use the model resolved in Step 1d.
+**`step` parameter (step 1):** Keep lean — framing + scope + spec summary + file manifest:
+
+1. Framing: "Review the following code changes for correctness, security, architecture, and adherence to design intent. The diff, source files, review checklists, and design docs are provided as files."
+2. Task Scope block from Step 1f.
+3. One-paragraph spec context summary from Step 1b (or "No spec context available — review based on code quality alone.").
+4. File manifest — categorized list of the paths in `relevant_files` so pal knows each file's role (see [shared-pal-codereview-invocation.md](shared-pal-codereview-invocation.md) §`step` content for format).
+
+Do NOT inline the diff or file contents into `step`.
+
+**`relevant_files` parameter:** Use the file list assembled in Step 1g.
+
+**`model` parameter:** Use the model resolved in Step 1d.
 
 ### Parallel execution
 

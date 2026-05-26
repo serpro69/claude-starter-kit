@@ -9,7 +9,7 @@ Use these parameters:
 | Parameter | Value |
 |---|---|
 | `model` | The most capable model from `pal listmodels` |
-| `step` | The content to review (document text or git diff), prefixed with a framing instruction |
+| `step` | Framing instruction + task scope + spec context summary (see §`step` content below). Keep it lean — file contents belong in `relevant_files`, not here |
 | `step_number` | `1` |
 | `total_steps` | `2` |
 | `next_step_required` | `true` |
@@ -17,8 +17,42 @@ Use these parameters:
 | `thinking_mode` | `"max"` |
 | `review_type` | `"full"` |
 | `findings` | `"Initial submission for review. No findings yet."` |
-| `relevant_files` | Absolute paths of the files being reviewed |
+| `relevant_files` | Absolute paths — see §Assembling `relevant_files` below |
 | `confidence` | `"exploring"` |
+
+#### `step` content
+
+The `step` field carries the review framing — not the diff or file contents. Structure it as:
+
+1. **Framing instruction** — what kind of review this is and what to focus on.
+2. **Task scope block** — in-scope vs out-of-scope tasks (prevents false positives on pending work).
+3. **Spec context summary** — one-paragraph design intent if available ("No spec context available" otherwise).
+4. **File manifest** — a categorized list of the paths in `relevant_files`, explaining each file's role. Paths only, no contents. Example:
+
+   ```
+   Files provided via relevant_files:
+   - Diff: /tmp/kk-review-diff-abc123.patch
+   - Changed: src/service.go, src/handler.go
+   - Surrounding: src/types.go, src/middleware.go
+   - Review checklists: .../profiles/go/review-code/solid-checklist.md
+   - Design: docs/wip/auth-refactor/design.md, implementation.md
+   ```
+
+   This tells pal which files are code under review, which are review criteria to apply, and which provide design intent. Without it, pal may treat checklists as code to review rather than guidance to follow.
+
+Do NOT inline file contents into `step`. These are passed via `relevant_files` — pal reads them with proper token budgeting and deduplication.
+
+#### Assembling `relevant_files`
+
+The caller assembles this list from artifacts gathered during preparation. All paths must be absolute. Categories, in order:
+
+1. **Diff file** — the git diff written to a temp file (e.g., `/tmp/kk-review-diff-<hash>.patch`). The caller writes this file; pal reads it.
+2. **Changed source files** — every file touched by the diff. These give pal the full file context around each change.
+3. **Surrounding code files** — direct imports, callers, interfaces, and type definitions referenced by the changed code. These enable cross-file reasoning (e.g., verifying a called function's signature, checking convention consistency with adjacent files). The caller identifies these by scanning imports and references in the diff.
+4. **Profile checklist files** — resolved `(profile, checklist)` file paths from profile detection (e.g., `<plugin_root>/profiles/go/review-code/solid-checklist.md`). These give pal the same domain-specific review criteria as the sub-agent reviewer.
+5. **Design/implementation docs** — `design.md` and `implementation.md` from the feature's `docs/wip/<feature>/` directory, when available. These enable pal to flag spec deviations, not just code smells.
+
+The caller is responsible for collecting these paths during its preparation steps and passing the assembled list here. pal handles file reading, token budgeting, and cross-turn deduplication internally.
 
 ### Step 2 — continuation call
 
