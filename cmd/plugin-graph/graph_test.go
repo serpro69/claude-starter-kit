@@ -100,6 +100,11 @@ func TestGraphNormalizePath(t *testing.T) {
 		{"file in profile root → profile", "profiles/go/overview.md", "profiles/go/"},
 		{"file in command dir → command", "commands/cove/default.md", "commands/cove/"},
 
+		// Directory-form artifact paths resolve to themselves, not a parent artifact
+		{"skill dir resolves to itself", "skills/review-code/", "skills/review-code/"},
+		{"profile-phase dir resolves to itself (not parent profile)", "profiles/go/review-code/", "profiles/go/review-code/"},
+		{"profile dir resolves to itself", "profiles/go/", "profiles/go/"},
+
 		// File-level nodes stay as-is (no artifact ancestor)
 		{"shared file stays as file", "skills/_shared/profile-detection.md", "skills/_shared/profile-detection.md"},
 		{"agent file stays as file", "agents/code-reviewer.md", "agents/code-reviewer.md"},

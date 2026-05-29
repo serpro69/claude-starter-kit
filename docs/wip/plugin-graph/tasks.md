@@ -59,7 +59,7 @@ Implement the graph data model and builder in `cmd/plugin-graph/graph.go`.
 
 ## Task 2: File walker and extractors
 
-**Status:** pending
+**Status:** done
 **Size:** M
 **Dependencies:** Task 1
 **Can run in parallel with:** —
@@ -68,18 +68,33 @@ Implement the graph data model and builder in `cmd/plugin-graph/graph.go`.
 
 Implement the file walker and all five extractors in `cmd/plugin-graph/parse.go`.
 
-- [ ] Define `ParseContext` struct: `PluginRoot`, `KnownProfiles`, `KnownPhases`, `KnownAgents`, `KnownSkills`, `KnownCommands`
-- [ ] Implement `ParseContext` initialization: derive `KnownProfiles` by parsing §Known profiles from `skills/_shared/profile-detection.md`, derive `KnownAgents`, `KnownSkills`, and `KnownCommands` from directory listings, hardcode `KnownPhases`
-- [ ] Implement code-block stripping: replace fenced code blocks (`` ``` `` and `~~~`) with blank lines preserving line count. Used as pre-processing for regex extractors 3–5
-- [ ] Implement Extractor 1 (markdown links): goldmark AST walk for `ast.Link` nodes, resolve relative paths, filter external/anchor/non-md. Inherently code-block-safe
-- [ ] Implement Extractor 2 (symlinks): `os.Lstat` + `os.Readlink`, resolve relative target, create `symlink` edge. Skip content extraction for symlink files — target's outgoing links are attributed to the canonical path only (prevents double-counting shared dependencies)
-- [ ] Implement Extractor 3 (plugin-root refs, merged template + parameterized): regex for `` `\$\{CLAUDE_PLUGIN_ROOT\}/([^`]+)` ``, strip prefix, branch on angle-bracket variable presence → concrete paths become `template-ref`, parameterized paths expand `<name>`/`<profile>` × `<phase>` × `<checklist>` (via glob). Runs on stripped content
-- [ ] Implement Extractor 4 (agent delegation): match `subagent_type` in markdown table rows only (structured context), extract `kk:<agent-name>` from same row → `agents/<name>.md`. No free-prose scanning. Runs on stripped content
-- [ ] Implement Extractor 5 (skill + command invocation): regex `/kk:([a-z-]+)(?::([a-z-]+))?`, first group → skill edge, second group (if present) → command edge to `commands/<skill>/<command>.md`. Runs on stripped content
-- [ ] Implement file walker: `filepath.WalkDir` over plugin root, skip non-`.md` files (except for symlink detection), classify each file into a node (normalizing to artifact nodes where applicable), run extractors, accumulate into `Graph`
-- [ ] Write table-driven unit tests for each extractor in `parse_test.go` covering: valid cases, skip cases (external URLs, anchors, non-md for extractor 1; bare `$CLAUDE_PLUGIN_ROOT` for extractor 3; non-existent expansion targets for extractor 3; agent name in prose NOT producing edge for extractor 4; self-references for extractor 5; command syntax for extractor 5), and code-block-stripping cases
+- [x] Define `ParseContext` struct: `PluginRoot`, `KnownProfiles`, `KnownPhases`, `KnownAgents`, `KnownSkills`, `KnownCommands`
+- [x] Implement `ParseContext` initialization: derive `KnownProfiles` by parsing §Known profiles from `skills/_shared/profile-detection.md`, derive `KnownAgents`, `KnownSkills`, and `KnownCommands` from directory listings, hardcode `KnownPhases`
+- [x] Implement code-block stripping: replace fenced code blocks (`` ``` `` and `~~~`) with blank lines preserving line count. Used as pre-processing for regex extractors 3–5
+- [x] Implement Extractor 1 (markdown links): goldmark AST walk for `ast.Link` nodes, resolve relative paths, filter external/anchor/non-md. Inherently code-block-safe
+- [x] Implement Extractor 2 (symlinks): `os.Lstat` + `os.Readlink`, resolve relative target, create `symlink` edge. Skip content extraction for symlink files — target's outgoing links are attributed to the canonical path only (prevents double-counting shared dependencies)
+- [x] Implement Extractor 3 (plugin-root refs, merged template + parameterized): regex for `` `\$\{CLAUDE_PLUGIN_ROOT\}/([^`]+)` ``, strip prefix, branch on angle-bracket variable presence → concrete paths become `template-ref`, parameterized paths expand `<name>`/`<profile>` × `<phase>` × `<checklist>` (via glob). Runs on stripped content
+- [x] Implement Extractor 4 (agent delegation): match `subagent_type` in markdown table rows only (structured context), extract `kk:<agent-name>` from same row → `agents/<name>.md`. No free-prose scanning. Runs on stripped content
+- [x] Implement Extractor 5 (skill + command invocation): regex `/kk:([a-z-]+)(?::([a-z-]+))?`, first group → skill edge, second group (if present) → command edge to `commands/<skill>/<command>.md`. Runs on stripped content
+- [x] Implement file walker: `filepath.WalkDir` over plugin root, skip non-`.md` files (except for symlink detection), classify each file into a node (normalizing to artifact nodes where applicable), run extractors, accumulate into `Graph`
+- [x] Write table-driven unit tests for each extractor in `parse_test.go` covering: valid cases, skip cases (external URLs, anchors, non-md for extractor 1; bare `$CLAUDE_PLUGIN_ROOT` for extractor 3; non-existent expansion targets for extractor 3; agent name in prose NOT producing edge for extractor 4; self-references for extractor 5; command syntax for extractor 5), and code-block-stripping cases
 
 **Verify:** `go test ./cmd/plugin-graph/... -run TestExtract` passes. Each extractor produces correct edges for its test cases.
+
+**Implementation notes (deviations from plan):**
+
+- **`NormalizePath` self-check (touches Task 1's `graph.go`).** Directory-form edge targets — skill-invocation targets `skills/<x>/` and concrete template-refs to phase dirs like `profiles/k8s/design/` — were collapsing to a *parent* artifact (e.g. a profile-phase into its profile) because `NormalizePath` only inspected ancestors. Added a self-check: a directory path that is itself an artifact node resolves to itself before the ancestor walk. Also fixes a latent Task 5 (targeted mode) bug where `skills/review-code/` would not resolve to its node. Regression cases added to `graph_test.go`.
+- **Edge dedup (`dedupEdges`).** Not in the original plan. A skill that mentions `/kk:review-code` N times must not produce N edges, or fan-in/out is distorted. `BuildGraph` collapses to one edge per `(RawSource, RawTarget, Type)`, first-line-wins, before normalization.
+- **Doc-placeholder skipping in Extractor 3.** Real plugin files contain non-path `${CLAUDE_PLUGIN_ROOT}/**` (glob) and `${CLAUDE_PLUGIN_ROOT}/…` / `.../...` (ellipsis) in prose. Concrete template-refs containing `*`, `…`, or `...` are skipped to avoid false broken edges. Parameterized refs with literal `...` naturally yield no edges (expansions don't exist on disk).
+- **Pre-existing gofmt gap:** `metrics.go` (Task 3) has un-gofmt'd struct-tag alignment. Left untouched to keep this task's diff focused — should be cleaned up alongside Task 3 follow-up.
+
+**Code-review fixes applied (isolated review, corroborated by code-reviewer + pal/gemini-3.1-pro):**
+
+- **Path confinement (`escapesRoot`).** All four path resolvers (`resolveMarkdownTarget`, `symlinkEdge`, `concreteTarget`, `expandParameterized`) now reject results that escape the plugin root (`..` / `../`-prefixed after `path.Clean`). Prevents misleading broken-edge stats outside the tree — defense-in-depth ahead of Task 6 (untrusted worktree roots). Covered by `TestExtractRejectsRootEscape`. Indexed as `kk:review-findings`.
+- **goldmark parser localized.** `extractMarkdownLinks` now builds `goldmark.New()` per call instead of a shared package global (goldmark's parser is stateful per `Parse`, not goroutine-safe).
+- **Irregular-file guard.** The walker skips non-regular `.md` entries (`d.Type().IsRegular()`) so a named pipe/device named `*.md` can't block `os.ReadFile`.
+- **`KnownCommands` made live.** Command-edge resolution now checks `ctx.KnownCommands[skill]` instead of a per-match `os.Stat`, removing dead state and honoring the spec field's purpose.
+- Dismissed: `strings.SplitSeq` "needs Go 1.24+" — `go.mod` is `go 1.25.2`.
 
 ---
 
