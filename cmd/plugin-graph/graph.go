@@ -48,9 +48,9 @@ type Edge struct {
 	RawSource string   `json:"raw_source"`
 	RawTarget string   `json:"raw_target"`
 	Source    string   `json:"source"`
-	Target   string   `json:"target"`
-	Type     EdgeType `json:"type"`
-	Line     int      `json:"line"`
+	Target    string   `json:"target"`
+	Type      EdgeType `json:"type"`
+	Line      int      `json:"line"`
 }
 
 type Graph struct {
@@ -90,8 +90,16 @@ func isArtifactType(t NodeType) bool {
 // NormalizePath walks up from a file path and returns the nearest ancestor
 // artifact node registered in the graph. Returns the original path if no
 // ancestor is an artifact.
+//
+// A directory-form path that is itself an artifact node (e.g. an edge target
+// of `skills/review-code/` or `profiles/k8s/design/`) resolves to that node
+// directly, before the ancestor walk — otherwise it would incorrectly climb to
+// a parent artifact (a profile-phase would collapse into its parent profile).
 func (g *Graph) NormalizePath(p string) string {
 	clean := path.Clean(filepath.ToSlash(p))
+	if node, ok := g.Nodes[clean+"/"]; ok && isArtifactType(node.Type) {
+		return clean + "/"
+	}
 	current := clean
 	for {
 		dir := path.Dir(current)
