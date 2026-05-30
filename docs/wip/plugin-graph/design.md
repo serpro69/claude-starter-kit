@@ -142,6 +142,8 @@ Per-subcommand flags: `--format json|text|dot|mermaid` (default: `text`), `--dir
 
 When positional arguments are provided after subcommand flags, the tool builds the full graph internally but filters output to the subgraph reachable from those starting nodes. Multiple targets are unioned. Target paths resolve to the owning artifact node (e.g., `skills/review-code/SKILL.md` resolves to the `skills/review-code/` skill node).
 
+Targeted mode applies to `graph` and `metrics` only. The sliceable metrics (fan-in/out, depth, transitive closure, coupling) are meaningful on a reachable subgraph — that is the point of targeted mode. **`validate` rejects target arguments**, because its findings (broken edges, orphans) are *global* health signals, not slice-relative complexity: a reachable slice zeroes out fan-in for boundary nodes (manufacturing false orphans) and drops broken edges filtered out of the slice, which would make the gate's verdict misleading. `validate` is a whole-graph gate.
+
 ```
 plugin-graph --root klaude-plugin/ metrics --format json skills/review-code/
 plugin-graph graph --direction both skills/_shared/profile-detection.md

@@ -39,6 +39,7 @@ logs
 # Go build artifacts
 /vendor-profiles
 /generate-kodex
+/plugin-graph
 
 # MkDocs build output
 /site
