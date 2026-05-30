@@ -60,6 +60,66 @@ func Render(format string, g *Graph, m *GraphMetrics, diagnostics []string) ([]b
 	}
 }
 
+// --- Validate ---
+
+// validationReport is the JSON projection the `validate` subcommand emits: just
+// the findings that drive its exit code, not the full graph or metrics.
+type validationReport struct {
+	BrokenEdges []Edge   `json:"broken_edges"`
+	Orphans     []string `json:"orphans"`
+}
+
+// renderValidate emits only the validation findings (broken edges, orphans) that
+// determine the validate subcommand's exit code. Unlike the four graph/metric
+// formatters it supports json and text only — dot and mermaid have no meaning
+// for a findings list, so requesting them is a loud error rather than a
+// surprising graph render.
+func renderValidate(format string, m *GraphMetrics) ([]byte, error) {
+	switch format {
+	case "json":
+		rep := validationReport{BrokenEdges: m.BrokenEdges, Orphans: m.Orphans}
+		if rep.BrokenEdges == nil {
+			rep.BrokenEdges = []Edge{}
+		}
+		if rep.Orphans == nil {
+			rep.Orphans = []string{}
+		}
+		out, err := json.MarshalIndent(rep, "", "  ")
+		if err != nil {
+			return nil, fmt.Errorf("marshal validation report: %w", err)
+		}
+		return append(out, '\n'), nil
+	case "text":
+		return renderValidateText(m), nil
+	default:
+		return nil, fmt.Errorf("validate supports only text and json formats, got %q", format)
+	}
+}
+
+func renderValidateText(m *GraphMetrics) []byte {
+	var buf bytes.Buffer
+	if len(m.BrokenEdges) == 0 && len(m.Orphans) == 0 {
+		buf.WriteString("OK: no broken edges or orphans found\n")
+		return buf.Bytes()
+	}
+	if len(m.BrokenEdges) > 0 {
+		fmt.Fprintf(&buf, "Broken edges (%d):\n", len(m.BrokenEdges))
+		for _, e := range m.BrokenEdges {
+			fmt.Fprintf(&buf, "  %s:%d -> %s (%s)\n", e.RawSource, e.Line, e.RawTarget, e.Type)
+		}
+	}
+	if len(m.Orphans) > 0 {
+		if buf.Len() > 0 {
+			buf.WriteByte('\n')
+		}
+		fmt.Fprintf(&buf, "Orphans (%d):\n", len(m.Orphans))
+		for _, o := range m.Orphans {
+			fmt.Fprintf(&buf, "  %s\n", o)
+		}
+	}
+	return buf.Bytes()
+}
+
 // --- JSON ---
 
 func renderJSON(g *Graph, m *GraphMetrics, diagnostics []string) ([]byte, error) {

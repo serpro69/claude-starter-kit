@@ -165,7 +165,7 @@ Implement the four output formatters in `cmd/plugin-graph/output.go`.
 
 ## Task 5: CLI entry point and targeted mode
 
-**Status:** pending
+**Status:** done
 **Size:** S
 **Dependencies:** Task 2, Task 3, Task 4
 **Can run in parallel with:** —
@@ -174,13 +174,25 @@ Implement the four output formatters in `cmd/plugin-graph/output.go`.
 
 Wire everything together in `cmd/plugin-graph/main.go`.
 
-- [ ] Implement CLI parsing: scan `os.Args[1:]` for global flags (`--root`, `--ref`) before the subcommand, extract them, treat first non-flag arg as subcommand, pass remainder to per-subcommand `flag.FlagSet` for `--format`/`--direction`
-- [ ] Implement subcommand dispatch: `graph` (default), `metrics`, `validate`
-- [ ] Implement targeted mode: when positional args provided, normalize paths via `NormalizePath`, build full graph, compute reachable set per `--direction`, filter graph to subgraph, then run the selected subcommand on the filtered result
-- [ ] Implement `validate` exit code: exit 1 if broken edges or orphans found. Respect `--format` for output
-- [ ] Add basic integration test in `main_test.go`: run `graph`, `metrics`, `validate` subcommands against a fixture and assert non-empty output / correct exit codes. Test that global flags before subcommand work, per-subcommand flags after work
+- [x] Implement CLI parsing: scan `os.Args[1:]` for global flags (`--root`, `--ref`) before the subcommand, extract them, treat first non-flag arg as subcommand, pass remainder to per-subcommand `flag.FlagSet` for `--format`/`--direction`
+- [x] Implement subcommand dispatch: `graph` (default), `metrics`, `validate`
+- [x] Implement targeted mode: when positional args provided, normalize paths via `NormalizePath`, build full graph, compute reachable set per `--direction`, filter graph to subgraph, then run the selected subcommand on the filtered result
+- [x] Implement `validate` exit code: exit 1 if broken edges or orphans found. Respect `--format` for output
+- [x] Add basic integration test in `main_test.go`: run `graph`, `metrics`, `validate` subcommands against a fixture and assert non-empty output / correct exit codes. Test that global flags before subcommand work, per-subcommand flags after work
 
 **Verify:** `go run ./cmd/plugin-graph --root klaude-plugin/ validate` exits cleanly against the real plugin. `go run ./cmd/plugin-graph --root klaude-plugin/ metrics --format json` produces valid JSON with all skills present.
+
+**Implementation notes (deviations from plan):**
+
+- **`validate` rejects target arguments (clarifies targeted-mode scope).** Targeted mode applies to `graph`/`metrics` only. `validate`'s findings (broken edges, orphans) are *global* health signals: on a reachable slice, boundary nodes lose their in-edges (false orphans) and filtered-out broken edges vanish, making the gate misleading. `run` rejects `validate` + targets with a loud error rather than silently slicing. Design updated ([design.md §Targeted Mode](design.md)). Surfaced during the isolated code review.
+
+**Code-review fixes applied (isolated review: code-reviewer + pal/gemini-3.1-pro):**
+
+- **`flag.ErrHelp` → exit 0 (pal).** `-h`/`--help` under `flag.ContinueOnError` returns `ErrHelp`; both flag-set parse blocks now treat it as a clean exit, not a usage error. Covered by `TestMainHelpExitsZero`.
+- **Slice-aliasing hygiene (corroborated).** `diags := append(buildDiags, metricDiags...)` → `slices.Concat(...)` — appending onto `buildDiags` could alias and mutate its backing array under a future reader. No live corruption today; forward-looking fix.
+- **`--direction` no-op warning (corroborated).** A non-default `--direction` with no targets is inert; now warns on stderr instead of silently ignoring. Covered by `TestMainDirectionWithoutTargetsWarns`.
+- **Test gap closed.** Added `TestMainValidateUnsupportedFormat` (`validate --format dot` → loud error), exercising the only previously-untested branch in `renderValidate`.
+- **Dismissed:** validate's format-error wording "divergence" from `Render` (correct as-is — `validate` genuinely supports only json/text); `renderValidate`'s nil-guards (kept — defensive `[]`-not-`null` at the JSON serializer boundary, decoupled from `ComputeMetrics`); a "single-line if" style finding (false positive — artifact of diff compression in the reviewer prompt; the real file is gofmt-clean).
 
 ---
 
@@ -221,6 +233,8 @@ Create the integration test fixture and wire up Makefile/CI.
 - [ ] Run `make plugin-graph` against the real `klaude-plugin/` and fix any validation findings (broken links, orphans) that surface — these are real bugs in the plugin, not test failures
 
 **Verify:** `make plugin-graph` passes. Integration test passes. `go run ./cmd/plugin-graph --root klaude-plugin/ metrics --format text` produces a readable table with all skills.
+
+**Heads-up (observed during Task 5 review):** `metrics`/`validate` against the real `klaude-plugin/` already emits a large `cycle detected affecting: …` diagnostic spanning most skills/profiles/agents. This is **expected, not a bug** — the plugin's cross-references (skills ↔ shared ↔ profiles) form a strongly-connected component, and depth = −1 for cyclic nodes is the Task 3 design. Cycles are stderr diagnostics, not `validate` failures (`validate` exits 1 only on broken edges/orphans). Don't try to "fix" the cycle; the Task 7 finding-triage checkbox is about broken links and orphans only.
 
 ---
 
