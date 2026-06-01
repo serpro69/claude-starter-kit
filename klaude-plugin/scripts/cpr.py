@@ -66,12 +66,8 @@ def find_plugin_root(plugin_name):
     Find plugin installation directory.
 
     Returns: (plugin_root_path, match_type)
-        match_type: 'env_var', 'exact', 'fuzzy', or None
+        match_type: 'exact', 'fuzzy', or None
     """
-    env_root = os.environ.get("CLAUDE_PLUGIN_ROOT")
-    if env_root and os.path.isdir(env_root):
-        return env_root.rstrip("/"), "env_var"
-
     plugins_file = Path(os.environ["CPR_PLUGINS_FILE"]) if "CPR_PLUGINS_FILE" in os.environ else Path.home() / ".claude" / "plugins" / "installed_plugins.json"
 
     if not plugins_file.exists():
@@ -124,7 +120,7 @@ def main():
     else:
         print(f"Error: Could not locate plugin '{plugin_name}'", file=sys.stderr)
         print(
-            "Checked: $CLAUDE_PLUGIN_ROOT, ~/.claude/plugins/installed_plugins.json",
+            "Checked: ~/.claude/plugins/installed_plugins.json",
             file=sys.stderr,
         )
         sys.exit(1)

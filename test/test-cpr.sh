@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/helpers.sh"
 
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-CPR="$REPO_ROOT/.claude/toolbox/scripts/cpr.py"
+CPR="$REPO_ROOT/klaude-plugin/scripts/cpr.py"
 
 # =============================================================================
 # Fixture setup
@@ -56,9 +56,9 @@ cat > "$PLUGINS_JSON" <<EOF
 }
 EOF
 
-# Helper: run cpr.py with fixtures, no env var leak
+# Helper: run cpr.py with fixtures
 run_cpr() {
-  CPR_PLUGINS_FILE="$PLUGINS_JSON" CLAUDE_PLUGIN_ROOT="" python3 "$CPR" "$@"
+  CPR_PLUGINS_FILE="$PLUGINS_JSON" python3 "$CPR" "$@"
 }
 
 # Helper: run cpr.py and capture exit code without set -e aborting
@@ -126,32 +126,14 @@ cat > "$MULTI_SCOPE_JSON" <<EOF
 EOF
 
 log_test "Project scope preferred over user scope"
-actual=$(CPR_PLUGINS_FILE="$MULTI_SCOPE_JSON" CLAUDE_PLUGIN_ROOT="" python3 "$CPR" "kk")
+actual=$(CPR_PLUGINS_FILE="$MULTI_SCOPE_JSON" python3 "$CPR" "kk")
 assert_equals "$FIXTURE_DIR/cache/claude-toolbox/kk/0.17.3" "$actual" "project scope wins over user scope"
 
 # =============================================================================
-# Section 3: CLAUDE_PLUGIN_ROOT env var takes precedence
+# Section 3: Fuzzy matching
 # =============================================================================
 
-log_section "Section 3: Env Var Precedence"
-
-log_test "CLAUDE_PLUGIN_ROOT overrides JSON lookup"
-actual=$(CPR_PLUGINS_FILE="$PLUGINS_JSON" CLAUDE_PLUGIN_ROOT="$FIXTURE_DIR/env-root" python3 "$CPR" "kk")
-assert_equals "$FIXTURE_DIR/env-root" "$actual" "env var takes precedence"
-
-log_test "CLAUDE_PLUGIN_ROOT ignored when directory does not exist"
-actual=$(CPR_PLUGINS_FILE="$PLUGINS_JSON" CLAUDE_PLUGIN_ROOT="/nonexistent/path" python3 "$CPR" "kk")
-assert_equals "$FIXTURE_DIR/cache/claude-toolbox/kk/0.17.3" "$actual" "falls back to JSON when env dir missing"
-
-log_test "Empty CLAUDE_PLUGIN_ROOT is ignored"
-actual=$(CPR_PLUGINS_FILE="$PLUGINS_JSON" CLAUDE_PLUGIN_ROOT="" python3 "$CPR" "kk")
-assert_equals "$FIXTURE_DIR/cache/claude-toolbox/kk/0.17.3" "$actual" "empty env var falls through"
-
-# =============================================================================
-# Section 4: Fuzzy matching
-# =============================================================================
-
-log_section "Section 4: Fuzzy Matching"
+log_section "Section 3: Fuzzy Matching"
 
 log_test "Fuzzy match on close name"
 actual=$(run_cpr "corte")
@@ -162,10 +144,10 @@ rc=$(run_cpr_rc "zzzzz")
 assert_not_equals "0" "$rc" "zzzzz should not match anything"
 
 # =============================================================================
-# Section 5: Error handling
+# Section 4: Error handling
 # =============================================================================
 
-log_section "Section 5: Error Handling"
+log_section "Section 4: Error Handling"
 
 log_test "No arguments exits non-zero"
 rc=$(run_cpr_rc)
@@ -173,31 +155,31 @@ assert_not_equals "0" "$rc" "No arguments should fail"
 
 log_test "Usage message on no arguments"
 set +e
-stderr=$(CPR_PLUGINS_FILE="$PLUGINS_JSON" CLAUDE_PLUGIN_ROOT="" python3 "$CPR" 2>&1)
+stderr=$(CPR_PLUGINS_FILE="$PLUGINS_JSON" python3 "$CPR" 2>&1)
 set -e
 assert_output_contains "Usage:" "echo '$stderr'" "Shows usage on no args"
 
 log_test "Missing plugins file exits non-zero"
-rc=$(set +e; CPR_PLUGINS_FILE="/nonexistent/file.json" CLAUDE_PLUGIN_ROOT="" python3 "$CPR" "kk" >/dev/null 2>&1; echo $?)
+rc=$(set +e; CPR_PLUGINS_FILE="/nonexistent/file.json" python3 "$CPR" "kk" >/dev/null 2>&1; echo $?)
 assert_not_equals "0" "$rc" "Missing plugins file should fail"
 
 log_test "Malformed JSON exits non-zero"
 BROKEN_JSON="$FIXTURE_DIR/broken.json"
 echo "not json" > "$BROKEN_JSON"
-rc=$(set +e; CPR_PLUGINS_FILE="$BROKEN_JSON" CLAUDE_PLUGIN_ROOT="" python3 "$CPR" "kk" >/dev/null 2>&1; echo $?)
+rc=$(set +e; CPR_PLUGINS_FILE="$BROKEN_JSON" python3 "$CPR" "kk" >/dev/null 2>&1; echo $?)
 assert_not_equals "0" "$rc" "Malformed JSON should fail"
 
 log_test "Plugin not found shows error on stderr"
 set +e
-stderr=$(CPR_PLUGINS_FILE="$PLUGINS_JSON" CLAUDE_PLUGIN_ROOT="" python3 "$CPR" "nonexistent" 2>&1 >/dev/null)
+stderr=$(CPR_PLUGINS_FILE="$PLUGINS_JSON" python3 "$CPR" "nonexistent" 2>&1 >/dev/null)
 set -e
 assert_output_contains "Error:" "echo '$stderr'" "Shows error for unknown plugin"
 
 # =============================================================================
-# Section 6: Install path validation
+# Section 5: Install path validation
 # =============================================================================
 
-log_section "Section 6: Install Path Validation"
+log_section "Section 5: Install Path Validation"
 
 MISSING_DIR_JSON="$FIXTURE_DIR/missing-dir.json"
 cat > "$MISSING_DIR_JSON" <<EOF
@@ -216,7 +198,7 @@ cat > "$MISSING_DIR_JSON" <<EOF
 EOF
 
 log_test "Entry with non-existent installPath is skipped"
-rc=$(set +e; CPR_PLUGINS_FILE="$MISSING_DIR_JSON" CLAUDE_PLUGIN_ROOT="" python3 "$CPR" "ghost" >/dev/null 2>&1; echo $?)
+rc=$(set +e; CPR_PLUGINS_FILE="$MISSING_DIR_JSON" python3 "$CPR" "ghost" >/dev/null 2>&1; echo $?)
 assert_not_equals "0" "$rc" "Non-existent installPath should not be returned"
 
 # =============================================================================
