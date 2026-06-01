@@ -50,7 +50,7 @@ If the list is empty (no profile matched), skip Steps 3–4's profile-specific l
 
 For each active profile record from Step 2:
 
-1. Read `<plugin_root>/profiles/<profile>/review-code/index.md`, where `<plugin_root>` is the absolute plugin-root path you already know from SKILL.md context.
+1. Read `${TOOLBOX_PLUGIN_ROOT}/profiles/<profile>/review-code/index.md`.
 2. Collect every entry under **Always load**.
 3. For every conditional entry (**Load if:** predicate), classify the predicate:
    - **Filename-evaluable** — the predicate is satisfied by filenames, extensions, or directory names alone (e.g., "diff contains `Chart.yaml`", "file under `bases/` or `overlays/`"). Evaluate now against the filename list from Step 1. If it matches, collect the entry into the `(profile, checklist)` list.
@@ -61,7 +61,7 @@ Do NOT hardcode checklist names — the index is authoritative, and new profiles
 
 ### 4) Read resolved checklists
 
-For each `(profile, checklist)` record from Step 3, use the `Read` tool on `<plugin_root>/profiles/<profile>/review-code/<checklist>`. Every checklist file enters context now, before any diff content does. The review that follows in Step 6 reads *through* these checklists; if they are not loaded, the review cannot happen.
+For each `(profile, checklist)` record from Step 3, use the `Read` tool on `${TOOLBOX_PLUGIN_ROOT}/profiles/<profile>/review-code/<checklist>`. Every checklist file enters context now, before any diff content does. The review that follows in Step 6 reads *through* these checklists; if they are not loaded, the review cannot happen.
 
 This is the single load-bearing gate of the workflow. If a checklist read fails (file missing, path unresolved), stop and surface the error — do not proceed with partial methodology.
 
@@ -82,7 +82,7 @@ This is the only step that reads artifact content. It appears once, by design. D
 For every `(profile, checklist, predicate)` record on the deferred list from Step 3:
 
 1. Evaluate the predicate against the file content now available from Step 5. Apply the same bounded-inspection rules as the shared profile-detection procedure — ~16 KB per file; multi-document YAML inspected per `---`-separated block.
-2. If the predicate matches, use the `Read` tool on `<plugin_root>/profiles/<profile>/review-code/<checklist>` to load the checklist into context, then append `(profile, checklist)` to the flat list that Step 7 iterates.
+2. If the predicate matches, use the `Read` tool on `${TOOLBOX_PLUGIN_ROOT}/profiles/<profile>/review-code/<checklist>` to load the checklist into context, then append `(profile, checklist)` to the flat list that Step 7 iterates.
 3. If the predicate does not match, drop the entry silently — no checklist is loaded for it.
 
 If the deferred list is empty (no profile contributed a content-evaluable conditional), this step is a no-op. Proceed to Step 7.

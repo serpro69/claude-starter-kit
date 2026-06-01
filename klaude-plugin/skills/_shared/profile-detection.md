@@ -30,7 +30,7 @@ The design phase runs before any code exists, so file-based detection is impossi
 
 **Algorithm:**
 
-1. **Collect tokens.** Iterate §Known profiles. For each `<name>`, `Read` `<plugin_root>/profiles/<name>/DETECTION.md`. If the file has no `## Design signals` section, skip — that profile does not participate in design-phase detection. Otherwise, parse `display_name` and `tokens` from the section.
+1. **Collect tokens.** Iterate §Known profiles. For each `<name>`, `Read` `${TOOLBOX_PLUGIN_ROOT}/profiles/<name>/DETECTION.md`. If the file has no `## Design signals` section, skip — that profile does not participate in design-phase detection. Otherwise, parse `display_name` and `tokens` from the section.
 2. **Build union.** Collect all declared tokens into a single set, each tagged by its source profile name and `display_name`.
 3. **Match.** Check the idea prose against the union. Matching is case-insensitive, whole-word (so `pod` in "podcast" does not fire).
 4. **Confirm.** On match, surface a confirmation prompt per matched profile:
@@ -58,10 +58,10 @@ An explicit list is boring, deterministic, and unambiguous; runtime filesystem e
 
 ### Algorithm
 
-Throughout this procedure, `<plugin_root>` denotes the absolute plugin-root path the agent already knows from the SKILL.md that invoked the procedure. Use that resolved absolute path wherever `<plugin_root>` appears.
+Resolve the plugin root by running `echo ${TOOLBOX_PLUGIN_ROOT}` in a Bash call before starting the algorithm.
 
 1. **Iterate profiles.** For each §Known profiles `<name>`:
-   1. Use the `Read` tool on `<plugin_root>/profiles/<name>/DETECTION.md`.
+   1. Use the `Read` tool on `${TOOLBOX_PLUGIN_ROOT}/profiles/<name>/DETECTION.md`.
    2. If `Read` fails with ENOENT (profile name in list but directory missing — a stale list entry), skip silently and move on.
    3. If `Read` succeeds, parse the declared `## Path signals`, `## Filename signals`, and `## Content signals` sections.
 
@@ -76,7 +76,7 @@ Throughout this procedure, `<plugin_root>` denotes the absolute plugin-root path
 
 ### Tool choice
 
-- Single file at `<plugin_root>/…` → `Read`. This is what the algorithm uses.
+- Single file at `${TOOLBOX_PLUGIN_ROOT}/…` → `Read`. This is what the algorithm uses.
 - Enumeration across profiles → iterate the §Known profiles list, `Read` each. Never `Glob` (cwd-scoped, misses outside-cwd paths).
 
 ### Two dimensions: cost vs authority
@@ -95,7 +95,7 @@ Evaluating cheapest-first optimizes work. Applying authority correctly prevents 
 
 ### Plugin-root resolution failure
 
-If every `Read` attempt in Algorithm step 1 fails — i.e., `<plugin_root>` could not be resolved from SKILL.md context, or the paths do not exist — the procedure cannot continue.
+If every `Read` attempt in Algorithm step 1 fails — i.e., `${TOOLBOX_PLUGIN_ROOT}` is unset or the paths do not exist — the procedure cannot continue.
 
 On that failure:
 

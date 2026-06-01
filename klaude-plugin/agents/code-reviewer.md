@@ -53,7 +53,7 @@ The spawning workflow has already run profile detection and produced a list of `
 
 For each `(profile, checklist)` record in the input payload:
 
-1. Read the checklist at `${CLAUDE_PLUGIN_ROOT}/profiles/<profile>/review-code/<checklist>` using the Read tool.
+1. Read the checklist at `${TOOLBOX_PLUGIN_ROOT}/profiles/<profile>/review-code/<checklist>` using the Read tool.
 2. Hold the content in context for Step 3.
 
 Every checklist file enters your context now, before you analyze the diff. If a checklist read fails (file missing, path unresolved), stop and surface the error — do not proceed with partial methodology.

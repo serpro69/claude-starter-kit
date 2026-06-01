@@ -26,7 +26,7 @@ In order to gain a better understanding of the project, **check the contributing
 
 **Detect active profiles before refining.** The design phase runs before any code exists, so file-based detection is impossible. Run the design interaction pattern from [shared-profile-detection.md §The `/kk:design` interaction pattern](shared-profile-detection.md) — it iterates all profiles with `## Design signals`, matches their declared tokens against the idea prose, and handles confirmation prompts. Never auto-activate a profile silently.
 
-For each active profile, use the `Read` tool on `<plugin_root>/profiles/<name>/design/index.md` — where `<plugin_root>` is the absolute plugin-root path you already know from SKILL.md context. Skip silently if absent; not every profile populates a `design/` subdirectory. Load every file listed under **Always load**; a profile's `questions.md` (when present) seeds the refinement question pool. Integrate the profile's questions into the sub-phases below — one question per message, as always.
+For each active profile, use the `Read` tool on `${TOOLBOX_PLUGIN_ROOT}/profiles/<name>/design/index.md`. Skip silently if absent; not every profile populates a `design/` subdirectory. Load every file listed under **Always load**; a profile's `questions.md` (when present) seeds the refinement question pool. Integrate the profile's questions into the sub-phases below — one question per message, as always.
 
 Note: [frameworks.md](frameworks.md) and [refinement-criteria.md](refinement-criteria.md) are already loaded during the mandatory instruction-load phase (SKILL.md step 2). Do not reload them here.
 
@@ -91,7 +91,7 @@ Document in .md files the entire design and write a comprehensive implementation
 
 Feel free to break out the design/implementation documents into multi-part files, if necessary.
 
-**For each active profile** (from Step 3), re-consult `<plugin_root>/profiles/<name>/design/index.md` (using the same resolved plugin-root path you used in Step 3) and apply every always-load entry whose content shapes the final design document. Profile-contributed `sections.md` (when present) names required sections the design document must cover. Do not drop a required section silently; if a section genuinely does not apply, state so explicitly with a one-line justification.
+**For each active profile** (from Step 3), re-consult `${TOOLBOX_PLUGIN_ROOT}/profiles/<name>/design/index.md` (using the same resolved plugin-root path you used in Step 3) and apply every always-load entry whose content shapes the final design document. Profile-contributed `sections.md` (when present) names required sections the design document must cover. Do not drop a required section silently; if a section genuinely does not apply, state so explicitly with a one-line justification.
 
 When creating documentation, follow this approach:
 
