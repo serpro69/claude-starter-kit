@@ -22,10 +22,43 @@ import sys
 from pathlib import Path
 from difflib import SequenceMatcher
 
+SCOPE_PRIORITY = ["project", "local", "user"]
+
 
 def similarity(a, b):
-    """Calculate similarity ratio between two strings."""
     return SequenceMatcher(None, a.lower(), b.lower()).ratio()
+
+
+def plugin_name_from_key(key):
+    """Extract the plugin name segment from a registry key.
+
+    Keys look like "plugin-name@repo-name" (e.g. "kk@claude-toolbox").
+    """
+    return key.split("@")[0]
+
+
+def best_install_for_entries(entries):
+    """Pick the best install path from a list of per-scope entries.
+
+    Prefers project > local > user scope, then most-recently-installed.
+    Only returns paths that exist on disk.
+    """
+    if not isinstance(entries, list):
+        entries = [entries]
+
+    def sort_key(entry):
+        scope = entry.get("scope", "")
+        try:
+            scope_rank = SCOPE_PRIORITY.index(scope)
+        except ValueError:
+            scope_rank = len(SCOPE_PRIORITY)
+        return (scope_rank, entry.get("installedAt", ""))
+
+    for entry in sorted(entries, key=sort_key):
+        path = entry.get("installPath", "").rstrip("/")
+        if path and os.path.isdir(path):
+            return path
+    return None
 
 
 def find_plugin_root(plugin_name):
@@ -35,13 +68,11 @@ def find_plugin_root(plugin_name):
     Returns: (plugin_root_path, match_type)
         match_type: 'env_var', 'exact', 'fuzzy', or None
     """
-    # Try CLAUDE_PLUGIN_ROOT first (backwards compatible)
     env_root = os.environ.get("CLAUDE_PLUGIN_ROOT")
     if env_root and os.path.isdir(env_root):
         return env_root.rstrip("/"), "env_var"
 
-    # Read installed_plugins.json
-    plugins_file = Path.home() / ".claude" / "plugins" / "installed_plugins.json"
+    plugins_file = Path(os.environ["CPR_PLUGINS_FILE"]) if "CPR_PLUGINS_FILE" in os.environ else Path.home() / ".claude" / "plugins" / "installed_plugins.json"
 
     if not plugins_file.exists():
         return None, None
@@ -53,47 +84,34 @@ def find_plugin_root(plugin_name):
     except (OSError, json.JSONDecodeError):
         return None, None
 
-    # Try exact match first (case-insensitive)
-    for key, value in plugins.items():
-        if plugin_name.lower() in key.lower():
-            # Handle list or dict value
-            if isinstance(value, list) and len(value) > 0:
-                value = value[0]
-            install_path = value.get("installPath", "").rstrip("/")
-            if install_path and os.path.isdir(install_path):
-                return install_path, "exact"
+    # Exact match: plugin name segment matches (case-insensitive)
+    for key, entries in plugins.items():
+        if plugin_name_from_key(key).lower() == plugin_name.lower():
+            path = best_install_for_entries(entries)
+            if path:
+                return path, "exact"
 
-    # Try fuzzy matching if no exact match
+    # Fuzzy match on the plugin name segment
     matches = []
-    for key, value in plugins.items():
-        # Extract just the plugin name from key (e.g., "owner/plugin-name" -> "plugin-name")
-        key_parts = key.split("/")
-        plugin_part = key_parts[-1] if key_parts else key
-        # Also handle @ separator (e.g., "plugin-name@plugin-name")
-        plugin_part = plugin_part.split("@")[0]
-
-        ratio = similarity(plugin_name, plugin_part)
-        if ratio > 0.6:  # 60% similarity threshold
-            # Handle list or dict value
-            if isinstance(value, list) and len(value) > 0:
-                value = value[0]
-            install_path = value.get("installPath", "").rstrip("/")
-            if install_path and os.path.isdir(install_path):
-                matches.append((ratio, install_path, key))
+    for key, entries in plugins.items():
+        name_part = plugin_name_from_key(key)
+        ratio = similarity(plugin_name, name_part)
+        if ratio > 0.6:
+            path = best_install_for_entries(entries)
+            if path:
+                matches.append((ratio, path, key))
 
     if matches:
-        # Return best match
         matches.sort(reverse=True, key=lambda x: x[0])
-        best_match = matches[0]
-        return best_match[1], "fuzzy"
+        return matches[0][1], "fuzzy"
 
     return None, None
 
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python3 /tmp/cpr.py <plugin-name>", file=sys.stderr)
-        print("Example: python3 /tmp/cpr.py readme-and-co", file=sys.stderr)
+        print(f"Usage: python3 {sys.argv[0]} <plugin-name>", file=sys.stderr)
+        print(f"Example: python3 {sys.argv[0]} kk", file=sys.stderr)
         sys.exit(1)
 
     plugin_name = sys.argv[1]
