@@ -2,186 +2,186 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/about/changelog/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/about/license/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/adr/0001-profile-detection-model/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/adr/0002-profile-content-organization/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/adr/0003-plugin-root-referenced-content/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/adr/0004-skill-workflow-ordering/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/adr/0005-codex-hook-enforcement-gap/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/archive/diff-skill-old/design/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/archive/diff-skill-old/implementation/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/archive/diff-skill-old/tasks/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/archive/system-prompts/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/archive/system-prompts/00-base-system-prompt/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/archive/system-prompts/01-sessionstart-capy/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/archive/system-prompts/02-deferred-tools/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/archive/system-prompts/03-mcp-server-instructions/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/archive/system-prompts/04-available-skills/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/archive/system-prompts/05-claudemd-block/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/archive/system-prompts/06-pretooluse-bash-hook/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/archive/system-prompts/07-pretooluse-read-hook/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/archive/system-prompts/08-task-tools-reminder/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/archive/system-prompts/09-local-command-caveats/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/archive/system-prompts/10-tool-schemas/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/archive/system-prompts/11-hooks-raw-outputs/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/archive/system-prompts/12-triggered-prompts/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/contributing/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/contributing/adrs/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/contributing/architecture/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/contributing/plugin-development/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/contributing/testing/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/getting-started/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/getting-started/adopting/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/getting-started/overview/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/getting-started/plugin-only/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/getting-started/quickstart/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/getting-started/template-setup/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/providers/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/providers/claude-code/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/providers/codex/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/reviews/diff-skill/review-code-13d065f-210d3f4/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/user-guide/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/user-guide/configuration/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/user-guide/mcp-servers/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/user-guide/profiles/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/user-guide/skills/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://serpro69.github.io/claude-toolbox/0.17/user-guide/template-sync/</loc>
-         <lastmod>2026-05-26</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
 </urlset>
