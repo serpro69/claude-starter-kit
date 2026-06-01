@@ -112,9 +112,16 @@ Runs on code-block-stripped content.
 | Metric | Definition | Signal |
 |--------|-----------|--------|
 | Orphans | Nodes with zero fan-in, excluding entry points (see below) | Potential dead content |
-| Broken edges | Edges whose target doesn't exist on disk | Build-breaking errors |
+| Broken edges | Edges whose target doesn't exist on disk, excluding non-operative sources (see below) | Build-breaking errors |
 | Hotspots | Nodes ranked by fan-in | Highest-impact change targets |
 | Coupling | Shared dependency count between skill pairs | Over-sharing between unrelated skills |
+
+**Non-operative content is exempt from broken-edge detection** — symmetric with the orphan-detection `evals/` exemption. An edge is skipped when its *source* file is not part of the live instruction dependency graph:
+
+- **Eval fixtures** (any source under an `evals/` directory) — synthetic, partial-by-design test inputs. Several deliberately reference an absent target (e.g. a fixture `tasks.md` linking a missing `implementation.md`) precisely so an eval can exercise missing-target detection; flagging those would be backwards.
+- **Example artifacts** (any source whose basename matches `example-*.md`, e.g. `example-tasks.md`) — faithful templates whose illustrative links intentionally mimic a real file and may dangle.
+
+Live instruction files (SKILL.md, process/checklist content, shared instructions) are **not** exempt, so a genuinely broken pointer there is still flagged.
 
 ### CLI Interface
 

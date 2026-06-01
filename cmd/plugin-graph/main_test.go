@@ -3,8 +3,10 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -300,5 +302,161 @@ func TestMainDirectionWithoutTargetsWarns(t *testing.T) {
 	}
 	if !strings.Contains(stderr, "has no effect without targets") {
 		t.Errorf("stderr = %q, want a --direction no-op warning", stderr)
+	}
+}
+
+// fixtureRoot is the committed minimal-plugin tree the integration test walks
+// end-to-end. Unlike writeCLIFixture's temp tree, it is checked in so the
+// symlink, the ${CLAUDE_PLUGIN_ROOT} references, the intentional broken link,
+// and the orphan are exercised exactly as a real plugin would be — including
+// the on-disk symlink, which a map-of-strings fixture cannot represent.
+const fixtureRoot = "testdata/minimal-plugin"
+
+// TestIntegrationFixturePipeline runs the whole walk → parse → build → metrics
+// pipeline against testdata/minimal-plugin and pins the node/edge shape, both
+// intentional defects (one broken edge, one orphan), and that connected nodes
+// get non-zero metrics. It is the feature's end-to-end safety net: each extractor
+// and every node level is exercised against a real filesystem rather than a
+// hand-built graph.
+func TestIntegrationFixturePipeline(t *testing.T) {
+	ctx, err := NewParseContext(fixtureRoot)
+	if err != nil {
+		t.Fatalf("NewParseContext(%q): %v", fixtureRoot, err)
+	}
+	g, diags, err := BuildGraph(ctx)
+	if err != nil {
+		t.Fatalf("BuildGraph: %v", err)
+	}
+
+	// A clean, acyclic fixture must walk without warnings; a stray diagnostic
+	// means an unreadable file or a broken symlink crept into the tree.
+	if len(diags) != 0 {
+		t.Errorf("unexpected build diagnostics: %v", diags)
+	}
+
+	// Nodes: exactly the nine artifact/file nodes, grouped by type. The content
+	// pair is orphan.md plus the entry-point README.md.
+	wantNodeTypes := map[NodeType]int{
+		NodeSkill:        2, // skills/alpha/, skills/beta/
+		NodeShared:       2, // _shared/profile-detection.md, _shared/common-helper.md
+		NodeAgent:        1, // agents/example-reviewer.md
+		NodeProfile:      1, // profiles/sample/
+		NodeProfilePhase: 1, // profiles/sample/review-code/
+		NodeContent:      2, // orphan.md, README.md
+	}
+	gotNodeTypes := make(map[NodeType]int)
+	for _, n := range g.Nodes {
+		gotNodeTypes[n.Type]++
+	}
+	if !maps.Equal(gotNodeTypes, wantNodeTypes) {
+		t.Errorf("node type counts = %v, want %v", gotNodeTypes, wantNodeTypes)
+	}
+	if len(g.Nodes) != 9 {
+		t.Errorf("node count = %d, want 9", len(g.Nodes))
+	}
+	for _, p := range []string{
+		"skills/alpha/", "skills/beta/",
+		"skills/_shared/profile-detection.md", "skills/_shared/common-helper.md",
+		"agents/example-reviewer.md",
+		"profiles/sample/", "profiles/sample/review-code/",
+		"orphan.md", "README.md",
+	} {
+		if g.NodeByPath(p) == nil {
+			t.Errorf("expected node %q missing from graph", p)
+		}
+	}
+
+	// Edges: every edge type the extractors can produce is exercised by the
+	// fixture, so the integration test fails if any extractor stops firing.
+	edgesByType := make(map[EdgeType][]Edge)
+	for _, e := range g.Edges {
+		edgesByType[e.Type] = append(edgesByType[e.Type], e)
+	}
+	// Symlink is asserted separately below (it depends on the checkout
+	// materializing a real symlink, which Windows may not do).
+	for _, et := range []EdgeType{
+		EdgeMarkdownLink, EdgeTemplateRef,
+		EdgeParameterizedNav, EdgeAgentDelegation, EdgeSkillInvocation,
+	} {
+		if len(edgesByType[et]) == 0 {
+			t.Errorf("no %q edge produced; the fixture should exercise every edge type", et)
+		}
+	}
+
+	// Pin the agent-delegation edge to its source: a type-only check would pass
+	// even if an extractor misfired and produced the edge from the wrong file.
+	if !slices.ContainsFunc(edgesByType[EdgeAgentDelegation], func(e Edge) bool {
+		return e.RawSource == "skills/alpha/SKILL.md" && e.RawTarget == "agents/example-reviewer.md"
+	}) {
+		t.Errorf("agent-delegation edge not attributed to skills/alpha/SKILL.md -> agents/example-reviewer.md; got %v", edgesByType[EdgeAgentDelegation])
+	}
+
+	// The symlink edge depends on shared-common-helper.md being checked out as a
+	// real symlink. Git on Windows without symlink support materializes it as a
+	// regular file, so assert the edge (and its source) only when the on-disk
+	// entry is actually a symlink; otherwise skip rather than fail off-platform.
+	symlinkPath := filepath.Join(fixtureRoot, "skills", "alpha", "shared-common-helper.md")
+	if fi, statErr := os.Lstat(symlinkPath); statErr == nil && fi.Mode()&os.ModeSymlink != 0 {
+		if !slices.ContainsFunc(edgesByType[EdgeSymlink], func(e Edge) bool {
+			return e.RawSource == "skills/alpha/shared-common-helper.md" && e.RawTarget == "skills/_shared/common-helper.md"
+		}) {
+			t.Errorf("symlink edge not attributed to skills/alpha/shared-common-helper.md -> skills/_shared/common-helper.md; got %v", edgesByType[EdgeSymlink])
+		}
+	} else {
+		t.Logf("skipping symlink-edge assertion: %s is not a materialized symlink (expected on Windows checkouts without symlink support)", symlinkPath)
+	}
+
+	m, mDiags := ComputeMetrics(g, fixtureRoot, defaultCouplingThreshold)
+	// The fixture is acyclic, so metric computation must also emit no diagnostics
+	// — symmetric with the BuildGraph diagnostics check above.
+	if len(mDiags) != 0 {
+		t.Errorf("unexpected metric diagnostics: %v", mDiags)
+	}
+
+	// The intentional broken edge: beta links to a file that does not exist.
+	// Broken detection works off RawTarget, so the missing concrete path is
+	// flagged even though it normalizes into the existing skills/beta/ artifact.
+	if !slices.ContainsFunc(m.BrokenEdges, func(e Edge) bool {
+		return e.RawTarget == "skills/beta/does-not-exist.md"
+	}) {
+		t.Errorf("broken edge to skills/beta/does-not-exist.md not detected; broken edges = %v", m.BrokenEdges)
+	}
+
+	// The intentional orphan: orphan.md has zero fan-in and is a content node.
+	// README.md also has zero fan-in but is an entry point and must be excluded.
+	if !slices.Contains(m.Orphans, "orphan.md") {
+		t.Errorf("orphan.md not flagged as orphan; orphans = %v", m.Orphans)
+	}
+	if slices.Contains(m.Orphans, "README.md") {
+		t.Errorf("README.md must be excluded from orphans; orphans = %v", m.Orphans)
+	}
+
+	// Connected nodes carry non-zero metrics: alpha pulls in shared + agent +
+	// beta; the agent is reached by two skills; beta is reached by alpha.
+	for path, check := range map[string]func(*NodeMetrics) bool{
+		"skills/alpha/":              func(nm *NodeMetrics) bool { return nm.FanOut > 0 },
+		"agents/example-reviewer.md": func(nm *NodeMetrics) bool { return nm.FanIn > 0 },
+		"skills/beta/":               func(nm *NodeMetrics) bool { return nm.FanIn > 0 },
+	} {
+		nm := m.PerNode[path]
+		if nm == nil || !check(nm) {
+			t.Errorf("node %q has unexpected zero metric: %+v", path, nm)
+		}
+	}
+}
+
+// TestIntegrationFixtureValidate runs the validate gate over the same fixture
+// through the real CLI entry point. Both intentional defects make it a findings
+// exit (1), and the report must name the broken target and the orphan.
+func TestIntegrationFixtureValidate(t *testing.T) {
+	code, stdout, stderr := runCLI("--root", fixtureRoot, "validate")
+	if code != exitFindings {
+		t.Fatalf("validate exit = %d, want %d (stdout: %s, stderr: %s)", code, exitFindings, stdout, stderr)
+	}
+	if !strings.Contains(stdout, "does-not-exist.md") {
+		t.Errorf("validate stdout should name the broken target; got %q", stdout)
+	}
+	if !strings.Contains(stdout, "orphan.md") {
+		t.Errorf("validate stdout should name the orphan; got %q", stdout)
 	}
 }

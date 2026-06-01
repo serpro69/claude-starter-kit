@@ -231,7 +231,7 @@ Implement `--ref` flag support via git worktrees in `cmd/plugin-graph/worktree.g
 
 ## Task 7: Integration test fixture and Makefile
 
-**Status:** pending
+**Status:** done
 **Size:** S
 **Dependencies:** Task 5, Task 6
 **Can run in parallel with:** —
@@ -240,12 +240,26 @@ Implement `--ref` flag support via git worktrees in `cmd/plugin-graph/worktree.g
 
 Create the integration test fixture and wire up Makefile/CI.
 
-- [ ] Create `cmd/plugin-graph/testdata/minimal-plugin/` with: 2 skills (one with symlink to shared, one referencing an agent via `${CLAUDE_PLUGIN_ROOT}`), 1 shared instruction, 1 agent, 1 profile with 1 phase and index.md, 1 intentional broken markdown link, 1 orphan `.md` file
-- [ ] Write full-pipeline integration test in `main_test.go`: walk → parse → build → metrics → validate. Assert expected node count/types, edge count/types, broken edge detected, orphan detected, non-zero metrics for connected nodes
-- [ ] Add `plugin-graph` target to `Makefile`: `go test ./cmd/plugin-graph/...` then `go run ./cmd/plugin-graph --root klaude-plugin/ validate`
-- [ ] Run `make plugin-graph` against the real `klaude-plugin/` and fix any validation findings (broken links, orphans) that surface — these are real bugs in the plugin, not test failures
+- [x] Create `cmd/plugin-graph/testdata/minimal-plugin/` with: 2 skills (one with symlink to shared, one referencing an agent via `${CLAUDE_PLUGIN_ROOT}`), 1 shared instruction, 1 agent, 1 profile with 1 phase and index.md, 1 intentional broken markdown link, 1 orphan `.md` file
+- [x] Write full-pipeline integration test in `main_test.go`: walk → parse → build → metrics → validate. Assert expected node count/types, edge count/types, broken edge detected, orphan detected, non-zero metrics for connected nodes
+- [x] Add `plugin-graph` target to `Makefile`: `go test ./cmd/plugin-graph/...` then `go run ./cmd/plugin-graph --root klaude-plugin/ validate`
+- [x] Run `make plugin-graph` against the real `klaude-plugin/` and fix any validation findings (broken links, orphans) that surface — these are real bugs in the plugin, not test failures
 
 **Verify:** `make plugin-graph` passes. Integration test passes. `go run ./cmd/plugin-graph --root klaude-plugin/ metrics --format text` produces a readable table with all skills.
+
+**Implementation notes (deviations from plan):**
+
+- **The 6 `validate` findings were false positives, not "real bugs in the plugin" as the checkbox assumed.** All 6 broken edges originated from *non-operative content*: eval-fixture internal links under `evals/test-files/` (3 — several deliberately omit their targets because the eval tests missing-target/degradation detection, so "fixing" them by creating targets would break those evals) and illustrative/example links (3 — `example-tasks.md`'s template links ×2, and a `[FORMS.md](FORMS.md)` syntax example in `skill-structure-gotchas.md`).
+- **Resolution (Option B, user-approved):** Broadened broken-edge detection to exempt non-operative sources via `nonOperativeSource(RawSource)` in `metrics.go` (Task 3's file) — skips edges sourced under `evals/` (mirrors the existing orphan exemption) or from `example-*.md` artifacts. Source-fixed only the one operative-file illustration: backticked the `[FORMS.md](FORMS.md)` example in `skill-structure-gotchas.md` so it renders as a code span (goldmark no longer parses it as a live link). `design.md` / `implementation.md` updated to document the exemption. `validate` against the real plugin now exits 0.
+- **Integration fixture exercises all 6 edge types + both defects.** `testdata/minimal-plugin/` (9 nodes) drives markdown-link, symlink, template-ref, parameterized-nav, agent-delegation, and skill-invocation edges, plus one intentional broken edge (`beta → does-not-exist.md`) and one orphan (`orphan.md`), with `README.md` pinning the entry-point orphan exclusion.
+- **Expected, not fixed:** `metrics`/`validate` on the real plugin emit a `cycle detected` stderr diagnostic and `DEPTH = -1` for most skills — the documented strongly-connected-component behavior from Task 3, not a `validate` failure.
+
+**Code-review fixes applied (isolated review: code-reviewer + pal/gemini-3.1-pro-preview):**
+
+- **Integration-test robustness (code-reviewer P2 ×2 + P3).** `TestIntegrationFixturePipeline` now (a) asserts `ComputeMetrics` emits no diagnostics — symmetric with the existing `BuildGraph` diagnostics check; (b) pins the agent-delegation edge to its source (`skills/alpha/SKILL.md → agents/example-reviewer.md`) so a misfiring extractor producing the right *type* from the wrong file is caught; (c) pins total `len(g.Nodes) == 9` alongside the per-type counts.
+- **Windows symlink portability (corroborated, Medium).** The symlink-edge assertion is now guarded by `os.Lstat`/`ModeSymlink`: on a checkout where `shared-common-helper.md` didn't materialize as a real symlink (Git on Windows without symlink support), the assertion `t.Logf`-skips instead of hard-failing. Node count and diagnostics still hold on that path (the file is absorbed into the skill artifact, produces no edges).
+- **`nonOperativeSource` doc note (code-reviewer P1 → downgraded to P3; pal: "correctly scoped").** Comment now states the `example-*.md` basename match is plugin-wide *by design* (repo convention for example artifacts) and that `path.Base` (not `filepath.Base`) is correct for slash-normalized `RawSource`. Empirically the only non-eval `example-*.md` today is `example-tasks.md` — the intended target; no operative `example-*.md` exists.
+- **Dismissed:** pal re-raised the Task 6 `WithWorktree` cleanup error-swallowing as P1/HIGH — verified already fixed (`worktree.go` has the `registered` gate + `errors.Join` + `err == nil` guard) and out-of-scope for this diff; pal's continuation had resumed stale Task 6 review context. Kept the Makefile `plugin-graph` target as-is (the test+validate coupling is the intended CI gate per implementation.md §Makefile Integration). No P0/P1 systemic findings to index as `kk:review-findings`.
 
 **Heads-up (observed during Task 5 review):** `metrics`/`validate` against the real `klaude-plugin/` already emits a large `cycle detected affecting: …` diagnostic spanning most skills/profiles/agents. This is **expected, not a bug** — the plugin's cross-references (skills ↔ shared ↔ profiles) form a strongly-connected component, and depth = −1 for cyclic nodes is the Task 3 design. Cycles are stderr diagnostics, not `validate` failures (`validate` exits 1 only on broken edges/orphans). Don't try to "fix" the cycle; the Task 7 finding-triage checkbox is about broken links and orphans only.
 

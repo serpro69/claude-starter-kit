@@ -162,6 +162,34 @@ func TestMetricsBrokenEdge(t *testing.T) {
 	}
 }
 
+func TestMetricsBrokenEdgeSkipsNonOperative(t *testing.T) {
+	// Edges from non-operative content (eval fixtures and example-*.md artifacts)
+	// legitimately dangle and must not be flagged as broken, while an edge from a
+	// live instruction file to the same missing target must still be flagged.
+	g := NewGraph()
+	g.AddNode(&Node{Path: "skills/foo/", Type: NodeSkill})
+	g.AddNode(&Node{Path: "skills/foo/example-tasks.md", Type: NodeContent})
+	g.AddNode(&Node{Path: "skills/foo/evals/case/test-files/tasks.md", Type: NodeContent})
+	g.Edges = []Edge{
+		// Live instruction file → missing target: still broken.
+		{Source: "skills/foo/", Target: "skills/foo/", RawSource: "skills/foo/SKILL.md", RawTarget: "skills/foo/missing.md", Type: EdgeMarkdownLink},
+		// Example artifact → missing target: exempt.
+		{Source: "skills/foo/", Target: "skills/foo/", RawSource: "skills/foo/example-tasks.md", RawTarget: "skills/foo/design.md", Type: EdgeMarkdownLink},
+		// Eval fixture → missing target: exempt.
+		{Source: "skills/foo/", Target: "skills/foo/", RawSource: "skills/foo/evals/case/test-files/tasks.md", RawTarget: "skills/foo/evals/case/test-files/implementation.md", Type: EdgeMarkdownLink},
+	}
+
+	root := setupMetricsDiskFixture(t, "skills/foo/SKILL.md")
+	m, _ := ComputeMetrics(g, root, 3)
+
+	if len(m.BrokenEdges) != 1 {
+		t.Fatalf("broken edges = %v, want exactly the live-file edge", m.BrokenEdges)
+	}
+	if m.BrokenEdges[0].RawSource != "skills/foo/SKILL.md" {
+		t.Errorf("broken edge source = %q, want skills/foo/SKILL.md (non-operative sources must be exempt)", m.BrokenEdges[0].RawSource)
+	}
+}
+
 func TestMetricsCycle(t *testing.T) {
 	g := NewGraph()
 	g.AddNode(&Node{Path: "A", Type: NodeShared})

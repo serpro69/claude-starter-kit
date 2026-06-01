@@ -2,7 +2,7 @@
 .SHELL      := $(shell which bash)
 .SHELLFLAGS := -ec
 
-.PHONY: vendor-profiles generate-kodex generate-all test-structure docs-serve docs-build
+.PHONY: vendor-profiles generate-kodex generate-all test-structure plugin-graph docs-serve docs-build
 
 vendor-profiles:
 	go test ./cmd/vendor-profiles/...
@@ -19,6 +19,10 @@ generate-all: vendor-profiles generate-kodex
 test-structure:
 	bash test/test-plugin-structure.sh
 	bash test/test-codex-structure.sh
+
+plugin-graph:
+	go test ./cmd/plugin-graph/...
+	go run ./cmd/plugin-graph --root klaude-plugin/ validate
 
 docs-serve:
 	MKDOCS_SITE_URL=http://localhost:8000 mkdocs serve

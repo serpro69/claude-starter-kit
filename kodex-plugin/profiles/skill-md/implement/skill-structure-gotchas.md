@@ -29,7 +29,7 @@ Skills use a three-tier model. Respect the budgets:
 
 If SKILL.md exceeds 500 lines, split content into bundled reference files. The agent loads the entire SKILL.md body on trigger — a 2,000-line file wastes context on content irrelevant to most tasks.
 
-Delegate detailed content to Tier 3 files with clear pointers: "See [FORMS.md](FORMS.md) for the complete guide." Claude reads each file only when the user's task requires it.
+Delegate detailed content to Tier 3 files with clear pointers: "See `[FORMS.md](FORMS.md)` for the complete guide." Claude reads each file only when the user's task requires it.
 
 ## Description effectiveness
 

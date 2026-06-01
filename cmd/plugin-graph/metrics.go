@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -173,6 +174,11 @@ func computeOrphans(g *Graph, m *GraphMetrics) {
 func computeBrokenEdges(g *Graph, pluginRoot string, m *GraphMetrics) {
 	targetExists := make(map[string]bool)
 	for _, e := range g.Edges {
+		// Edges from non-operative content are not part of the live instruction
+		// dependency graph, so a missing target there is not a build-breaking bug.
+		if nonOperativeSource(e.RawSource) {
+			continue
+		}
 		target := e.RawTarget
 		if _, checked := targetExists[target]; !checked {
 			fullPath := filepath.Join(pluginRoot, target)
@@ -183,6 +189,34 @@ func computeBrokenEdges(g *Graph, pluginRoot string, m *GraphMetrics) {
 			m.BrokenEdges = append(m.BrokenEdges, e)
 		}
 	}
+}
+
+// nonOperativeSource reports whether an edge originating from path should be
+// exempt from broken-edge detection because the source is non-operative content
+// rather than a live instruction file:
+//
+//   - eval fixtures under evals/ — synthetic, partial-by-design test inputs;
+//     several deliberately reference absent targets (e.g. a tasks.md that links a
+//     missing implementation.md) precisely so an eval can test missing-target
+//     detection. This mirrors the evals/ exemption already applied to orphans.
+//   - example-*.md artifacts — faithful templates whose illustrative links (e.g.
+//     example-tasks.md's [design.md](design.md)) intentionally mimic a real file
+//     and may dangle.
+//
+// Live instruction files (SKILL.md, process/checklist content, shared
+// instructions) are NOT exempt, so a genuinely broken pointer there is still
+// flagged.
+//
+// The example-*.md match is by basename and therefore plugin-wide by design:
+// example-* is the repo's naming convention for example artifacts, so any such
+// file is treated as illustrative regardless of where it lives. path.Base (not
+// filepath.Base) is correct because RawSource is always slash-normalized by the
+// walker (relSlash), independent of the host OS separator.
+func nonOperativeSource(p string) bool {
+	if strings.Contains(p, "evals/") {
+		return true
+	}
+	return strings.HasPrefix(path.Base(p), "example-")
 }
 
 func computeHotspots(m *GraphMetrics) {
