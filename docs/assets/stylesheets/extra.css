@@ -18,7 +18,7 @@
 
 /* ── Tab font ────────────────────────────────────────────────── */
 .md-tabs__link {
-  font-family: 'Space Mono', monospace !important;
+  font-family: "Space Mono", monospace !important;
   font-size: 12px !important;
 }
 
@@ -58,4 +58,9 @@
 .md-nav__link--active {
   border-left: 2px solid var(--tn-blue);
   padding-left: 0.6rem;
+}
+
+/* ── Mermaid diagram labels ─────────────────────────────── */
+.mermaid {
+  --md-mermaid-label-fg-color: #000000 !important;
 }
