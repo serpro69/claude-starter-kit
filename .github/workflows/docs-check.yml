@@ -1,0 +1,41 @@
+---
+name: Docs Check
+run-name: ${{ github.actor }} is validating the docs build
+
+# Validates that the docs site builds cleanly under --strict (broken links,
+# missing nav entries, unresolved snippets) on pull requests — before merge,
+# rather than only at deploy time in docs.yml. Build-only: never deploys.
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/docs-check.yml'
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - 'requirements.txt'
+      - 'README.md'
+      - 'LICENSE.md'
+      - 'klaude-plugin/**'
+      - 'kodex-plugin/README.md'
+      - 'cmd/plugin-graph/**'
+      - 'Makefile'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+      - run: pip install -r requirements.txt
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      # make docs-build regenerates the plugin-graph artifacts, then runs
+      # `mkdocs build --strict` — identical to the gate in docs.yml.
+      - name: Build docs (strict)
+        run: make docs-build
