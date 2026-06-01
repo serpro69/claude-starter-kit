@@ -27,10 +27,10 @@ You do NOT receive: the user's natural request, expected profile names, assertio
 
 Follow the mandatory-ordering principle: load all instructions before inspecting the subject matter.
 
-1. Read `<kk-plugin-root>/skills/_shared/profile-detection.md`. Note the "Known profiles" list.
-2. For each known profile, read `<kk-plugin-root>/profiles/<name>/DETECTION.md`.
+1. Read `${TOOLBOX_PLUGIN_ROOT}/skills/_shared/profile-detection.md`. Note the "Known profiles" list.
+2. For each known profile, read `${TOOLBOX_PLUGIN_ROOT}/profiles/<name>/DETECTION.md`.
 3. Apply each profile's three-section rule (path signals → filename signals → content signals) to the files listed in the diff. Use Read/Glob against the worktree for adjacency and ancestor checks.
-4. For each active profile, read `<kk-plugin-root>/profiles/<name>/review-code/index.md`. Record:
+4. For each active profile, read `${TOOLBOX_PLUGIN_ROOT}/profiles/<name>/review-code/index.md`. Record:
    - **Always-load** checklists — all load unconditionally.
    - **Conditional** checklists — evaluate each Load-if clause against the diff; record load/skip with the reason.
 
@@ -60,7 +60,7 @@ Every file in the diff appears in the Active profiles table, even when no profil
 ## What You Do Not Do
 
 - Do not apply checklists, emit findings, propose fixes, or comment on the code itself.
-- Do not open files outside the worktree or `<kk-plugin-root>/**`.
+- Do not open files outside the worktree or `${TOOLBOX_PLUGIN_ROOT}/**`.
 - Do not infer intent. If the diff does not match a profile's rule, the profile does not activate — even if the file "looks like" something the profile might cover.
 
 ## Phase scope

@@ -49,7 +49,7 @@ The caller assembles this list from artifacts gathered during preparation. All p
 1. **Diff file** — the git diff written to a temp file via `mktemp` (e.g., `/tmp/kk-review-code-XXXXXXXX.patch`). The caller writes this file; pal reads it. Clean up after the review completes.
 2. **Changed source files** — every file touched by the diff. These give pal the full file context around each change.
 3. **Surrounding code files** — direct imports, callers (one level up), and adjacent same-package files that share types with the changed code. Capped at 10 files; prioritize imports and callers over adjacency. These enable cross-file reasoning (e.g., verifying a called function's signature, checking convention consistency).
-4. **Profile checklist files** — resolved `(profile, checklist)` file paths from profile detection (e.g., `<plugin_root>/profiles/go/review-code/solid-checklist.md`). These give pal the same domain-specific review criteria as the sub-agent reviewer.
+4. **Profile checklist files** — resolved `(profile, checklist)` file paths from profile detection (e.g., `${TOOLBOX_PLUGIN_ROOT}/profiles/go/review-code/solid-checklist.md`). These give pal the same domain-specific review criteria as the sub-agent reviewer.
 5. **Design/implementation docs** — `design.md` and `implementation.md` from the feature's `docs/wip/<feature>/` directory, when available. These enable pal to flag spec deviations, not just code smells.
 
 The caller is responsible for collecting these paths during its preparation steps and passing the assembled list here. pal handles file reading, token budgeting, and cross-turn deduplication internally.

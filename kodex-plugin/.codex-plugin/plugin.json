@@ -16,5 +16,5 @@
   "name": "kk",
   "repository": "https://github.com/serpro69/claude-toolbox",
   "skills": "./skills/",
-  "version": "0.17.3"
+  "version": "0.17.4-rc.1"
 }
