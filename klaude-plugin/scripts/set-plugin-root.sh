@@ -2,14 +2,16 @@
 
 # SessionStart hook — exports TOOLBOX_PLUGIN_ROOT for the session.
 #
-# The hook command passes the harness-resolved ${CLAUDE_PLUGIN_ROOT} as $1.
-# Falls back to cpr.py if not provided (e.g. manual invocation).
+# Uses cpr.py (reads installed_plugins.json) as the primary resolver.
+# The harness-substituted ${CLAUDE_PLUGIN_ROOT} ($1) is unreliable —
+# it resolves to marketplaces/ instead of the versioned cache/ path.
+# See anthropics/claude-code#64461
 
-PLUGIN_ROOT="${1:-}"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PLUGIN_ROOT=$(python3 "$SCRIPT_DIR/cpr.py" kk 2>/dev/null)
 
 if [ -z "$PLUGIN_ROOT" ] || [ ! -d "$PLUGIN_ROOT" ]; then
-  SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-  PLUGIN_ROOT=$(python3 "$SCRIPT_DIR/../../.claude/toolbox/scripts/cpr.py" kk 2>/dev/null)
+  PLUGIN_ROOT="${1:-}"
 fi
 
 if [ -z "$PLUGIN_ROOT" ] || [ ! -d "$PLUGIN_ROOT" ]; then
