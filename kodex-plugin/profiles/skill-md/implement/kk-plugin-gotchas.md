@@ -17,7 +17,7 @@ ln -s ../_shared/<name>.md shared-<name>.md
 - Reference in skill prose as `[shared-<name>.md](shared-<name>.md)` — local links resolve without `../` path traversal.
 - Only symlink into skills that actually reference the file — don't blanket-symlink.
 - Symlinks must stay inside the `skills/` tree. Cross-boundary symlinks break under some plugin installers.
-- Skills and agents reference profile content via `${CLAUDE_PLUGIN_ROOT}/profiles/<name>/...` in plugin-load files — no symlinks from skills into `profiles/` (profiles are outside the `skills/` tree). Profile files themselves are runtime-read and must not contain literal `${CLAUDE_PLUGIN_ROOT}` tokens as runtime paths.
+- Skills, agents, and runtime-read files reference profile content via `${TOOLBOX_PLUGIN_ROOT}/profiles/<name>/...` — no symlinks from skills into `profiles/` (profiles are outside the `skills/` tree). `${TOOLBOX_PLUGIN_ROOT}` is an env var exported by the SessionStart hook; resolve it via `echo ${TOOLBOX_PLUGIN_ROOT}` in a Bash call. Reserve `${CLAUDE_PLUGIN_ROOT}` for `hooks.json` and MCP configs only (where the harness must resolve the path to find scripts).
 
 ## Bidirectional index invariant
 

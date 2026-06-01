@@ -61,7 +61,7 @@ Delegate to [shared-profile-detection.md](shared-profile-detection.md) with the 
 
 For each active profile, resolve the checklists to apply:
 
-1. Read `<plugin_root>/profiles/<profile>/review-code/index.md` — where `<plugin_root>` is the absolute plugin-root path known from SKILL.md context.
+1. Read `${TOOLBOX_PLUGIN_ROOT}/profiles/<profile>/review-code/index.md`.
 2. Collect every entry under **Always load**.
 3. For every **Load if:** conditional entry, evaluate the predicate against the diff; collect the entry when it matches.
 
@@ -134,7 +134,7 @@ You are reviewing the following code changes. Apply your full review workflow.
 ...
 }
 
-For each record, read the checklist at `<plugin_root>/profiles/<profile>/review-code/<checklist>` and apply it to the diff — `<plugin_root>` is the absolute plugin-root path the spawning skill substitutes into this prompt before sending it to you. If no profiles are active (empty list), fall back to general review guidance without profile-specific checklists.
+For each record, read the checklist at `${TOOLBOX_PLUGIN_ROOT}/profiles/<profile>/review-code/<checklist>` and apply it to the diff. If no profiles are active (empty list), fall back to general review guidance without profile-specific checklists.
 
 ## Spec Context
 

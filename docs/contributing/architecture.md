@@ -27,8 +27,8 @@ The canonical source of truth for all workflow functionality. Contains:
 - **`commands/`** — Slash commands for isolated/variant invocations
 - **`agents/`** — Sub-agent definitions (code-reviewer, design-reviewer, spec-reviewer, eval-grader, profile-resolver)
 - **`profiles/`** — Per-domain content (Go, Java, JS/TS, Kotlin, K8s, Python) with detection rules, review checklists, implementation gotchas, design prompts, test validators, and doc rubrics
-- **`hooks/`** — Hook definitions (Bash validation)
-- **`scripts/`** — Hook scripts
+- **`hooks/`** — Hook definitions (SessionStart plugin-root export, PreToolUse Bash validation)
+- **`scripts/`** — Hook scripts (`set-plugin-root.sh`, `validate-bash.sh`)
 
 Skills reference shared instructions via symlinks to `skills/_shared/`. Profiles are referenced via `${CLAUDE_PLUGIN_ROOT}/profiles/` paths (substituted at plugin-load time by the Claude Code harness).
 

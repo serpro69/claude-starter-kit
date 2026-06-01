@@ -8,7 +8,8 @@ Review checks specific to skills within the `klaude-plugin/` directory structure
 - [ ] Are symlinks created from inside the consuming skill's directory?
 - [ ] Do symlinks stay inside the `skills/` tree? (Cross-boundary symlinks break under some installers.)
 - [ ] Are only skills that actually reference the shared file symlinked? (No blanket-symlinking.)
-- [ ] Does profile content use `${CLAUDE_PLUGIN_ROOT}` references instead of symlinks?
+- [ ] Does profile content use `${TOOLBOX_PLUGIN_ROOT}` references instead of symlinks?
+- [ ] Do skills and agents reference profile paths via `${TOOLBOX_PLUGIN_ROOT}`, not `${CLAUDE_PLUGIN_ROOT}`? (`${CLAUDE_PLUGIN_ROOT}` is only for `hooks.json` and MCP configs where the harness must resolve the path.)
 
 ## Bidirectional index invariant
 

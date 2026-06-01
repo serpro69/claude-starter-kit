@@ -11,14 +11,14 @@ description: |
 
 Read capy knowledge base conventions at [shared-capy-knowledge-protocol.md](shared-capy-knowledge-protocol.md).
 
-Profile detection is delegated to [shared-profile-detection.md](shared-profile-detection.md). When an active profile contributes a `test/` subdirectory (e.g., `${CLAUDE_PLUGIN_ROOT}/profiles/k8s/test/`), its `index.md` lists validators, check categories, and any binary-presence or auto-detection protocols the skill must apply. See Step 2 of the Workflow.
+Profile detection is delegated to [shared-profile-detection.md](shared-profile-detection.md). When an active profile contributes a `test/` subdirectory (e.g., `${TOOLBOX_PLUGIN_ROOT}/profiles/k8s/test/`), its `index.md` lists validators, check categories, and any binary-presence or auto-detection protocols the skill must apply. See Step 2 of the Workflow.
 
 ## Workflow
 
 **Mandatory order — instructions before action.** The flow below is strictly sequential. Do not run any validator, test, or binary against subject-matter files until profile detection has completed and all resolved profile content is in context.
 
 1. **Detect active profiles.** Run the shared profile-detection procedure against the changed files.
-2. **Load profile content.** For each active profile that contributes a `test/` subdirectory, load `${CLAUDE_PLUGIN_ROOT}/profiles/<name>/test/index.md` and read its always-load + any matching conditional content. Honor the binary-presence protocols named there BEFORE any validator invocation — a missing pre-check step can crash on a tool that isn't installed.
+2. **Load profile content.** For each active profile that contributes a `test/` subdirectory, load `${TOOLBOX_PLUGIN_ROOT}/profiles/<name>/test/index.md` and read its always-load + any matching conditional content. Honor the binary-presence protocols named there BEFORE any validator invocation — a missing pre-check step can crash on a tool that isn't installed.
 3. **Apply the test guidelines below.** With profile methodology now loaded, run existing tests, add coverage for new or fixed functionality, and execute profile-specific validators per the loaded content.
 
 ## Guidelines

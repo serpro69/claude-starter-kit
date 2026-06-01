@@ -70,7 +70,7 @@ When profile detection identifies an Infrastructure-as-Code profile (e.g., Kuber
 
 `DOC_INCON` and `OUTDATED_DOC` apply unchanged — their semantics are doc-vs-doc or code-vs-doc, which declarative IaC does not alter.
 
-For each active IaC profile that populates a `review-spec/` slot, load `../../profiles/<name>/review-spec/index.md` for domain-specific verification patterns.
+For each active IaC profile that populates a `review-spec/` slot, load `${TOOLBOX_PLUGIN_ROOT}/profiles/<name>/review-spec/index.md` for domain-specific verification patterns.
 
 ## Severity Levels
 
