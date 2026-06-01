@@ -1,8 +1,11 @@
 .ONESHELL:
-.SHELL      := $(shell which bash)
+SHELL      := $(shell which bash)
 .SHELLFLAGS := -ec
 
-.PHONY: vendor-profiles generate-kodex generate-all test-structure plugin-graph plugin-graph-docs docs-serve docs-build
+VERSION ?=
+REF     ?=
+
+.PHONY: vendor-profiles generate-kodex generate-all test-structure plugin-graph plugin-graph-docs docs-serve docs-build release pre-release
 
 vendor-profiles:
 	go test ./cmd/vendor-profiles/...
@@ -49,3 +52,42 @@ docs-serve: plugin-graph-docs
 
 docs-build: plugin-graph-docs
 	MKDOCS_SITE_URL=https://serpro69.github.io/claude-toolbox/ mkdocs build --strict
+
+# https://stackoverflow.com/a/10858332
+# Check that given variables are set and all have non-empty values,
+# die with an error otherwise.
+#
+# Params:
+#   1. Variable name(s) to test.
+#   2. (optional) Error message to print.
+check_defined = \
+    $(strip $(foreach 1,$1, \
+        $(call __check_defined,$1,$(strip $(value 2)))))
+__check_defined = \
+    $(if $(value $1),, \
+      $(error Undefined $1$(if $2, ($2))))
+
+release:
+	@:$(call check_defined, VERSION, semantic version string - 'X.Y.Z(-rc.\d+)?')
+	# Validate semver format: MAJOR.MINOR.PATCH
+	if [[ ! "$(VERSION)" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$$ ]]; then
+		echo "Invalid semver format: $(VERSION). Expected format: MAJOR.MINOR.PATCH (e.g., '1.2.3')"
+		exit 1
+	fi
+	gh workflow run release.yml -f version=v$(VERSION)
+
+pre-release:
+	@:$(call check_defined, VERSION, semantic version string - 'X.Y.Z(-rc.\d+)?')
+	@:$(call check_defined, REF, undefined target branch reference)
+	# Validate semver format: MAJOR.MINOR.PATCH with pre-release and optional build metadata
+	if [[ ! "$(VERSION)" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$$ ]]; then
+		echo "Invalid semver format: $(VERSION). Expected format: MAJOR.MINOR.PATCH-rc.N(\+abc.1)? (e.g., v1.2.3-rc.1 with an optional build identifier)"
+		exit 1
+	fi
+	if [[ "$(REF)" =~ ^master$$ ]]; then
+		read -p "Pre-releases should typically NOT be made from $(REF) ref. Do you want to proceed? [y/Y]: " ANSWER && \
+		if [ ! "$${ANSWER}" = "y" ] && [ ! "$${ANSWER}" = "Y" ]; then
+			exit 1
+		fi
+	fi
+	gh workflow run pre-release.yml -f version=v$(VERSION) -r $(REF)
