@@ -48,4 +48,4 @@ docs-serve: plugin-graph-docs
 	MKDOCS_SITE_URL=http://localhost:8000 mkdocs serve
 
 docs-build: plugin-graph-docs
-	MKDOCS_SITE_URL=https://serpro69.github.io/claude-toolbox/ mkdocs build
+	MKDOCS_SITE_URL=https://serpro69.github.io/claude-toolbox/ mkdocs build --strict
