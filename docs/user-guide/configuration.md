@@ -25,10 +25,11 @@ Customize in `.claude/settings.json` under `permissions.allow` and `permissions.
 
 ## Hooks
 
-The plugin ships one hook:
+The plugin ships two hooks:
 
 | Hook | Trigger | Description |
 |------|---------|-------------|
+| Plugin root export | `SessionStart` | Exports `TOOLBOX_PLUGIN_ROOT` into the session environment so every Bash call has a reliable path to the plugin installation directory |
 | Bash validation | `PreToolUse` on `Bash` | Blocks commands touching `.env`, `.git/`, `node_modules`, `build/`, `dist/`, `venv/`, and other sensitive paths |
 
 ## Statusline
