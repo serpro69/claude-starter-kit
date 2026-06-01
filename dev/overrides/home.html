@@ -130,7 +130,7 @@
 /* ── Scroll-pinned hero → pipeline transition ─── */
 .lp-hero-wrap {
   position: relative;
-  height: 300vh;
+  height: 560vh;   /* hero/rain intro + scroll room for 6 cycling phases */
 }
 .lp-pin-stack {
   position: sticky; top: 0;
@@ -230,6 +230,21 @@
   font-family: 'Space Mono', monospace;
   color: var(--tn-comment); padding: 0 6px; font-size: 14px;
 }
+/* Scroll-driven phase states: current step glows, prior steps read as done */
+.lp-pipe-step.is-active {
+  background: var(--tn-blue);
+  border-color: var(--tn-blue);
+  color: var(--tn-night);
+  font-weight: 700;
+  transform: translateY(-2px);
+  box-shadow: 0 0 22px rgba(var(--tn-blue-rgb), 0.45);
+}
+.lp-pipe-step.is-done {
+  background: rgba(var(--tn-green-rgb), 0.08);
+  border-color: rgba(var(--tn-green-rgb), 0.35);
+  color: var(--tn-green);
+}
+.lp-pipe-arrow.is-done { color: var(--tn-green); opacity: 0.85; }
 
 /* ── Terminal window ─── */
 .lp-term {
@@ -252,11 +267,18 @@
 .lp-term-body {
   padding: 20px 24px; font-family: 'Space Mono', monospace;
   font-size: 13px; line-height: 2; color: var(--tn-fg);
+  min-height: 152px;   /* hold height steady as scroll swaps phase content */
 }
 .lp-term-body .prompt { color: var(--tn-green); }
 .lp-term-body .cmd { color: var(--tn-blue); }
 .lp-term-body .flag { color: var(--tn-purple); }
 .lp-term-body .out { color: var(--tn-comment); font-style: italic; }
+/* Re-triggered on every phase swap to fade the new output in */
+.lp-term-body--swap { animation: lpTermSwap 380ms cubic-bezier(0.2, 0.6, 0.2, 1); }
+@keyframes lpTermSwap {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
 /* ── Feature cards ─── */
 .lp-features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 48px; }
@@ -425,27 +447,27 @@
     <div class="lp-eyebrow">workflow</div>
     <h2 class="lp-h2">From Idea to <span>Shipped</span></h2>
     <p class="lp-lead">Ten skills chained into a pipeline. Each step produces artifacts the next step consumes — design docs, task lists, code, reviews, tests, documentation.</p>
-    <div class="lp-pipeline">
-      <div class="lp-pipe-step">/design</div>
+    <div class="lp-pipeline" id="lpPipeline">
+      <div class="lp-pipe-step">/kk:design</div>
       <span class="lp-pipe-arrow">→</span>
-      <div class="lp-pipe-step">/review-design</div>
+      <div class="lp-pipe-step">/kk:review-design</div>
       <span class="lp-pipe-arrow">→</span>
-      <div class="lp-pipe-step">/implement</div>
+      <div class="lp-pipe-step">/kk:implement</div>
       <span class="lp-pipe-arrow">→</span>
-      <div class="lp-pipe-step">/review-code</div>
+      <div class="lp-pipe-step">/kk:review-code</div>
       <span class="lp-pipe-arrow">→</span>
-      <div class="lp-pipe-step">/test</div>
+      <div class="lp-pipe-step">/kk:test</div>
       <span class="lp-pipe-arrow">→</span>
-      <div class="lp-pipe-step">/document</div>
+      <div class="lp-pipe-step">/kk:document</div>
     </div>
     <div class="lp-term">
       <div class="lp-term-bar">
         <div class="lp-term-dot" style="background:var(--tn-red)"></div>
         <div class="lp-term-dot" style="background:var(--tn-yellow)"></div>
         <div class="lp-term-dot" style="background:var(--tn-green)"></div>
-        <span class="lp-term-title">~/project</span>
+        <span class="lp-term-title" id="lpTermTitle">~/project</span>
       </div>
-      <div class="lp-term-body">
+      <div class="lp-term-body" id="lpTermBody">
         <div><span class="prompt">$</span> <span class="cmd">/kk:design</span> <span class="flag">"add user authentication"</span></div>
         <div><span class="out">→ Created docs/wip/auth/design.md, tasks.md</span></div>
         <div><span class="prompt">$</span> <span class="cmd">/kk:implement</span> <span class="flag">"work on task 1"</span></div>
@@ -638,16 +660,86 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('resize', initRain);
   }
 
-  // ── SCROLL-PINNED HERO TRANSITION (matrix rain dissolve → pipeline reveal) ──
+  // ── SCROLL-PINNED HERO TRANSITION (matrix rain dissolve → pipeline reveal → phase cycling) ──
   var heroWrap = document.getElementById('lpHeroWrap');
   var hero = heroWrap && heroWrap.querySelector('.lp-hero');
   var pipelineSection = document.querySelector('.lp-pipeline-section');
+
+  // Per-phase terminal content; index aligns with the .lp-pipe-step order in the pipeline.
+  var PHASES = [
+    { title: 'design', body:
+      '<div><span class="prompt">$</span> <span class="cmd">/kk:design</span> <span class="flag">"add user authentication"</span></div>' +
+      '<div><span class="out">→ Exploring codebase, drafting the PRD...</span></div>' +
+      '<div><span class="out">→ Created docs/wip/auth/design.md</span></div>' +
+      '<div><span class="out">→ Created tasks.md — 4 tasks queued</span></div>' },
+    { title: 'review-design', body:
+      '<div><span class="prompt">$</span> <span class="cmd">/kk:review-design</span></div>' +
+      '<div><span class="out">→ Completeness · consistency · soundness</span></div>' +
+      '<div><span class="out">→ 2 gaps flagged, 1 ambiguity resolved</span></div>' +
+      '<div><span class="out">→ design.md updated — ready to build</span></div>' },
+    { title: 'implement', body:
+      '<div><span class="prompt">$</span> <span class="cmd">/kk:implement</span> <span class="flag">"work on task 1"</span></div>' +
+      '<div><span class="out">→ Profile detected: python</span></div>' +
+      '<div><span class="out">→ Writing src/auth/login.py ...</span></div>' +
+      '<div><span class="out">→ review-code checkpoint: passed</span></div>' },
+    { title: 'review-code', body:
+      '<div><span class="prompt">$</span> <span class="cmd">/kk:review-code</span></div>' +
+      '<div><span class="out">→ SOLID · security · quality lenses</span></div>' +
+      '<div><span class="out">→ 1 SOLID violation, 0 security risks</span></div>' +
+      '<div><span class="out">→ Fix applied, re-reviewed clean</span></div>' },
+    { title: 'test', body:
+      '<div><span class="prompt">$</span> <span class="cmd">/kk:test</span></div>' +
+      '<div><span class="out">→ Generating cases from the spec...</span></div>' +
+      '<div><span class="out">→ 14 tests passed, 92% coverage</span></div>' +
+      '<div><span class="out">→ Edge cases: tokens, expiry, lockout</span></div>' },
+    { title: 'document', body:
+      '<div><span class="prompt">$</span> <span class="cmd">/kk:document</span></div>' +
+      '<div><span class="out">→ Updating the architecture docs...</span></div>' +
+      '<div><span class="out">→ Updated docs/architecture.md</span></div>' +
+      '<div><span class="out">→ Recorded ADR-0006 — auth design</span></div>' }
+  ];
+
+  var pipelineEl = document.getElementById('lpPipeline');
+  var stepEls = pipelineEl ? Array.prototype.slice.call(pipelineEl.querySelectorAll('.lp-pipe-step')) : [];
+  var arrowEls = pipelineEl ? Array.prototype.slice.call(pipelineEl.querySelectorAll('.lp-pipe-arrow')) : [];
+  var termBody = document.getElementById('lpTermBody');
+  var termTitle = document.getElementById('lpTermTitle');
+  var currentPhase = -1;
+
+  function setPhase(i) {
+    if (i === currentPhase || i < 0 || i >= PHASES.length) return;
+    currentPhase = i;
+    stepEls.forEach(function(s, idx) {
+      s.classList.toggle('is-active', idx === i);
+      s.classList.toggle('is-done', idx < i);
+    });
+    arrowEls.forEach(function(a, idx) { a.classList.toggle('is-done', idx < i); });
+    if (termBody) {
+      termBody.innerHTML = PHASES[i].body;
+      termBody.classList.remove('lp-term-body--swap');
+      void termBody.offsetWidth;          // force reflow so the swap animation restarts
+      termBody.classList.add('lp-term-body--swap');
+    }
+    if (termTitle) termTitle.textContent = '~/project · ' + PHASES[i].title;
+  }
 
   if (prefersReduced && pipelineSection) pipelineSection.classList.add('is-revealed');
 
   if (heroWrap && hero && !prefersReduced) {
     var ticking = false;
     var pipelineRevealed = false;
+
+    // Scroll-progress windows (fractions of the pinned scroll distance):
+    //   0 – FADE:  hero fades out while rain builds up
+    //   – HOLD:    hero gone, rain at full
+    //   – RAINOUT: rain fades out as the pipeline crossfades in
+    //   PHASE_*:   active phase cycles design → … → document across the back half
+    var HERO_FADE_END = 0.16;
+    var RAIN_HOLD_END = 0.24;
+    var RAIN_OUT_END  = 0.36;
+    var PHASE_START   = 0.34;
+    var PHASE_END     = 0.98;
+
     function updateHero() {
       ticking = false;
       var rect = heroWrap.getBoundingClientRect();
@@ -655,23 +747,17 @@ document.addEventListener('DOMContentLoaded', function() {
       if (scrollDistance <= 0) return;
       var p = Math.max(0, Math.min(1, -rect.top / scrollDistance));
 
-      // Phase 1 (0–0.25): hero fades out, rain builds up
-      // Phase 2 (0.25–0.45): hero gone, rain at full (the hold)
-      // Phase 3 (0.45–0.70): pipeline fades in, rain fades out
-      // Phase 4 (0.70–1.0): pipeline lingers alone
-
       var fade, rain;
-      if (p < 0.25) {
-        var t = p / 0.25;
+      if (p < HERO_FADE_END) {
+        var t = p / HERO_FADE_END;
         fade = t;
         rain = t;
-      } else if (p < 0.45) {
+      } else if (p < RAIN_HOLD_END) {
         fade = 1;
         rain = 1;
-      } else if (p < 0.70) {
-        var t2 = (p - 0.45) / 0.25;
+      } else if (p < RAIN_OUT_END) {
         fade = 1;
-        rain = 1 - t2;
+        rain = 1 - (p - RAIN_HOLD_END) / (RAIN_OUT_END - RAIN_HOLD_END);
       } else {
         fade = 1;
         rain = 0;
@@ -683,10 +769,15 @@ document.addEventListener('DOMContentLoaded', function() {
       if (canvas) canvas.style.opacity = rain.toFixed(3);
       if (rain > 0 && !rainAnimId) rainAnimId = requestAnimationFrame(drawRain);
 
-      if (pipelineSection && !pipelineRevealed && p > 0.48) {
+      if (pipelineSection && !pipelineRevealed && p > RAIN_HOLD_END) {
         pipelineSection.classList.add('is-revealed');
         pipelineRevealed = true;
       }
+
+      // Cycle the active phase across the back half of the scroll.
+      var ph = (p - PHASE_START) / (PHASE_END - PHASE_START);
+      ph = Math.max(0, Math.min(0.999, ph));
+      setPhase(Math.floor(ph * PHASES.length));
     }
 
     function onScroll() {
@@ -694,6 +785,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll, { passive: true });
+    setPhase(0);   // design active by default once dynamic mode is on
     updateHero();
   }
 
